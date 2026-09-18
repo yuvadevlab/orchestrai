@@ -105,7 +105,7 @@ export function parseSSEMessage(raw: string): SSEMessage | null {
   }
 
   const joinedData = dataChunks.join("\n");
-  let parsedData: unknown = joinedData;
+  let parsedData: unknown;
 
   // Attempt JSON parsing; fallback to raw string if not JSON
   try {

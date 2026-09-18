@@ -4,6 +4,38 @@ This log records completed milestones, architectural decisions, and session hand
 
 ---
 
+## [2026-09-19] — Phase 7: Queue & BullMQ Producers (`@orchestrai/queue`)
+
+### Summary of Changes
+
+- Scaffolded `@orchestrai/queue` package with dual ESM/CJS build via `tsup`.
+- Created strongly-typed job payload schemas with Zod validation:
+  - `AgentExecutionJobPayloadSchema`: Workflow initiation with `executionId`, `agentId`, `tenantId`, `traceId`, `idempotencyKey`, and `variables`.
+  - `ToolExecutionJobPayloadSchema`: Deferred tool offloading with timeout and step tracking.
+  - `DeadLetterJobPayloadSchema`: Forensic capture for poisoned or exhausted jobs.
+- Implemented BullMQ-tuned Redis connection manager (`createRedisConnection`, `closeRedisConnection`) enforcing `maxRetriesPerRequest: null`.
+- Built queue resilience and reliability modules:
+  - `calculateBackoffWithJitter`: Exponential backoff with full jitter formula preventing thundering herds.
+  - `BackpressureController`: Multi-tier watermark monitoring (`HEALTHY`, `THROTTLED`, `SATURATED`).
+- Implemented producer hierarchy:
+  - `IQueueProducer<TPayload>` interface and `BaseQueueProducer` managing BullMQ `Queue` instances.
+  - `AgentExecutionProducer`: Dispatches agent execution tasks with automatic `idempotencyKey` deduplication.
+  - `ToolExecutionProducer`: Dispatches background tool invocations with step deduplication.
+  - `DeadLetterProducer`: Directs poison-pill jobs to the DLQ.
+- Integrated unified `OrchestrAIError` hierarchy:
+  - Added `"QUEUE_ERROR"` and `"QUEUE_BACKPRESSURE"` to `ErrorCode` in `@orchestrai/shared-types`.
+  - Exported `QueueError` (HTTP 500) and `QueueBackpressureError` (HTTP 503) from `@orchestrai/core`.
+  - Wrapped payload schema failures in `ValidationError` (HTTP 400).
+- Added phase documentation in `docs/phases/phase-07-queue.md`.
+
+### Architectural Rationale
+
+- **API-Worker Decoupling**: Offloading execution orchestration to BullMQ queues keeps HTTP request threads non-blocking and prevents socket timeouts during long-running agent reasoning.
+- **Idempotency Deduplication**: Binding BullMQ job IDs directly to the client's `idempotencyKey` guarantees that retried HTTP requests do not spawn redundant execution loops.
+- **Backpressure Protection**: Low and high watermarks protect worker cluster memory by signaling throttling or task shedding before worker node OOM crashes occur.
+
+---
+
 ## [2026-09-18] — Phase 6: Database & PostgreSQL Schemas (`infrastructure/postgres`)
 
 ### Summary of Changes

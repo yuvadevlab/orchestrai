@@ -80,7 +80,7 @@ export interface ITool<TInput = Record<string, unknown>, TOutput = unknown> {
    * Accepts any raw input type (such as undefined fields with defaults)
    * that parses to TInput.
    */
-  readonly inputSchema: z.ZodType<TInput, z.ZodTypeDef, unknown>;
+  readonly inputSchema: z.ZodType<TInput, unknown>;
 
   /**
    * Executes the tool logic within the given execution context.

@@ -1,9 +1,9 @@
 {
-  "name": "@orchestrai/shared-types",
+  "name": "@orchestrai/queue",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Shared enums, constants, and universal types for OrchestrAI",
+  "description": "BullMQ job producers, priority scheduling, and backpressure control for OrchestrAI",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,7 +20,15 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
+  "dependencies": {
+    "@orchestrai/core": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "bullmq": "^6.3.6",
+    "ioredis": "^6.0.0",
+    "zod": "^4.6.5"
+  },
   "devDependencies": {
+    "@types/node": "^26.6.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   }
