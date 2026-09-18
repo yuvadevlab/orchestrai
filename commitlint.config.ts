@@ -92,7 +92,9 @@ const config: UserConfig = {
         "phase-4",
         "phase-5",
 
-        // Tooling
+        // Tooling & CI
+        "ci",
+        "workflows",
         "eslint",
         "prettier",
         "husky",
