@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 3 — Tools & Execution Security
-Current Feature:   Tool registry, sandboxed execution, permissions (HITL)
+Current Phase:     Phase 4 — Agent Loop & State Transitions
+Current Feature:   Agent state machine, execution loop, mode behaviors
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0 Complete (100%), Phase 1 Complete (100%), Phase 2 Complete (100%)
+Overall Progress:  Phase 0 Complete (100%), Phase 1 Complete (100%), Phase 2 Complete (100%), Phase 3 Complete (100%)
 Last Updated:      2026-09-18
-Next Immediate:    Scaffold packages/tools — tool registry, schema validation, permissions, and sandbox runner
+Next Immediate:    Scaffold packages/agent — agent state machine, prompt compiling, execution transitions
 ```
 
 ---
@@ -25,7 +25,7 @@ Next Immediate:    Scaffold packages/tools — tool registry, schema validation,
 | **Phase 0** | **Workspace & Foundation**           | **[x]** | Monorepo root, configs, tooling |
 | **Phase 1** | **Core Contracts & Domain Types**    | **[x]** | `packages/core`                 |
 | **Phase 2** | **Models & LLM Adapters**            | **[x]** | `packages/models`               |
-| Phase 3     | Tools & Execution Security           |   [ ]   | `packages/tools`                |
+| **Phase 3** | **Tools & Execution Security**       | **[x]** | `packages/tools`                |
 | Phase 4     | Agent Loop & State Transitions       |   [ ]   | `packages/agent`                |
 | Phase 5     | Runtime & LangGraph Execution        |   [ ]   | `packages/runtime`              |
 | Phase 6     | Database & PostgreSQL Schemas        |   [ ]   | `infrastructure/postgres`       |
@@ -106,3 +106,18 @@ Next Immediate:    Scaffold packages/tools — tool registry, schema validation,
 - [x] Token pricing catalog (`pricing.constants.ts`) and pure usage aggregation (`usage-aggregator.ts`)
 - [x] Strict package boundaries & 250-line maximum compliance
 - [x] Phase 2 documentation (`docs/phases/phase-02-models.md`)
+
+---
+
+## Phase 3 Breakdown
+
+- [x] Master tool interface (`ITool<TInput, TOutput>`) and execution context (`ToolExecutionContext`)
+- [x] Security perimeter: sandbox path jail (`PathSanitizer`) preventing directory traversal attacks
+- [x] Hierarchical permission clearance evaluator (`evaluateToolPermission`) with HITL triggers for `DANGEROUS` tools
+- [x] Central tool catalog and discovery registry (`ToolRegistry`) with OpenAI, Anthropic, and Ollama schema converters
+- [x] Sandboxed runner (`executeTool`) enforcing input Zod validation, timeouts via abort signals, and error containment
+- [x] Built-in filesystem tools: `read_file` (windowing), `write_file` (recursive mkdir), `list_directory` (bounded)
+- [x] Built-in network tools: `http_fetch` (URL protocol validation, body size caps)
+- [x] Built-in system tools: `bash` (classified `DANGEROUS`, subprocess execution, HITL mandatory)
+- [x] Zero file line-count violations (all files < 170 lines) with complete JSDoc
+- [x] Phase 3 documentation (`docs/phases/phase-03-tools.md`)
