@@ -4,6 +4,30 @@ This log records completed milestones, architectural decisions, and session hand
 
 ---
 
+## [2026-09-18] — Phase 4: Agent Loop & State Transitions (`@orchestrai/agent`)
+
+### Summary of Changes
+
+- Created `@orchestrai/agent` package with dual ESM/CJS build via `tsup`.
+- Implemented `AgentStateMachine` maintaining step indices, context variables, and termination guards.
+- Implemented `LoopDetector` tracking action fingerprints to prevent infinite tool calling cycles.
+- Built multi-tier `prompt-compiler.ts` synthesizing personas, operational mode rules, dynamic context variables, and conversation history.
+- Implemented pluggable operational mode strategies (`CHAT`, `PLAN`, `ACT`, `AUTO`) via `IModeStrategy` and `resolveModeStrategy`.
+- Built core execution engine:
+  - `AgentLoop.step`: Single-cycle execution evaluating mode rules, invoking models, and executing tools.
+  - `runAgentUntilHalt`: Continuous multi-turn runner with circuit breaker limits.
+  - Clean Human-in-the-Loop (HITL) suspension when destructive actions are encountered (`WAITING_FOR_APPROVAL`).
+- Created fluent `AgentBuilder` API for constructing validated `AgentDefinition` records.
+- Added phase documentation in `docs/phases/phase-04-agent.md`.
+
+### Architectural Rationale
+
+- **Strategy Pattern for Modes**: Encapsulating mode behavior (`CHAT`, `PLAN`, `ACT`, `AUTO`) into dedicated strategy classes prevents conditional bloat in the main reasoning loop and makes adding future modes straightforward.
+- **Fail-Safe Loop Detection**: Repetitive tool calls with identical arguments are terminated proactively, protecting against runaway cost and compute exhaustion.
+- **Stateless Tool Adapters**: The agent loop delegates all tool execution to `@orchestrai/tools` and model invocation to `@orchestrai/models`, preserving clean inward monorepo dependency flow.
+
+---
+
 ## [2026-09-18] — Phase 3: Tools & Execution Security (`@orchestrai/tools`)
 
 ### Summary of Changes

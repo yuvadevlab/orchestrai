@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 4 — Agent Loop & State Transitions
-Current Feature:   Agent state machine, execution loop, mode behaviors
+Current Phase:     Phase 5 — Runtime & LangGraph Execution
+Current Feature:   LangGraph DAG execution graph, state checkpointing, node runners
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0 Complete (100%), Phase 1 Complete (100%), Phase 2 Complete (100%), Phase 3 Complete (100%)
+Overall Progress:  Phase 0 Complete (100%), Phase 1 Complete (100%), Phase 2 Complete (100%), Phase 3 Complete (100%), Phase 4 Complete (100%)
 Last Updated:      2026-09-18
-Next Immediate:    Scaffold packages/agent — agent state machine, prompt compiling, execution transitions
+Next Immediate:    Scaffold packages/runtime — LangGraph state graph, node execution, state checkpointing
 ```
 
 ---
@@ -26,7 +26,7 @@ Next Immediate:    Scaffold packages/agent — agent state machine, prompt compi
 | **Phase 1** | **Core Contracts & Domain Types**    | **[x]** | `packages/core`                 |
 | **Phase 2** | **Models & LLM Adapters**            | **[x]** | `packages/models`               |
 | **Phase 3** | **Tools & Execution Security**       | **[x]** | `packages/tools`                |
-| Phase 4     | Agent Loop & State Transitions       |   [ ]   | `packages/agent`                |
+| **Phase 4** | **Agent Loop & State Transitions**   | **[x]** | `packages/agent`                |
 | Phase 5     | Runtime & LangGraph Execution        |   [ ]   | `packages/runtime`              |
 | Phase 6     | Database & PostgreSQL Schemas        |   [ ]   | `infrastructure/postgres`       |
 | Phase 7     | Queue & BullMQ Producers             |   [ ]   | `packages/queue`                |
@@ -121,3 +121,18 @@ Next Immediate:    Scaffold packages/agent — agent state machine, prompt compi
 - [x] Built-in system tools: `bash` (classified `DANGEROUS`, subprocess execution, HITL mandatory)
 - [x] Zero file line-count violations (all files < 170 lines) with complete JSDoc
 - [x] Phase 3 documentation (`docs/phases/phase-03-tools.md`)
+
+---
+
+## Phase 4 Breakdown
+
+- [x] Dynamic state machine controller (`AgentStateMachine`) managing step indices, context vars, and termination guards
+- [x] Infinite action repetition loop detector (`LoopDetector`) preventing token drain
+- [x] Multi-tier prompt compilation pipeline (`prompt-compiler.ts`) assembling personas, mode instructions, and context
+- [x] Pluggable agent mode strategies (`CHAT`, `PLAN`, `ACT`, `AUTO`) via `IModeStrategy` and `resolveModeStrategy`
+- [x] Single-step controller (`AgentLoop.step`) and multi-turn runner (`runAgentUntilHalt`)
+- [x] Clean Human-In-The-Loop (HITL) suspension when destructive tools are encountered
+- [x] Tool-to-message formatting bridge (`createToolResultMessage`, `extractToolCalls`)
+- [x] Fluent agent definition builder (`AgentBuilder`)
+- [x] Strict package boundaries and 250-line rule adherence across all files
+- [x] Phase 4 documentation (`docs/phases/phase-04-agent.md`)
