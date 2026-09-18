@@ -4,6 +4,36 @@ This log records completed milestones, architectural decisions, and session hand
 
 ---
 
+## [2026-09-18] — Phase 6: Database & PostgreSQL Schemas (`infrastructure/postgres`)
+
+### Summary of Changes
+
+- Established PostgreSQL 16 persistence tier with `pgvector`, `uuid-ossp`, and `pgcrypto` extensions.
+- Authored modular, numbered SQL DDL migrations:
+  - `0001_core_entities.sql`: Multi-tenancy (`tenants`), `agents`, `conversations`, `executions`, and `execution_steps`.
+  - `0002_messages_and_tools.sql`: Multimodal chat `messages`, audited `tool_calls`, and HITL `approvals`.
+  - `0003_checkpoints_and_outbox.sql`: Durable DAG `checkpoints` matching `ICheckpointer`, and transactional `outbox` table.
+  - `0004_memory_and_rag.sql`: `memory_items`, `documents`, and `document_chunks` with 1536-dimension pgvector.
+  - `0005_indexes_and_constraints.sql`: Enum check constraints, B-Tree indexes, partial indexes for pending approvals and FIFO outbox, GIN indexes on JSONB, and HNSW cosine vector indexes.
+- Created typed Prisma ORM schema (`infrastructure/postgres/prisma/schema.prisma`) and `prisma.config.ts`.
+- Authored comprehensive educational SQL query handbook covering:
+  - ACID transaction and outbox event enqueue (`01_transactional_outbox.sql`).
+  - Idempotent checkpoint UPSERT and hydration (`02_checkpoint_upsert.sql`).
+  - Concurrent outbox worker polling using `SELECT FOR UPDATE SKIP LOCKED` (`03_outbox_worker_polling.sql`).
+  - Execution timeline and step latency analysis using CTEs and window functions (`04_execution_timeline_window.sql`).
+  - Hierarchical sub-agent delegation tree traversal via recursive CTEs (`05_agent_delegation_recursive_cte.sql`).
+  - Daily token analytics materialized view with non-blocking concurrent refresh (`06_token_usage_materialized_view.sql`).
+- Configured local Docker Compose environment (`infrastructure/docker/docker-compose.postgres.yml`).
+- Added Phase 6 technical documentation in `docs/phases/phase-06-postgres.md`.
+
+### Architectural Rationale
+
+- **Transactional Outbox for Zero Dual-Write Inconsistencies**: State transitions and outbox events are written in the same ACID database transaction, preventing desynchronization between PostgreSQL and asynchronous message brokers.
+- **Microsecond FIFO Draining via Partial Indexes**: The outbox table uses a partial index on `(created_at ASC) WHERE status = 'PENDING'` so the outbox relay worker scans only active events without traversing millions of historical records.
+- **Zero Lock Contention via `SKIP LOCKED`**: Concurrent workers polling the outbox skip already-locked rows, ensuring linear scaling without deadlocks.
+
+---
+
 ## [2026-09-18] — Phase 5: Runtime & LangGraph Execution (`@orchestrai/runtime`)
 
 ### Summary of Changes

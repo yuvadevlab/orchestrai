@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 6 — Database & PostgreSQL Schemas
-Current Feature:   PostgreSQL migrations, checkpoint tables, transactional outbox
+Current Phase:     Phase 7 — Queue & BullMQ Producers
+Current Feature:   Queue abstractions, job producers, Redis connections
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0-5 Complete (100%), Phase 6 Ready
+Overall Progress:  Phase 0-6 Complete (100%), Phase 7 Ready
 Last Updated:      2026-09-18
-Next Immediate:    Scaffold infrastructure/postgres — relational schema, checkpoints, outbox bus
+Next Immediate:    Scaffold packages/queue — BullMQ client, job producers, backpressure
 ```
 
 ---
@@ -28,7 +28,7 @@ Next Immediate:    Scaffold infrastructure/postgres — relational schema, check
 | **Phase 3** | **Tools & Execution Security**       | **[x]** | `packages/tools`                |
 | **Phase 4** | **Agent Loop & State Transitions**   | **[x]** | `packages/agent`                |
 | **Phase 5** | **Runtime & LangGraph Execution**    | **[x]** | `packages/runtime`              |
-| Phase 6     | Database & PostgreSQL Schemas        |   [ ]   | `infrastructure/postgres`       |
+| **Phase 6** | **Database & PostgreSQL Schemas**    | **[x]** | `infrastructure/postgres`       |
 | Phase 7     | Queue & BullMQ Producers             |   [ ]   | `packages/queue`                |
 | Phase 8     | Worker Application                   |   [ ]   | `apps/worker`                   |
 | Phase 9     | Events & Outbox Bus                  |   [ ]   | `packages/events`               |
@@ -149,3 +149,18 @@ Next Immediate:    Scaffold infrastructure/postgres — relational schema, check
 - [x] Master runtime coordinator (`OrchestrAIRuntime`) managing workflow initiation and resumption
 - [x] Zero file line-count violations (all files < 180 lines) with complete JSDoc
 - [x] Phase 5 documentation (`docs/phases/phase-05-runtime.md`)
+
+---
+
+## Phase 6 Breakdown
+
+- [x] PostgreSQL 16 initialization script (`init/01_extensions.sql`) enabling `uuid-ossp`, `pgcrypto`, and `vector`
+- [x] Core relational schema migrations (`migrations/0001_core_entities.sql`, `0002_messages_and_tools.sql`)
+- [x] Durable execution DAG checkpoint table (`checkpoints`) with unique `(execution_id, step_index)`
+- [x] Transactional Outbox pattern table (`outbox`) solving distributed dual-write inconsistency
+- [x] Memory & RAG vector schema (`memory_items`, `documents`, `document_chunks`) with 1536-dim pgvector
+- [x] Performance indexing: partial indexes for pending approvals/outbox, GIN on JSONB, HNSW on embeddings
+- [x] Prisma ORM schema definition (`prisma/schema.prisma`) and `prisma.config.ts`
+- [x] Educational SQL query handbook covering ACID outbox, UPSERT, `FOR UPDATE SKIP LOCKED`, CTE window functions, recursive CTEs, and materialized views with concurrent refresh
+- [x] Local Docker Compose configuration (`infrastructure/docker/docker-compose.postgres.yml`)
+- [x] Phase 6 documentation (`docs/phases/phase-06-postgres.md`)
