@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 5 — Runtime & LangGraph Execution
-Current Feature:   LangGraph DAG execution graph, state checkpointing, node runners
+Current Phase:     Phase 6 — Database & PostgreSQL Schemas
+Current Feature:   PostgreSQL migrations, checkpoint tables, transactional outbox
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0 Complete (100%), Phase 1 Complete (100%), Phase 2 Complete (100%), Phase 3 Complete (100%), Phase 4 Complete (100%)
+Overall Progress:  Phase 0-5 Complete (100%), Phase 6 Ready
 Last Updated:      2026-09-18
-Next Immediate:    Scaffold packages/runtime — LangGraph state graph, node execution, state checkpointing
+Next Immediate:    Scaffold infrastructure/postgres — relational schema, checkpoints, outbox bus
 ```
 
 ---
@@ -27,7 +27,7 @@ Next Immediate:    Scaffold packages/runtime — LangGraph state graph, node exe
 | **Phase 2** | **Models & LLM Adapters**            | **[x]** | `packages/models`               |
 | **Phase 3** | **Tools & Execution Security**       | **[x]** | `packages/tools`                |
 | **Phase 4** | **Agent Loop & State Transitions**   | **[x]** | `packages/agent`                |
-| Phase 5     | Runtime & LangGraph Execution        |   [ ]   | `packages/runtime`              |
+| **Phase 5** | **Runtime & LangGraph Execution**    | **[x]** | `packages/runtime`              |
 | Phase 6     | Database & PostgreSQL Schemas        |   [ ]   | `infrastructure/postgres`       |
 | Phase 7     | Queue & BullMQ Producers             |   [ ]   | `packages/queue`                |
 | Phase 8     | Worker Application                   |   [ ]   | `apps/worker`                   |
@@ -136,3 +136,16 @@ Next Immediate:    Scaffold packages/runtime — LangGraph state graph, node exe
 - [x] Fluent agent definition builder (`AgentBuilder`)
 - [x] Strict package boundaries and 250-line rule adherence across all files
 - [x] Phase 4 documentation (`docs/phases/phase-04-agent.md`)
+
+---
+
+## Phase 5 Breakdown
+
+- [x] Directed state graph DAG engine (`StateGraph`, `CompiledGraph`, `START`, `END` sentinels)
+- [x] Pluggable state checkpoint persistence interface (`ICheckpointer`) and in-memory engine (`MemoryCheckpointer`)
+- [x] Core execution DAG nodes: `ModelNode`, `ToolEvaluatorNode`, `ToolExecutorNode`, `ApprovalGateNode`
+- [x] Cyclic multi-turn graph execution with dynamic conditional edge routing
+- [x] Clean Human-In-The-Loop (HITL) suspension and resumption from checkpoints
+- [x] Master runtime coordinator (`OrchestrAIRuntime`) managing workflow initiation and resumption
+- [x] Zero file line-count violations (all files < 180 lines) with complete JSDoc
+- [x] Phase 5 documentation (`docs/phases/phase-05-runtime.md`)
