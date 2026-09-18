@@ -2,10 +2,20 @@
  * @file packages/core/src/errors/base.error.ts
  * @description Base domain error class for OrchestrAI.
  * Enforces structured error codes, HTTP status mapping, and JSON serialization.
+ *
+ * Design notes:
+ * - `OrchestrAIError` is generic on `TCode extends ErrorCode` so that each
+ *   domain subclass narrows `code` to a single string literal. This enables
+ *   exhaustive `switch (err.code)` discrimination at call sites.
+ * - `ErrorCode` lives in `@orchestrai/shared-types` as the single source of
+ *   truth; add new codes there whenever a new subclass is introduced.
  */
+
+import type { ErrorCode } from "@orchestrai/shared-types";
 
 /**
  * Serialized representation of an OrchestrAI error for API and logging boundaries.
+ * The `code` field is a string (not the union type) so it survives JSON transport.
  */
 export interface SerializedOrchestrAIError {
   readonly name: string;
@@ -19,8 +29,11 @@ export interface SerializedOrchestrAIError {
 /**
  * Root domain error for the OrchestrAI platform.
  * All domain, infrastructure, and runtime errors must extend this base class.
+ *
+ * @typeParam TCode - The specific `ErrorCode` literal this error instance carries.
+ *                   Defaults to the full `ErrorCode` union for the base case.
  */
-export class OrchestrAIError extends Error {
+export class OrchestrAIError<TCode extends ErrorCode = ErrorCode> extends Error {
   /**
    * ISO timestamp when the error instance was instantiated.
    */
@@ -30,13 +43,13 @@ export class OrchestrAIError extends Error {
    * Constructs an OrchestrAIError.
    *
    * @param message - Human-readable error description.
-   * @param code - Machine-readable constant string error code.
+   * @param code - Machine-readable error code constrained to the `ErrorCode` union.
    * @param statusCode - HTTP status code equivalent (defaults to 500).
    * @param details - Optional contextual debug metadata or Zod issues.
    */
   constructor(
     message: string,
-    public readonly code: string = "INTERNAL_SERVER_ERROR",
+    public readonly code: TCode = "INTERNAL_SERVER_ERROR" as TCode,
     public readonly statusCode: number = 500,
     public readonly details?: unknown,
   ) {
@@ -52,6 +65,8 @@ export class OrchestrAIError extends Error {
 
   /**
    * Serializes the error to a standardized JSON-compatible object.
+   * Safe for network transport — the generic narrows the `code` at compile
+   * time but the serialized form is always a plain `string`.
    *
    * @returns Serialized error representation safe for network transport.
    */
