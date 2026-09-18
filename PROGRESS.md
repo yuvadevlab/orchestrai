@@ -69,6 +69,7 @@ Next Immediate:    Implement domain contracts & Zod schemas in packages/core (Ph
 - [x] Code formatting & linting configuration (`.prettierrc`, `eslint.config.mjs`)
 - [x] Repository directory skeleton (`apps/*`, `packages/*`, `infrastructure/*`, `docs/*`, `scripts/*`)
 - [x] AI agent configuration rules (`.agents/AGENTS.md`, `.agents/rules/*`, `.agents/skills/*`, `.github/copilot-instructions.md`)
+- [x] GitHub Actions CI workflows & PR templates (`.github/workflows/ci.yml`, `commitlint.yml`, `pull_request_template.md`)
 - [x] Core documentation skeleton (`README.md`, `ARCHITECTURE.md`, `ADR-001`, phase guides)
 - [x] Base package declarations (`package.json` inside packages/core)
 - [x] Install dependencies (`pnpm install`) and verify turbo pipeline runs cleanly

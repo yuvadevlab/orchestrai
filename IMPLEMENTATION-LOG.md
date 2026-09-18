@@ -16,6 +16,7 @@ This log records completed milestones, architectural decisions, and session hand
   - Code splitting into smaller, single-responsibility files.
   - Detailed JSDoc on all exported functions, classes, interfaces, and schemas.
   - Explanatory inline comments on all conditionals, guards, and edge cases.
+- Configured GitHub Actions CI workflows (`ci.yml`, `commitlint.yml`, `pull_request_template.md`, and Copilot agent personas).
 - Configured strict TypeScript defaults with project reference capability (`tsconfig.base.json`, `tsconfig.json`).
 - Scaffolding complete directory structure:
   - `apps/`: `gateway`, `worker`, `realtime`, `console`
