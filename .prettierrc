@@ -1,9 +1,18 @@
 {
-  "singleQuote": true,
-  "trailingComma": "all",
+  "$schema": "https://json.schemastore.org/prettierrc",
   "printWidth": 100,
   "tabWidth": 2,
+  "useTabs": false,
   "semi": true,
+  "singleQuote": false,
+  "jsxSingleQuote": false,
+  "trailingComma": "all",
+  "bracketSpacing": true,
+  "bracketSameLine": false,
   "arrowParens": "always",
-  "endOfLine": "lf"
+  "quoteProps": "as-needed",
+  "endOfLine": "lf",
+  "proseWrap": "preserve",
+  "embeddedLanguageFormatting": "auto",
+  "plugins": ["prettier-plugin-tailwindcss"]
 }

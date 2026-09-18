@@ -9,8 +9,14 @@ This log records completed milestones, architectural decisions, and session hand
 ### Summary of Changes
 
 - Established root pnpm workspace with Turborepo task pipeline (`package.json`, `pnpm-workspace.yaml`, `turbo.json`).
+- Added Commitlint (`commitlint.config.ts`), Husky hooks (`commit-msg`, `pre-commit`), and `lint-staged`.
+- Configured ESLint (`eslint.config.js`) and Prettier (`.prettierrc`) with `eslint-plugin-prettier` and `typescript-eslint`.
+- Codified strict file standards in `.agents/rules/00-core-invariants.md`:
+  - 250-line hard maximum per file (proactive decomposition at 200 lines).
+  - Code splitting into smaller, single-responsibility files.
+  - Detailed JSDoc on all exported functions, classes, interfaces, and schemas.
+  - Explanatory inline comments on all conditionals, guards, and edge cases.
 - Configured strict TypeScript defaults with project reference capability (`tsconfig.base.json`, `tsconfig.json`).
-- Added Prettier and modern ESLint configurations (`.prettierrc`, `eslint.config.mjs`).
 - Scaffolding complete directory structure:
   - `apps/`: `gateway`, `worker`, `realtime`, `console`
   - `packages/`: `core`, `models`, `tools`, `agent`, `runtime`, `queue`, `events`, `memory`, `rag`, `observability`, `sdk`
