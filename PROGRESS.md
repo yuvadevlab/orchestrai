@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 2 — Models & LLM Adapters
-Current Feature:   Model identifiers, capability flags, provider adapters
+Current Phase:     Phase 3 — Tools & Execution Security
+Current Feature:   Tool registry, sandboxed execution, permissions (HITL)
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0 Complete (100%), Phase 1 Complete (100%), Phase 2 Ready
+Overall Progress:  Phase 0 Complete (100%), Phase 1 Complete (100%), Phase 2 Complete (100%)
 Last Updated:      2026-09-18
-Next Immediate:    Implement packages/models — model registry, provider adapters, usage stats
+Next Immediate:    Scaffold packages/tools — tool registry, schema validation, permissions, and sandbox runner
 ```
 
 ---
@@ -24,7 +24,7 @@ Next Immediate:    Implement packages/models — model registry, provider adapte
 | :---------- | :----------------------------------- | :-----: | :------------------------------ |
 | **Phase 0** | **Workspace & Foundation**           | **[x]** | Monorepo root, configs, tooling |
 | **Phase 1** | **Core Contracts & Domain Types**    | **[x]** | `packages/core`                 |
-| Phase 2     | Models & LLM Adapters                |   [ ]   | `packages/models`               |
+| **Phase 2** | **Models & LLM Adapters**            | **[x]** | `packages/models`               |
 | Phase 3     | Tools & Execution Security           |   [ ]   | `packages/tools`                |
 | Phase 4     | Agent Loop & State Transitions       |   [ ]   | `packages/agent`                |
 | Phase 5     | Runtime & LangGraph Execution        |   [ ]   | `packages/runtime`              |
@@ -92,3 +92,17 @@ Next Immediate:    Implement packages/models — model registry, provider adapte
 - [x] Vitest config with `@/` alias resolution (`vitest.config.ts`)
 - [x] Split tsconfig strategy: `tsconfig.json` (full project + tests) / `tsconfig.build.json` (src-only for tsup)
 - [ ] Unit tests — deferred to a dedicated test session
+
+---
+
+## Phase 2 Breakdown
+
+- [x] Unified adapter interface (`ILlmAdapter`, `LlmRequest`, `LlmResponse`, `LlmStreamChunk`)
+- [x] Ollama adapter (`OllamaAdapter`, `OllamaConfigSchema`, `ollama.mapper.ts` for multimodal images)
+- [x] OpenAI adapter (`OpenAiAdapter`, `OpenAiConfigSchema`)
+- [x] Anthropic adapter (`AnthropicAdapter`, `AnthropicConfigSchema`)
+- [x] Dynamic adapter factory (`createAdapter`) with provider routing and runtime peer-dep validation
+- [x] In-memory Model Registry (`ModelRegistry`, capability matrix lookups, fallback resolution)
+- [x] Token pricing catalog (`pricing.constants.ts`) and pure usage aggregation (`usage-aggregator.ts`)
+- [x] Strict package boundaries & 250-line maximum compliance
+- [x] Phase 2 documentation (`docs/phases/phase-02-models.md`)

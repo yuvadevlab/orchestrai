@@ -4,6 +4,51 @@ This log records completed milestones, architectural decisions, and session hand
 
 ---
 
+## [2026-09-18] — Phase 2: Models & LLM Adapters (`@orchestrai/models`)
+
+### Summary of Changes
+
+- Implemented unified `ILlmAdapter` interface with Zod-validated `LlmRequestSchema`, `LlmResponseSchema`, and `LlmStreamChunkSchema`.
+- Built provider adapters with async generators for token streaming:
+  - `OllamaAdapter` with dynamic import peer-dependency shim and multimodal image mapping.
+  - `OpenAiAdapter` using OpenAI chat completion payloads.
+  - `AnthropicAdapter` using Anthropic messages API.
+- Extracted `ollama.mapper.ts` for clean multimodal conversion:
+  - Extracts text blocks to `content`.
+  - Extracts Base64-encoded image payloads into Ollama's native `images: []` array.
+- Created `createAdapter()` factory supporting dynamic provider switching and runtime validation.
+- Created `ModelRegistry` implementing Flyweight adapter pooling and capability-based lookup.
+- Created `pricing.constants.ts` and pure `usage-aggregator.ts` for multi-provider token merging and USD cost estimation.
+- All files strictly adhere to the 250-line maximum rule and include comprehensive JSDoc.
+- Added phase documentation in `docs/phases/phase-02-models.md`.
+
+### Architectural Rationale
+
+- **Pure Factory + Flyweight Pool**: Callers request adapters through the unified factory and registry rather than coupling to concrete SDK classes.
+- **Provider-Specific Wire Mappers**: Isolating wire transformations (like Ollama's separate `images` array) in dedicated mapper files keeps adapter classes lean and individually unit-testable.
+- **Peer Dependency Isolation**: Optional SDKs are dynamically imported with descriptive error guidance if not installed.
+
+---
+
+## [2026-09-18] — Phase 1: Core Contracts & Domain Types (`@orchestrai/core`)
+
+### Summary of Changes
+
+- Created `@orchestrai/shared-types` with enums (`AgentMode`, `ExecutionStatus`, `MessageRole`, `ToolPermissionLevel`, `ModelProvider`, `EventType`).
+- Created branded UUID types in `packages/core/src/identifiers`.
+- Implemented Zod domain schemas across 9 modules:
+  - `agents`: Agent definitions, execution modes, state representations.
+  - `executions`: State transitions, execution context, step results, approval gates.
+  - `messages`: Chat messages, multimodal content blocks (text, image, thought, tool call, tool result).
+  - `models`: Identifiers, capability flags, usage metrics.
+  - `tools`: Tool definitions, invocations, results, and permission tiers.
+  - `events`: Domain event envelopes and lifecycle payloads.
+  - `streaming`: Server-Sent Events (SSE) chunks and WebSocket envelopes.
+  - `errors`: Domain error hierarchy extending `OrchestrAIError`.
+- Configured build via `tsup` and testing with Vitest.
+
+---
+
 ## [2026-09-18] — Phase 0: Workspace & Engineering Foundation (Initial Monorepo Setup)
 
 ### Summary of Changes
