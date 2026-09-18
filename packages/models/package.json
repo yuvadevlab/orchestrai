@@ -1,0 +1,51 @@
+{
+  "name": "@orchestrai/models",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Provider-agnostic LLM adapter layer for OrchestrAI — Ollama, OpenAI, and Anthropic adapters behind a unified ILlmAdapter interface",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/core": "workspace:*",
+    "zod": "^3.24.2"
+  },
+  "peerDependencies": {
+    "ollama": ">=0.5.0",
+    "openai": ">=4.0.0",
+    "@anthropic-ai/sdk": ">=0.24.0"
+  },
+  "peerDependenciesMeta": {
+    "ollama": {
+      "optional": true
+    },
+    "openai": {
+      "optional": true
+    },
+    "@anthropic-ai/sdk": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.7"
+  }
+}
