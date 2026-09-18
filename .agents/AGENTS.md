@@ -9,12 +9,12 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, a local-first, modul
 
 ## 1. Modular Rulebook Index
 
-| Rulebook               | Path                                                                                                                          | Primary Scope                                                                           |
-| :--------------------- | :---------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
-| **Core Invariants**    | [`00-core-invariants.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/.agents/rules/00-core-invariants.md) | 250-line rule, code splitting, detailed JSDoc, explanatory comments, package boundaries |
-| **Architecture**       | [`architecture.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/.agents/rules/architecture.md)             | Layer hierarchy, local-first stack, state machines & outbox pattern                     |
-| **Coding Standards**   | [`coding-standards.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/.agents/rules/coding-standards.md)     | Strict TypeScript, Zod schemas, error handling & pure functions                         |
-| **Session Continuity** | [`session-continuity.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/.agents/rules/session-continuity.md) | Handoff protocol, PROGRESS.md checklist, continuation state                             |
+| Rulebook               | Path                                                           | Primary Scope                                                                           |
+| :--------------------- | :------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| **Core Invariants**    | [`00-core-invariants.md`](.agents/rules/00-core-invariants.md) | 250-line rule, code splitting, detailed JSDoc, explanatory comments, package boundaries |
+| **Architecture**       | [`architecture.md`](.agents/rules/architecture.md)             | Layer hierarchy, local-first stack, state machines & outbox pattern                     |
+| **Coding Standards**   | [`coding-standards.md`](.agents/rules/coding-standards.md)     | Strict TypeScript, Zod schemas, error handling & pure functions                         |
+| **Session Continuity** | [`session-continuity.md`](.agents/rules/session-continuity.md) | Handoff protocol, PROGRESS.md checklist, continuation state                             |
 
 ---
 
@@ -36,4 +36,4 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, a local-first, modul
    - Typechecks must pass: `pnpm typecheck`.
 5. **Continuous Session Continuity**:
    - Leave the codebase in an unambiguous, continuation-ready state at the end of every session.
-   - Always update [`PROGRESS.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/PROGRESS.md) and log in [`IMPLEMENTATION-LOG.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/IMPLEMENTATION-LOG.md).
+   - Always update [`PROGRESS.md`](PROGRESS.md) and log in [`IMPLEMENTATION-LOG.md`](IMPLEMENTATION-LOG.md).

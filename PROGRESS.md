@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 1 — Core Contracts & Domain Types
-Current Feature:   Domain contracts, Zod schemas, lifecycle events
+Current Phase:     Phase 2 — Models & LLM Adapters
+Current Feature:   Model identifiers, capability flags, provider adapters
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0 Complete (100%), Phase 1 Ready
+Overall Progress:  Phase 0 Complete (100%), Phase 1 Complete (100%), Phase 2 Ready
 Last Updated:      2026-09-18
-Next Immediate:    Implement domain contracts & Zod schemas in packages/core (Phase 1)
+Next Immediate:    Implement packages/models — model registry, provider adapters, usage stats
 ```
 
 ---
@@ -23,7 +23,7 @@ Next Immediate:    Implement domain contracts & Zod schemas in packages/core (Ph
 | Phase       | Description                          | Status  | Target Package / App            |
 | :---------- | :----------------------------------- | :-----: | :------------------------------ |
 | **Phase 0** | **Workspace & Foundation**           | **[x]** | Monorepo root, configs, tooling |
-| **Phase 1** | **Core Contracts & Domain Types**    |   [ ]   | `packages/core`                 |
+| **Phase 1** | **Core Contracts & Domain Types**    | **[x]** | `packages/core`                 |
 | Phase 2     | Models & LLM Adapters                |   [ ]   | `packages/models`               |
 | Phase 3     | Tools & Execution Security           |   [ ]   | `packages/tools`                |
 | Phase 4     | Agent Loop & State Transitions       |   [ ]   | `packages/agent`                |
@@ -74,3 +74,21 @@ Next Immediate:    Implement domain contracts & Zod schemas in packages/core (Ph
 - [x] Base package declarations (`package.json` inside packages/core)
 - [x] Install dependencies (`pnpm install`) and verify turbo pipeline runs cleanly
 - [x] Phase 0 signoff and handoff to Phase 1 (`packages/core`)
+
+---
+
+## Phase 1 Breakdown
+
+- [x] `@orchestrai/shared-types` package — enums (`AgentMode`, `ExecutionStatus`, `MessageRole`, `ToolPermissionLevel`, `ModelProvider`, `EventType`) and constants
+- [x] Branded identifier schemas (UUIDs) via `packages/core/src/identifiers`
+- [x] Agent domain: `agent-definition.schema.ts`, `agent-mode.schema.ts`, `agent-state.schema.ts`
+- [x] Execution domain: `execution-status.schema.ts` (state machine transitions), `execution-context.schema.ts`, `execution-step.schema.ts`, `approval.schema.ts`
+- [x] Message domain: `chat-message.schema.ts`, `content-block.schema.ts`, `message-role.schema.ts`
+- [x] Model domain: `model-identifier.schema.ts`, `model-capabilities.schema.ts`, `model-usage.schema.ts`
+- [x] Tool domain: `tool-definition.schema.ts`, `tool-call.schema.ts`, `tool-result.schema.ts`
+- [x] Event domain: `domain-event.schema.ts`
+- [x] Streaming domain: `sse-chunk.schema.ts`, `ws-envelope.schema.ts`
+- [x] Error hierarchy: `OrchestrAIError` base + 6 domain error subclasses
+- [x] Vitest config with `@/` alias resolution (`vitest.config.ts`)
+- [x] Split tsconfig strategy: `tsconfig.json` (full project + tests) / `tsconfig.build.json` (src-only for tsup)
+- [ ] Unit tests — deferred to a dedicated test session

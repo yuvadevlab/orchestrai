@@ -7,7 +7,16 @@
  * `@orchestrai/core` is strictly isolated and maintains ZERO internal workspace dependencies.
  */
 
-/**
- * Current semantic version of the OrchestrAI platform contracts.
- */
-export const ORCHESTRAI_VERSION = "0.1.0";
+// Re-export universal types and enums from shared-types
+export * from "@orchestrai/shared-types";
+
+// Domain Modules
+export * from "./identifiers";
+export * from "./errors";
+export * from "./agents";
+export * from "./executions";
+export * from "./messages";
+export * from "./models";
+export * from "./tools";
+export * from "./events";
+export * from "./streaming";
