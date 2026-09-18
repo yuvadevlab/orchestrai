@@ -4,6 +4,34 @@ This log records completed milestones, architectural decisions, and session hand
 
 ---
 
+## [2026-09-18] — Phase 5: Runtime & LangGraph Execution (`@orchestrai/runtime`)
+
+### Summary of Changes
+
+- Created `@orchestrai/runtime` package with dual ESM/CJS build via `tsup`.
+- Implemented lightweight, typed directed acyclic graph engine:
+  - `StateGraph` builder: `addNode`, `addEdge`, `addConditionalEdge`, and `compile`.
+  - `CompiledGraph` runner: Traversing nodes, evaluating conditional edge routers, and halting at `END`.
+- Implemented checkpointing layer:
+  - `ICheckpointer` interface (`save`, `loadLatest`, `load`, `list`).
+  - `MemoryCheckpointer` providing ephemeral in-memory state snapshots.
+- Built core execution nodes:
+  - `ModelNode`: Prompt compilation and LLM inference.
+  - `ToolEvaluatorNode`: Permission clearance and HITL detection.
+  - `ToolExecutorNode`: Executing cleared tools in the sandbox runner.
+  - `ApprovalGateNode`: Suspension checkpoint when human approval is required.
+- Implemented `OrchestrAIRuntime`:
+  - `start()`: Compiles default agent graph, initiates state, runs graph, and saves checkpoints.
+  - `resume()`: Reloads state from checkpoint after human operator approval or rejection.
+- Added phase documentation in `docs/phases/phase-05-runtime.md`.
+
+### Architectural Rationale
+
+- **Durable Checkpointing Across Nodes**: Persisting state snapshots before and after node execution allows seamless recovery if workers fail and enables clean Human-In-The-Loop pauses without re-running expensive LLM calls.
+- **DAG Execution Decoupling**: Structuring workflows as nodes and edges guarantees modular extensibility (future phases can inject RAG, memory, or evaluation nodes without rewriting the core loop).
+
+---
+
 ## [2026-09-18] — Phase 4: Agent Loop & State Transitions (`@orchestrai/agent`)
 
 ### Summary of Changes
