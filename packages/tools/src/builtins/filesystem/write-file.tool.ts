@@ -84,8 +84,8 @@ export class WriteFileTool implements ITool<WriteFileInput, WriteFileOutput> {
     const root = context.workspaceRoot ?? process.cwd();
     const safePath = sanitizePath(args.path, root);
 
-    // Check if file already existed
-    let isCreated = true;
+    // Check if file already existed before writing
+    let isCreated: boolean;
     try {
       await fs.access(safePath);
       isCreated = false;
