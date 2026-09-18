@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+out/
+.next/
+.turbo/
+coverage/
+pnpm-lock.yaml
+ORCHESTRAI-IMPLEMENTATION.md
+ORCHESTRAI-UI-LOVABLE-PROMPT.md
