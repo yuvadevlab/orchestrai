@@ -105,3 +105,28 @@ export class ApprovalTimeoutError extends OrchestrAIError<"APPROVAL_TIMEOUT"> {
     );
   }
 }
+
+/**
+ * Thrown when a queue operations failure occurs (e.g. BullMQ or Redis dispatching error).
+ * Maps to HTTP 500 Internal Server Error.
+ */
+export class QueueError extends OrchestrAIError<"QUEUE_ERROR"> {
+  constructor(message: string, details?: unknown) {
+    super(message, "QUEUE_ERROR", 500, details);
+  }
+}
+
+/**
+ * Thrown when an incoming task is rejected because the target queue backlog is saturated.
+ * Maps to HTTP 503 Service Unavailable (backpressure rejection).
+ */
+export class QueueBackpressureError extends OrchestrAIError<"QUEUE_BACKPRESSURE"> {
+  constructor(queueName: string, backlogCount: number, highWatermark: number) {
+    super(
+      `Queue '${queueName}' rejected task: backlog (${backlogCount}) exceeded high watermark (${highWatermark})`,
+      "QUEUE_BACKPRESSURE",
+      503,
+      { queueName, backlogCount, highWatermark },
+    );
+  }
+}

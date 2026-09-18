@@ -178,4 +178,8 @@ export type ErrorCode =
   /** State machine checkpoint failed to persist or reload */
   | "CHECKPOINT_ERROR"
   /** Human approval window expired without operator response */
-  | "APPROVAL_TIMEOUT";
+  | "APPROVAL_TIMEOUT"
+  /** Background queue failure or job dispatching error */
+  | "QUEUE_ERROR"
+  /** Queue is saturated and rejecting non-critical tasks */
+  | "QUEUE_BACKPRESSURE";

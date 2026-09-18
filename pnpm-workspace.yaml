@@ -3,3 +3,15 @@ packages:
   - "packages/*"
 allowBuilds:
   esbuild: true
+  msgpackr-extract: true
+minimumReleaseAgeExclude:
+  - "@turbo/darwin-64@2.11.1"
+  - "@turbo/darwin-arm64@2.11.1"
+  - "@turbo/linux-64@2.11.1"
+  - "@turbo/linux-arm64@2.11.1"
+  - "@turbo/windows-64@2.11.1"
+  - "@turbo/windows-arm64@2.11.1"
+  - prettier@3.9.8
+  - turbo@2.11.1
+overrides:
+  rollup-plugin-dts: "^6.5.1"
