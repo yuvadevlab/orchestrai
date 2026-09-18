@@ -120,7 +120,7 @@ pnpm dev
 
 AI coding assistants (Antigravity, Claude, Copilot, Cursor) must follow the protocols defined in:
 
-- [`.agents/AGENTS.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/.agents/AGENTS.md) — Master instructions
-- [`.agents/rules/session-continuity.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/.agents/rules/session-continuity.md) — Session handoff rules
-- [`PROGRESS.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/PROGRESS.md) — Live phase tracking
-- [`docs/architecture/ARCHITECTURE.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/docs/architecture/ARCHITECTURE.md) — Architectural invariants
+- [`.agents/AGENTS.md`](.agents/AGENTS.md) — Master instructions
+- [`.agents/rules/session-continuity.md`](.agents/rules/session-continuity.md) — Session handoff rules
+- [`PROGRESS.md`](PROGRESS.md) — Live phase tracking
+- [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) — Architectural invariants

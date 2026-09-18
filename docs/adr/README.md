@@ -4,9 +4,9 @@ Architecture Decision Records capture significant technical choices, context, al
 
 ## Index of ADRs
 
-| ADR                                                                                                            | Title                                                 |    Status    | Date       |
-| -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | :----------: | ---------- |
-| [`ADR-001`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/docs/adr/ADR-001-monorepo-first.md) | Modular Monorepo with Evolutionary Package Extraction | **Accepted** | 2026-09-18 |
+| ADR                                             | Title                                                 |    Status    | Date       |
+| ----------------------------------------------- | ----------------------------------------------------- | :----------: | ---------- |
+| [`ADR-001`](docs/adr/ADR-001-monorepo-first.md) | Modular Monorepo with Evolutionary Package Extraction | **Accepted** | 2026-09-18 |
 
 ---
 

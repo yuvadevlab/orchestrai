@@ -23,7 +23,7 @@ Use this skill when developing, refactoring, or planning any feature within Orch
 
 ## Monorepo Mapping
 
-- **Contracts**: Always check [`packages/core`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/core) before writing any API payload or model.
-- **Queueing**: BullMQ jobs go through [`packages/queue`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/queue) and are consumed by [`apps/worker`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/worker).
-- **Events**: Cross-service communication goes through [`packages/events`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/events).
-- **Status & Handoff**: Always check [`PROGRESS.md`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/PROGRESS.md).
+- **Contracts**: Always check [`packages/core`](packages/core) before writing any API payload or model.
+- **Queueing**: BullMQ jobs go through [`packages/queue`](packages/queue) and are consumed by [`apps/worker`](apps/worker).
+- **Events**: Cross-service communication goes through [`packages/events`](packages/events).
+- **Status & Handoff**: Always check [`PROGRESS.md`](PROGRESS.md).
