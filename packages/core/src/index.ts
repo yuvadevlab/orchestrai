@@ -7,9 +7,6 @@
  * `@orchestrai/core` is strictly isolated and maintains ZERO internal workspace dependencies.
  */
 
-// Version
-export const ORCHESTRAI_VERSION = "0.1.0";
-
 // Re-export universal types and enums from shared-types
 export * from "@orchestrai/shared-types";
 
