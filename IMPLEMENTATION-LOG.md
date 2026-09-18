@@ -4,6 +4,35 @@ This log records completed milestones, architectural decisions, and session hand
 
 ---
 
+## [2026-09-18] — Phase 3: Tools & Execution Security (`@orchestrai/tools`)
+
+### Summary of Changes
+
+- Created `@orchestrai/tools` package with dual ESM/CJS build via `tsup`.
+- Implemented core tool contract `ITool<TInput, TOutput>` and `ToolExecutionContext` binding runtime Zod input validation to LLM parameter schemas.
+- Built sandbox security layer:
+  - `PathSanitizer`: Jail verification preventing directory traversal (`../../etc/passwd`) outside `workspaceRoot`.
+  - `PermissionEvaluator`: Hierarchical clearance checks (`READ_ONLY` < `WRITE_SAFE` < `SENSITIVE` < `DANGEROUS`) and automatic Human-In-The-Loop (HITL) gate triggers for destructive tools.
+- Built `ToolRegistry`:
+  - Catalog lifecycle management (register, unregister, find, filter).
+  - Schema format converters for OpenAI function calling, Anthropic messages API, and Ollama.
+- Built sandboxed `ToolRunner`:
+  - Enforces pre-execution Zod argument validation.
+  - Enforces timeouts via `AbortController` and `Promise.race()`.
+  - Catches all runtime failures, returning standardized `ToolResult` envelopes with status, output, error diagnostics, and duration.
+- Implemented built-in standard tools:
+  - Filesystem: `read_file` (windowing), `write_file` (recursive mkdir), `list_directory` (bounded scan).
+  - Network: `http_fetch` (URL protocol validation, body size caps).
+  - System: `bash` (classified `DANGEROUS`, subprocess execution, mandatory human approval).
+- Added phase documentation in `docs/phases/phase-03-tools.md`.
+
+### Architectural Rationale
+
+- **Execution Boundary Containment**: Uncaught tool exceptions or LLM parameter hallucinations must never crash worker threads. The runner acts as an isolation barrier.
+- **Fail-Safe Defaults**: All tools default to `READ_ONLY` unless explicitly designated otherwise. `DANGEROUS` tools cannot be executed automatically by autonomous loops.
+
+---
+
 ## [2026-09-18] — Phase 2: Models & LLM Adapters (`@orchestrai/models`)
 
 ### Summary of Changes
