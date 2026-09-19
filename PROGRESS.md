@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 10 — Persistence & State Checkpointing
-Current Feature:   PostgreSQL / Memory Checkpointing, State Rewind, Time-travel
+Current Phase:     Phase 11 — Human-in-the-Loop (HITL)
+Current Feature:   Approval gates, interactive intervention, interrupt/resume
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0-9, 13 Complete (100%), Phase 10 Ready
+Overall Progress:  Phase 0-10, 13 Complete (100%), Phase 11 Ready
 Last Updated:      2026-09-19
-Next Immediate:    Scaffold packages/runtime checkpoints & PostgreSQL state saver
+Next Immediate:    Implement interactive HITL approval policies and supervisor override
 ```
 
 ---
@@ -32,7 +32,7 @@ Next Immediate:    Scaffold packages/runtime checkpoints & PostgreSQL state save
 | **Phase 7**  | **Queue & BullMQ Producers**         | **[x]** | `packages/queue`                |
 | **Phase 8**  | **Worker Application**               | **[x]** | `apps/worker`                   |
 | **Phase 9**  | **Events & Outbox Bus**              | **[x]** | `packages/events`               |
-| Phase 10     | Persistence & Recovery               |   [ ]   | `packages/runtime`              |
+| **Phase 10** | **Persistence & Recovery**           | **[x]** | `packages/runtime`              |
 | Phase 11     | Human-in-the-Loop (HITL)             |   [ ]   | `packages/runtime`              |
 | Phase 12     | Realtime Streaming Broker            |   [ ]   | `apps/realtime`                 |
 | **Phase 13** | **Console Dashboard UI**             | **[x]** | `apps/console`                  |
@@ -229,6 +229,32 @@ Next Immediate:    Scaffold packages/runtime checkpoints & PostgreSQL state save
 - [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 19 workspace projects
 - [x] Zero file line-count violations (all 16 files < 160 lines) with comprehensive JSDoc
 - [x] Phase 9 documentation (`docs/phases/phase-09-events.md`)
+
+---
+
+## Phase 10 Breakdown (Persistence & Recovery)
+
+- [x] Abstract database query runner interface `IDatabaseQueryRunner` and extended `IPersistentCheckpointer`
+- [x] Durable PostgreSQL checkpointer `PostgresCheckpointer` with idempotent atomic UPSERTs matching `checkpoints` table (`0003_checkpoints_and_outbox.sql`)
+- [x] Checkpoint serialization and hydration subsystem (`packages/runtime/src/checkpoint/serializer/`):
+  - `state-serializer.ts`: Type-preserving serialization for `Date`, `Set`, `Map`, `RegExp`, and `Error` / `OrchestrAIError`
+  - `state-hasher.ts`: Canonical key-sorted SHA-256 state checksum calculation (`calculateStateHash`, `verifyStateHash`)
+- [x] State rewind & time-travel debugging engine (`packages/runtime/src/checkpoint/rewind/`):
+  - `rewind-policy.ts`: Policy schemas (`PRUNE_SUBSEQUENT`, `BRANCH_FORK`) and rewind options
+  - `state-diff.ts`: Deep object delta comparison (`added`, `modified`, `deleted`) between snapshots
+  - `state-rewind-engine.ts`: Execution rollback with downstream pruning or branch forking
+- [x] Checkpoint retention & pruning sweeper (`packages/runtime/src/checkpoint/retention/`):
+  - `retention-policy.ts`: Retention thresholds with milestone node protection
+  - `checkpoint-pruner.ts`: Timeline compaction algorithm preserving critical milestones
+- [x] Crash recovery coordinator (`packages/runtime/src/recovery/`):
+  - `recovery-types.ts`: Diagnostic inspection contracts and recovery plans
+  - `execution-recovery-manager.ts`: Stalled execution detector, checksum verifier, and DAG resumption planner
+- [x] Master runtime integration:
+  - Added `rewind(executionId, options)` and `recover(executionId, deps)` to `OrchestrAIRuntime`
+- [x] Introduced `EXECUTION_ERROR` code to `@orchestrai/shared-types` and `ExecutionError` class to `@orchestrai/core`
+- [x] Quality gates passed: `pnpm --filter @orchestrai/runtime build` and full monorepo `pnpm typecheck` (19 of 19 projects clean)
+- [x] Strict invariant adherence: 0 test cases added (per user directive) and 100% of files < 217 lines
+- [x] Phase 10 documentation (`docs/phases/phase-10-persistence.md`)
 
 ---
 

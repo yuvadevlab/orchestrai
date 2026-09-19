@@ -1,15 +1,16 @@
 /**
  * @file packages/runtime/src/checkpoint/memory-checkpointer.ts
- * @description In-memory implementation of ICheckpointer for local execution and testing.
+ * @description In-memory implementation of IPersistentCheckpointer for local execution, rewinds, and tests.
  */
 
 import type { CheckpointRecord } from "./checkpoint.types";
-import type { ICheckpointer } from "./checkpointer.interface";
+import type { IPersistentCheckpointer } from "./database-adapter.interface";
+import { calculateStateHash } from "./serializer/state-hasher";
 
 /**
- * Ephemeral in-memory checkpointer storing snapshots in process memory.
+ * Ephemeral in-memory checkpointer storing snapshots in process memory with rewinding support.
  */
-export class MemoryCheckpointer<TState = unknown> implements ICheckpointer<TState> {
+export class MemoryCheckpointer<TState = unknown> implements IPersistentCheckpointer<TState> {
   private readonly store = new Map<string, CheckpointRecord<TState>[]>();
 
   /**
@@ -17,7 +18,22 @@ export class MemoryCheckpointer<TState = unknown> implements ICheckpointer<TStat
    */
   public async save(checkpoint: CheckpointRecord<TState>): Promise<void> {
     const list = this.store.get(checkpoint.executionId) ?? [];
-    list.push(checkpoint);
+    const stateHash = checkpoint.stateHash ?? calculateStateHash(checkpoint.state);
+
+    const recordWithHash: CheckpointRecord<TState> = {
+      ...checkpoint,
+      stateHash,
+    };
+
+    // Replace if stepIndex already exists (idempotent upsert), else append
+    const existingIndex = list.findIndex((c) => c.stepIndex === checkpoint.stepIndex);
+    if (existingIndex >= 0) {
+      list[existingIndex] = recordWithHash;
+    } else {
+      list.push(recordWithHash);
+      list.sort((a, b) => a.stepIndex - b.stepIndex);
+    }
+
     this.store.set(checkpoint.executionId, list);
   }
 
@@ -51,6 +67,37 @@ export class MemoryCheckpointer<TState = unknown> implements ICheckpointer<TStat
   public async list(executionId: string): Promise<readonly CheckpointRecord<TState>[]> {
     const list = this.store.get(executionId);
     return list ? [...list] : [];
+  }
+
+  /**
+   * Deletes all checkpoints strictly following a specified step index for rewinding execution.
+   */
+  public async deleteAfter(executionId: string, stepIndex: number): Promise<void> {
+    const list = this.store.get(executionId);
+    if (!list) {
+      return;
+    }
+
+    const filtered = list.filter((c) => c.stepIndex <= stepIndex);
+    this.store.set(executionId, filtered);
+  }
+
+  /**
+   * Prunes non-retained checkpoints for an execution, preserving only milestone steps.
+   */
+  public async prune(executionId: string, retainStepIndices: number[]): Promise<number> {
+    const list = this.store.get(executionId);
+    // Guard: Return 0 if no checkpoints or empty retain list provided
+    if (!list || retainStepIndices.length === 0) {
+      return 0;
+    }
+
+    const retainSet = new Set(retainStepIndices);
+    const beforeCount = list.length;
+    const filtered = list.filter((c) => retainSet.has(c.stepIndex));
+    this.store.set(executionId, filtered);
+
+    return beforeCount - filtered.length;
   }
 
   /**

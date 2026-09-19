@@ -2,6 +2,40 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## [2026-09-19] — Phase 10: Persistence & Recovery (`packages/runtime`)
+
+### Summary of Changes
+
+- Established database query runner abstraction `IDatabaseQueryRunner` and extended `IPersistentCheckpointer` supporting timeline rewinding and retention pruning.
+- Built durable PostgreSQL checkpointer (`PostgresCheckpointer`) implementing atomic, idempotent UPSERTs matching the `checkpoints` table (`0003_checkpoints_and_outbox.sql`).
+- Upgraded in-memory checkpointer (`MemoryCheckpointer`) with full `IPersistentCheckpointer` support for local-first testing and rapid developer feedback.
+- Created state serialization and integrity hashing subsystem (`packages/runtime/src/checkpoint/serializer/`):
+  - `state-serializer.ts`: Type-preserving serialization maintaining full fidelity for `Date`, `Set`, `Map`, `RegExp`, and `Error` / `OrchestrAIError` instances with typed JSON descriptors.
+  - `state-hasher.ts`: Canonical key-sorted SHA-256 state checksum hashing (`calculateStateHash`, `verifyStateHash`) safeguarding against checkpoint corruption or tampering.
+- Implemented state rewind & time-travel debugging engine (`packages/runtime/src/checkpoint/rewind/`):
+  - `rewind-policy.ts`: Strongly typed schemas for `PRUNE_SUBSEQUENT` (in-place rollback) and `BRANCH_FORK` (non-destructive execution branching).
+  - `state-diff.ts`: Deep object delta calculator computing additions, modifications, and deletions between any two checkpoints.
+  - `state-rewind-engine.ts`: Checkpoint resolution by step index or UUID with timeline pruning or history copying into forked runs.
+- Developed checkpoint retention and pruning sweeper (`packages/runtime/src/checkpoint/retention/`):
+  - `retention-policy.ts`: Soft retention ceilings (`maxCheckpointsPerRun: 50`) with critical milestone protection.
+  - `checkpoint-pruner.ts`: Timeline compaction algorithm that preserves initial, terminal, and milestone nodes while trimming intermediate reasoning steps.
+- Created crash recovery coordinator (`packages/runtime/src/recovery/`):
+  - `recovery-types.ts`: Diagnostic inspection contracts and recovery plans.
+  - `execution-recovery-manager.ts`: Detects interrupted/stalled runs, validates checksums, determines the safe DAG resumption node, and builds executable state plans.
+- Integrated `rewind(executionId, options)` and `recover(executionId, deps)` directly into `OrchestrAIRuntime`.
+- Added `EXECUTION_ERROR` to `@orchestrai/shared-types` (`ErrorCode`) and `ExecutionError` class to `@orchestrai/core`.
+- Created comprehensive phase documentation in `docs/phases/phase-10-persistence.md`.
+- Maintained zero line-count violations across all 33 files (< 217 lines each).
+- Verified with quality gates: `pnpm --filter @orchestrai/runtime build` and full monorepo `pnpm typecheck` (19 of 19 projects clean).
+
+### Architectural Rationale
+
+- **Deterministic Checkpoint Resumption**: Storing atomic state snapshots at every node transition enables paused or crashed agent runs to resume from the exact node without re-executing previously completed side-effects.
+- **Milestone-Preserving Retention**: Without compaction, long-running agent workflows generate hundreds of intermediate thought snapshots. Milestone-preserving retention maintains auditability while capping storage consumption.
+- **Non-Destructive Branch Forking**: Providing `BRANCH_FORK` alongside `PRUNE_SUBSEQUENT` enables developers and operators to experiment with alternative agent reasoning trajectories from past steps without destroying the original execution audit trail.
+
+---
+
 ## [2026-09-19] — Phase 9: Events & Outbox Bus (`@orchestrai/events`)
 
 ### Summary of Changes
