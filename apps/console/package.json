@@ -13,8 +13,8 @@
   "dependencies": {
     "@orchestrai/core": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
-    "@yuva-devlab/tokens": "link:../../../design-system/packages/tokens",
-    "@yuva-devlab/ui": "link:../../../design-system/packages/ui",
+    "@yuva-devlab/tokens": "1.0.0",
+    "@yuva-devlab/ui": "1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
