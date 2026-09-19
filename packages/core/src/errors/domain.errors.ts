@@ -130,3 +130,14 @@ export class QueueBackpressureError extends OrchestrAIError<"QUEUE_BACKPRESSURE"
     );
   }
 }
+
+/**
+ * Thrown when a background worker encounters an unrecoverable failure during job execution
+ * or worker lifecycle transition.
+ * Maps to HTTP 500 Internal Server Error.
+ */
+export class WorkerError extends OrchestrAIError<"WORKER_ERROR"> {
+  constructor(message: string, details?: unknown) {
+    super(message, "WORKER_ERROR", 500, details);
+  }
+}
