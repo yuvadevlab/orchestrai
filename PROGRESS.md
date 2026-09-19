@@ -20,44 +20,44 @@ Next Immediate:    Scaffold packages/events — Redis Streams publisher/subscrib
 
 ## Master Phase Checklist
 
-| Phase       | Description                          | Status  | Target Package / App            |
-| :---------- | :----------------------------------- | :-----: | :------------------------------ |
-| **Phase 0** | **Workspace & Foundation**           | **[x]** | Monorepo root, configs, tooling |
-| **Phase 1** | **Core Contracts & Domain Types**    | **[x]** | `packages/core`                 |
-| **Phase 2** | **Models & LLM Adapters**            | **[x]** | `packages/models`               |
-| **Phase 3** | **Tools & Execution Security**       | **[x]** | `packages/tools`                |
-| **Phase 4** | **Agent Loop & State Transitions**   | **[x]** | `packages/agent`                |
-| **Phase 5** | **Runtime & LangGraph Execution**    | **[x]** | `packages/runtime`              |
-| **Phase 6** | **Database & PostgreSQL Schemas**    | **[x]** | `infrastructure/postgres`       |
-| **Phase 7** | **Queue & BullMQ Producers**         | **[x]** | `packages/queue`                |
-| **Phase 8** | **Worker Application**               | **[x]** | `apps/worker`                   |
-| Phase 9     | Events & Outbox Bus                  |   [ ]   | `packages/events`               |
-| Phase 10    | Persistence & Recovery               |   [ ]   | `packages/runtime`              |
-| Phase 11    | Human-in-the-Loop (HITL)             |   [ ]   | `packages/runtime`              |
-| Phase 12    | Realtime Streaming Broker            |   [ ]   | `apps/realtime`                 |
-| Phase 13    | Console Dashboard UI                 |   [ ]   | `apps/console`                  |
-| Phase 14    | Agent Modes (CHAT/PLAN/ACT/AUTO)     |   [ ]   | `packages/agent`                |
-| Phase 15    | Memory Systems (Episodic/Semantic)   |   [ ]   | `packages/memory`               |
-| Phase 16    | RAG & Vector Retrieval               |   [ ]   | `packages/rag`                  |
-| Phase 17    | API Gateway                          |   [ ]   | `apps/gateway`                  |
-| Phase 18    | Client SDK                           |   [ ]   | `packages/sdk`                  |
-| Phase 19    | Observability & OpenTelemetry        |   [ ]   | `packages/observability`        |
-| Phase 20    | Reliability Engineering & Resilience |   [ ]   | `packages/*`                    |
-| Phase 21    | Security & Sandboxing                |   [ ]   | `packages/tools`                |
-| Phase 22    | Distributed Consistency              |   [ ]   | `packages/events`               |
-| Phase 23    | Advanced PostgreSQL Optimizations    |   [ ]   | `infrastructure/postgres`       |
-| Phase 24    | Caching Layer                        |   [ ]   | `packages/runtime`              |
-| Phase 25    | Performance & Latency Tuning         |   [ ]   | `apps/*`                        |
-| Phase 26    | Evaluation Harness                   |   [ ]   | `packages/eval`                 |
-| Phase 27    | Specialized Research Agent           |   [ ]   | `packages/agent`                |
-| Phase 28    | Specialized Developer Agent          |   [ ]   | `packages/agent`                |
-| Phase 29    | Multi-Agent Orchestration            |   [ ]   | `packages/runtime`              |
-| Phase 30    | gRPC Inter-service Layer             |   [ ]   | `apps/*`                        |
-| Phase 31    | Kafka Event Streaming                |   [ ]   | `packages/events`               |
-| Phase 32    | Distributed Execution Engine         |   [ ]   | `apps/worker`                   |
-| Phase 33    | Production Infrastructure & Docker   |   [ ]   | `infrastructure/docker`         |
-| Phase 34    | Kubernetes Helm Deployments          |   [ ]   | `infrastructure/k8s`            |
-| Phase 35    | Architecture Review & Audit          |   [ ]   | Whole System                    |
+| Phase        | Description                          | Status  | Target Package / App            |
+| :----------- | :----------------------------------- | :-----: | :------------------------------ |
+| **Phase 0**  | **Workspace & Foundation**           | **[x]** | Monorepo root, configs, tooling |
+| **Phase 1**  | **Core Contracts & Domain Types**    | **[x]** | `packages/core`                 |
+| **Phase 2**  | **Models & LLM Adapters**            | **[x]** | `packages/models`               |
+| **Phase 3**  | **Tools & Execution Security**       | **[x]** | `packages/tools`                |
+| **Phase 4**  | **Agent Loop & State Transitions**   | **[x]** | `packages/agent`                |
+| **Phase 5**  | **Runtime & LangGraph Execution**    | **[x]** | `packages/runtime`              |
+| **Phase 6**  | **Database & PostgreSQL Schemas**    | **[x]** | `infrastructure/postgres`       |
+| **Phase 7**  | **Queue & BullMQ Producers**         | **[x]** | `packages/queue`                |
+| **Phase 8**  | **Worker Application**               | **[x]** | `apps/worker`                   |
+| Phase 9      | Events & Outbox Bus                  |   [ ]   | `packages/events`               |
+| Phase 10     | Persistence & Recovery               |   [ ]   | `packages/runtime`              |
+| Phase 11     | Human-in-the-Loop (HITL)             |   [ ]   | `packages/runtime`              |
+| Phase 12     | Realtime Streaming Broker            |   [ ]   | `apps/realtime`                 |
+| **Phase 13** | **Console Dashboard UI**             | **[x]** | `apps/console`                  |
+| Phase 14     | Agent Modes (CHAT/PLAN/ACT/AUTO)     |   [ ]   | `packages/agent`                |
+| Phase 15     | Memory Systems (Episodic/Semantic)   |   [ ]   | `packages/memory`               |
+| Phase 16     | RAG & Vector Retrieval               |   [ ]   | `packages/rag`                  |
+| Phase 17     | API Gateway                          |   [ ]   | `apps/gateway`                  |
+| Phase 18     | Client SDK                           |   [ ]   | `packages/sdk`                  |
+| Phase 19     | Observability & OpenTelemetry        |   [ ]   | `packages/observability`        |
+| Phase 20     | Reliability Engineering & Resilience |   [ ]   | `packages/*`                    |
+| Phase 21     | Security & Sandboxing                |   [ ]   | `packages/tools`                |
+| Phase 22     | Distributed Consistency              |   [ ]   | `packages/events`               |
+| Phase 23     | Advanced PostgreSQL Optimizations    |   [ ]   | `infrastructure/postgres`       |
+| Phase 24     | Caching Layer                        |   [ ]   | `packages/runtime`              |
+| Phase 25     | Performance & Latency Tuning         |   [ ]   | `apps/*`                        |
+| Phase 26     | Evaluation Harness                   |   [ ]   | `packages/eval`                 |
+| Phase 27     | Specialized Research Agent           |   [ ]   | `packages/agent`                |
+| Phase 28     | Specialized Developer Agent          |   [ ]   | `packages/agent`                |
+| Phase 29     | Multi-Agent Orchestration            |   [ ]   | `packages/runtime`              |
+| Phase 30     | gRPC Inter-service Layer             |   [ ]   | `apps/*`                        |
+| Phase 31     | Kafka Event Streaming                |   [ ]   | `packages/events`               |
+| Phase 32     | Distributed Execution Engine         |   [ ]   | `apps/worker`                   |
+| Phase 33     | Production Infrastructure & Docker   |   [ ]   | `infrastructure/docker`         |
+| Phase 34     | Kubernetes Helm Deployments          |   [ ]   | `infrastructure/k8s`            |
+| Phase 35     | Architecture Review & Audit          |   [ ]   | Whole System                    |
 
 ---
 
@@ -207,3 +207,29 @@ Next Immediate:    Scaffold packages/events — Redis Streams publisher/subscrib
 - [x] Zero file line-count violations (all 23 files < 165 lines) with comprehensive JSDoc
 - [x] Removed placeholder `.gitkeep`
 - [x] Phase 8 documentation (`docs/phases/phase-08-worker.md`)
+
+---
+
+## Phase 13 Breakdown (Console Dashboard UI)
+
+- [x] Cross-repository `@yuva-devlab/design-system` integration via local symlinks
+- [x] Shared `@yuva-devlab/tokens` with Tailwind 4 `@theme inline` preset and theme variants (`theme-finai.css` Emerald, `theme-orchestrai.css` Terminal Moss)
+- [x] 46 production UI components in `@yuva-devlab/ui` with Radix UI, CVA, and Tailwind 4
+- [x] Standalone interactive `apps/cookbook` in `design-system` with live FinAI/OrchestrAI theme switching
+- [x] Next.js 15 App Router frontend scaffolded in `apps/console` with TypeScript 6 and Tailwind 4
+- [x] Google/Meta-grade feature-driven architecture (`src/features/<feature>/...`)
+- [x] Thin routing wrappers: all `page.tsx` and `layout.tsx` files strictly 5-15 lines
+- [x] Dashboard Shell (`SidebarNav`, `TopBar`, `DashboardShell`)
+- [x] Feature modules implemented:
+  - `features/console`: Live prompt execution, SSE event stream, agent markdown output card, token telemetry
+  - `features/agents`: Agent cards with execution stats, status badges, model tags, and filter tabs
+  - `features/executions`: Execution runs table with status icons, duration, and latency metrics
+  - `features/workflows`: Visual DAG pipeline builder cards with test run actions
+  - `features/tools`: Tool registry catalog with sandbox validation indicators and execution metrics
+  - `features/models`: Dynamic LLM fallback cascade cards with 1M token pricing and latency
+  - `features/activity`: Real-time diagnostic audit stream for outbox flushes and queue drains
+  - `features/settings`: PostgreSQL topology, transactional outbox poller toggle, and security execution limits
+- [x] Prime Invariants enforced: 100% of files < 125 lines (zero violations of 250-line rule)
+- [x] ESLint `max-lines` (250) and `max-len` (100) rules enforced across monorepo
+- [x] Scoped Tailwind linting configured, verified clean across all packages and apps with 0 errors and 0 warnings
+- [x] Monorepo-wide typecheck (`pnpm typecheck`) and build (`pnpm build`) passing

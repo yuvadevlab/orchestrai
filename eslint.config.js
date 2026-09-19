@@ -1,7 +1,11 @@
 import js from "@eslint/js";
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
+import tailwindcss from "eslint-plugin-tailwindcss";
 import globals from "globals";
+import path from "node:path";
 import tseslint from "typescript-eslint";
+
+const rootDir = import.meta.dirname;
 
 export default tseslint.config(
   {
@@ -17,6 +21,22 @@ export default tseslint.config(
       "**/out/**",
       "**/next-env.d.ts",
     ],
+  },
+  {
+    // Scope tailwindcss rules strictly to frontend apps that contain Tailwind CSS
+    ...tailwindcss.configs.recommended,
+    files: ["apps/console/**/*.{ts,tsx}"],
+    rules: {
+      ...tailwindcss.configs.recommended.rules,
+      "tailwindcss/classnames-order": "off",
+      "tailwindcss/no-custom-classname": "off",
+    },
+    settings: {
+      tailwindcss: {
+        callees: ["cn", "cva"],
+        cssConfigPath: path.resolve(rootDir, "apps/console/src/app/globals.css"),
+      },
+    },
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
@@ -41,15 +61,6 @@ export default tseslint.config(
       ],
       /**
        * Enforce the OrchestrAI 250-line hard maximum per file.
-       *
-       * Why skipComments + skipBlankLines?
-       * JSDoc comments are mandatory for every exported symbol and can be
-       * verbose — they should not "eat into" the budget. Only executable code
-       * lines count. This mirrors the spirit of the rule: keep logic lean,
-       * not documentation lean.
-       *
-       * Warn at 200 lines (proactive decomposition threshold) and error at 250
-       * (the absolute hard limit stated in 00-core-invariants.md).
        */
       "max-lines": [
         "error",
@@ -59,6 +70,23 @@ export default tseslint.config(
           skipBlankLines: true,
         },
       ],
+      /**
+       * Maximum line length rule (100 characters).
+       * Ignores long URLs, strings, template literals, and comments.
+       */
+      "max-len": [
+        "warn",
+        {
+          code: 100,
+          tabWidth: 2,
+          ignoreComments: true,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreRegExpLiterals: true,
+        },
+      ],
+      "tailwindcss/no-custom-classname": "off",
     },
   },
   eslintPluginPrettier,

@@ -1,0 +1,124 @@
+@import "tailwindcss";
+@source "../**";
+@source "../../node_modules/@yuva-devlab/ui/src";
+@import "@yuva-devlab/tokens/preset.css";
+@import "@yuva-devlab/tokens/themes/orchestrai.css";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Manrope", sans-serif;
+  --font-display: "Sora", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    background: var(--background);
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  button,
+  input,
+  textarea {
+    letter-spacing: 0;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 28%, transparent);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+.execution-grid {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+.topology-grid {
+  background-image: radial-gradient(circle at center, var(--border) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
+}
+
+.animate-agent-pulse {
+  animation: agent-pulse 1.8s ease-in-out infinite;
+}
+
+.animate-signal-travel {
+  animation: signal-travel 1.5s linear infinite;
+}
+
+.animate-progress-flow {
+  animation: progress-flow 1.8s ease-in-out infinite;
+}
+
+.runner-enter {
+  animation: runner-enter 260ms ease-out both;
+}
+
+@keyframes agent-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes signal-travel {
+  from {
+    left: 0;
+  }
+  to {
+    left: calc(100% - 0.5rem);
+  }
+}
+
+@keyframes progress-flow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes runner-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

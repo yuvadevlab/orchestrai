@@ -1,0 +1,40 @@
+{
+  "name": "@orchestrai/console",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@orchestrai/core": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "@yuva-devlab/tokens": "1.0.0",
+    "@yuva-devlab/ui": "1.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.575.0",
+    "next": "^15.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "recharts": "^2.15.4",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.1",
+    "tw-animate-css": "^1.3.4",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "@types/node": "^26.6.1",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.6",
+    "postcss": "^8.5.3",
+    "typescript": "^6.0.3"
+  }
+}
