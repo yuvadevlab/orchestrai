@@ -5,6 +5,7 @@
 
 import type { ToolPermissionLevel } from "@orchestrai/shared-types";
 import type { ICheckpointer, IPersistentCheckpointer } from "@/checkpoint";
+import type { IApprovalStorage, ApprovalPolicyEngine } from "@/hitl";
 import type { RuntimeGraphState } from "@/nodes";
 
 /**
@@ -20,4 +21,10 @@ export interface RuntimeEngineConfig {
 
   /** Permitted sandbox filesystem boundary directory */
   readonly workspaceRoot?: string;
+
+  /** Storage adapter managing HITL approval tickets and state */
+  readonly approvalStorage?: IApprovalStorage;
+
+  /** Policy engine governing human approval risk tiers and timeouts */
+  readonly approvalPolicy?: ApprovalPolicyEngine;
 }

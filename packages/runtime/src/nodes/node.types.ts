@@ -45,6 +45,8 @@ export interface RuntimeGraphState extends Record<string, unknown> {
   readonly error?: string;
 }
 
+import type { IApprovalStorage, ApprovalPolicyEngine } from "@/hitl";
+
 /**
  * Injected dependencies provided to runtime node factories.
  */
@@ -53,4 +55,6 @@ export interface RuntimeNodeDependencies {
   readonly tools: ToolRegistry;
   readonly clearance?: ToolPermissionLevel;
   readonly workspaceRoot?: string;
+  readonly approvalStorage?: IApprovalStorage;
+  readonly approvalPolicy?: ApprovalPolicyEngine;
 }
