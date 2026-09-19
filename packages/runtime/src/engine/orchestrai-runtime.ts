@@ -1,15 +1,6 @@
 /**
  * @file packages/runtime/src/engine/orchestrai-runtime.ts
- * @description Master runtime coordinator managing graph execution, checkpointing, and HITL resumption.
- *
- * ─── The OrchestrAI Runtime Engine (Learning note) ─────────────────
- * The Runtime coordinates the lifecycle of an agent execution run:
- * 1. Graph Assembly: Wires up Model -> Evaluator -> Executor -> Approval Gate DAG.
- * 2. Start Run: Initializes state, executes graph, and checkpoints progress.
- * 3. Resume Run: When a human approves a paused action, reloads state from
- *    the checkpointer and resumes execution from the exact checkpoint without
- *    repeating previous LLM calls.
- * ───────────────────────────────────────────────────────────────────
+ * @description Master runtime coordinator managing graph execution, checkpointing, rewind, and recovery.
  */
 
 import crypto from "node:crypto";
@@ -21,7 +12,14 @@ import {
   type AgentDefinition,
 } from "@orchestrai/core";
 import { START, END, StateGraph, type CompiledGraph } from "@/graph";
-import { MemoryCheckpointer, type ICheckpointer } from "@/checkpoint";
+import {
+  MemoryCheckpointer,
+  StateRewindEngine,
+  type ICheckpointer,
+  type IPersistentCheckpointer,
+  type RewindOptions,
+  type RewindResult,
+} from "@/checkpoint";
 import {
   createModelNode,
   createToolEvaluatorNode,
@@ -30,18 +28,21 @@ import {
   type RuntimeGraphState,
   type RuntimeNodeDependencies,
 } from "@/nodes";
+import { ExecutionRecoveryManager } from "@/recovery";
 import type { RuntimeEngineConfig } from "./runtime-context";
 
 /**
  * Top-level runtime coordinator executing agent workflows on directed state graphs.
  */
 export class OrchestrAIRuntime {
-  private readonly checkpointer: ICheckpointer<RuntimeGraphState>;
+  private readonly checkpointer: IPersistentCheckpointer<RuntimeGraphState>;
   private readonly defaultClearance: ToolPermissionLevel;
   private readonly workspaceRoot?: string;
 
-  constructor(config: RuntimeEngineConfig = {}) {
-    this.checkpointer = config.checkpointer ?? new MemoryCheckpointer<RuntimeGraphState>();
+  public constructor(config: RuntimeEngineConfig = {}) {
+    this.checkpointer =
+      (config.checkpointer as IPersistentCheckpointer<RuntimeGraphState>) ??
+      new MemoryCheckpointer<RuntimeGraphState>();
     this.defaultClearance = config.defaultClearance ?? ToolPermissionLevel.READ_ONLY;
     this.workspaceRoot = config.workspaceRoot;
   }
@@ -52,16 +53,14 @@ export class OrchestrAIRuntime {
   public createAgentGraph(deps: RuntimeNodeDependencies): CompiledGraph<RuntimeGraphState> {
     const graph = new StateGraph<RuntimeGraphState>();
 
-    // 1. Add discrete nodes
     graph.addNode("model", createModelNode(deps));
     graph.addNode("tool_evaluator", createToolEvaluatorNode(deps));
     graph.addNode("tool_executor", createToolExecutorNode(deps));
     graph.addNode("approval_gate", createApprovalGateNode());
 
-    // 2. Define static and conditional routing edges
     graph.addEdge(START, "model");
 
-    // After model runs: if tool calls are present, evaluate them; else end
+    // After model runs: route to evaluator if tool calls present, else complete
     graph.addConditionalEdge("model", (state) => {
       if (state.pendingToolCalls && state.pendingToolCalls.length > 0) {
         return "tool_evaluator";
@@ -69,7 +68,7 @@ export class OrchestrAIRuntime {
       return END;
     });
 
-    // After evaluation: if approval needed, pause at gate; else execute tools
+    // After evaluation: route to approval gate if approval required, else execute tools
     graph.addConditionalEdge("tool_evaluator", (state) => {
       if (state.pendingApprovalId) {
         return "approval_gate";
@@ -77,10 +76,7 @@ export class OrchestrAIRuntime {
       return "tool_executor";
     });
 
-    // Approval gate terminates current traversal round (pauses execution)
     graph.addEdge("approval_gate", END);
-
-    // After tool execution: loop back to model node to reason on results
     graph.addEdge("tool_executor", "model");
 
     return graph.compile({ checkpointer: this.checkpointer });
@@ -88,12 +84,6 @@ export class OrchestrAIRuntime {
 
   /**
    * Initiates a new agent execution run from START.
-   *
-   * @param agent - Agent configuration definition.
-   * @param history - Initial conversation messages.
-   * @param deps - Runtime dependencies (model adapter, tools).
-   * @param executionId - Optional existing execution run UUID.
-   * @returns Final state snapshot upon completion or pause.
    */
   public async start(
     agent: AgentDefinition,
@@ -109,7 +99,6 @@ export class OrchestrAIRuntime {
     };
 
     const compiledGraph = this.createAgentGraph(resolvedDeps);
-
     const initialState: RuntimeGraphState = {
       executionId: runId,
       agent,
@@ -122,11 +111,6 @@ export class OrchestrAIRuntime {
 
   /**
    * Resumes an execution run that was suspended at an approval gate.
-   *
-   * @param executionId - Execution run identifier.
-   * @param approved - Whether the human operator approved or rejected the action.
-   * @param deps - Runtime dependencies.
-   * @returns Final state snapshot after resuming execution.
    */
   public async resume(
     executionId: string,
@@ -153,7 +137,6 @@ export class OrchestrAIRuntime {
     const compiledGraph = this.createAgentGraph(resolvedDeps);
 
     if (approved) {
-      // Clear approval lock and resume directly into the tool executor
       const resumedState: RuntimeGraphState = {
         ...state,
         pendingApprovalId: undefined,
@@ -161,7 +144,6 @@ export class OrchestrAIRuntime {
       return compiledGraph.invoke(resumedState, executionId, "tool_executor");
     }
 
-    // Operator rejected: append refusal message and loop back to model
     const rejectionMessage: AIMessage = AIMessageSchema.parse({
       role: MessageRole.TOOL,
       content: [
@@ -182,5 +164,53 @@ export class OrchestrAIRuntime {
     };
 
     return compiledGraph.invoke(rejectedState, executionId, "model");
+  }
+
+  /**
+   * Rewinds an execution timeline to an earlier checkpoint.
+   */
+  public async rewind(
+    executionId: string,
+    options: RewindOptions,
+  ): Promise<RewindResult<RuntimeGraphState>> {
+    const rewindEngine = new StateRewindEngine(this.checkpointer);
+    return rewindEngine.rewind(executionId, options);
+  }
+
+  /**
+   * Automatically recovers an interrupted or crashed execution run.
+   */
+  public async recover(
+    executionId: string,
+    deps: Omit<RuntimeNodeDependencies, "clearance" | "workspaceRoot">,
+  ): Promise<RuntimeGraphState> {
+    const recoveryManager = new ExecutionRecoveryManager(this.checkpointer);
+    const plan = await recoveryManager.planRecovery(executionId);
+
+    // Guard: Prevent resumption if recovery strategy is deemed unrecoverable
+    if (plan.strategy === "FAIL_UNRECOVERABLE") {
+      throw new OrchestrAIError(
+        `Cannot recover execution "${executionId}": ${plan.reason}`,
+        "EXECUTION_ERROR",
+        422,
+        { executionId, plan },
+      );
+    }
+
+    const resolvedDeps: RuntimeNodeDependencies = {
+      ...deps,
+      clearance: this.defaultClearance,
+      workspaceRoot: this.workspaceRoot,
+    };
+    const compiledGraph = this.createAgentGraph(resolvedDeps);
+
+    return compiledGraph.invoke(plan.reconstitutedState, executionId, plan.targetResumeNode);
+  }
+
+  /**
+   * Returns the underlying checkpointer instance.
+   */
+  public getCheckpointer(): ICheckpointer<RuntimeGraphState> {
+    return this.checkpointer;
   }
 }

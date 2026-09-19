@@ -22,6 +22,12 @@ export interface CheckpointRecord<TState = unknown> {
   /** Complete serialized state payload at this point in time */
   readonly state: Readonly<TState>;
 
+  /** Optional SHA-256 state integrity checksum hash */
+  readonly stateHash?: string;
+
+  /** Optional arbitrary metadata attached to this checkpoint (e.g. latency, reason, milestone flag) */
+  readonly metadata?: Readonly<Record<string, unknown>>;
+
   /** Timestamp when this checkpoint was recorded */
   readonly timestamp: Date;
 }

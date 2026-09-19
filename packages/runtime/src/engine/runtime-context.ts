@@ -4,7 +4,7 @@
  */
 
 import type { ToolPermissionLevel } from "@orchestrai/shared-types";
-import type { ICheckpointer } from "@/checkpoint";
+import type { ICheckpointer, IPersistentCheckpointer } from "@/checkpoint";
 import type { RuntimeGraphState } from "@/nodes";
 
 /**
@@ -12,7 +12,8 @@ import type { RuntimeGraphState } from "@/nodes";
  */
 export interface RuntimeEngineConfig {
   /** Checkpointer used for durable state snapshots and resumption */
-  readonly checkpointer?: ICheckpointer<RuntimeGraphState>;
+  readonly checkpointer?:
+    IPersistentCheckpointer<RuntimeGraphState> | ICheckpointer<RuntimeGraphState>;
 
   /** Default tool permission clearance level (defaults to READ_ONLY) */
   readonly defaultClearance?: ToolPermissionLevel;

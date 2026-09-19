@@ -184,4 +184,6 @@ export type ErrorCode =
   /** Queue is saturated and rejecting non-critical tasks */
   | "QUEUE_BACKPRESSURE"
   /** Background worker task processing failure or lifecycle crash */
-  | "WORKER_ERROR";
+  | "WORKER_ERROR"
+  /** Execution graph run encountered an unrecoverable failure or crashed state */
+  | "EXECUTION_ERROR";

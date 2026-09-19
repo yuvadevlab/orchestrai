@@ -141,3 +141,13 @@ export class WorkerError extends OrchestrAIError<"WORKER_ERROR"> {
     super(message, "WORKER_ERROR", 500, details);
   }
 }
+
+/**
+ * Thrown when an execution graph encountered an unrecoverable crash or invalid state.
+ * Maps to HTTP 500 Internal Server Error.
+ */
+export class ExecutionError extends OrchestrAIError<"EXECUTION_ERROR"> {
+  constructor(message: string, details?: unknown) {
+    super(message, "EXECUTION_ERROR", 500, details);
+  }
+}
