@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 9 — Event Architecture
-Current Feature:   Domain events, Redis Streams, Transactional Outbox consumer
+Current Phase:     Phase 10 — Persistence & State Checkpointing
+Current Feature:   PostgreSQL / Memory Checkpointing, State Rewind, Time-travel
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0-8 Complete (100%), Phase 9 Ready
+Overall Progress:  Phase 0-9, 13 Complete (100%), Phase 10 Ready
 Last Updated:      2026-09-19
-Next Immediate:    Scaffold packages/events — Redis Streams publisher/subscriber, Outbox bus
+Next Immediate:    Scaffold packages/runtime checkpoints & PostgreSQL state saver
 ```
 
 ---
@@ -31,7 +31,7 @@ Next Immediate:    Scaffold packages/events — Redis Streams publisher/subscrib
 | **Phase 6**  | **Database & PostgreSQL Schemas**    | **[x]** | `infrastructure/postgres`       |
 | **Phase 7**  | **Queue & BullMQ Producers**         | **[x]** | `packages/queue`                |
 | **Phase 8**  | **Worker Application**               | **[x]** | `apps/worker`                   |
-| Phase 9      | Events & Outbox Bus                  |   [ ]   | `packages/events`               |
+| **Phase 9**  | **Events & Outbox Bus**              | **[x]** | `packages/events`               |
 | Phase 10     | Persistence & Recovery               |   [ ]   | `packages/runtime`              |
 | Phase 11     | Human-in-the-Loop (HITL)             |   [ ]   | `packages/runtime`              |
 | Phase 12     | Realtime Streaming Broker            |   [ ]   | `apps/realtime`                 |
@@ -207,6 +207,28 @@ Next Immediate:    Scaffold packages/events — Redis Streams publisher/subscrib
 - [x] Zero file line-count violations (all 23 files < 165 lines) with comprehensive JSDoc
 - [x] Removed placeholder `.gitkeep`
 - [x] Phase 8 documentation (`docs/phases/phase-08-worker.md`)
+
+---
+
+## Phase 9 Breakdown (Events & Outbox Bus)
+
+- [x] Scaffold `@orchestrai/events` package with `package.json`, `tsconfig.json`, `tsconfig.build.json`, and `tsup.config.ts`
+- [x] Domain event payload Zod schemas (`ExecutionCreated`, `ExecutionStarted`, `ExecutionCompleted`, `ExecutionFailed`, `StepStarted`, `StepCompleted`, `ToolCalled`, `ToolCompleted`, `ApprovalRequested`, `ApprovalResolved`)
+- [x] Canonical `createDomainEvent` factory helper stamping UUIDs and ISO timestamps
+- [x] Interfaces `IEventPublisher`, `IEventSubscriber`, and `IEventBus`
+- [x] In-memory asynchronous `MemoryEventBus` with wildcard `*` topics and error containment
+- [x] Redis Streams engine:
+  - `RedisStreamPublisherConfigSchema` & `RedisStreamConsumerConfigSchema`
+  - Hash serializer / deserializer with metadata headers (`eventType`, `eventId`, `executionId`)
+  - `RedisStreamPublisher` with `XADD` and approximate trimming (`MAXLEN ~`)
+  - `RedisStreamConsumer` worker with consumer groups (`MKSTREAM`), `XREADGROUP`, and `XACK`
+- [x] Transactional Outbox subsystem:
+  - `IOutboxStorage` contract and `OutboxRecord` with status lifecycle (`PENDING` -> `PROCESSING` -> `PUBLISHED` / `FAILED`)
+  - `MemoryOutboxStorage` adapter for local development and testing
+  - `OutboxPoller` background engine with interval sweep, batch claiming, and publisher dispatch
+- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 19 workspace projects
+- [x] Zero file line-count violations (all 16 files < 160 lines) with comprehensive JSDoc
+- [x] Phase 9 documentation (`docs/phases/phase-09-events.md`)
 
 ---
 

@@ -59,7 +59,15 @@ Core Contracts (@orchestrai/core)
 
 ---
 
-## 5. Universal Verification Checklist
+## 5. Phase Implementation Testing Policy (Strict)
+
+- While implementing roadmap phases, **DO NOT** write or implement test cases (unit tests, e2e tests, integration tests) or Storybook stories unless explicitly instructed by the user.
+- Focus effort and code strictly on production code: domain logic, state machines, Zod contracts, database schemas, API routes, event handlers, and polished UI screens.
+- When quality gates run, verify with `pnpm typecheck` and `pnpm lint`. Do not add automated test suites during phase implementation without explicit user sign-off.
+
+---
+
+## 6. Universal Verification Checklist
 
 Before completing any task, verify:
 
@@ -67,5 +75,6 @@ Before completing any task, verify:
 - [ ] All exported symbols have complete JSDoc annotations.
 - [ ] All conditionals, guards, and branching logic have explanatory inline comments.
 - [ ] Shared contracts originate from `@orchestrai/core` without cross-package duplication.
+- [ ] No test cases (unit, e2e, integration) or Storybook stories added during phase implementation unless requested.
 - [ ] `pnpm lint` and `pnpm typecheck` pass with zero errors and zero warnings.
 - [ ] Commit messages conform to `commitlint.config.ts`.

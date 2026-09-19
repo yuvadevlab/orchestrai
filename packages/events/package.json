@@ -1,0 +1,36 @@
+{
+  "name": "@orchestrai/events",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Event architecture, Redis Streams publisher/consumer, and transactional outbox bus for OrchestrAI",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/core": "workspace:*",
+    "@orchestrai/logger": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "ioredis": "^6.0.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.0"
+  }
+}
