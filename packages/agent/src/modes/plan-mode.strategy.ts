@@ -15,14 +15,16 @@ export class PlanModeStrategy implements IModeStrategy {
   public readonly mode = AgentMode.PLAN;
 
   /**
-   * System guidance for PLAN mode.
+   * System guidance for PLAN mode, instructing structured decomposition.
    */
   public getSystemInstructions(): string {
     return (
       "Operating Mode: PLAN.\n" +
-      "Analyze the user's objective and deconstruct it into a logical, numbered plan of execution. " +
+      "Analyze the user's objective and deconstruct it into a logical, numbered plan of execution.\n" +
       "Use read-only exploration tools to investigate context if necessary, but do NOT execute " +
-      "destructive modifications yet. Focus on architecture, verification criteria, and clear steps."
+      "destructive modifications yet. Focus on architecture, verification criteria, and clear steps.\n" +
+      "When ready, format your plan in a structured ```json block with keys: planId, goal, " +
+      "and steps (array of { id, title, description, toolTarget, dependencies, verificationCriteria })."
     );
   }
 

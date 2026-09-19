@@ -26,15 +26,11 @@ export class ChatModeStrategy implements IModeStrategy {
   }
 
   /**
-   * Restricts tools to READ_ONLY for conversational safety.
+   * Enforces no side effects by strictly permitting only READ_ONLY tools.
    */
   public filterTools(tools: readonly ITool[]): ITool[] {
-    // In pure chat mode, block destructive/dangerous tools unless overridden
-    return tools.filter(
-      (t) =>
-        t.definition.permissionLevel === ToolPermissionLevel.READ_ONLY ||
-        t.definition.permissionLevel === ToolPermissionLevel.WRITE_SAFE,
-    );
+    // In CHAT mode, enforce zero side-effects: block all mutation/write tools
+    return tools.filter((t) => t.definition.permissionLevel === ToolPermissionLevel.READ_ONLY);
   }
 
   /**
