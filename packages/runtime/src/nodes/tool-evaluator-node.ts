@@ -29,33 +29,26 @@ export function createToolEvaluatorNode(
         continue;
       }
 
-      let requiresApproval: boolean;
-      let riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" = "HIGH";
-      let timeoutMs = 900_000;
-      let rationale = `Tool "${call.toolName}" requires human clearance`;
-
-      // 1. Evaluate via ApprovalPolicyEngine if configured
-      if (deps.approvalPolicy) {
-        const assessment = deps.approvalPolicy.evaluateToolCall(
-          call.toolName,
-          tool.definition.permissionLevel,
-          tool.definition.isDestructive,
-          clearance,
-        );
-        requiresApproval = assessment.requiresApproval;
-        riskLevel = assessment.riskLevel;
-        timeoutMs = assessment.timeoutMs;
-        rationale = assessment.rationale;
-      } else {
-        // Fallback: Default to core requiresHumanApproval threshold
-        requiresApproval = requiresHumanApproval(tool.definition.permissionLevel);
-      }
+      // 1. Evaluate tool call against ApprovalPolicyEngine or fallback threshold
+      const assessment = deps.approvalPolicy
+        ? deps.approvalPolicy.evaluateToolCall(
+            call.toolName,
+            tool.definition.permissionLevel,
+            tool.definition.isDestructive,
+            clearance,
+          )
+        : {
+            requiresApproval: requiresHumanApproval(tool.definition.permissionLevel),
+            riskLevel: "HIGH" as const,
+            timeoutMs: 900_000,
+            rationale: `Tool "${call.toolName}" requires human clearance`,
+          };
 
       // 2. If clearance required, generate ticket and pause execution
-      if (requiresApproval) {
+      if (assessment.requiresApproval) {
         const approvalId = crypto.randomUUID();
         const now = new Date();
-        const expiresAt = new Date(now.getTime() + timeoutMs);
+        const expiresAt = new Date(now.getTime() + assessment.timeoutMs);
 
         // Persist ticket into storage if an adapter was provided
         if (deps.approvalStorage) {
@@ -65,8 +58,8 @@ export function createToolEvaluatorNode(
             stepIndex: 0,
             toolName: call.toolName,
             toolArguments: (call.arguments as Record<string, unknown>) ?? {},
-            riskLevel,
-            rationale,
+            riskLevel: assessment.riskLevel,
+            rationale: assessment.rationale,
             status: ApprovalStatus.PENDING,
             requestedAt: now,
             expiresAt,
