@@ -62,3 +62,8 @@ export function createLogger(context?: string, config?: LoggerConfig): Logger {
 export function loggerWithConfig(base: Logger, config?: LoggerConfig): Logger {
   return createLogger(base.context, config);
 }
+
+/**
+ * Global default logger instance configured from ambient environment variables.
+ */
+export const defaultLogger: Logger = createLogger();
