@@ -7,12 +7,14 @@
  * Standard network ports for OrchestrAI applications in local development.
  */
 export const DEFAULT_PORTS = {
-  /** Ingress API Gateway */
-  GATEWAY: 4000,
+  /** Ingress API Gateway (Port 4000 reserved for FinAI) */
+  GATEWAY: 4001,
   /** Realtime WebSocket / SSE streamer */
-  REALTIME: 4001,
-  /** Operator Console Web UI */
-  CONSOLE: 3000,
+  REALTIME: 4002,
+  /** Background Worker Engine diagnostics */
+  WORKER: 4003,
+  /** Operator Console Web UI (Port 3000 reserved for FinAI) */
+  CONSOLE: 3001,
   /** Local Ollama Model Server */
   OLLAMA: 11434,
   /** PostgreSQL with pgvector */

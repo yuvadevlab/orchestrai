@@ -8,19 +8,19 @@
 
 ```text
                ┌────────────────────────────────────────────────────────┐
-               │              Operator UI / Console (Next.js)           │
+               │        Operator UI / Console (Next.js - Port 3001)     │
                └───────────────────────────┬────────────────────────────┘
                                            │ HTTP / SSE / WS
                                            ▼
                ┌────────────────────────────────────────────────────────┐
-               │                   API Gateway (Port 4000)              │
+               │                   API Gateway (Port 4001)              │
                │        (Auth, Rate Limiting, Request Validation)       │
                └───────────┬────────────────────────────────┬───────────┘
                            │                                │
                            ▼                                ▼
 ┌──────────────────────────────────────┐  ┌──────────────────────────────────────┐
-│       Realtime Streamer (Port 4001)  │  │        BullMQ Worker Engine          │
-│    (SSE / WebSocket Execution Rail)  │  │   (Background State Transitions)     │
+│       Realtime Streamer (Port 4002)  │  │        BullMQ Worker Engine          │
+│    (SSE / WebSocket Execution Rail)  │  │   (Background Diagnostics Port 4003) │
 └──────────────────┬───────────────────┘  └──────────────────┬───────────────────┘
                    │                                         │
                    └───────────────────┬─────────────────────┘
