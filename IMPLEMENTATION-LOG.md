@@ -2,6 +2,33 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## [2026-09-19] — Phase 11: Human-in-the-Loop (HITL) Architecture (`packages/runtime`)
+
+### Summary of Changes
+
+- Designed and implemented the complete Human-in-the-Loop (HITL) clearance and supervisor intervention architecture in `packages/runtime/src/hitl/`:
+  - **Contracts & Schemas (`hitl/contracts/`)**: `RiskLevel` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), `ApprovalTicket` metadata interface, `ApprovalResolutionInputSchema` (`decision: APPROVED | REJECTED | CANCELLED`, `operatorId`, `reason`, `modifiedArguments`), and `IApprovalStorage` interface.
+  - **Storage Adapters (`hitl/storage/`)**: `MemoryApprovalStorage` for development and ephemeral tests, and `PostgresApprovalStorage` targeting the relational `approvals` table (`0002_messages_and_tools.sql`) with optimistic concurrency checks (`WHERE approval_id = $6 AND status = 'PENDING'`).
+  - **Policy & Risk Engine (`hitl/policy/`)**: `ApprovalPolicyConfigSchema` and `ApprovalPolicyEngine` assessing operational risk levels based on mandatory tool lists, destructive flags (`isDestructive`), tool permission tiers (`ToolPermissionLevel.DANGEROUS`), and clearance hierarchy comparisons.
+  - **Decision Engine & Expiration Sweeper (`hitl/decision/` & `hitl/watchdog/`)**: `ApprovalDecisionEngine` validating operator verdicts and modified arguments; `ApprovalWatchdog` periodic background sweeper marking stale pending tickets as `TIMED_OUT`.
+- Modularized runtime engine to preserve 250-line maximum limit (Prime Invariant 1):
+  - Extracted `AgentGraphBuilder` (`agent-graph-builder.ts`, 68 lines) to encapsulate state graph assembly.
+  - Extracted `RuntimeApprovalCoordinator` (`runtime-approval-coordinator.ts`, 160 lines) handling `resumeApprovalRun`, `cancelApprovalRun`, and `resolveApprovalRun`.
+  - Refactored `OrchestrAIRuntime` (`orchestrai-runtime.ts`, 193 lines) to delegate DAG compilation and approval coordination to dedicated modules.
+  - Integrated `ToolEvaluatorNode` with approval policy evaluation and automatic ticket creation upon clearance triggers.
+- Updated `packages/runtime/src/index.ts` to export all HITL types, schemas, and engines.
+- Verified dual ESM/CJS build with DTS declarations (`tsup`) and full monorepo typecheck across all 19 workspace projects.
+- Enforced strict testing policy: zero test files added.
+- Created phase documentation in `docs/phases/phase-11-hitl.md`.
+
+### Architectural Rationale
+
+- **Optimistic Concurrency on Approval Gates**: Multiple supervisors or automated policies might simultaneously attempt to clear or reject an approval gate. Using atomic conditional updates (`WHERE approval_id = $1 AND status = 'PENDING'`) prevents race conditions and ensures each decision is recorded exactly once.
+- **Decomposed Graph Assembly & Coordinators**: Extracting `AgentGraphBuilder` and `RuntimeApprovalCoordinator` from `OrchestrAIRuntime` prevented the master runtime from becoming a monolithic coordinator, guaranteeing that every file strictly stays under 200-220 lines with single responsibilities.
+- **Operator Parameter Overrides**: When an agent attempts an action that is slightly off-policy, rejecting and terminating the entire execution is costly. Supporting `modifiedArguments` allows operators to sanitize command parameters in-flight and let the run resume seamlessly.
+
+---
+
 ## [2026-09-19] — Phase 10: Persistence & Recovery (`packages/runtime`)
 
 ### Summary of Changes

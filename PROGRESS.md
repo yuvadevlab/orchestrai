@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 11 — Human-in-the-Loop (HITL)
-Current Feature:   Approval gates, interactive intervention, interrupt/resume
+Current Phase:     Phase 12 — Realtime Streaming Broker
+Current Feature:   SSE, WebSocket connection broker, live step streaming, Redis pub/sub bridge
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0-10, 13 Complete (100%), Phase 11 Ready
+Overall Progress:  Phase 0-11, 13 Complete (100%), Phase 12 Ready
 Last Updated:      2026-09-19
-Next Immediate:    Implement interactive HITL approval policies and supervisor override
+Next Immediate:    Implement realtime streaming gateway and WebSocket/SSE handlers in apps/realtime
 ```
 
 ---
@@ -33,7 +33,7 @@ Next Immediate:    Implement interactive HITL approval policies and supervisor o
 | **Phase 8**  | **Worker Application**               | **[x]** | `apps/worker`                   |
 | **Phase 9**  | **Events & Outbox Bus**              | **[x]** | `packages/events`               |
 | **Phase 10** | **Persistence & Recovery**           | **[x]** | `packages/runtime`              |
-| Phase 11     | Human-in-the-Loop (HITL)             |   [ ]   | `packages/runtime`              |
+| **Phase 11** | **Human-in-the-Loop (HITL)**         | **[x]** | `packages/runtime`              |
 | Phase 12     | Realtime Streaming Broker            |   [ ]   | `apps/realtime`                 |
 | **Phase 13** | **Console Dashboard UI**             | **[x]** | `apps/console`                  |
 | Phase 14     | Agent Modes (CHAT/PLAN/ACT/AUTO)     |   [ ]   | `packages/agent`                |
@@ -255,6 +255,32 @@ Next Immediate:    Implement interactive HITL approval policies and supervisor o
 - [x] Quality gates passed: `pnpm --filter @orchestrai/runtime build` and full monorepo `pnpm typecheck` (19 of 19 projects clean)
 - [x] Strict invariant adherence: 0 test cases added (per user directive) and 100% of files < 217 lines
 - [x] Phase 10 documentation (`docs/phases/phase-10-persistence.md`)
+
+---
+
+## Phase 11 Breakdown (Human-in-the-Loop Architecture)
+
+- [x] HITL approval ticket contracts & schemas (`packages/runtime/src/hitl/contracts/`):
+  - `RiskLevel` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) and `ApprovalTicket` interface
+  - `ApprovalResolutionInputSchema` (`decision: APPROVED | REJECTED | CANCELLED`, `operatorId`, `reason`, `modifiedArguments`)
+  - `IApprovalStorage` interface (`createTicket`, `getTicket`, `listPending`, `resolveTicket`, `expireStaleTickets`)
+- [x] Storage adapters (`packages/runtime/src/hitl/storage/`):
+  - `MemoryApprovalStorage` for development, ephemeral testing, and local runs
+  - `PostgresApprovalStorage` targeting relational `approvals` table with optimistic concurrency control (`WHERE approval_id = $6 AND status = 'PENDING'`)
+- [x] Policy & risk classification engine (`packages/runtime/src/hitl/policy/`):
+  - `ApprovalPolicyConfigSchema` (`defaultTimeoutMs`, `autoApproveClearance`, `alwaysRequireApprovalTools`)
+  - `ApprovalPolicyEngine` evaluating mandatory tools, destructive flags, `ToolPermissionLevel.DANGEROUS`, and clearance hierarchy
+- [x] Decision engine & watchdog sweeper (`packages/runtime/src/hitl/decision/` & `watchdog/`):
+  - `ApprovalDecisionEngine` validating operator verdicts, argument overrides, and cancellation
+  - `ApprovalWatchdog` periodic background timer marking stale pending tickets as `TIMED_OUT`
+- [x] Runtime engine modularization (`packages/runtime/src/engine/`):
+  - Extracted `AgentGraphBuilder` (`agent-graph-builder.ts`, 68 lines) to keep files strictly < 250 lines
+  - Extracted `RuntimeApprovalCoordinator` (`runtime-approval-coordinator.ts`, 160 lines) for `resumeApprovalRun`, `cancelApprovalRun`, and `resolveApprovalRun`
+  - Modularized `OrchestrAIRuntime` (`orchestrai-runtime.ts`, 193 lines)
+  - Integrated `ToolEvaluatorNode` with approval policy evaluation and automatic ticket creation
+- [x] Quality gates passed: `pnpm --filter @orchestrai/runtime build` (ESM, CJS, DTS) and full monorepo `pnpm typecheck` (19 of 19 projects clean)
+- [x] Strict invariant adherence: 0 test cases added (per user directive) and 100% of files < 220 lines
+- [x] Phase 11 documentation (`docs/phases/phase-11-hitl.md`)
 
 ---
 

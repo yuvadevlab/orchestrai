@@ -1,10 +1,11 @@
 /**
  * @file packages/runtime/src/nodes/tool-evaluator-node.ts
- * @description Permission evaluation and HITL approval detection node.
+ * @description Permission evaluation and HITL approval detection node with automated ticket creation.
  */
 
 import crypto from "node:crypto";
 import { requiresHumanApproval } from "@orchestrai/core";
+import { ApprovalStatus, ToolPermissionLevel } from "@orchestrai/shared-types";
 import type { NodeFunction } from "@/graph";
 import type { RuntimeGraphState, RuntimeNodeDependencies } from "./node.types";
 
@@ -12,7 +13,7 @@ import type { RuntimeGraphState, RuntimeNodeDependencies } from "./node.types";
  * Creates the ToolEvaluatorNode handler.
  * Evaluates in-flight tool calls and sets `pendingApprovalId` if human clearance is required.
  *
- * @param deps - Runtime dependencies (tools, permissions).
+ * @param deps - Runtime dependencies (tools, permissions, policy, storage).
  * @returns NodeFunction evaluating clearance for pending tool calls.
  */
 export function createToolEvaluatorNode(
@@ -20,12 +21,51 @@ export function createToolEvaluatorNode(
 ): NodeFunction<RuntimeGraphState> {
   return async (state: Readonly<RuntimeGraphState>): Promise<Partial<RuntimeGraphState>> => {
     const calls = state.pendingToolCalls ?? [];
+    const clearance = deps.clearance ?? ToolPermissionLevel.READ_ONLY;
 
     for (const call of calls) {
       const tool = deps.tools.get(call.toolName);
-      // If tool is classified as DANGEROUS, trigger HITL requirement
-      if (tool && requiresHumanApproval(tool.definition.permissionLevel)) {
+      if (!tool) {
+        continue;
+      }
+
+      // 1. Evaluate tool call against ApprovalPolicyEngine or fallback threshold
+      const assessment = deps.approvalPolicy
+        ? deps.approvalPolicy.evaluateToolCall(
+            call.toolName,
+            tool.definition.permissionLevel,
+            tool.definition.isDestructive,
+            clearance,
+          )
+        : {
+            requiresApproval: requiresHumanApproval(tool.definition.permissionLevel),
+            riskLevel: "HIGH" as const,
+            timeoutMs: 900_000,
+            rationale: `Tool "${call.toolName}" requires human clearance`,
+          };
+
+      // 2. If clearance required, generate ticket and pause execution
+      if (assessment.requiresApproval) {
         const approvalId = crypto.randomUUID();
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + assessment.timeoutMs);
+
+        // Persist ticket into storage if an adapter was provided
+        if (deps.approvalStorage) {
+          await deps.approvalStorage.createTicket({
+            approvalId,
+            executionId: state.executionId,
+            stepIndex: 0,
+            toolName: call.toolName,
+            toolArguments: (call.arguments as Record<string, unknown>) ?? {},
+            riskLevel: assessment.riskLevel,
+            rationale: assessment.rationale,
+            status: ApprovalStatus.PENDING,
+            requestedAt: now,
+            expiresAt,
+          });
+        }
+
         return {
           pendingApprovalId: approvalId,
         };
