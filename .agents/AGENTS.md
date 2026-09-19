@@ -34,6 +34,9 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, a local-first, modul
    - Commits must pass `commitlint` (format: `<type>(<scope>): <subject>`).
    - Pre-commit hooks run `lint-staged` with zero ESLint warnings (`--max-warnings=0`).
    - Typechecks must pass: `pnpm typecheck`.
-5. **Continuous Session Continuity**:
+5. **Phase Implementation Testing Policy (Strict)**:
+   - While implementing roadmap phases, **DO NOT** write or implement test cases (unit tests, e2e tests, integration tests) or Storybook stories unless explicitly instructed by the user.
+   - Focus strictly on production contracts, domain logic, schemas, adapters, state machines, and UI components.
+6. **Continuous Session Continuity**:
    - Leave the codebase in an unambiguous, continuation-ready state at the end of every session.
    - Always update [`PROGRESS.md`](PROGRESS.md) and log in [`IMPLEMENTATION-LOG.md`](IMPLEMENTATION-LOG.md).

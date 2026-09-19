@@ -2,6 +2,39 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## [2026-09-19] — Phase 9: Events & Outbox Bus (`@orchestrai/events`)
+
+### Summary of Changes
+
+- Scaffolded dedicated `@orchestrai/events` package with dual ESM/CJS build and TypeScript DTS declarations via `tsup`.
+- Created strongly-typed Zod payload schemas in `src/contracts/event-payloads.ts` for all domain events across the platform:
+  - `ExecutionCreatedPayloadSchema`, `ExecutionStartedPayloadSchema`, `ExecutionCompletedPayloadSchema`, `ExecutionFailedPayloadSchema`, `ExecutionCancelledPayloadSchema`.
+  - `StepStartedPayloadSchema`, `StepCompletedPayloadSchema`.
+  - `ToolCalledPayloadSchema`, `ToolCompletedPayloadSchema`.
+  - `ApprovalRequestedPayloadSchema`, `ApprovalResolvedPayloadSchema`.
+- Implemented `createDomainEvent()` factory helper enforcing RFC 4122 UUIDv4 event IDs, default timestamps, and Zod envelope validation.
+- Defined decoupling interfaces in `src/contracts/event-bus.interface.ts`: `IEventPublisher`, `IEventSubscriber`, and `IEventBus`.
+- Implemented asynchronous in-memory event bus (`MemoryEventBus`) supporting exact event type matching, wildcard (`*`) catch-all topics, and isolated error boundaries preventing faulty subscriber callbacks from crashing publishers.
+- Built durable Redis Streams transport subsystem in `src/redis/`:
+  - `RedisStreamPublisherConfigSchema` & `RedisStreamConsumerConfigSchema` with configurable stream keys, buffer limits, and consumer group settings.
+  - `serializeStreamEvent` & `deserializeStreamEvent`: High-throughput mapping between `DomainEventEnvelope` and Redis Stream entry hash fields with metadata headers (`eventType`, `eventId`, `executionId`).
+  - `RedisStreamPublisher`: Append-only publisher utilizing Redis `XADD` with approximate trimming (`MAXLEN ~`) for $O(1)$ memory bounds.
+  - `RedisStreamConsumer`: Consumer group daemon using `MKSTREAM`, `XREADGROUP`, and manual `XACK` acknowledgment for resilient at-least-once stream processing.
+- Implemented Transactional Outbox subsystem in `src/outbox/`:
+  - `IOutboxStorage` contract and `OutboxRecord` with full status lifecycle (`PENDING` -> `PROCESSING` -> `PUBLISHED` / `FAILED`) and retry count tracking.
+  - `MemoryOutboxStorage`: Local-first, concurrent in-memory storage adapter with atomic batch claiming and retry backoff.
+  - `OutboxPoller`: Asynchronous background sweeper that polls the outbox, forwards pending records via `IEventPublisher`, and updates outbox status.
+- Added strict agent rule across `.agents/AGENTS.md`, `.agents/rules/00-core-invariants.md`, and root `AGENTS.md`: "While implementing roadmap phases, DO NOT implement test cases (unit, e2e, integration) or Storybook stories until explicitly requested by the user."
+- Created comprehensive phase documentation in `docs/phases/phase-09-events.md`.
+- Maintained zero line-count violations across all 16 files (< 160 lines each).
+- Monorepo quality gates verified: `pnpm --filter @orchestrai/events build` and `pnpm typecheck` pass across all 19 workspace packages/apps.
+
+### Architectural Rationale
+
+- **Dual-Write Safety via Outbox**: Combining state mutations with event persistence in a single transactional unit guarantees events are never lost if external message brokers temporarily disconnect.
+- **Redis Streams Consumer Groups**: Enables horizontal scaling of event processors with individual consumer offsets and automated message redelivery for stalled consumers.
+- **Strict Decoupling via Core Interfaces**: Components publish against `IEventPublisher` without coupling to whether events are routed to memory, Redis Streams, or upcoming Kafka partitions.
+
 ---
 
 ## [2026-09-19] — Phase 8: Worker Application (`apps/worker`)
