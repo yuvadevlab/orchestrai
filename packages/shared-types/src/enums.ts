@@ -182,4 +182,6 @@ export type ErrorCode =
   /** Background queue failure or job dispatching error */
   | "QUEUE_ERROR"
   /** Queue is saturated and rejecting non-critical tasks */
-  | "QUEUE_BACKPRESSURE";
+  | "QUEUE_BACKPRESSURE"
+  /** Background worker task processing failure or lifecycle crash */
+  | "WORKER_ERROR";

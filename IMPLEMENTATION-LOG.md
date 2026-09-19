@@ -4,6 +4,41 @@ This log records completed milestones, architectural decisions, and session hand
 
 ---
 
+## [2026-09-19] — Phase 8: Worker Application (`apps/worker`)
+
+### Summary of Changes
+
+- Scaffolded dedicated `@orchestrai/logger` package (`packages/logger/`) modeled on FinAI's logger with ANSI color formatting, configurable severity levels, file persistence, and stream-direct output (`process.stdout`/`process.stderr`) eliminating ESLint `no-console` warnings.
+- Created Zod-validated environment config schema (`WorkerConfigSchema`, `loadWorkerConfig`) managing Redis settings, concurrency limits, and timeouts.
+- Built domain job handlers in `apps/worker/src/jobs/`:
+  - `agent-job.handler`: Executes `@orchestrai/runtime` DAG execution graphs, handles step updates, and extracts assistant response text.
+  - `document-job.handler`: Document ingestion, parsing, and chunking pipeline stub prepared for Phase 16 RAG.
+  - `evaluation-job.handler`: Offline benchmark and evaluation suite runner stub prepared for Phase 26.
+  - `maintenance-job.handler`: Inspects dead-letter queue entries, stale task cleanup, and runtime memory diagnostics.
+- Implemented BullMQ job processors in `apps/worker/src/processors/`:
+  - `agent-execution.processor`: Handles agent runs with progress tracking (`job.updateProgress`) and error wrapping.
+  - `tool-execution.processor`: Offloads detached tools with `ToolRegistry` and `ToolExecutionContext`.
+  - `dead-letter.processor`: Forensic payload capture and operator alerting.
+- Built worker daemon hierarchy in `apps/worker/src/workers/`:
+  - `BaseWorker`: Abstract lifecycle wrapper around BullMQ `Worker` standardizing event telemetry (`completed`, `failed`, `stalled`, `error`), pause, resume, and close.
+  - `AgentExecutionWorker`, `ToolExecutionWorker`, `DeadLetterWorker`: Specialized workers consuming dedicated queues from `QUEUE_NAMES`.
+  - `WorkerManager`: Central coordinator managing multi-worker lifecycles (`pauseAll`, `resumeAll`, `stopAll`, `getStatuses`).
+- Implemented dependency injection container (`createWorkerContainer`) wiring Redis connections, ToolRegistry, ModelRegistry, and WorkerManager.
+- Built two-stage graceful shutdown coordinator (`registerProcessLifecycle`) with `SIGTERM`/`SIGINT` traps:
+  - Stage 1: Pauses workers to halt pulling of new jobs.
+  - Stage 2: Awaits in-flight tasks up to configurable timeout before closing Redis connections.
+- Integrated `WorkerError` domain error into `@orchestrai/core` and `ErrorCode` in `@orchestrai/shared-types`.
+- Created comprehensive phase documentation in `docs/phases/phase-08-worker.md`.
+- Maintained zero line-count violations across all 24 files (< 165 lines each).
+
+### Architectural Rationale
+
+- **Decoupled Worker Architecture**: Isolating long-running LLM inference and multi-step tool loops in dedicated worker processes prevents HTTP request thread starvation in API services.
+- **Two-Stage Drain Protocol**: Halting new job ingestion via `worker.pause()` before closing prevents job aborts during rolling deployments and container terminations.
+- **Console-Free Production Logging**: Direct standard stream writes (`process.stdout`/`process.stderr`) provide high-throughput, non-blocking structured logging while maintaining strict zero-warning ESLint gates.
+
+---
+
 ## [2026-09-19] — Phase 7: Queue & BullMQ Producers (`@orchestrai/queue`)
 
 ### Summary of Changes

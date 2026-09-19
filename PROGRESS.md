@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 8 — Worker Application
-Current Feature:   Background worker process, queue consumers, job processors
+Current Phase:     Phase 9 — Event Architecture
+Current Feature:   Domain events, Redis Streams, Transactional Outbox consumer
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0-7 Complete (100%), Phase 8 Ready
+Overall Progress:  Phase 0-8 Complete (100%), Phase 9 Ready
 Last Updated:      2026-09-19
-Next Immediate:    Scaffold apps/worker — BullMQ workers, job execution loop, runtime bridge
+Next Immediate:    Scaffold packages/events — Redis Streams publisher/subscriber, Outbox bus
 ```
 
 ---
@@ -30,7 +30,7 @@ Next Immediate:    Scaffold apps/worker — BullMQ workers, job execution loop, 
 | **Phase 5** | **Runtime & LangGraph Execution**    | **[x]** | `packages/runtime`              |
 | **Phase 6** | **Database & PostgreSQL Schemas**    | **[x]** | `infrastructure/postgres`       |
 | **Phase 7** | **Queue & BullMQ Producers**         | **[x]** | `packages/queue`                |
-| Phase 8     | Worker Application                   |   [ ]   | `apps/worker`                   |
+| **Phase 8** | **Worker Application**               | **[x]** | `apps/worker`                   |
 | Phase 9     | Events & Outbox Bus                  |   [ ]   | `packages/events`               |
 | Phase 10    | Persistence & Recovery               |   [ ]   | `packages/runtime`              |
 | Phase 11    | Human-in-the-Loop (HITL)             |   [ ]   | `packages/runtime`              |
@@ -181,3 +181,29 @@ Next Immediate:    Scaffold apps/worker — BullMQ workers, job execution loop, 
 - [x] Full integration with `OrchestrAIError` hierarchy (`QueueError`, `QueueBackpressureError`, `ValidationError`)
 - [x] Zero file line-count violations (all files < 170 lines) with complete JSDoc
 - [x] Phase 7 documentation (`docs/phases/phase-07-queue.md`)
+
+---
+
+## Phase 8 Breakdown
+
+- [x] `apps/worker` application configured with build scripts and TS 6 tooling
+- [x] Dedicated `@orchestrai/logger` package with colored output, context tags, file persistence, and zero console warnings
+- [x] Environment configuration validation with Zod (`WorkerConfigSchema`, `loadWorkerConfig`)
+- [x] Job handlers:
+  - `agent-job.handler`: Executes `@orchestrai/runtime` DAG execution loop, checkpointing, and output extraction
+  - `document-job.handler`: Text extraction and chunking pipeline stub for Phase 16 RAG
+  - `evaluation-job.handler`: Offline benchmark and evaluation suite stub for Phase 26
+  - `maintenance-job.handler`: DLQ inspection, stale record cleanup, and runtime memory diagnostics
+- [x] BullMQ processors:
+  - `agent-execution.processor`: Progress reporting (10% -> 100%) and error boundaries
+  - `tool-execution.processor`: Detached tool execution with `ToolExecutionContext` and `ToolRegistry`
+  - `dead-letter.processor`: Forensic payload capture and operational alerting
+- [x] Worker daemons:
+  - `BaseWorker`: Lifecycle management, event telemetry (`completed`, `failed`, `stalled`, `error`), pause/resume/close
+  - `AgentExecutionWorker`, `ToolExecutionWorker`, `DeadLetterWorker`
+  - `WorkerManager`: Multi-worker coordination (`pauseAll`, `resumeAll`, `stopAll`, `getStatuses`)
+- [x] DI Service container (`createWorkerContainer`) wiring Redis, ToolRegistry, ModelRegistry, and WorkerManager
+- [x] Two-stage graceful shutdown coordinator (`registerProcessLifecycle`) with `SIGTERM`/`SIGINT` traps and in-flight job drain
+- [x] Zero file line-count violations (all 23 files < 165 lines) with comprehensive JSDoc
+- [x] Removed placeholder `.gitkeep`
+- [x] Phase 8 documentation (`docs/phases/phase-08-worker.md`)

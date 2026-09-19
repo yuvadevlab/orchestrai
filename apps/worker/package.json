@@ -1,0 +1,35 @@
+{
+  "name": "@orchestrai/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Background task worker engine for asynchronous agent and tool execution in OrchestrAI",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/agent": "workspace:*",
+    "@orchestrai/core": "workspace:*",
+    "@orchestrai/logger": "workspace:*",
+    "@orchestrai/models": "workspace:*",
+    "@orchestrai/queue": "workspace:*",
+    "@orchestrai/runtime": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "@orchestrai/tools": "workspace:*",
+    "bullmq": "^6.3.6",
+    "dotenv": "^16.4.7",
+    "ioredis": "^6.0.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}
