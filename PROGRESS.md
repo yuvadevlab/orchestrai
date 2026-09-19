@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 14 — Agent Modes (CHAT/PLAN/ACT/AUTO)
-Current Feature:   Mode transitions, plan-and-solve loops, auto-execution guards
+Current Phase:     Phase 15 — Memory Systems (Episodic/Semantic)
+Current Feature:   Conversation memory, working memory, episodic & semantic vector retrieval
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phases 0-13 Complete (100%), Phase 14 Ready
+Overall Progress:  Phases 0-14 Complete (100%), Phase 15 Ready
 Last Updated:      2026-09-19
-Next Immediate:    Implement Agent Modes and execution loops in packages/agent
+Next Immediate:    Implement controlled memory systems in packages/memory
 ```
 
 ---
@@ -36,7 +36,7 @@ Next Immediate:    Implement Agent Modes and execution loops in packages/agent
 | **Phase 11** | **Human-in-the-Loop (HITL)**         | **[x]** | `packages/runtime`              |
 | **Phase 12** | **Realtime Streaming Broker**        | **[x]** | `apps/realtime`                 |
 | **Phase 13** | **Console Dashboard UI**             | **[x]** | `apps/console`                  |
-| Phase 14     | Agent Modes (CHAT/PLAN/ACT/AUTO)     |   [ ]   | `packages/agent`                |
+| **Phase 14** | **Agent Modes (CHAT/PLAN/ACT/AUTO)** | **[x]** | `packages/agent`                |
 | Phase 15     | Memory Systems (Episodic/Semantic)   |   [ ]   | `packages/memory`               |
 | Phase 16     | RAG & Vector Retrieval               |   [ ]   | `packages/rag`                  |
 | Phase 17     | API Gateway                          |   [ ]   | `apps/gateway`                  |
@@ -340,3 +340,32 @@ Next Immediate:    Implement Agent Modes and execution loops in packages/agent
 - [x] ESLint `max-lines` (250) and `max-len` (100) rules enforced across monorepo
 - [x] Scoped Tailwind linting configured, verified clean across all packages and apps with 0 errors and 0 warnings
 - [x] Monorepo-wide typecheck (`pnpm typecheck`) and build (`pnpm build`) passing
+
+---
+
+## Phase 14 Breakdown (Agent Modes: CHAT / PLAN / ACT / AUTO)
+
+- [x] Core Operating Modes and Invariant:
+  - `CHAT`: Zero external side-effects; pure conversational dialogue with strict blocking of mutation tools
+  - `PLAN`: Read-only exploration and inspection tools allowed (`ToolPermissionLevel.READ_ONLY`), enforcing structured task deconstruction
+  - `ACT`: Autonomous tool execution loop with authorized mutations governed by operator clearance tiers and HITL safety gates
+  - `AUTO`: Application-controlled routing dynamically selecting the appropriate operational mode
+  - Core Invariant: "The LLM proposes behavior; the application enforces permissions and mode constraints." Mode is not a security boundary on its own; authorization remains authoritative
+- [x] Structured Planning Engine (`packages/agent/src/modes/plan/`):
+  - `plan.schema.ts`: Zod schemas for `PlanStep` (`id`, `title`, `description`, `toolTarget`, `dependencies`, `status`, `verificationCriteria`), `PlanStepStatus`, and `Plan`
+  - `plan-parser.ts`: Extracts structured plans from model outputs across Markdown JSON blocks, XML `<plan>` tags, or raw payloads
+  - `plan-tracker.ts`: Tracks plan execution state, dependency resolution, step state progression (`PENDING` -> `IN_PROGRESS` -> `COMPLETED`), and overall completion percentage
+- [x] Mode Constraint Enforcement (`packages/agent/src/modes/enforcement/`):
+  - `mode-constraint.types.ts`: `ModeCheckResult` and `ModeEnforcerOptions`
+  - `mode-constraint-enforcer.ts`: Evaluates proposed tool calls before dispatch, guaranteeing that an LLM cannot execute tools forbidden by its active mode
+- [x] Application-Controlled Dynamic Mode Routing (`packages/agent/src/modes/routing/`):
+  - `mode-router.interface.ts`: `IModeRouter` and `ModeRoutingContext`
+  - `heuristic-mode-router.ts`: Fast, zero-latency rule-based classifier evaluating lexical markers, intent verbs, and question styles to route to `CHAT`, `PLAN`, or `ACT`
+- [x] Mode Controller & Transition History (`packages/agent/src/modes/controller/`):
+  - `mode-controller.ts`: Manages current operational mode, tracks transition audit trail (`ModeTransitionRecord`), and invokes listeners
+- [x] Agent Loop & Tool Execution Modularization (`packages/agent/src/loop/`):
+  - `step-tool-executor.ts`: Extracted modular tool execution handler enforcing loop detection, mode constraints, HITL gates, and sandbox runs (< 120 lines)
+  - `agent-loop.ts`: Integrated mode-filtered tool lists, dynamic AUTO mode routing, plan extraction, and step execution (< 175 lines)
+- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 21 workspace projects
+- [x] Zero file line-count violations (all 34 files in `packages/agent/src/` < 175 lines) with comprehensive JSDoc
+- [x] Phase 14 documentation (`docs/phases/phase-14-modes.md`)

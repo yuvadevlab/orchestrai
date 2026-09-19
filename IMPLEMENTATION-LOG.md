@@ -2,6 +2,42 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-19 — Phase 14: Agent Modes (CHAT / PLAN / ACT / AUTO)
+
+### Completed Work
+
+- Established core operational modes in `packages/agent` adhering to the invariant: _"The LLM proposes behavior; the application enforces permissions and mode constraints."_
+- Implemented structured planning engine (`packages/agent/src/modes/plan/`):
+  - `plan.schema.ts`: Zod schemas for `PlanStep` (`id`, `title`, `description`, `toolTarget`, `dependencies`, `status`, `verificationCriteria`), `PlanStepStatus`, and `Plan`.
+  - `plan-parser.ts`: Parses structured plans across JSON code blocks, XML `<plan>` tags, or raw payloads.
+  - `plan-tracker.ts`: Tracks plan execution state, dependency satisfaction, and completion percentages.
+- Implemented mode capability and constraint enforcement (`packages/agent/src/modes/enforcement/`):
+  - `mode-constraint.types.ts`: `ModeCheckResult` and `ModeEnforcerOptions`.
+  - `mode-constraint-enforcer.ts`: Intercepts proposed tool calls, ensuring `CHAT` permits no side-effects and `PLAN` strictly permits only `READ_ONLY` exploration.
+- Implemented application-controlled mode routing (`packages/agent/src/modes/routing/`):
+  - `mode-router.interface.ts`: `IModeRouter` and `ModeRoutingContext`.
+  - `heuristic-mode-router.ts`: Fast, zero-latency rule-based classifier routing user intent to `CHAT`, `PLAN`, or `ACT`.
+- Implemented mode controller (`packages/agent/src/modes/controller/`):
+  - `mode-controller.ts`: Manages active mode, transitions, and transition audit history (`ModeTransitionRecord`).
+- Modularized agent loop tool execution (`packages/agent/src/loop/`):
+  - `step-tool-executor.ts`: Extracted tool call execution handler enforcing loop detection, mode constraints, HITL gates, and sandbox dispatch.
+  - `agent-loop.ts`: Integrated dynamic AUTO mode routing, mode-filtered tools, plan extraction, and step execution.
+- Verified 100% adherence to Prime Invariant 1 (all 34 files in `packages/agent/src/` < 175 lines).
+- Monorepo validation: `pnpm typecheck` passed (21 of 21 projects), `pnpm lint` passed (0 warnings), and `pnpm build` passed (12 of 12 packages).
+- Created phase documentation in `docs/phases/phase-14-modes.md`.
+- Updated `PROGRESS.md`.
+
+### Known Limitations / Stubs
+
+- LLM-based mode router can be plugged into `IModeRouter` if semantic classification beyond regex heuristics is required.
+
+### Exact Next Steps for Next Session / Continuation
+
+1. Begin **Phase 15: Memory Systems (Episodic / Semantic / Conversation / Working)** in `packages/memory`.
+2. Implement controlled memory types (`CONVERSATION`, `WORKING`, `USER_PREFERENCE`, `FACT`, `EPISODIC`, `TASK`).
+
+---
+
 ## Session: 2026-09-19 — Phase 12: Real-Time Streaming & WebSocket Server
 
 ### Completed Work
