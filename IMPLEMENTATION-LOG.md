@@ -2,6 +2,36 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-19 — Phase 12: Real-Time Streaming & WebSocket Server
+
+### Completed Work
+
+- Scaffolded standalone service application `apps/realtime` with `.env.example`, `package.json`, `tsconfig.json`, and `tsup.config.ts`.
+- Implemented Zod configuration schema (`realtime-config.ts`, `RealtimeConfigSchema`, `loadRealtimeConfig`) validating ports, host, redis, secret, heartbeat intervals, and max connections.
+- Implemented channel topic formatting/parsing utilities (`channel-topics.ts`) and WebSocket wire protocol schemas (`ws-protocol.types.ts`).
+- Created connection registry and unified client session abstraction (`client-session.ts`, `connection-registry.ts`) supporting session ID, user ID, and channel indexing with backpressure safeguards.
+- Implemented resilient Redis Pub/Sub broker (`redis-pubsub-broker.ts`) with automatic fallback to in-memory event bus.
+- Built multi-topic subscription engine (`subscription-manager.ts`) and operator room presence tracking (`presence-manager.ts`).
+- Implemented Server-Sent Events line protocol formatting (`sse-channel.ts`) and HTTP request handlers (`sse-handler.ts`).
+- Built WebSocket gateway (`ws-gateway.ts`), authenticator (`ws-authenticator.ts`), and incoming frame dispatcher (`ws-message-handler.ts`).
+- Created zero-dependency HTTP router (`http-router.ts`), master server coordinator (`realtime-server.ts`), and two-stage graceful shutdown coordinator (`lifecycle.ts`).
+- Exported `defaultLogger` from `@orchestrai/logger`.
+- Verified 100% adherence to Prime Invariant 1 (all 27 files in `apps/realtime/src/` < 180 lines).
+- Monorepo validation: `pnpm typecheck` passed (21 of 21 projects), `pnpm lint` passed (0 warnings), and `pnpm build` passed (12 of 12 packages).
+- Created phase documentation in `docs/phases/phase-12-realtime.md`.
+- Updated `PROGRESS.md`.
+
+### Known Limitations / Stubs
+
+- JWT payload decoding in `ws-authenticator.ts` extracts prefix identities as Phase 12 foundation; Phase 19/21 will introduce full RSA/HMAC verification.
+
+### Exact Next Steps for Next Session / Continuation
+
+1. Begin **Phase 14: Agent Modes (CHAT / PLAN / ACT / AUTO)** in `packages/agent`.
+2. Implement mode state transitions, plan-and-solve execution loops, and automated guardrails.
+
+---
+
 ## [2026-09-19] — Phase 11: Human-in-the-Loop (HITL) Architecture (`packages/runtime`)
 
 ### Summary of Changes
@@ -368,3 +398,5 @@ This log records completed milestones, architectural decisions, and session hand
 2. Wire up root devDependencies and verify `pnpm install` succeeds.
 3. Verify `pnpm typecheck` and `pnpm build` pass via Turborepo.
 4. Mark Phase 0 as complete `[x]` and begin Phase 1 contracts implementation.
+
+---

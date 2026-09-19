@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 12 — Realtime Streaming Broker
-Current Feature:   SSE, WebSocket connection broker, live step streaming, Redis pub/sub bridge
+Current Phase:     Phase 14 — Agent Modes (CHAT/PLAN/ACT/AUTO)
+Current Feature:   Mode transitions, plan-and-solve loops, auto-execution guards
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phase 0-11, 13 Complete (100%), Phase 12 Ready
+Overall Progress:  Phases 0-13 Complete (100%), Phase 14 Ready
 Last Updated:      2026-09-19
-Next Immediate:    Implement realtime streaming gateway and WebSocket/SSE handlers in apps/realtime
+Next Immediate:    Implement Agent Modes and execution loops in packages/agent
 ```
 
 ---
@@ -34,7 +34,7 @@ Next Immediate:    Implement realtime streaming gateway and WebSocket/SSE handle
 | **Phase 9**  | **Events & Outbox Bus**              | **[x]** | `packages/events`               |
 | **Phase 10** | **Persistence & Recovery**           | **[x]** | `packages/runtime`              |
 | **Phase 11** | **Human-in-the-Loop (HITL)**         | **[x]** | `packages/runtime`              |
-| Phase 12     | Realtime Streaming Broker            |   [ ]   | `apps/realtime`                 |
+| **Phase 12** | **Realtime Streaming Broker**        | **[x]** | `apps/realtime`                 |
 | **Phase 13** | **Console Dashboard UI**             | **[x]** | `apps/console`                  |
 | Phase 14     | Agent Modes (CHAT/PLAN/ACT/AUTO)     |   [ ]   | `packages/agent`                |
 | Phase 15     | Memory Systems (Episodic/Semantic)   |   [ ]   | `packages/memory`               |
@@ -279,8 +279,41 @@ Next Immediate:    Implement realtime streaming gateway and WebSocket/SSE handle
   - Modularized `OrchestrAIRuntime` (`orchestrai-runtime.ts`, 193 lines)
   - Integrated `ToolEvaluatorNode` with approval policy evaluation and automatic ticket creation
 - [x] Quality gates passed: `pnpm --filter @orchestrai/runtime build` (ESM, CJS, DTS) and full monorepo `pnpm typecheck` (19 of 19 projects clean)
-- [x] Strict invariant adherence: 0 test cases added (per user directive) and 100% of files < 220 lines
 - [x] Phase 11 documentation (`docs/phases/phase-11-hitl.md`)
+
+---
+
+## Phase 12 Breakdown (Real-Time Streaming Broker)
+
+- [x] Scaffold standalone `@orchestrai/realtime` service application with `package.json`, `tsconfig.json`, `tsup.config.ts`, and local `.env.example`
+- [x] Environment configuration validation with Zod (`RealtimeConfigSchema`, `loadRealtimeConfig`)
+- [x] Channel topics and WS wire protocol types (`executions:{id}`, `agents:{id}`, `presence:{id}`, `system:alerts`)
+- [x] Connection & session management:
+  - `ClientSession`: Unified session metadata abstraction across WebSocket and SSE connections with heartbeat tracking
+  - `ConnectionRegistry`: Map-indexed connection registry supporting lookups by session ID, user ID, channel topic, and backpressure guards
+- [x] Redis Pub/Sub integration:
+  - `IRedisPubSubBroker` interface defining topic publish, subscribe, unsubscribe, and listener routing
+  - `RedisPubSubBroker`: Resilient dual-client Redis Pub/Sub adapter with automatic fallback to in-memory event broker
+- [x] Subscription engine (`SubscriptionManager`):
+  - Multi-topic subscription tracking per session with topic deduplication and dynamic cleanup on disconnect
+- [x] Presence subsystem (`PresenceManager`):
+  - Connected operator tracking per execution room with join/leave detection and presence broadcast
+- [x] Server-Sent Events (SSE) streaming (`apps/realtime/src/sse/`):
+  - `sse-channel.ts`: Line-protocol formatting, keepalive comments (`: keepalive`), and multi-line data framing
+  - `sse-handler.ts`: HTTP request handlers for single-execution streams (`/api/v1/stream/executions/:id`) and global event streams (`/api/v1/stream/events`)
+- [x] WebSocket gateway subsystem (`apps/realtime/src/websocket/`):
+  - `ws-authenticator.ts`: Bearer token extraction and authentication verification
+  - `ws-message-handler.ts`: Client payload validation and action dispatching
+  - `ws-gateway.ts`: WebSocketServer lifecycle, HTTP upgrade handling on `/ws`, and periodic heartbeat sweeps
+- [x] Server coordinator & graceful shutdown (`apps/realtime/src/server/`):
+  - `http-router.ts`: Zero-dependency HTTP router handling `/health`, `/metrics`, and SSE streaming routes with CORS headers
+  - `realtime-server.ts`: Coordinates HTTP server, WebSocket gateway, Redis Pub/Sub broker, and cross-protocol fan-out
+  - `lifecycle.ts`: Two-stage graceful shutdown coordinator trapping `SIGTERM` and `SIGINT` with connection draining
+- [x] Application entrypoint (`apps/realtime/src/index.ts`): Environment bootstrapping, server start, and lifecycle registration
+- [x] Removed placeholder `.gitkeep` from `apps/realtime`
+- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 21 workspace projects
+- [x] Zero file line-count violations (all 27 files < 180 lines) with comprehensive JSDoc
+- [x] Phase 12 documentation (`docs/phases/phase-12-realtime.md`)
 
 ---
 

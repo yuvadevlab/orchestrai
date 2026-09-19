@@ -1,0 +1,32 @@
+{
+  "name": "@orchestrai/realtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "High-throughput realtime streaming broker, WebSocket event gateway, and SSE broadcaster for OrchestrAI",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/core": "workspace:*",
+    "@orchestrai/events": "workspace:*",
+    "@orchestrai/logger": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "dotenv": "^16.4.7",
+    "ioredis": "^6.0.0",
+    "ws": "^8.18.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "@types/ws": "^8.5.14",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}
