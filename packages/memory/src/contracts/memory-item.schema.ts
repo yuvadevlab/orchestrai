@@ -11,10 +11,10 @@ import { MemoryTypeSchema } from "./memory-type.schema";
  */
 export const MemoryItemSchema = z
   .object({
-    memoryId: z.string().uuid().describe("Unique identifier for this memory item"),
-    tenantId: z.string().uuid().describe("Tenant ID for multi-tenant isolation"),
-    agentId: z.string().uuid().describe("Agent ID associated with this memory"),
-    conversationId: z.string().uuid().optional().describe("Optional conversation thread ID"),
+    memoryId: z.uuid().describe("Unique identifier for this memory item"),
+    tenantId: z.uuid().describe("Tenant ID for multi-tenant isolation"),
+    agentId: z.uuid().describe("Agent ID associated with this memory"),
+    conversationId: z.uuid().optional().describe("Optional conversation thread ID"),
     memoryType: MemoryTypeSchema.describe("Classification tier of this memory"),
     content: z.string().min(1).describe("Textual payload of the memory"),
     embedding: z
@@ -31,13 +31,12 @@ export const MemoryItemSchema = z
       .max(1)
       .default(0.5)
       .describe("Importance priority score between 0.0 and 1.0"),
-    expiresAt: z
-      .string()
+    expiresAt: z.iso
       .datetime()
       .optional()
       .describe("Optional ISO timestamp for TTL-based automatic expiration"),
-    createdAt: z.string().datetime().describe("ISO timestamp when memory was created"),
-    updatedAt: z.string().datetime().describe("ISO timestamp when memory was last updated"),
+    createdAt: z.iso.datetime().describe("ISO timestamp when memory was created"),
+    updatedAt: z.iso.datetime().describe("ISO timestamp when memory was last updated"),
   })
   .strict();
 

@@ -11,15 +11,14 @@ import { MemoryTypeSchema } from "./memory-type.schema";
  */
 export const MemoryFilterSchema = z
   .object({
-    tenantId: z.string().uuid().describe("Tenant isolation scope"),
-    agentId: z.string().uuid().optional().describe("Agent isolation scope"),
-    conversationId: z.string().uuid().optional().describe("Conversation thread scope"),
+    tenantId: z.uuid().describe("Tenant isolation scope"),
+    agentId: z.uuid().optional().describe("Agent isolation scope"),
+    conversationId: z.uuid().optional().describe("Conversation thread scope"),
     memoryTypes: z
       .array(MemoryTypeSchema)
       .optional()
       .describe("Subset of memory types to retrieve"),
-    since: z
-      .string()
+    since: z.iso
       .datetime()
       .optional()
       .describe("Only return memories created after this timestamp"),
@@ -35,8 +34,8 @@ export type MemoryFilter = z.infer<typeof MemoryFilterSchema>;
  */
 export const MemorySearchQuerySchema = z
   .object({
-    tenantId: z.string().uuid().describe("Tenant scope"),
-    agentId: z.string().uuid().optional().describe("Optional agent filter"),
+    tenantId: z.uuid().describe("Tenant scope"),
+    agentId: z.uuid().optional().describe("Optional agent filter"),
     query: z.string().min(1).describe("Text search prompt"),
     embedding: z
       .array(z.number())

@@ -10,10 +10,10 @@ import { z } from "zod";
  */
 export const EpisodeRecordSchema = z
   .object({
-    episodeId: z.string().uuid().describe("Unique identifier for this episode"),
-    tenantId: z.string().uuid().describe("Tenant ID"),
-    agentId: z.string().uuid().describe("Agent ID"),
-    executionId: z.string().uuid().describe("Execution run ID"),
+    episodeId: z.uuid().describe("Unique identifier for this episode"),
+    tenantId: z.uuid().describe("Tenant ID"),
+    agentId: z.uuid().describe("Agent ID"),
+    executionId: z.uuid().describe("Execution run ID"),
     goal: z.string().min(1).describe("Target objective or instruction requested by user"),
     actionsSummary: z
       .array(z.string())
@@ -24,7 +24,7 @@ export const EpisodeRecordSchema = z
       .string()
       .optional()
       .describe("Agent reflection or retrospective analysis for future reuse"),
-    timestamp: z.string().datetime().describe("ISO timestamp when the episode finished"),
+    timestamp: z.iso.datetime().describe("ISO timestamp when the episode finished"),
   })
   .strict();
 

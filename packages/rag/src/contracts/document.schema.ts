@@ -10,9 +10,9 @@ import { z } from "zod";
  */
 export const DocumentSchema = z.object({
   /** Primary identifier for the document */
-  documentId: z.string().uuid(),
+  documentId: z.uuid(),
   /** Tenant isolation partition ID */
-  tenantId: z.string().uuid(),
+  tenantId: z.uuid(),
   /** Human-readable document title */
   title: z.string().min(1).max(255),
   /** Source location URI (file path, URL, object storage key) */
@@ -22,9 +22,9 @@ export const DocumentSchema = z.object({
   /** Structured arbitrary metadata attributes */
   metadata: z.record(z.string(), z.unknown()).default({}),
   /** Creation timestamp in ISO 8601 format */
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
   /** Last update timestamp in ISO 8601 format */
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 /**

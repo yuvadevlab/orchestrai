@@ -10,9 +10,9 @@ import { z } from "zod";
  */
 export const DocumentChunkSchema = z.object({
   /** Primary identifier for the chunk */
-  chunkId: z.string().uuid(),
+  chunkId: z.uuid(),
   /** Parent document foreign key */
-  documentId: z.string().uuid(),
+  documentId: z.uuid(),
   /** Zero-based ordinal index of the chunk within the document */
   chunkIndex: z.number().int().nonnegative(),
   /** Raw text content of the chunk */
@@ -24,7 +24,7 @@ export const DocumentChunkSchema = z.object({
   /** Chunk-level metadata tags, headers, and section attributes */
   metadata: z.record(z.string(), z.unknown()).default({}),
   /** Creation timestamp in ISO 8601 format */
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 
 /**
@@ -37,7 +37,7 @@ export type DocumentChunk = z.infer<typeof DocumentChunkSchema>;
  */
 export const CreateChunkInputSchema = z.object({
   /** Parent document identifier */
-  documentId: z.string().uuid(),
+  documentId: z.uuid(),
   /** Chunk position index */
   chunkIndex: z.number().int().nonnegative(),
   /** Text content */

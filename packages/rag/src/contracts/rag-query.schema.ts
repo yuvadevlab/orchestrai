@@ -10,9 +10,9 @@ import { z } from "zod";
  */
 export const RagFilterSchema = z.object({
   /** Optional tenant identifier filter */
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   /** Restrict retrieval to specific document IDs */
-  documentIds: z.array(z.string().uuid()).optional(),
+  documentIds: z.array(z.uuid()).optional(),
   /** Filter by document media MIME type */
   mimeType: z.string().optional(),
   /** Exact-match metadata key-value filters */
