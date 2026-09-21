@@ -404,3 +404,47 @@ Next Immediate:    Implement RAG ingestion and retrieval pipeline in packages/ra
 - [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 22 workspace projects
 - [x] Zero file line-count violations (all 26 files in `packages/memory/src/` < 195 lines) with comprehensive JSDoc
 - [x] Phase 15 documentation (`docs/phases/phase-15-memory.md`)
+
+---
+
+## Phase 16 Breakdown (RAG & Vector Retrieval Pipeline)
+
+- [x] Scaffold `@orchestrai/rag` package with `package.json`, `tsconfig.json`, `tsconfig.build.json`, and `tsup.config.ts`
+- [x] Evolutionary architecture: In-monorepo TypeScript package first with clean evolution path to Python microservice (`apps/rag`)
+- [x] Domain contracts & Zod schemas (`packages/rag/src/contracts/`):
+  - `document.schema.ts`: `Document` and `CreateDocumentInput` schemas
+  - `chunk.schema.ts`: `DocumentChunk`, `CreateChunkInput`, and `ScoredDocumentChunk`
+  - `rag-query.schema.ts`: `RagFilter`, `RagSearchQuery`, `VectorSearchOptions`, `KeywordSearchOptions`, `HybridSearchOptions`
+  - `rag-storage.interface.ts`: `IRagStorage` persistence abstraction
+- [x] Ingestion & text extraction subsystem (`packages/rag/src/ingestion/`):
+  - `extractor.interface.ts`: `ITextExtractor` and `ExtractedDocument` contracts
+  - `text-extractor.ts`: Plain text, markdown, csv, and delimited text extraction with heading-based title inference
+  - `json-extractor.ts`: Structured JSON document extraction with attribute flattening
+  - `document-ingestor.ts`: Multi-format ingestion coordinator with fallback
+- [x] Text chunking & token budgeting subsystem (`packages/rag/src/chunking/`):
+  - `chunker.interface.ts`: `ITextChunker`, `ChunkOptions`, and `TextChunkResult`
+  - `token-estimator.ts`: Fast zero-dependency token count estimator
+  - `text-chunker.ts`: Boundary-aware sliding-window chunker with sentence/paragraph splitting and configurable token overlap
+- [x] Embedding provider subsystem (`packages/rag/src/embeddings/`):
+  - `embedding-provider.interface.ts`: `IEmbeddingProvider` contract
+  - `mock-embedding-provider.ts`: Deterministic, unit-normalized 1536-dimensional embedding provider for reproducible testing and offline runs
+  - `ollama-embedding-provider.ts`: HTTP client connecting to Ollama instances (`/api/embed` and `/api/embeddings`) with timeout and error handling
+- [x] Storage engines & adapters (`packages/rag/src/storage/`):
+  - `vector-math.ts`: Pure vector cosine similarity calculations
+  - `database-runner.interface.ts`: Decoupled `IDatabaseQueryRunner` contract
+  - `memory-matchers.ts`: In-memory tenancy filtering and term density scorers
+  - `memory-rag-storage.ts`: Thread-safe in-memory vector & lexical storage adapter
+  - `postgres-row-mappers.ts`: Type-safe row mapping functions for database rows
+  - `postgres-rag-storage.ts`: PostgreSQL storage adapter targeting `documents` and `document_chunks` with pgvector `<=>` cosine distance
+- [x] Hybrid retrieval & reranking (`packages/rag/src/retrieval/` & `reranking/`):
+  - `hybrid-retriever.ts`: Reciprocal Rank Fusion (RRF, k=60) and linear score fusion combining dense vectors and sparse keywords
+  - `relevance-reranker.ts`: Multi-factor relevance reranking combining semantic similarity, lexical density, and document diversity penalties
+- [x] Context construction & citations (`packages/rag/src/context/`):
+  - `context-builder.types.ts`: `ContextCitation`, `ContextBuildOptions`, `FormattedContext`
+  - `context-builder.ts`: Assembles ranked chunks into prompt-ready markdown context strings with structured citations (`[1] Source: ...`) and token budget enforcement
+- [x] Master Facade (`packages/rag/src/pipeline/`):
+  - `rag-pipeline.ts`: End-to-end facade orchestrating `ingest`, `query`, and document lifecycle
+- [x] Added `RAG_ERROR` to `ErrorCode` in `@orchestrai/shared-types` and `RagError` to `@orchestrai/core`
+- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 23 workspace projects
+- [x] Zero file line-count violations (all 29 files in `packages/rag/src/` < 180 lines) with comprehensive JSDoc
+- [x] Phase 16 documentation (`docs/phases/phase-16-rag.md`)

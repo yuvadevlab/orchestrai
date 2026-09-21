@@ -151,3 +151,13 @@ export class ExecutionError extends OrchestrAIError<"EXECUTION_ERROR"> {
     super(message, "EXECUTION_ERROR", 500, details);
   }
 }
+
+/**
+ * Thrown when document ingestion, chunking, embedding, vector retrieval, or RAG pipeline fails.
+ * Maps to HTTP 500 Internal Server Error.
+ */
+export class RagError extends OrchestrAIError<"RAG_ERROR"> {
+  constructor(message: string, details?: unknown) {
+    super(message, "RAG_ERROR", 500, details);
+  }
+}
