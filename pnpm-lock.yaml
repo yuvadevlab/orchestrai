@@ -411,6 +411,22 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(@types/node@26.6.1)(vite@7.3.6(@types/node@26.6.1)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.1))
 
+  packages/observability:
+    dependencies:
+      '@orchestrai/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@orchestrai/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+    devDependencies:
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   packages/queue:
     dependencies:
       '@orchestrai/core':
