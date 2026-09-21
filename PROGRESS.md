@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 21 — Security & Sandboxing
-Current Feature:   Capability model, RBAC/ABAC policy engine, path jail, sandbox executor, audit trail
-Current Status:    [ ] Ready to begin
-Overall Progress:  Phases 0-20 Complete (100%), Phase 21 Ready
+Current Phase:     Phase 22 — Distributed Consistency
+Current Feature:   Idempotency deduplication, distributed lock, vector clock ordering, Saga coordinator
+Current Status:    [x] Completed
+Overall Progress:  Phases 0-22 Complete (100%)
 Last Updated:      2026-09-21
-Next Immediate:    Implement capability-based security and sandboxed tool executor in packages/tools
+Next Immediate:    Phase 23: Advanced PostgreSQL Optimizations (infrastructure/postgres)
 ```
 
 > ✅ **Env Migration Complete**: Hybrid strategy applied — root `.env` holds shared infra (DB, Redis, JWT, API keys); each `apps/*/.env` holds app-specific vars only (PORT, CORS, feature flags). Zero duplication.
@@ -46,7 +46,7 @@ Next Immediate:    Implement capability-based security and sandboxed tool execut
 | **Phase 19** | **Observability & OpenTelemetry**        | **[x]** | `packages/observability`        |
 | **Phase 20** | **Reliability Engineering & Resilience** | **[x]** | `packages/resilience`           |
 | **Phase 21** | **Security & Sandboxing**                | **[x]** | `packages/tools`                |
-| Phase 22     | Distributed Consistency                  |   [ ]   | `packages/events`               |
+| **Phase 22** | **Distributed Consistency**              | **[x]** | `packages/events`               |
 | Phase 23     | Advanced PostgreSQL Optimizations        |   [ ]   | `infrastructure/postgres`       |
 | Phase 24     | Caching Layer                            |   [ ]   | `packages/runtime`              |
 | Phase 25     | Performance & Latency Tuning             |   [ ]   | `apps/*`                        |
@@ -651,3 +651,32 @@ Next Immediate:    Implement capability-based security and sandboxed tool execut
 - [x] Monorepo quality gates: `pnpm --filter @orchestrai/tools build`, `pnpm typecheck` (27/27), `pnpm lint` (`--max-warnings=0`) all passing
 - [x] Zero file line-count violations (all files in `packages/tools/src/` strictly < 250 lines)
 - [x] Phase 21 documentation (`docs/phases/phase-21-security.md`)
+
+---
+
+## Phase 22 Breakdown (Distributed Consistency)
+
+- [x] Idempotency & Deduplication Engine (`packages/events/src/idempotency/`):
+  - `idempotency-record.schema.ts`: `IdempotencyRecord` Zod schema and `IdempotencyStatus`
+  - `idempotency-store.interface.ts`: `IIdempotencyStore` contract and `AcquireKeyResult`
+  - `memory-idempotency-store.ts`: Thread-safe memory deduplication store with lazy and background TTL sweeps
+  - `redis-idempotency-store.ts`: Distributed Redis key-value store using atomic `SETNX` with `PX` expiration
+- [x] Distributed Mutual Exclusion Locks (`packages/events/src/lock/`):
+  - `lock-options.schema.ts`: `LockOptions` Zod schema validating ttl, retry count, and retry delay
+  - `distributed-lock.interface.ts`: `IDistributedLock` contract and `LockHandle`
+  - `memory-distributed-lock.ts`: In-memory reentrant lock implementation
+  - `redis-distributed-lock.ts`: Distributed Redis lock engine using atomic Lua scripts for release and extension
+- [x] Causal Event Ordering & Vector Clocks (`packages/events/src/ordering/`):
+  - `vector-clock.types.ts`: `VectorClockMap` and `ClockComparison` enum (`EQUAL`, `BEFORE`, `AFTER`, `CONCURRENT`)
+  - `vector-clock.ts`: `VectorClock` class implementing increment, element-wise max merge, and causal precedence checks
+  - `ordered-event.schema.ts`: `OrderedDomainEvent` schema binding domain events to vector clock state
+- [x] Distributed Saga Orchestration with Compensations (`packages/events/src/saga/`):
+  - `saga.types.ts`: `SagaState`, `SagaStep`, `SagaDefinition`, and `SagaResult`
+  - `saga-execution.schema.ts`: `SagaExecutionSnapshot` Zod schema for checkpointing and auditing
+  - `saga-coordinator.ts`: Distributed Saga orchestrator executing forward steps and LIFO backward compensating transactions on failure
+- [x] Exactly-Once Processing Delivery Handler (`packages/events/src/delivery/`):
+  - `deduplicated-handler.ts`: Higher-order function `createDeduplicatedHandler` wrapping domain event handlers with `IIdempotencyStore` checks
+- [x] Package index barrel exports formatted with top-line comments
+- [x] Monorepo quality gates: `pnpm --filter @orchestrai/events build`, `pnpm typecheck` (27/27), `pnpm lint` (`--max-warnings=0`) all passing
+- [x] Zero file line-count violations (all files in `packages/events/src/` strictly < 200 lines) with comprehensive JSDoc
+- [x] Phase 22 documentation (`docs/phases/phase-22-distributed-consistency.md`)
