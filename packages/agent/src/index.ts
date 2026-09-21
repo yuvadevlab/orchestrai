@@ -22,3 +22,6 @@ export * from "./loop";
 
 // Fluent agent builder
 export * from "./builder";
+
+// Specialized agent definitions (ResearchAgent, DeveloperAgent)
+export * from "./specialized";

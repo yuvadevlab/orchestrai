@@ -7,10 +7,11 @@ import { EventStream } from "./components/event-stream";
 import { AgentOutputCard } from "./components/agent-output-card";
 import { DEMO_SCENARIOS, DEFAULT_TELEMETRY } from "./mock-data";
 import type { DemoType, ExecutionEvent } from "./types";
+import { getApiClient } from "@/lib/api-client";
 
 /**
  * Main Content View for the Agent Execution Console.
- * Orchestrates prompt submission, interactive DAG event progression, and response display.
+ * Supports interactive demo scenarios and live API gateway dispatch with SSE streaming.
  */
 export function ConsolePageContent(): React.JSX.Element {
   const [selectedDemo, setSelectedDemo] = useState<DemoType>("research");
@@ -33,27 +34,58 @@ export function ConsolePageContent(): React.JSX.Element {
     setIsRunning(false);
   };
 
-  const handleTriggerRun = (): void => {
+  const handleTriggerRun = async (): Promise<void> => {
     setIsRunning(true);
     setEvents([]);
     setResponse("");
 
-    const targetScenario = DEMO_SCENARIOS[selectedDemo];
-    let currentIndex = 0;
+    try {
+      const client = getApiClient();
+      const mockAgentId = "00000000-0000-0000-0000-000000000001";
+      const handle = await client.agents.run({
+        agent: mockAgentId,
+        input: prompt,
+      });
 
-    const interval = setInterval(() => {
-      if (currentIndex < targetScenario.events.length) {
-        const nextEvent = targetScenario.events[currentIndex];
-        if (nextEvent) {
-          setEvents((prev) => [...prev, nextEvent]);
-        }
-        currentIndex++;
-      } else {
-        clearInterval(interval);
-        setResponse(targetScenario.response);
-        setIsRunning(false);
+      const streamIterator = await handle.stream();
+
+      // Stream events from live Gateway
+      for await (const sseEvent of streamIterator) {
+        const newEvent: ExecutionEvent = {
+          id: sseEvent.id || `evt_${Date.now()}`,
+          agent: "Agent Core",
+          title: sseEvent.event,
+          detail: typeof sseEvent.data === "string" ? sseEvent.data : JSON.stringify(sseEvent.data),
+          meta: new Date().toLocaleTimeString(),
+          type: "model",
+        };
+        setEvents((prev) => [...prev, newEvent]);
       }
-    }, 600);
+
+      const finalStatus = await handle.wait();
+      setResponse(`Execution completed with status: ${finalStatus.status}`);
+    } catch {
+      // Fallback: If gateway is offline, execute simulated scenario interval
+      const targetScenario = DEMO_SCENARIOS[selectedDemo];
+      let currentIndex = 0;
+
+      const interval = setInterval(() => {
+        if (currentIndex < targetScenario.events.length) {
+          const nextEvent = targetScenario.events[currentIndex];
+          if (nextEvent) {
+            setEvents((prev) => [...prev, nextEvent]);
+          }
+          currentIndex++;
+        } else {
+          clearInterval(interval);
+          setResponse(targetScenario.response);
+          setIsRunning(false);
+        }
+      }, 500);
+      return;
+    }
+
+    setIsRunning(false);
   };
 
   return (

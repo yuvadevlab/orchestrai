@@ -2,6 +2,33 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Phases 24–29 & Live Data Integration (`packages/*` & `apps/console`)
+
+### Completed Work
+
+- Delivered core engine roadmap phases **Phase 24 through Phase 29** and connected **`apps/console`** to live Gateway backend execution via `@orchestrai/sdk`.
+- **Phase 24: Caching Layer (`packages/runtime/src/cache/`)**:
+  - `ICacheStorage` contract with Memory and Redis backends (`MemoryCacheStorage`, `RedisCacheStorage`).
+  - `StampedeProtector`: Request coalescer (single-flight execution) preventing thundering herd cache stampedes.
+- **Phase 25: Performance Engineering (`packages/runtime/src/performance/`)**:
+  - `LatencyTracker`: Quantile estimation engine computing $p_{50}$, $p_{95}$, and $p_{99}$ latency metrics.
+  - `PoolTuner`: Dynamic connection pool parameter tuning for PostgreSQL and Redis based on CPU cores.
+- **Phase 26: Evaluation Harness (`packages/eval`)**:
+  - Scaffolded new `@orchestrai/eval` package with ESM/CJS and DTS output.
+  - Zod schemas for `EvaluationDataset`, `EvaluationItem`, `BenchmarkResult`.
+  - `EvaluationRunner`: Async benchmark runner scoring tool accuracy, output matching, and latency.
+- **Phases 27 & 28: Specialized Agents (`packages/agent/src/specialized/`)**:
+  - `ResearchAgent`: Specialized web search, document retrieval, and citation synthesis agent.
+  - `DeveloperAgent`: Specialized software engineering agent for refactoring, AST inspection, and sandboxed test execution.
+- **Phase 29: Multi-Agent Orchestration (`packages/runtime/src/multi-agent/`)**:
+  - `AgentRouter`: Inter-agent task delegation and message routing bus.
+  - `SubagentCoordinator`: Hierarchical supervisor dispatching parallel sub-agent runs and merging execution results.
+- **Live System Integration (`apps/console`)**:
+  - Wired `apps/console` to Gateway SDK via `getApiClient()`.
+  - Connected prompt execution playground directly to live Gateway execution dispatch and SSE streaming with automatic fallback.
+
+---
+
 ## Session: 2026-09-21 — Phase 23: Advanced PostgreSQL Optimizations (`infrastructure/postgres`)
 
 ### Completed Work
