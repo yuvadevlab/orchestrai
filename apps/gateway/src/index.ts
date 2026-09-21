@@ -55,8 +55,8 @@ export async function bootstrap(): Promise<GatewayServer> {
   return server;
 }
 
-// Auto-start when invoked directly via Node process
-if (require.main === module || process.env.NODE_ENV !== "test") {
+// Auto-start when invoked directly in non-test environments
+if (process.env.NODE_ENV !== "test") {
   bootstrap().catch((err) => {
     defaultLogger.error("Failed to start gateway server", { error: String(err) });
     process.exit(1);

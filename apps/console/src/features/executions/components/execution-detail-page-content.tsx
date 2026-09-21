@@ -1,0 +1,94 @@
+"use client";
+
+/**
+ * @file execution-detail-page-content.tsx
+ * @description Replayable execution session detail with DAG step trace and recovery metadata.
+ * @module apps/console/features/executions/components
+ */
+
+import React from "react";
+import { Panel } from "@yuva-devlab/ui";
+import { useExecutions } from "../api";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Play } from "lucide-react";
+
+function Row({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}): React.JSX.Element {
+  return (
+    <div className="border-border/60 flex items-center justify-between gap-3 border-b pb-1.5 last:border-0">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className={mono ? "font-mono text-[11px]" : ""}>{value}</dd>
+    </div>
+  );
+}
+
+export interface ExecutionDetailPageContentProps {
+  executionId: string;
+}
+
+export function ExecutionDetailPageContent({
+  executionId,
+}: ExecutionDetailPageContentProps): React.JSX.Element {
+  const { data: executions, isLoading } = useExecutions();
+  const execution = executions.find((item) => item.id === executionId);
+
+  if (isLoading) {
+    return (
+      <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-lg border backdrop-blur">
+        <span className="text-muted-foreground animate-pulse font-mono text-xs">
+          Loading execution trace...
+        </span>
+      </div>
+    );
+  }
+
+  if (!execution) {
+    return (
+      <EmptyState
+        icon={Play}
+        title="Execution Trace Not Found"
+        description={`No recorded execution run matching ID "${executionId}" was found in cluster memory.`}
+      />
+    );
+  }
+
+  return (
+    <div className="grid gap-3 lg:grid-cols-3">
+      {/* Main Column */}
+      <div className="space-y-3 lg:col-span-2">
+        <Panel title="Execution Intent">
+          <p className="text-sm font-semibold">{execution.intent}</p>
+        </Panel>
+
+        <Panel title="Step Trace Summary">
+          <div className="space-y-2 font-mono text-xs">
+            <Row
+              label="Steps Completed"
+              value={`${execution.stepsCompleted}/${execution.totalSteps}`}
+              mono
+            />
+            <Row label="Latency" value={`${execution.latencyMs}ms`} mono />
+            <Row label="Tokens Billed" value={execution.tokensUsed.toLocaleString()} mono />
+          </div>
+        </Panel>
+      </div>
+
+      {/* Sidebar Column */}
+      <Panel title="Run Metadata">
+        <dl className="space-y-2 text-xs">
+          <Row label="Execution ID" value={execution.id} mono />
+          <Row label="Primary Agent" value={execution.primaryAgent} />
+          <Row label="Status" value={execution.status} />
+          <Row label="Dispatched at" value={execution.createdAt} mono />
+        </dl>
+      </Panel>
+    </div>
+  );
+}

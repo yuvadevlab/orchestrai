@@ -3,7 +3,7 @@
  * @description Conversation resource managing multi-turn sessions and message histories.
  */
 
-import type { Conversation, Message } from "@/types";
+import type { Conversation, Message, PaginatedList } from "@/types";
 import { ResourceBase } from "./resource-base";
 import { MessageRole } from "@orchestrai/shared-types";
 
@@ -22,6 +22,18 @@ export interface SendMessageParams {
  * Resource client for managing conversation sessions and threads.
  */
 export class ConversationsResource extends ResourceBase {
+  /**
+   * Lists active conversation sessions.
+   */
+  public async list(filter?: {
+    limit?: number;
+    cursor?: string;
+  }): Promise<PaginatedList<Conversation>> {
+    return this.http.request<PaginatedList<Conversation>>("/api/v1/conversations", {
+      params: filter,
+    });
+  }
+
   /**
    * Creates a new conversation session.
    */

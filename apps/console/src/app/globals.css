@@ -32,12 +32,44 @@
   textarea {
     letter-spacing: 0;
   }
+  button,
+  a,
+  select,
+  summary,
+  [role="button"],
+  [role="tab"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    cursor: pointer;
+  }
+  button:disabled,
+  a[aria-disabled="true"],
+  [aria-disabled="true"],
+  [type="button"]:disabled,
+  [type="submit"]:disabled {
+    cursor: not-allowed;
+  }
+  *:focus {
+    outline: none;
+  }
+  *:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--primary) 70%, white);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
   ::selection {
     background: color-mix(in oklab, var(--primary) 28%, transparent);
   }
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+  }
+  /* Breadcrumb separator icon sizing override */
+  li[data-slot="breadcrumb-separator"] svg,
+  [data-slot="breadcrumb-separator"] svg {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
   }
 }
 

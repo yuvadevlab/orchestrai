@@ -43,7 +43,7 @@ export function PageShell({
                 </BreadcrumbItem>
                 {breadcrumb ? (
                   <>
-                    <BreadcrumbSeparator />
+                    <BreadcrumbSeparator className="[&>svg]:size-3" />
                     <BreadcrumbItem>
                       <BreadcrumbPage>{breadcrumb}</BreadcrumbPage>
                     </BreadcrumbItem>

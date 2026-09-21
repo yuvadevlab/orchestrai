@@ -144,7 +144,5 @@ function main(): void {
   logInfo(`Verified ${queryResult.verifiedCount} query handbooks cleanly.`);
 }
 
-// Run main if script is executed directly
-if (require.main === module) {
-  main();
-}
+// Run main script execution
+main();
