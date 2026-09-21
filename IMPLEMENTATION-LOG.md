@@ -2,6 +2,37 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Phase 22: Distributed Consistency (`packages/events`)
+
+### Completed Work
+
+- Extended `@orchestrai/events` with distributed state consistency and idempotency primitives.
+- **Idempotency & Deduplication Subsystem** (`src/idempotency/`):
+  - `idempotency-record.schema.ts`: `IdempotencyRecord` Zod schema and `IdempotencyStatus` enum.
+  - `idempotency-store.interface.ts`: `IIdempotencyStore` contract and `AcquireKeyResult` interface.
+  - `memory-idempotency-store.ts`: Thread-safe memory deduplication store with lazy and periodic expiration.
+  - `redis-idempotency-store.ts`: Distributed Redis key-value store using atomic `SETNX` with `PX` expiration.
+- **Distributed Mutual Exclusion Locks** (`src/lock/`):
+  - `lock-options.schema.ts`: `LockOptions` Zod schema validating ttl, retry count, and retry delay.
+  - `distributed-lock.interface.ts`: `IDistributedLock` contract and `LockHandle` interface.
+  - `memory-distributed-lock.ts`: In-memory reentrant lock implementation.
+  - `redis-distributed-lock.ts`: Distributed Redis lock engine using atomic Lua scripts for release and extension.
+- **Causal Event Ordering & Vector Clocks** (`src/ordering/`):
+  - `vector-clock.types.ts`: `VectorClockMap` and `ClockComparison` enum (`EQUAL`, `BEFORE`, `AFTER`, `CONCURRENT`).
+  - `vector-clock.ts`: `VectorClock` class implementing increment, element-wise max merge, and causal precedence checks.
+  - `ordered-event.schema.ts`: `OrderedDomainEvent` schema binding domain events to vector clock state.
+- **Distributed Saga Orchestration with Compensations** (`src/saga/`):
+  - `saga.types.ts`: `SagaState`, `SagaStep`, `SagaDefinition`, and `SagaResult`.
+  - `saga-execution.schema.ts`: `SagaExecutionSnapshot` Zod schema for checkpointing and auditing.
+  - `saga-coordinator.ts`: Distributed Saga orchestrator executing forward steps and LIFO backward compensating transactions on failure.
+- **Exactly-Once Processing Delivery Handler** (`src/delivery/`):
+  - `deduplicated-handler.ts`: Higher-order function `createDeduplicatedHandler` wrapping domain event handlers with `IIdempotencyStore` checks.
+- **Package index barrel exports** formatted with top-line comments.
+- **Monorepo quality gates**: `pnpm --filter @orchestrai/events build`, `pnpm typecheck` (27/27), `pnpm lint` (`--max-warnings=0`) all passing.
+- **Documentation**: Documented in `docs/phases/phase-22-distributed-consistency.md`.
+
+---
+
 ## Session: 2026-09-21 — Environment Variable Migration (Per-App `.env` Isolation)
 
 ### Completed Work
