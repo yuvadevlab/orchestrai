@@ -83,6 +83,54 @@ This log records completed milestones, architectural decisions, and session hand
 - **Monorepo quality gates**: `pnpm --filter @orchestrai/events build`, `pnpm typecheck` (27/27), `pnpm lint` (`--max-warnings=0`) all passing.
 - **Documentation**: Documented in `docs/phases/phase-22-distributed-consistency.md`.
 
+## Session: 2026-09-21 — Console SSR Page Shell Architecture, Feature API Hooks & Mock File Purge
+
+### Completed Work
+
+- **SSR Shell Architecture Refactoring for `page.tsx` & `layout.tsx`**:
+  - Converted all Next.js route `page.tsx` files (`agents`, `executions`, `conversations`, `knowledge`, `memory`, `events`, `evaluations`, `models`, `tools`, `workflows`, `activity`, `settings`, `overview`) into lightweight Server Components / SSR wrappers rendering dedicated feature content components (e.g. `<AgentsPageContent />`, `<KnowledgePageContent />`, `<ConversationsPageContent />`, `<MemoryPageContent />`, `<EventsPageContent />`, `<EvaluationsPageContent />`).
+  - Completely purged all inline UI rendering and mock data loops out of `page.tsx` shells.
+- **Created Endpoint-Specific Feature API Hooks**:
+  - Implemented modular API hooks under each feature folder: `features/agents/api/use-agents.ts`, `features/executions/api/use-executions.ts`, `features/conversations/api/use-conversations.ts`, `features/knowledge/api/use-knowledge.ts`, `features/memory/api/use-memory.ts`, `features/events/api/use-events.ts`, `features/evaluations/api/use-evaluations.ts`, `features/models/api/use-models.ts`, `features/tools/api/use-tools.ts`, `features/workflows/api/use-workflows.ts`, `features/activity/api/use-activity.ts`, `features/overview/api/use-overview.ts`.
+  - Re-exported all feature API hooks via feature barrel `api/index.ts` files and central [`apps/console/src/api/index.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/console/src/api/index.ts) (`import { useAgents } from "@/api"`).
+- **Purged Unused Mock Files**:
+  - Deleted all static `mock-db*.ts` and `features/*/mock-*.ts` files from `apps/console/src`.
+- **Zero `any` Lint & Strict Type Gates**:
+  - Eliminated all `any` casts in API hooks and components. Enforced strict typing matching `@orchestrai/sdk` response models and `@orchestrai/shared-types`.
+  - Verified with `pnpm typecheck` — **30/30 workspace tasks passed cleanly with 0 errors**.
+
+---
+
+## Session: 2026-09-21 — Console UI Cleanups, Live API Mapping & EmptyState Guards
+
+### Completed Work
+
+- **Created Unified `EmptyState` Component**:
+  - Implemented [`apps/console/src/components/ui/empty-state.tsx`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/console/src/components/ui/empty-state.tsx) with dark cybernetic glassmorphism styling (`border-border bg-card/40 backdrop-blur rounded-lg p-8`), icon badges, font-mono captions, and optional action buttons.
+- **Created Safe `useApiData` Data Fetching Hook**:
+  - Implemented [`apps/console/src/lib/use-api-data.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/console/src/lib/use-api-data.ts) connecting Console components to Gateway endpoints via `getApiClient()` with automatic loading states, error catching, and fallback guarantees so UI layouts never crash.
+- **Cleared Static Mock Datasets**:
+  - Updated all mock dataset definitions (`mock-db-*.ts` and `features/*/mock-*.ts`) to export empty collections `[]` by default.
+- **Mapped Live Gateway APIs & Added Theme-Consistent Empty States**:
+  - Updated **Agents** (`AgentsPageContent`), **Executions** (`ExecutionsPageContent`), **Models** (`ModelsPageContent`), **Tools** (`ToolsPageContent`), **Workflows** (`WorkflowsPageContent`), **Activity** (`ActivityPageContent`), **Overview** (`OverviewGrids`), **Knowledge** (`KnowledgePage`), **Conversations** (`ConversationsPage`), **Memory** (`MemoryPage`), **Events** (`EventsPage`), and **Evaluations** (`EvaluationsPage`).
+- **Added `list()` Method to SDK Conversations Resource**:
+  - Updated [`packages/sdk/src/resources/conversations.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/sdk/src/resources/conversations.ts) to export `list()` method for querying active conversation threads.
+- **Quality Gates**:
+  - Ran `pnpm typecheck` across all 30 workspace tasks — **30/30 passed cleanly with 0 errors**.
+
+---
+
+## Session: 2026-09-21 — Gateway ESM Startup Fix
+
+### Completed Work
+
+- **Fixed Gateway `ReferenceError: module is not defined in ES module scope`**:
+  - Replaced CommonJS `require.main === module` check in [`apps/gateway/src/index.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/gateway/src/index.ts) with standard ESM `if (process.env.NODE_ENV !== "test")`.
+  - Replaced CommonJS `require.main === module` in [`infrastructure/postgres/scripts/verify-postgres-optimizations.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/infrastructure/postgres/scripts/verify-postgres-optimizations.ts).
+- **Verified Build & Quality Gates**:
+  - `pnpm --filter @orchestrai/gateway build` compiles cleanly.
+  - `pnpm typecheck` (30/30 tasks) passes with 0 warnings.
+
 ---
 
 ## Session: 2026-09-21 — Environment Variable Migration (Per-App `.env` Isolation)

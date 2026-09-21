@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Button, Badge, useTheme } from "@yuva-devlab/ui";
 import { Sun, Moon, Cpu, Zap } from "lucide-react";
 
@@ -10,6 +11,7 @@ import { Sun, Moon, Cpu, Zap } from "lucide-react";
  */
 export function TopBar(): React.JSX.Element {
   const { setTheme, resolvedTheme } = useTheme();
+  const router = useRouter();
 
   return (
     <header className="border-border bg-background/80 flex h-14 shrink-0 items-center justify-between border-b px-6 backdrop-blur-sm">
@@ -20,8 +22,8 @@ export function TopBar(): React.JSX.Element {
           className="border-primary/40 bg-primary/5 flex items-center gap-1.5 px-2.5 py-1 font-mono text-xs"
         >
           <span className="bg-primary size-2 animate-pulse rounded-full" />
-          <span className="text-primary font-semibold">4 Workers</span>
-          <span className="text-muted-foreground">· 12 jobs/s</span>
+          <span className="text-primary font-semibold">Gateway Active</span>
+          <span className="text-muted-foreground">· Local Core</span>
         </Badge>
 
         <Badge
@@ -29,7 +31,7 @@ export function TopBar(): React.JSX.Element {
           className="hidden items-center gap-1.5 px-2.5 py-1 font-mono text-xs sm:flex"
         >
           <Cpu className="text-muted-foreground size-3.5" />
-          <span>BullMQ: 0 delayed · 0 failed</span>
+          <span>Outbox Bus: Connected</span>
         </Badge>
       </div>
 
@@ -39,7 +41,7 @@ export function TopBar(): React.JSX.Element {
           variant="outline"
           size="sm"
           onClick={(): void => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-          className="h-8 gap-1.5 px-2.5 font-mono text-xs"
+          className="h-8 cursor-pointer gap-1.5 px-2.5 font-mono text-xs"
         >
           {resolvedTheme === "dark" ? (
             <>
@@ -54,7 +56,12 @@ export function TopBar(): React.JSX.Element {
           )}
         </Button>
 
-        <Button variant="default" size="sm" className="h-8 gap-1.5 text-xs font-medium">
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => router.push("/console")}
+          className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+        >
           <Zap className="size-3.5" />
           <span>New Execution</span>
         </Button>

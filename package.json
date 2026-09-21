@@ -9,7 +9,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "turbo dev --concurrency=25",
     "build": "turbo build",
     "clean": "turbo clean",
     "lint": "eslint . --max-warnings=0",
