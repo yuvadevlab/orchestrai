@@ -2,6 +2,24 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Phase 17: Public API Gateway (`apps/gateway`)
+
+### Completed Work
+
+- Established the public API Gateway service (`apps/gateway`) as the perimeter boundary shielding internal agent execution and database tiers.
+- Implemented enterprise-grade clean layering (`Routes -> Controllers -> Services`):
+  - `src/routes/`: Declarative route parameter registration (`router.ts`, `health.route.ts`, `execution.route.ts`, `conversation.route.ts`, `agent.route.ts`, `rag.route.ts`, `approval.route.ts`).
+  - `src/controllers/`: HTTP boundary handling request parsing, context passing, service invocation, and status serialization (`HealthController`, `ExecutionController`, `ConversationController`, `AgentController`, `RagController`, `ApprovalController`).
+  - `src/services/`: Pure domain orchestration logic completely decoupled from Node HTTP req/res (`ExecutionService`, `ConversationService`, `AgentService`, `RagService`, `ApprovalService`).
+- Implemented multi-tenant context extraction (`RequestContext` with `x-tenant-id`, correlation trace `x-request-id`, client IP, user identity).
+- Implemented policy middleware pipeline (`cors.middleware.ts`, `auth.middleware.ts` for API keys and Bearer tokens, `rate-limiter.ts` sliding-window limiter with RFC headers, `error.middleware.ts` global handler mapping Zod/domain errors).
+- Built comprehensive Zod v4 validation schemas and inferred DTO types (`validation/`).
+- Standardized on barrel files and monorepo path alias imports (`@/*` -> `./src/*`) across all modules.
+- Evaluated and documented rationale for native zero-dependency HTTP router over Express and NestJS (non-blocking token streaming, zero CVE footprint, <50ms cold start, pure compile-time inferred type safety).
+- Verified with full quality gates: `pnpm --filter @orchestrai/gateway build`, `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and monorepo `pnpm build` all passing with zero errors.
+- All 43 files in `apps/gateway/src/` strictly under 120 lines (limit: 250 lines) with complete JSDoc.
+- Documented in `docs/phases/phase-17-gateway.md`.
+
 ## Session: 2026-09-21 — Phase 16: RAG & Vector Retrieval (`packages/rag`)
 
 ### Completed Work

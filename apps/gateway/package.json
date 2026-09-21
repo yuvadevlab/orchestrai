@@ -1,0 +1,30 @@
+{
+  "name": "@orchestrai/gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Public API gateway boundary for OrchestrAI managing authentication, rate limiting, request validation, and service routing",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/core": "workspace:*",
+    "@orchestrai/events": "workspace:*",
+    "@orchestrai/logger": "workspace:*",
+    "@orchestrai/queue": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "dotenv": "^16.4.7",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}
