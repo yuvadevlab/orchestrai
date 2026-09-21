@@ -187,3 +187,24 @@ export type ErrorCode =
   | "WORKER_ERROR"
   /** Execution graph run encountered an unrecoverable failure or crashed state */
   | "EXECUTION_ERROR";
+
+/**
+ * Categorical tier of an agent memory item.
+ * Dictates retention, lifecycle policy, and retrieval strategies.
+ */
+export enum MemoryType {
+  /** Short-term conversational context thread */
+  CONVERSATION = "CONVERSATION",
+  /** Ephemeral scratchpad for intermediate execution state */
+  WORKING = "WORKING",
+  /** Explicit persistent user preferences, stylistic cues, and directives */
+  USER_PREFERENCE = "USER_PREFERENCE",
+  /** Verified factual assertions learned from user or tools */
+  FACT = "FACT",
+  /** Historical narrative log of past agent execution episodes */
+  EPISODIC = "EPISODIC",
+  /** Execution instructions, plans, and task templates */
+  TASK = "TASK",
+  /** System-level configuration or environmental knowledge */
+  SYSTEM = "SYSTEM",
+}

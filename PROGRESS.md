@@ -8,56 +8,56 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 15 — Memory Systems (Episodic/Semantic)
-Current Feature:   Conversation memory, working memory, episodic & semantic vector retrieval
+Current Phase:     Phase 16 — RAG & Vector Retrieval
+Current Feature:   Document ingestion, text chunking, pgvector embedding storage, hybrid search & reranking
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phases 0-14 Complete (100%), Phase 15 Ready
-Last Updated:      2026-09-19
-Next Immediate:    Implement controlled memory systems in packages/memory
+Overall Progress:  Phases 0-15 Complete (100%), Phase 16 Ready
+Last Updated:      2026-09-21
+Next Immediate:    Implement RAG ingestion and retrieval pipeline in packages/rag
 ```
 
 ---
 
 ## Master Phase Checklist
 
-| Phase        | Description                          | Status  | Target Package / App            |
-| :----------- | :----------------------------------- | :-----: | :------------------------------ |
-| **Phase 0**  | **Workspace & Foundation**           | **[x]** | Monorepo root, configs, tooling |
-| **Phase 1**  | **Core Contracts & Domain Types**    | **[x]** | `packages/core`                 |
-| **Phase 2**  | **Models & LLM Adapters**            | **[x]** | `packages/models`               |
-| **Phase 3**  | **Tools & Execution Security**       | **[x]** | `packages/tools`                |
-| **Phase 4**  | **Agent Loop & State Transitions**   | **[x]** | `packages/agent`                |
-| **Phase 5**  | **Runtime & LangGraph Execution**    | **[x]** | `packages/runtime`              |
-| **Phase 6**  | **Database & PostgreSQL Schemas**    | **[x]** | `infrastructure/postgres`       |
-| **Phase 7**  | **Queue & BullMQ Producers**         | **[x]** | `packages/queue`                |
-| **Phase 8**  | **Worker Application**               | **[x]** | `apps/worker`                   |
-| **Phase 9**  | **Events & Outbox Bus**              | **[x]** | `packages/events`               |
-| **Phase 10** | **Persistence & Recovery**           | **[x]** | `packages/runtime`              |
-| **Phase 11** | **Human-in-the-Loop (HITL)**         | **[x]** | `packages/runtime`              |
-| **Phase 12** | **Realtime Streaming Broker**        | **[x]** | `apps/realtime`                 |
-| **Phase 13** | **Console Dashboard UI**             | **[x]** | `apps/console`                  |
-| **Phase 14** | **Agent Modes (CHAT/PLAN/ACT/AUTO)** | **[x]** | `packages/agent`                |
-| Phase 15     | Memory Systems (Episodic/Semantic)   |   [ ]   | `packages/memory`               |
-| Phase 16     | RAG & Vector Retrieval               |   [ ]   | `packages/rag`                  |
-| Phase 17     | API Gateway                          |   [ ]   | `apps/gateway`                  |
-| Phase 18     | Client SDK                           |   [ ]   | `packages/sdk`                  |
-| Phase 19     | Observability & OpenTelemetry        |   [ ]   | `packages/observability`        |
-| Phase 20     | Reliability Engineering & Resilience |   [ ]   | `packages/*`                    |
-| Phase 21     | Security & Sandboxing                |   [ ]   | `packages/tools`                |
-| Phase 22     | Distributed Consistency              |   [ ]   | `packages/events`               |
-| Phase 23     | Advanced PostgreSQL Optimizations    |   [ ]   | `infrastructure/postgres`       |
-| Phase 24     | Caching Layer                        |   [ ]   | `packages/runtime`              |
-| Phase 25     | Performance & Latency Tuning         |   [ ]   | `apps/*`                        |
-| Phase 26     | Evaluation Harness                   |   [ ]   | `packages/eval`                 |
-| Phase 27     | Specialized Research Agent           |   [ ]   | `packages/agent`                |
-| Phase 28     | Specialized Developer Agent          |   [ ]   | `packages/agent`                |
-| Phase 29     | Multi-Agent Orchestration            |   [ ]   | `packages/runtime`              |
-| Phase 30     | gRPC Inter-service Layer             |   [ ]   | `apps/*`                        |
-| Phase 31     | Kafka Event Streaming                |   [ ]   | `packages/events`               |
-| Phase 32     | Distributed Execution Engine         |   [ ]   | `apps/worker`                   |
-| Phase 33     | Production Infrastructure & Docker   |   [ ]   | `infrastructure/docker`         |
-| Phase 34     | Kubernetes Helm Deployments          |   [ ]   | `infrastructure/k8s`            |
-| Phase 35     | Architecture Review & Audit          |   [ ]   | Whole System                    |
+| Phase        | Description                            | Status  | Target Package / App            |
+| :----------- | :------------------------------------- | :-----: | :------------------------------ |
+| **Phase 0**  | **Workspace & Foundation**             | **[x]** | Monorepo root, configs, tooling |
+| **Phase 1**  | **Core Contracts & Domain Types**      | **[x]** | `packages/core`                 |
+| **Phase 2**  | **Models & LLM Adapters**              | **[x]** | `packages/models`               |
+| **Phase 3**  | **Tools & Execution Security**         | **[x]** | `packages/tools`                |
+| **Phase 4**  | **Agent Loop & State Transitions**     | **[x]** | `packages/agent`                |
+| **Phase 5**  | **Runtime & LangGraph Execution**      | **[x]** | `packages/runtime`              |
+| **Phase 6**  | **Database & PostgreSQL Schemas**      | **[x]** | `infrastructure/postgres`       |
+| **Phase 7**  | **Queue & BullMQ Producers**           | **[x]** | `packages/queue`                |
+| **Phase 8**  | **Worker Application**                 | **[x]** | `apps/worker`                   |
+| **Phase 9**  | **Events & Outbox Bus**                | **[x]** | `packages/events`               |
+| **Phase 10** | **Persistence & Recovery**             | **[x]** | `packages/runtime`              |
+| **Phase 11** | **Human-in-the-Loop (HITL)**           | **[x]** | `packages/runtime`              |
+| **Phase 12** | **Realtime Streaming Broker**          | **[x]** | `apps/realtime`                 |
+| **Phase 13** | **Console Dashboard UI**               | **[x]** | `apps/console`                  |
+| **Phase 14** | **Agent Modes (CHAT/PLAN/ACT/AUTO)**   | **[x]** | `packages/agent`                |
+| **Phase 15** | **Memory Systems (Episodic/Semantic)** | **[x]** | `packages/memory`               |
+| Phase 16     | RAG & Vector Retrieval                 |   [ ]   | `packages/rag`                  |
+| Phase 17     | API Gateway                            |   [ ]   | `apps/gateway`                  |
+| Phase 18     | Client SDK                             |   [ ]   | `packages/sdk`                  |
+| Phase 19     | Observability & OpenTelemetry          |   [ ]   | `packages/observability`        |
+| Phase 20     | Reliability Engineering & Resilience   |   [ ]   | `packages/*`                    |
+| Phase 21     | Security & Sandboxing                  |   [ ]   | `packages/tools`                |
+| Phase 22     | Distributed Consistency                |   [ ]   | `packages/events`               |
+| Phase 23     | Advanced PostgreSQL Optimizations      |   [ ]   | `infrastructure/postgres`       |
+| Phase 24     | Caching Layer                          |   [ ]   | `packages/runtime`              |
+| Phase 25     | Performance & Latency Tuning           |   [ ]   | `apps/*`                        |
+| Phase 26     | Evaluation Harness                     |   [ ]   | `packages/eval`                 |
+| Phase 27     | Specialized Research Agent             |   [ ]   | `packages/agent`                |
+| Phase 28     | Specialized Developer Agent            |   [ ]   | `packages/agent`                |
+| Phase 29     | Multi-Agent Orchestration              |   [ ]   | `packages/runtime`              |
+| Phase 30     | gRPC Inter-service Layer               |   [ ]   | `apps/*`                        |
+| Phase 31     | Kafka Event Streaming                  |   [ ]   | `packages/events`               |
+| Phase 32     | Distributed Execution Engine           |   [ ]   | `apps/worker`                   |
+| Phase 33     | Production Infrastructure & Docker     |   [ ]   | `infrastructure/docker`         |
+| Phase 34     | Kubernetes Helm Deployments            |   [ ]   | `infrastructure/k8s`            |
+| Phase 35     | Architecture Review & Audit            |   [ ]   | Whole System                    |
 
 ---
 
@@ -369,3 +369,38 @@ Next Immediate:    Implement controlled memory systems in packages/memory
 - [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 21 workspace projects
 - [x] Zero file line-count violations (all 34 files in `packages/agent/src/` < 175 lines) with comprehensive JSDoc
 - [x] Phase 14 documentation (`docs/phases/phase-14-modes.md`)
+
+---
+
+## Phase 15 Breakdown (Memory Systems)
+
+- [x] Controlled Memory Principles (Section 59-60):
+  - In-monorepo evolutionary architecture: `packages/memory`
+  - Explicit categorical classifications: `CONVERSATION`, `WORKING`, `USER_PREFERENCE`, `FACT`, `EPISODIC`, `TASK`, `SYSTEM`
+  - Strict governance enforcing relevance, privacy, retention, lifecycle, and retrieval
+- [x] Domain Contracts & Schemas (`packages/memory/src/contracts/`):
+  - `memory-type.schema.ts`: Zod validation for `MemoryType`
+  - `memory-item.schema.ts`: `MemoryItem` Zod schema and `ScoredMemoryItem` interface
+  - `memory-query.schema.ts`: `MemoryFilter` and `MemorySearchQuery` schemas
+  - `memory-storage.interface.ts`: `IMemoryStorage` contract for persistent and ephemeral backends
+- [x] Storage Engines (`packages/memory/src/storage/`):
+  - `vector-math.ts`: Pure vector cosine similarity calculations (`calculateCosineSimilarity`)
+  - `memory-storage.ts`: Thread-safe, in-memory storage adapter with cosine vector search and TTL pruning
+  - `database-runner.interface.ts`: Decoupled `IDatabaseQueryRunner` contract
+  - `postgres-memory-storage.ts`: Production PostgreSQL adapter targeting `memory_items` table with pgvector `<=>` cosine distance
+- [x] Memory Subsystems (`packages/memory/src/`):
+  - `conversation/conversation-window.ts`: Token-aware sliding-window conversation memory buffer
+  - `working/working-memory.ts`: Execution-scoped scratchpad for intermediate reasoning and task variables
+  - `episodic/`:
+    - `episode.types.ts`: `EpisodeRecord` schema
+    - `episodic-recorder.ts`: Encodes and records execution runs into episodic narrative memories
+  - `semantic/semantic-search.ts`: Multi-factor hybrid relevance re-ranking combining vector similarity, inherent importance score, and half-life recency decay
+- [x] Lifecycle, Privacy & Relevance (`packages/memory/src/lifecycle/`):
+  - `relevance-filter.ts`: Rejects low-entropy pleasantries ("ok", "thanks") from polluting long-term memory
+  - `privacy-sanitizer.ts`: Redacts secrets, tokens, API keys, and sensitive credentials prior to persistence
+  - `retention-manager.ts`: Manages TTL per MemoryType and schedules automated sweeps
+- [x] Master Facade (`packages/memory/src/manager/`):
+  - `memory-manager.ts`: High-level entrypoint orchestrating `remember`, `recall`, `list`, `createWorkingMemory`, `createConversationWindow`, `recordEpisode`, and `pruneExpired`
+- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 22 workspace projects
+- [x] Zero file line-count violations (all 26 files in `packages/memory/src/` < 195 lines) with comprehensive JSDoc
+- [x] Phase 15 documentation (`docs/phases/phase-15-memory.md`)
