@@ -3,7 +3,7 @@
  * @description Advanced semantic retrieval combining vector similarity with recency decay and importance.
  */
 
-import type { IMemoryStorage, MemorySearchQuery, ScoredMemoryItem } from "../contracts";
+import type { IMemoryStorage, MemorySearchQuery, ScoredMemoryItem } from "@/contracts";
 
 /**
  * Weighting parameters for hybrid composite relevance ranking.

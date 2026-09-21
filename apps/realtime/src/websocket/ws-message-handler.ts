@@ -4,12 +4,10 @@
  */
 
 import { defaultLogger } from "@orchestrai/logger";
-import { ClientMessageSchema, ServerMessageType } from "../contracts/ws-protocol.types";
-import { ChannelTopics } from "../contracts/channel-topics";
+import { ChannelTopics, ClientMessageSchema, ServerMessageType } from "@/contracts";
+import type { ClientSession, ConnectionRegistry } from "@/connection";
+import type { SubscriptionManager } from "@/subscriptions";
 import { authenticateSession } from "./ws-authenticator";
-import type { ClientSession } from "../connection/client-session";
-import type { ConnectionRegistry } from "../connection/connection-registry";
-import type { SubscriptionManager } from "../subscriptions/subscription-manager";
 
 interface MessageHandlerDeps {
   readonly registry: ConnectionRegistry;

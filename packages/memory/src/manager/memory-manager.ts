@@ -11,17 +11,17 @@ import type {
   MemoryItem,
   MemorySearchQuery,
   ScoredMemoryItem,
-} from "../contracts";
-import { ConversationWindow, type ConversationWindowConfig } from "../conversation";
-import { WorkingMemory } from "../working";
-import { EpisodicRecorder, type EpisodeRecord } from "../episodic";
-import { SemanticSearchEngine, type RankingWeights } from "../semantic";
+} from "@/contracts";
+import { ConversationWindow, type ConversationWindowConfig } from "@/conversation";
+import { WorkingMemory } from "@/working";
+import { EpisodicRecorder, type EpisodeRecord } from "@/episodic";
+import { SemanticSearchEngine, type RankingWeights } from "@/semantic";
 import {
   PrivacySanitizer,
   RelevanceFilter,
   RetentionManager,
   type RetentionPolicyMap,
-} from "../lifecycle";
+} from "@/lifecycle";
 
 /**
  * Options configuring the master MemoryManager facade.

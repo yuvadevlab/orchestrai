@@ -4,9 +4,9 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { handleExecutionSseStream, handleGlobalSseStream } from "../sse/sse-handler";
-import type { ConnectionRegistry } from "../connection/connection-registry";
-import type { SubscriptionManager } from "../subscriptions/subscription-manager";
+import { handleExecutionSseStream, handleGlobalSseStream } from "@/sse";
+import type { ConnectionRegistry } from "@/connection";
+import type { SubscriptionManager } from "@/subscriptions";
 
 interface RouterDeps {
   readonly registry: ConnectionRegistry;

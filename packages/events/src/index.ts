@@ -29,3 +29,6 @@ export * from "./saga";
 
 // Exactly-once processing deduplication handlers
 export * from "./delivery";
+
+// Kafka stream publisher and consumer group worker
+export * from "./kafka";
