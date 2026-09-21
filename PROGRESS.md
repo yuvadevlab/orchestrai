@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 19 — Observability & OpenTelemetry
-Current Feature:   OpenTelemetry Tracing, Metrics, and Correlation SDK
+Current Phase:     Phase 20 — Reliability Engineering & Resilience
+Current Feature:   Chaos testing, circuit breakers, fallback degradation, and deadline propagation
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phases 0-18 Complete (100%), Phase 19 Ready
+Overall Progress:  Phases 0-19 Complete (100%), Phase 20 Ready
 Last Updated:      2026-09-21
-Next Immediate:    Implement OpenTelemetry SDK in packages/observability
+Next Immediate:    Implement resilience policies across workspace packages
 ```
 
 ---
@@ -41,7 +41,7 @@ Next Immediate:    Implement OpenTelemetry SDK in packages/observability
 | **Phase 16** | **RAG & Vector Retrieval**             | **[x]** | `packages/rag`                  |
 | **Phase 17** | **API Gateway**                        | **[x]** | `apps/gateway`                  |
 | **Phase 18** | **Client SDK**                         | **[x]** | `packages/sdk`                  |
-| Phase 19     | Observability & OpenTelemetry          |   [ ]   | `packages/observability`        |
+| **Phase 19** | **Observability & OpenTelemetry**      | **[x]** | `packages/observability`        |
 | Phase 20     | Reliability Engineering & Resilience   |   [ ]   | `packages/*`                    |
 | Phase 21     | Security & Sandboxing                  |   [ ]   | `packages/tools`                |
 | Phase 22     | Distributed Consistency                |   [ ]   | `packages/events`               |
@@ -526,3 +526,38 @@ Next Immediate:    Implement OpenTelemetry SDK in packages/observability
 - [x] Monorepo quality gates: `pnpm --filter @orchestrai/sdk build` (Dual ESM & CJS with full DTS), `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
 - [x] Zero file line-count violations (all 29 files in `packages/sdk/src/` < 175 lines) with comprehensive JSDoc
 - [x] Phase 18 documentation (`docs/phases/phase-18-sdk.md`)
+
+---
+
+## Phase 19 Breakdown (Observability & OpenTelemetry)
+
+- [x] Scaffold `packages/observability` with `package.json`, `tsconfig.json`, `tsconfig.build.json`, `tsup.config.ts`
+- [x] Clean separation of concerns: SDK telemetry library in `packages/observability`, deployment manifests in `infrastructure/monitoring/`
+- [x] Correlation context & W3C trace propagation (`packages/observability/src/context/`):
+  - `correlation-context.ts`: `AsyncLocalStorage`-backed ambient store for `traceId`, `spanId`, `executionId`, `tenantId`, `userId`, `correlationId`
+  - `propagation.ts`: W3C `traceparent` (`00-${traceId}-${spanId}-${flags}`) header parser, serializer, and ID generators
+- [x] Distributed tracing engine (`packages/observability/src/tracing/`):
+  - `span.types.ts`: `SpanKind`, `StatusCode`, `SpanAttributes`, `SpanEvent`, `ISpan`, `ITracer`
+  - `span.ts`: OpenTelemetry-compatible `Span` implementation with lifecycle timestamps, events, and duration tracking
+  - `span-exporter.interface.ts`: `ISpanExporter` contract
+  - `memory-exporter.ts`: In-memory span exporter for development and unit testing
+  - `otlp-exporter.ts`: Zero-dependency OTLP HTTP JSON exporter transmitting spans to OTel Collector (`:4318/v1/traces`)
+  - `tracer.ts`: Master `Tracer` with `startSpan()` and `startActiveSpan()` nesting
+- [x] Prometheus metrics engine (`packages/observability/src/metrics/`):
+  - `metric.types.ts`: `Counter`, `Gauge`, `Histogram` interfaces and sample models
+  - `metric-instruments.ts`: Concrete thread-safe Counter, Gauge, and Histogram classes
+  - `metric-registry.ts`: Registry storing metric series and label keys
+  - `standard-metrics.ts`: Pre-registered platform metrics from Section 72 (Agent, LLM, Tools, Queue, Realtime)
+  - `prometheus-serializer.ts`: Official Prometheus text exposition serializer for `/metrics` HTTP endpoints
+- [x] Sensitive data redaction & logging (`packages/observability/src/logging/`):
+  - `sensitive-data-redactor.ts`: Recursive sanitizer redacting passwords, tokens, API keys, secrets, and private credentials
+  - `log-context-enricher.ts`: Enriches structured logs with ambient `traceId`, `spanId`, and sanitized context
+- [x] Master facade (`packages/observability/src/index.ts`):
+  - Global `initObservability()`, `getTracer()`, `getMetricRegistry()`, `getStandardMetrics()`
+- [x] Monitoring infrastructure (`infrastructure/monitoring/`):
+  - `prometheus.yml`: Scrape configuration targeting Gateway (`:8000`), Realtime (`:8001`), Worker (`:9100`), and OTel Collector (`:8889`)
+  - `otel-collector-config.yml`: OpenTelemetry Collector pipelines routing OTLP traces and metrics to Prometheus and debug
+  - `docker-compose.monitoring.yml`: Local Docker Compose stack with Prometheus, Grafana, and OTel Collector
+- [x] Monorepo quality gates: `pnpm --filter @orchestrai/observability build` (Dual ESM & CJS with full DTS), `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
+- [x] Zero file line-count violations (all 20 files in `packages/observability/src/` < 140 lines) with comprehensive JSDoc
+- [x] Phase 19 documentation (`docs/phases/phase-19-observability.md`)
