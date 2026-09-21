@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 16 — RAG & Vector Retrieval
-Current Feature:   Document ingestion, text chunking, pgvector embedding storage, hybrid search & reranking
+Current Phase:     Phase 18 — Client SDK
+Current Feature:   TypeScript Client SDK (`@orchestrai/sdk`)
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phases 0-15 Complete (100%), Phase 16 Ready
+Overall Progress:  Phases 0-17 Complete (100%), Phase 18 Ready
 Last Updated:      2026-09-21
-Next Immediate:    Implement RAG ingestion and retrieval pipeline in packages/rag
+Next Immediate:    Implement Client SDK in packages/sdk
 ```
 
 ---
@@ -38,8 +38,8 @@ Next Immediate:    Implement RAG ingestion and retrieval pipeline in packages/ra
 | **Phase 13** | **Console Dashboard UI**               | **[x]** | `apps/console`                  |
 | **Phase 14** | **Agent Modes (CHAT/PLAN/ACT/AUTO)**   | **[x]** | `packages/agent`                |
 | **Phase 15** | **Memory Systems (Episodic/Semantic)** | **[x]** | `packages/memory`               |
-| Phase 16     | RAG & Vector Retrieval                 |   [ ]   | `packages/rag`                  |
-| Phase 17     | API Gateway                            |   [ ]   | `apps/gateway`                  |
+| **Phase 16** | **RAG & Vector Retrieval**             | **[x]** | `packages/rag`                  |
+| **Phase 17** | **API Gateway**                        | **[x]** | `apps/gateway`                  |
 | Phase 18     | Client SDK                             |   [ ]   | `packages/sdk`                  |
 | Phase 19     | Observability & OpenTelemetry          |   [ ]   | `packages/observability`        |
 | Phase 20     | Reliability Engineering & Resilience   |   [ ]   | `packages/*`                    |
@@ -448,3 +448,46 @@ Next Immediate:    Implement RAG ingestion and retrieval pipeline in packages/ra
 - [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 23 workspace projects
 - [x] Zero file line-count violations (all 29 files in `packages/rag/src/` < 180 lines) with comprehensive JSDoc
 - [x] Phase 16 documentation (`docs/phases/phase-16-rag.md`)
+
+---
+
+## Phase 17 Breakdown (Public API Gateway)
+
+- [x] Scaffold `apps/gateway` with `package.json`, `tsconfig.json`, `tsup.config.ts`, `.env.example`
+- [x] Clean layered architecture: `Routes -> Controllers -> Services` adhering to enterprise AI company standards
+- [x] Configuration & request context (`apps/gateway/src/config/` & `context/`):
+  - `gateway-config.schema.ts`: Zod schema validating port, host, security keys, rate limits, and shutdown timeouts
+  - `gateway-config.ts`: Environment variable parsing and defaults loader
+  - `request-context.ts`: Tenancy isolation (`x-tenant-id`), correlation trace ID (`x-request-id`), remote IP, and user identity extraction
+- [x] Security & policy middleware (`apps/gateway/src/middleware/`):
+  - `cors.middleware.ts`: CORS headers and preflight 204 response
+  - `auth.middleware.ts`: API key (`X-API-Key`) and Bearer token (`Authorization`) guard with 401 error response
+  - `rate-limiter.ts`: In-memory sliding-window rate limiter with RFC headers (`X-RateLimit-*`, `Retry-After`)
+  - `error.middleware.ts`: Global error handler mapping Zod, OrchestrAI domain errors, and JSON syntax errors
+- [x] Validation schemas & DTOs (`apps/gateway/src/validation/`):
+  - `execution.schema.ts`: `CreateExecutionDto`, `ExecutionFilterDto`, `ResumeExecutionDto`
+  - `conversation.schema.ts`: `CreateConversationDto`, `AddMessageDto`, `MessageQueryDto`
+  - `agent.schema.ts`: `CreateAgentDto`, `UpdateAgentDto`, `AgentFilterDto`
+  - `rag.schema.ts`: `IngestDocumentDto`, `QueryRagDto`
+  - `approval.schema.ts`: `ResolveApprovalDto`, `ApprovalFilterDto`
+- [x] Domain services layer (`apps/gateway/src/services/`):
+  - `execution.service.ts`: Execution dispatch, query, cancel, and resume operations
+  - `conversation.service.ts`: Multi-turn session creation and message appending
+  - `agent.service.ts`: Agent definition registration, query, and update operations
+  - `rag.service.ts`: Document ingestion and vector query orchestration
+  - `approval.service.ts`: Human-in-the-loop approval listing and resolution
+- [x] HTTP controllers layer (`apps/gateway/src/controllers/`):
+  - `health.controller.ts`: Liveness (`/health`) and readiness (`/ready`) probes
+  - `execution.controller.ts`: Execution REST HTTP request handling
+  - `conversation.controller.ts`: Conversation and messaging HTTP request handling
+  - `agent.controller.ts`: Agent management HTTP request handling
+  - `rag.controller.ts`: RAG ingestion and retrieval HTTP request handling
+  - `approval.controller.ts`: Approval ticket resolution HTTP request handling
+- [x] Routing & server orchestration (`apps/gateway/src/routes/` & `server/`):
+  - `router.ts`: Lightweight parameterized route dispatcher with URL parameter parsing (`:id`) and JSON streaming body reader
+  - `gateway-server.ts`: HTTP server orchestrating CORS -> Context -> Auth -> RateLimit -> Router pipeline
+  - `lifecycle.ts`: Graceful shutdown draining in-flight requests on SIGTERM/SIGINT
+- [x] Central barrel files and `@/*` path aliases across all gateway modules
+- [x] Monorepo quality gates: `pnpm --filter @orchestrai/gateway build`, `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` passing with zero errors
+- [x] Zero file line-count violations (all 43 files in `apps/gateway/src/` < 120 lines) with comprehensive JSDoc
+- [x] Phase 17 documentation (`docs/phases/phase-17-gateway.md`)

@@ -139,6 +139,40 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  apps/gateway:
+    dependencies:
+      '@orchestrai/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@orchestrai/events':
+        specifier: workspace:*
+        version: link:../../packages/events
+      '@orchestrai/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@orchestrai/queue':
+        specifier: workspace:*
+        version: link:../../packages/queue
+      '@orchestrai/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.1
+        version: 26.6.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   apps/realtime:
     dependencies:
       '@orchestrai/core':
