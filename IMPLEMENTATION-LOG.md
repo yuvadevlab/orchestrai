@@ -2,6 +2,38 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Phase 18: Client SDK (`packages/sdk`)
+
+### Completed Work
+
+- Established the official TypeScript client SDK (`@orchestrai/sdk`) for OrchestrAI with zero external framework dependencies.
+- Built enterprise-grade AI cost-protection and cryptographic security subsystem (`packages/sdk/src/security/`):
+  - `nonce-generator.ts`: Cryptographically secure random UUIDv4 nonces guarding against replay attacks.
+  - `hmac-signer.ts`: Web Crypto HMAC-SHA256 request signing over canonical string `(METHOD, PATH, TIMESTAMP, NONCE, CONTENT_HASH)`. The private `clientSecret` is never sent over the wire.
+  - `credential-sanitizer.ts`: Redaction helper masking auth tokens and secrets in error logs.
+- Established strongly typed error hierarchy (`packages/sdk/src/errors/`):
+  - `sdk-error.ts`: Base `OrchestrAISDKError` holding status code, domain code, and correlation request IDs.
+  - `http-errors.ts`: `AuthenticationError`, `PermissionDeniedError`, `NotFoundError`, `RateLimitError` (with `retryAfterSeconds`), `ValidationError`, `BudgetExceededError`, and `GatewayTimeoutError`.
+- Implemented resilient HTTP transport layer (`packages/sdk/src/transport/`):
+  - `retry-policy.ts`: Exponential backoff with full jitter and `Retry-After` header priority for 429/502/503/504 errors.
+  - `idempotency.ts`: Automatic `Idempotency-Key` header injection preventing duplicate LLM task dispatching.
+  - `error-mapper.ts`: Maps HTTP response bodies to specific typed SDK error instances.
+  - `http-client.ts`: Resilient Web `fetch` wrapper applying authentication, tenant isolation, tracing, and streaming.
+- Built zero-dependency streaming subsystem (`packages/sdk/src/streaming/`):
+  - `sse-parser.ts`: Line-by-line Server-Sent Events stream decoder.
+  - `stream-iterator.ts`: `AsyncIterableIterator<StreamEvent>` for native `for await (const event of ...)` loops.
+- Implemented fluent domain sub-resources (`packages/sdk/src/resources/`):
+  - `agents.ts`: `AgentsResource` with `.run()` returning a fluent `ExecutionHandle`.
+  - `execution-handle.ts`: `ExecutionHandle` providing `.stream()`, `.wait()`, `.cancel()`, and `.resume()`.
+  - `executions.ts`: `ExecutionsResource` for state inspection, polling, and control.
+  - `conversations.ts`: `ConversationsResource` for session creation and message appending.
+  - `rag.ts`: `RagResource` for document ingestion and hybrid vector queries.
+  - `approvals.ts`: `ApprovalsResource` for human-in-the-loop ticket resolution.
+- Master Client entrypoint: `OrchestrAIClient` and `createOrchestrAIClient` factory function.
+- Verified with full quality gates: `pnpm --filter @orchestrai/sdk build` (Dual ESM/CJS and DTS), `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and monorepo `pnpm build` all passing with zero errors.
+- All 29 files in `packages/sdk/src/` strictly under 175 lines (limit: 250 lines) with complete JSDoc.
+- Documented in `docs/phases/phase-18-sdk.md`.
+
 ## Session: 2026-09-21 — Phase 17: Public API Gateway (`apps/gateway`)
 
 ### Completed Work
