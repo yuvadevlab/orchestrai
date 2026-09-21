@@ -7,3 +7,5 @@ export * from "./vector-math";
 export * from "./database-runner.interface";
 export * from "./memory-storage";
 export * from "./postgres-memory-storage";
+export * from "./postgres-queries";
+export * from "./postgres-row-mappers";

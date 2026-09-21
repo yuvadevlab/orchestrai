@@ -2,6 +2,62 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Phase 16: RAG & Vector Retrieval (`packages/rag`)
+
+### Completed Work
+
+- Established the complete Retrieval-Augmented Generation (RAG) and vector retrieval subsystem in `packages/rag` adhering to Sections 61-63 specifications.
+- Adopted deliberate evolutionary architecture: high-performance TypeScript implementation with clean evolution path to Python microservice (`apps/rag`) if GPU tensor loads or Python OCR require it.
+- Added `RAG_ERROR` to `ErrorCode` union in `@orchestrai/shared-types` (extracted `error-codes.ts` to keep `enums.ts` under 180 lines) and `RagError` domain error to `@orchestrai/core`.
+- Implemented RAG domain contracts and schemas (`packages/rag/src/contracts/`):
+  - `document.schema.ts`: `Document` and `CreateDocumentInput` Zod schemas.
+  - `chunk.schema.ts`: `DocumentChunk`, `CreateChunkInput`, and `ScoredDocumentChunk` contracts.
+  - `rag-query.schema.ts`: `RagFilter`, `RagSearchQuery`, `VectorSearchOptions`, `KeywordSearchOptions`, and `HybridSearchOptions`.
+  - `rag-storage.interface.ts`: `IRagStorage` persistence interface defining document and chunk lifecycle, vector search, keyword search, and hybrid search.
+- Built multi-format document ingestion and extraction subsystem (`packages/rag/src/ingestion/`):
+  - `extractor.interface.ts`: `ITextExtractor` and `ExtractedDocument` contracts.
+  - `text-extractor.ts`: Plain text, markdown, csv, and delimited text extraction with heading-based title inference.
+  - `json-extractor.ts`: Structured JSON document extraction with attribute flattening.
+  - `document-ingestor.ts`: Multi-format ingestion coordinator with pluggable format fallback.
+- Built boundary-aware text chunking & token estimation (`packages/rag/src/chunking/`):
+  - `chunker.interface.ts`: `ITextChunker`, `ChunkOptions`, and `TextChunkResult`.
+  - `token-estimator.ts`: Fast zero-dependency token count estimator (~4 chars/token and word boundaries).
+  - `text-chunker.ts`: Boundary-aware sliding-window chunker with sentence/paragraph splitting and configurable token overlap.
+- Built embedding provider subsystem (`packages/rag/src/embeddings/`):
+  - `embedding-provider.interface.ts`: `IEmbeddingProvider` contract (`dimension`, `embedText`, `embedBatch`).
+  - `mock-embedding-provider.ts`: Deterministic, unit-normalized 1536-dimensional embedding provider for reproducible testing and offline development.
+  - `ollama-embedding-provider.ts`: HTTP client connecting to Ollama instances (`/api/embed` and `/api/embeddings`) with timeout and error handling.
+- Implemented storage backends (`packages/rag/src/storage/`):
+  - `vector-math.ts`: Pure vector cosine similarity calculation with zero-magnitude guards.
+  - `database-runner.interface.ts`: Decoupled `IDatabaseQueryRunner` contract.
+  - `memory-matchers.ts`: In-memory tenancy filtering and term density scorers.
+  - `memory-rag-storage.ts`: Thread-safe in-memory vector & lexical storage adapter with cosine vector search and keyword matching.
+  - `postgres-row-mappers.ts`: Type-safe row mapping functions for database rows.
+  - `postgres-rag-storage.ts`: PostgreSQL storage adapter targeting `documents` and `document_chunks` with pgvector `<=>` cosine distance.
+- Implemented hybrid retrieval & candidate reranking (`packages/rag/src/retrieval/` & `packages/rag/src/reranking/`):
+  - `hybrid-retriever.ts`: Reciprocal Rank Fusion (RRF, k=60) and linear score fusion combining dense vectors and sparse keywords.
+  - `relevance-reranker.ts`: Multi-factor relevance reranking combining semantic similarity, lexical density, and document diversity penalties.
+- Implemented prompt context construction with citations (`packages/rag/src/context/`):
+  - `context-builder.types.ts`: `ContextCitation`, `ContextBuildOptions`, and `FormattedContext`.
+  - `context-builder.ts`: Assembles ranked chunks into prompt-ready markdown context strings with structured citations (`[1] Source: ...`) and token budget enforcement.
+- Built unified master facade (`packages/rag/src/pipeline/`):
+  - `rag-pipeline.ts`: End-to-end facade orchestrating `ingest(rawContent, options)`, `query(options)`, and document lifecycle.
+- Verified 100% adherence to Prime Invariant 1: all 29 files in `packages/rag/src/` are strictly < 180 lines (longest file is `memory-rag-storage.ts` at 178 lines).
+- Monorepo validation: `pnpm --filter @orchestrai/rag build` passed (ESM, CJS, DTS clean), repo-wide `pnpm typecheck` passed (23 of 23 projects), `pnpm lint` passed (0 errors, 0 warnings with `--max-warnings=0`), and monorepo `pnpm build` passed (14 of 14 packages).
+- Created phase documentation in `docs/phases/phase-16-rag.md`.
+- Updated `PROGRESS.md`.
+
+### Known Limitations / Stubs
+
+- Document formats: Ingestion currently natively supports plain text, markdown, csv, and JSON; PDF and binary formats can be plugged in via custom `ITextExtractor` implementations or downstream Python extraction (`apps/rag`).
+
+### Exact Next Steps for Next Session / Continuation
+
+1. Begin **Phase 17: Gateway** in `apps/gateway`.
+2. Implement public API boundary: authentication, authorization, request validation, execution creation, and conversation/agent APIs.
+
+---
+
 ## Session: 2026-09-21 — Phase 15: Memory Systems (`packages/memory`)
 
 ### Completed Work
