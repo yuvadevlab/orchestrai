@@ -14,5 +14,8 @@ export interface IDatabaseQueryRunner {
    * @param params - Positional values mapped to query placeholders.
    * @returns Generic query result containing typed result rows.
    */
-  query<T = unknown>(sql: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
+  query<T = unknown>(
+    sql: string,
+    params?: readonly unknown[],
+  ): Promise<{ rows: T[]; rowCount?: number | null }>;
 }
