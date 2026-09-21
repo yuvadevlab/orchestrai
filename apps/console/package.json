@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@orchestrai/core": "workspace:*",
+    "@orchestrai/sdk": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
     "@yuva-devlab/tokens": "1.0.0",
     "@yuva-devlab/ui": "1.0.0",

@@ -26,3 +26,12 @@ export * from "./recovery";
 
 // Human-in-the-Loop (HITL) approval gates, policies, decision engine, and watchdog
 export * from "./hitl";
+
+// Multi-tier caching layer and stampede protection
+export * from "./cache";
+
+// Performance engineering, latency quantiles, and pool tuning
+export * from "./performance";
+
+// Multi-agent orchestration, agent router, and sub-agent coordinator
+export * from "./multi-agent";
