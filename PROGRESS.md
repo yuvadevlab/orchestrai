@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 18 — Client SDK
-Current Feature:   TypeScript Client SDK (`@orchestrai/sdk`)
+Current Phase:     Phase 19 — Observability & OpenTelemetry
+Current Feature:   OpenTelemetry Tracing, Metrics, and Correlation SDK
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phases 0-17 Complete (100%), Phase 18 Ready
+Overall Progress:  Phases 0-18 Complete (100%), Phase 19 Ready
 Last Updated:      2026-09-21
-Next Immediate:    Implement Client SDK in packages/sdk
+Next Immediate:    Implement OpenTelemetry SDK in packages/observability
 ```
 
 ---
@@ -40,7 +40,7 @@ Next Immediate:    Implement Client SDK in packages/sdk
 | **Phase 15** | **Memory Systems (Episodic/Semantic)** | **[x]** | `packages/memory`               |
 | **Phase 16** | **RAG & Vector Retrieval**             | **[x]** | `packages/rag`                  |
 | **Phase 17** | **API Gateway**                        | **[x]** | `apps/gateway`                  |
-| Phase 18     | Client SDK                             |   [ ]   | `packages/sdk`                  |
+| **Phase 18** | **Client SDK**                         | **[x]** | `packages/sdk`                  |
 | Phase 19     | Observability & OpenTelemetry          |   [ ]   | `packages/observability`        |
 | Phase 20     | Reliability Engineering & Resilience   |   [ ]   | `packages/*`                    |
 | Phase 21     | Security & Sandboxing                  |   [ ]   | `packages/tools`                |
@@ -491,3 +491,38 @@ Next Immediate:    Implement Client SDK in packages/sdk
 - [x] Monorepo quality gates: `pnpm --filter @orchestrai/gateway build`, `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` passing with zero errors
 - [x] Zero file line-count violations (all 43 files in `apps/gateway/src/` < 120 lines) with comprehensive JSDoc
 - [x] Phase 17 documentation (`docs/phases/phase-17-gateway.md`)
+
+---
+
+## Phase 18 Breakdown (Client SDK with AI Cost Protection & HMAC Signing)
+
+- [x] Scaffold `packages/sdk` with `package.json`, `tsconfig.json`, `tsconfig.build.json`, `tsup.config.ts`
+- [x] Enterprise security & HMAC request signing (`packages/sdk/src/security/`):
+  - `nonce-generator.ts`: Cryptographically secure UUIDv4 nonces for replay attack prevention
+  - `hmac-signer.ts`: Web Crypto HMAC-SHA256 signature generator over `(METHOD, PATH, TIMESTAMP, NONCE, CONTENT_HASH)`
+  - `credential-sanitizer.ts`: Masking of tokens, API keys, and client secrets in logs and errors
+- [x] Strongly-typed error hierarchy (`packages/sdk/src/errors/`):
+  - `sdk-error.ts`: Base `OrchestrAISDKError` with request ID and status code
+  - `http-errors.ts`: `AuthenticationError`, `PermissionDeniedError`, `NotFoundError`, `RateLimitError`, `ValidationError`, `BudgetExceededError`, `GatewayTimeoutError`
+- [x] Resilient HTTP transport & cost protection (`packages/sdk/src/transport/`):
+  - `retry-policy.ts`: Exponential backoff with full jitter and `Retry-After` header support
+  - `idempotency.ts`: Automatic idempotency key generation guarding against duplicate execution charges
+  - `error-mapper.ts`: Maps HTTP response bodies and status codes to typed SDK errors
+  - `http-client.ts`: Resilient Web `fetch` client managing HMAC signing, headers, timeouts, and streaming
+- [x] Streaming subsystem (`packages/sdk/src/streaming/`):
+  - `sse-parser.ts`: Zero-dependency Server-Sent Events stream decoder
+  - `stream-iterator.ts`: `AsyncIterableIterator<StreamEvent>` for native `for await (const event of ...)`
+- [x] Fluent domain resources (`packages/sdk/src/resources/`):
+  - `resource-base.ts`: Abstract base class providing transport access
+  - `agents.ts`: `AgentsResource` (`list`, `get`, `create`, `update`, `run`)
+  - `executions.ts`: `ExecutionsResource` (`get`, `list`, `cancel`, `resume`, `stream`)
+  - `execution-handle.ts`: `ExecutionHandle` fluent controller (`.stream()`, `.wait()`, `.cancel()`, `.resume()`)
+  - `conversations.ts`: `ConversationsResource` (`create`, `getMessages`, `sendMessage`)
+  - `rag.ts`: `RagResource` (`ingest`, `query`)
+  - `approvals.ts`: `ApprovalsResource` (`list`, `resolve`)
+- [x] Master Client and factory (`packages/sdk/src/client.ts` & `src/index.ts`):
+  - `OrchestrAIClient`: Top-level client with sub-resource properties
+  - `createOrchestrAIClient`: Factory helper
+- [x] Monorepo quality gates: `pnpm --filter @orchestrai/sdk build` (Dual ESM & CJS with full DTS), `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
+- [x] Zero file line-count violations (all 29 files in `packages/sdk/src/` < 175 lines) with comprehensive JSDoc
+- [x] Phase 18 documentation (`docs/phases/phase-18-sdk.md`)
