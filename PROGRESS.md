@@ -9,12 +9,14 @@
 
 ```text
 Current Phase:     Phase 21 — Security & Sandboxing
-Current Feature:   Agent security boundary, RBAC/ABAC policies, capability security, and sandboxing
+Current Feature:   Capability model, RBAC/ABAC policy engine, path jail, sandbox executor, audit trail
 Current Status:    [ ] Ready to begin
 Overall Progress:  Phases 0-20 Complete (100%), Phase 21 Ready
 Last Updated:      2026-09-21
-Next Immediate:    Implement agent security boundary and capability sandboxing
+Next Immediate:    Implement capability-based security and sandboxed tool executor in packages/tools
 ```
+
+> ✅ **Env Migration Complete**: Hybrid strategy applied — root `.env` holds shared infra (DB, Redis, JWT, API keys); each `apps/*/.env` holds app-specific vars only (PORT, CORS, feature flags). Zero duplication.
 
 ---
 
@@ -43,7 +45,7 @@ Next Immediate:    Implement agent security boundary and capability sandboxing
 | **Phase 18** | **Client SDK**                           | **[x]** | `packages/sdk`                  |
 | **Phase 19** | **Observability & OpenTelemetry**        | **[x]** | `packages/observability`        |
 | **Phase 20** | **Reliability Engineering & Resilience** | **[x]** | `packages/resilience`           |
-| Phase 21     | Security & Sandboxing                    |   [ ]   | `packages/tools`                |
+| **Phase 21** | **Security & Sandboxing**                | **[x]** | `packages/tools`                |
 | Phase 22     | Distributed Consistency                  |   [ ]   | `packages/events`               |
 | Phase 23     | Advanced PostgreSQL Optimizations        |   [ ]   | `infrastructure/postgres`       |
 | Phase 24     | Caching Layer                            |   [ ]   | `packages/runtime`              |
@@ -606,3 +608,46 @@ Next Immediate:    Implement agent security boundary and capability sandboxing
 - [x] Monorepo quality gates: `pnpm --filter @orchestrai/resilience build`, `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
 - [x] Zero file line-count violations (all 36 files in `packages/resilience/src/` strictly < 190 lines) with comprehensive JSDoc
 - [x] Phase 20 documentation (`docs/phases/phase-20-resilience.md`)
+
+---
+
+## Environment Variable Migration (Cross-Cutting)
+
+- [x] Hybrid strategy: root `.env` = shared infra & secrets; `apps/*/.env` = app-specific overrides only
+- [x] Root `.env` holds: `DATABASE_URL`, `POSTGRES_*`, `REDIS_*`, `JWT_SECRET`, all LLM provider keys
+- [x] `apps/gateway/.env`: PORT, HOST, GATEWAY_API_KEY, RATE_LIMIT_*, CORS_ORIGIN, internal service URLs, execution bounds
+- [x] `apps/realtime/.env`: PORT, HOST, CORS_ORIGINS, heartbeat/connection/rate limits
+- [x] `apps/worker/.env`: WORKER_PORT, WORKER_ID, concurrency limits, graceful shutdown timeout
+- [x] `apps/console/.env`: PORT, NEXT_PUBLIC_* vars, backend service URLs, execution bounds, telemetry flag
+- [x] Deleted stale `apps/console/src/.env` (wrong DB port 5432)
+- [x] Updated all `.env.example` files to reflect the new structure
+
+---
+
+## Phase 21 Breakdown (Security & Sandboxing)
+
+- [x] Capability-Based Security Model (`packages/tools/src/capabilities/`):
+  - `capability.types.ts`: `Capability` enum and `CapabilitySet`
+  - `capability-grant.schema.ts`: Zod schema for grants with scope constraints
+  - `capability-evaluator.ts`: Scope-aware capability grant evaluator
+- [x] RBAC / ABAC Policy Engine (`packages/tools/src/policy/`):
+  - `policy.types.ts`: `PolicyRule`, `PolicyEffect`, `PolicyContext`
+  - `policy-engine.ts`: DENY-first ordered rule evaluator
+  - `policy-store.interface.ts`: `IPolicyStore` abstraction
+  - `memory-policy-store.ts`: In-memory dev store
+- [x] Filesystem & Network Sandbox (`packages/tools/src/sandbox/`):
+  - `path-jail.ts`: Real-path symlink resolution + prefix enforcement (pre-existing from Phase 3)
+  - `network-allowlist.ts`: SSRF-prevention domain allowlist blocking private IPs, link-local, non-HTTPS
+  - `resource-quota.ts`: Per-agent quota tracker (elapsed ms, output bytes, tool call count)
+- [x] Sandboxed Execution Wrapper (`packages/tools/src/executor/`):
+  - `sandbox-context.ts`: Immutable Zod-validated per-execution security context
+  - `sandbox-executor.ts`: Full 5-layer stack: capability → policy → quota → tool → audit
+- [x] Audit Trail (`packages/tools/src/audit/`):
+  - `audit-event.schema.ts`: `SecurityAuditEvent` Zod schema
+  - `audit-logger.ts`: `AuditLogger` using `@orchestrai/logger` + `MemoryAuditStore`
+  - `audit-store.interface.ts`: `IAuditStore` contract
+- [x] `IToolRegistry` interface added to `registry/tool-registry.types.ts`
+- [x] `@orchestrai/logger` added to `packages/tools` dependencies
+- [x] Monorepo quality gates: `pnpm --filter @orchestrai/tools build`, `pnpm typecheck` (27/27), `pnpm lint` (`--max-warnings=0`) all passing
+- [x] Zero file line-count violations (all files in `packages/tools/src/` strictly < 250 lines)
+- [x] Phase 21 documentation (`docs/phases/phase-21-security.md`)

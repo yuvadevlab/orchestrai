@@ -51,3 +51,17 @@ export interface AnthropicToolFormat {
  * Ollama chat endpoint tool format (compatible with OpenAI format).
  */
 export type OllamaToolFormat = OpenAiFunctionToolFormat;
+
+/**
+ * Minimal registry interface used by SandboxExecutor.
+ * Decouples the executor from the concrete ToolRegistry class.
+ */
+export interface IToolRegistry {
+  /**
+   * Retrieves a registered tool by its name.
+   *
+   * @param name - The tool's unique name.
+   * @returns The ITool instance, or undefined if not registered.
+   */
+  get(name: string): import("../interfaces/index.js").ITool | undefined;
+}

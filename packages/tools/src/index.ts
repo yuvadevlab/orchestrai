@@ -22,3 +22,18 @@ export * from "./runner";
 
 // Built-in tool implementations
 export * from "./builtins";
+
+// Capability enum, scoped grants, and grant evaluator
+export * from "./capabilities";
+
+// DENY-first RBAC/ABAC policy engine and memory store
+export * from "./policy";
+
+// Network allowlist (SSRF) and per-execution resource quota
+export * from "./sandbox";
+
+// Immutable sandbox context and full 5-layer security stack executor
+export * from "./executor";
+
+// SecurityAuditEvent schema, AuditLogger, and IAuditStore
+export * from "./audit";

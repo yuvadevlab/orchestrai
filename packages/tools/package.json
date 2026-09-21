@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@orchestrai/core": "workspace:*",
+    "@orchestrai/logger": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
     "zod": "^4.6.5"
   },

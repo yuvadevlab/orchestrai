@@ -557,6 +557,9 @@ importers:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../core
+      '@orchestrai/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
