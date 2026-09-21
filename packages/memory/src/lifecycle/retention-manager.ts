@@ -4,7 +4,7 @@
  */
 
 import { MemoryType } from "@orchestrai/shared-types";
-import type { IMemoryStorage } from "../contracts";
+import type { IMemoryStorage } from "@/contracts";
 
 /**
  * Time-to-live policies per memory classification in milliseconds.

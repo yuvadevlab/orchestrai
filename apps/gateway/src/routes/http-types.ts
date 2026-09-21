@@ -4,7 +4,7 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { RequestContext } from "../context/request-context";
+import type { RequestContext } from "@/context";
 
 /**
  * Supported HTTP methods for gateway endpoints.

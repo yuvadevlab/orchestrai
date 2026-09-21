@@ -1,0 +1,81 @@
+name: orchestrai-stack
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: orchestrai-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: orchestrai
+      POSTGRES_PASSWORD: orchestrai_dev_password
+      POSTGRES_DB: orchestrai_dev
+    volumes:
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orchestrai -d orchestrai_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: orchestrai-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/apps.Dockerfile
+      args:
+        APP_NAME: gateway
+    container_name: orchestrai-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+      DATABASE_URL: postgresql://orchestrai:orchestrai_dev_password@postgres:5432/orchestrai_dev
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  realtime:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/apps.Dockerfile
+      args:
+        APP_NAME: realtime
+    container_name: orchestrai-realtime
+    ports:
+      - "8001:8001"
+    environment:
+      PORT: 8001
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/apps.Dockerfile
+      args:
+        APP_NAME: worker
+    container_name: orchestrai-worker
+    environment:
+      DATABASE_URL: postgresql://orchestrai:orchestrai_dev_password@postgres:5432/orchestrai_dev
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy

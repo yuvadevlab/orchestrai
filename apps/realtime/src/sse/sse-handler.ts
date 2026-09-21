@@ -5,10 +5,9 @@
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { defaultLogger } from "@orchestrai/logger";
-import { ClientSession } from "../connection/client-session";
-import { ConnectionRegistry } from "../connection/connection-registry";
-import { SubscriptionManager } from "../subscriptions/subscription-manager";
-import { ChannelTopics } from "../contracts/channel-topics";
+import { ClientSession, ConnectionRegistry } from "@/connection";
+import { SubscriptionManager } from "@/subscriptions";
+import { ChannelTopics } from "@/contracts";
 import { configureSseHeaders, sendSseEvent, sendSseKeepalive, closeSseStream } from "./sse-channel";
 
 interface SseHandlerDeps {

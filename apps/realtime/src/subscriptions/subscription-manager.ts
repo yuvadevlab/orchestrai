@@ -3,7 +3,7 @@
  * @description Manages channel topics, multiplexed room subscriptions, and fan-out dispatch.
  */
 
-import type { ConnectionRegistry } from "../connection/connection-registry";
+import type { ConnectionRegistry } from "@/connection";
 
 /**
  * Coordinates channel subscription mappings and dispatches messages to listening clients.

@@ -4,7 +4,7 @@
  */
 
 import type { IncomingMessage } from "node:http";
-import type { ConnectionRegistry } from "../connection/connection-registry";
+import type { ConnectionRegistry } from "@/connection";
 
 export interface AuthResult {
   readonly authenticated: boolean;

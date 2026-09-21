@@ -6,12 +6,11 @@
 import { WebSocketServer, WebSocket } from "ws";
 import type { Server as HttpServer, IncomingMessage } from "node:http";
 import { defaultLogger } from "@orchestrai/logger";
-import { ClientSession } from "../connection/client-session";
-import { ServerMessageType } from "../contracts/ws-protocol.types";
+import { ClientSession, ConnectionRegistry } from "@/connection";
+import { ServerMessageType } from "@/contracts";
+import type { SubscriptionManager } from "@/subscriptions";
 import { validateWsUpgradeToken } from "./ws-authenticator";
 import { handleWsMessage } from "./ws-message-handler";
-import type { ConnectionRegistry } from "../connection/connection-registry";
-import type { SubscriptionManager } from "../subscriptions/subscription-manager";
 
 interface WsGatewayDeps {
   readonly registry: ConnectionRegistry;

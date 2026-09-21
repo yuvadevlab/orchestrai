@@ -5,13 +5,13 @@
 
 import { createServer, type Server } from "node:http";
 import { defaultLogger } from "@orchestrai/logger";
-import { ConnectionRegistry } from "../connection/connection-registry";
-import { SubscriptionManager } from "../subscriptions/subscription-manager";
-import { RedisPubSubBroker } from "../broker/redis-pubsub-broker";
-import { WsGateway } from "../websocket/ws-gateway";
+import { ConnectionRegistry } from "@/connection";
+import { SubscriptionManager } from "@/subscriptions";
+import { RedisPubSubBroker } from "@/broker";
+import { WsGateway } from "@/websocket";
 import { createHttpRouter } from "./http-router";
 
-import type { RealtimeConfig } from "../config/realtime-config";
+import type { RealtimeConfig } from "@/config";
 
 /**
  * Master realtime server coordinating all transports and internal services.

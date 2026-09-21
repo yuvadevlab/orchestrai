@@ -3,10 +3,9 @@
  * @description Tracks connected operators per execution room and broadcasts JOIN/LEAVE presence state.
  */
 
-import { ServerMessageType } from "../contracts/ws-protocol.types";
-import type { ConnectionRegistry } from "../connection/connection-registry";
-import type { SubscriptionManager } from "../subscriptions/subscription-manager";
-import { ChannelTopics } from "../contracts/channel-topics";
+import { ServerMessageType, ChannelTopics } from "@/contracts";
+import type { ConnectionRegistry } from "@/connection";
+import type { SubscriptionManager } from "@/subscriptions";
 
 export type PresenceEvent = "JOIN" | "LEAVE";
 
