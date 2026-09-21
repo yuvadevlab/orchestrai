@@ -2,6 +2,48 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Phase 15: Memory Systems (`packages/memory`)
+
+### Completed Work
+
+- Established the controlled agent memory subsystem in `packages/memory` adhering to Section 59-60 specifications.
+- Added canonical `MemoryType` enum to `@orchestrai/shared-types` (`CONVERSATION`, `WORKING`, `USER_PREFERENCE`, `FACT`, `EPISODIC`, `TASK`, `SYSTEM`).
+- Implemented core memory schemas and storage contracts (`packages/memory/src/contracts/`):
+  - `memory-item.schema.ts`: `MemoryItem` Zod schema and `ScoredMemoryItem` interface with importance scores and TTL timestamps.
+  - `memory-query.schema.ts`: `MemoryFilter` and `MemorySearchQuery` validation schemas.
+  - `memory-storage.interface.ts`: `IMemoryStorage` contract defining atomic saves, semantic vector search, filter listing, and expiration pruning.
+- Implemented storage backends (`packages/memory/src/storage/`):
+  - `vector-math.ts`: Pure vector cosine similarity calculations (`calculateCosineSimilarity`) with zero-magnitude guards.
+  - `memory-storage.ts`: Thread-safe in-memory adapter with vector similarity search and TTL pruning for dev/testing.
+  - `database-runner.interface.ts`: Decoupled `IDatabaseQueryRunner` contract.
+  - `postgres-memory-storage.ts`: Production PostgreSQL adapter targeting `memory_items` table with pgvector `<=>` cosine distance queries.
+- Built memory subsystems:
+  - `conversation/conversation-window.ts`: Token-aware sliding-window conversation memory buffer with turn and token limits.
+  - `working/working-memory.ts`: Execution-scoped scratchpad for intermediate reasoning variables and task progress.
+  - `episodic/`: Formats finished runs into narrative episodes and reflections with `EpisodicRecorder`.
+  - `semantic/semantic-search.ts`: Hybrid composite relevance re-ranking combining cosine similarity, inherent importance, and recency half-life decay.
+- Implemented lifecycle, privacy, and relevance governance (`packages/memory/src/lifecycle/`):
+  - `relevance-filter.ts`: Gates memory ingestion to reject low-entropy pleasantries ("ok", "thanks") from polluting stores.
+  - `privacy-sanitizer.ts`: Redacts secrets, tokens, API keys (sk-_, ghp__), and credentials prior to persistence.
+  - `retention-manager.ts`: Calculates TTL per `MemoryType` and executes automated pruning sweeps.
+- Built master facade (`packages/memory/src/manager/`):
+  - `memory-manager.ts`: High-level entrypoint orchestrating `remember`, `recall`, `list`, `createWorkingMemory`, `createConversationWindow`, `recordEpisode`, and `pruneExpired`.
+- Verified 100% adherence to Prime Invariant 1 (all 26 files in `packages/memory/src/` < 195 lines).
+- Monorepo validation: `pnpm typecheck` passed (22 of 22 projects), `pnpm lint` passed (0 warnings), and `pnpm build` passed (13 of 13 packages).
+- Created phase documentation in `docs/phases/phase-15-memory.md`.
+- Updated `PROGRESS.md`.
+
+### Known Limitations / Stubs
+
+- Embedding generation: `MemoryManager` accepts precomputed vector embeddings or defaults to text fallback matching; Phase 16 (RAG) will integrate local Ollama and remote embedding providers.
+
+### Exact Next Steps for Next Session / Continuation
+
+1. Begin **Phase 16: RAG & Vector Retrieval** in `packages/rag`.
+2. Implement document ingestion, text chunking, pgvector embedding storage, and hybrid search.
+
+---
+
 ## Session: 2026-09-19 — Phase 14: Agent Modes (CHAT / PLAN / ACT / AUTO)
 
 ### Completed Work
@@ -35,6 +77,37 @@ This log records completed milestones, architectural decisions, and session hand
 
 1. Begin **Phase 15: Memory Systems (Episodic / Semantic / Conversation / Working)** in `packages/memory`.
 2. Implement controlled memory types (`CONVERSATION`, `WORKING`, `USER_PREFERENCE`, `FACT`, `EPISODIC`, `TASK`).
+
+---
+
+## Session: 2026-09-19 — Phase 13: Console Dashboard UI (`apps/console`)
+
+### Completed Work
+
+- Established the operator dashboard application in `apps/console` using Next.js 15 App Router, React 19, TypeScript 6, and Tailwind 4.
+- Integrated the `@yuva-devlab/design-system` monorepo packages (`@yuva-devlab/tokens` with Terminal Moss preset, `@yuva-devlab/ui` with 46 production Radix UI and CVA components).
+- Designed and built the global application shell:
+  - 56px vertical navigation rail (`ProductNav`) with icon and tooltip navigation for 13 destinations.
+  - Consistent `PageShell` header layout providing titles, breadcrumbs, descriptions, and action bars.
+- Implemented 16 live console screens with feature-driven architecture (`src/features/<feature>/...`):
+  - Waypoints Overview (`/`): High-level system vitals, active execution gauges, and health indicators.
+  - Live Prompt Console (`/console`): Live prompt execution, SSE event streaming, markdown rendering card, and token telemetry.
+  - Agent Roster (`/agents`, `/agents/[agentId]`): Agent cards, execution statistics, status tags, model selection, and detail drawer.
+  - Conversations Directory (`/conversations`): Multi-turn thread history with message timeline view.
+  - Executions Table (`/executions`, `/executions/[executionId]`): Run history with status badges, durations, latency metrics, and run inspector.
+  - Memory Inspector (`/memory`): Tabbed memory item browser (Conversation, Working, Episodic, Semantic, User Preferences).
+  - Knowledge Base (`/knowledge`): Document chunks, ingestion status, vector dimensions, and search bar.
+  - Tool Catalog (`/tools`): Tool registry catalog with permission levels, sandboxing indicators, and execution counts.
+  - Workflow Builder (`/workflows`): Visual DAG pipeline layout cards with test run triggers.
+  - Model Fallback Cascade (`/models`): LLM fallback cascade cards with 1M token pricing, context window, and latency metrics.
+  - Audit Activity Stream (`/activity`): Real-time diagnostic audit stream for outbox flushes, queue drains, and worker telemetry.
+  - Evaluations (`/evaluations`): Benchmark metrics, accuracy scores, and evaluation run logs.
+  - Settings (`/settings`): PostgreSQL topology, transactional outbox poller toggle, and security execution limits.
+- Built mock database adapters in `src/lib/mock-db*` providing type-safe mocks for all platform primitives.
+- Thin routing wrappers: all `page.tsx` and `layout.tsx` files strictly 5-15 lines.
+- Invariant compliance: 100% of files in `apps/console` < 135 lines (zero violations of 250-line rule).
+- Quality gates: TypeScript check and `next build` static export passing cleanly across all 17 routes.
+- Created phase documentation in `docs/phases/phase-13-console-ui.md`.
 
 ---
 
