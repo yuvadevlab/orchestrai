@@ -8,12 +8,12 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 22 — Distributed Consistency
-Current Feature:   Idempotency deduplication, distributed lock, vector clock ordering, Saga coordinator
+Current Phase:     Phase 23 — Advanced PostgreSQL Optimizations
+Current Feature:   FTS GIN indexing, RRF hybrid retrieval, advisory locks, range partitioning, materialized views
 Current Status:    [x] Completed
-Overall Progress:  Phases 0-22 Complete (100%)
+Overall Progress:  Phases 0-23 Complete (100%)
 Last Updated:      2026-09-21
-Next Immediate:    Phase 23: Advanced PostgreSQL Optimizations (infrastructure/postgres)
+Next Immediate:    Phase 24: Caching Layer (packages/runtime)
 ```
 
 > ✅ **Env Migration Complete**: Hybrid strategy applied — root `.env` holds shared infra (DB, Redis, JWT, API keys); each `apps/*/.env` holds app-specific vars only (PORT, CORS, feature flags). Zero duplication.
@@ -47,7 +47,7 @@ Next Immediate:    Phase 23: Advanced PostgreSQL Optimizations (infrastructure/p
 | **Phase 20** | **Reliability Engineering & Resilience** | **[x]** | `packages/resilience`           |
 | **Phase 21** | **Security & Sandboxing**                | **[x]** | `packages/tools`                |
 | **Phase 22** | **Distributed Consistency**              | **[x]** | `packages/events`               |
-| Phase 23     | Advanced PostgreSQL Optimizations        |   [ ]   | `infrastructure/postgres`       |
+| **Phase 23** | **Advanced PostgreSQL Optimizations**    | **[x]** | `infrastructure/postgres`       |
 | Phase 24     | Caching Layer                            |   [ ]   | `packages/runtime`              |
 | Phase 25     | Performance & Latency Tuning             |   [ ]   | `apps/*`                        |
 | Phase 26     | Evaluation Harness                       |   [ ]   | `packages/eval`                 |
@@ -680,3 +680,29 @@ Next Immediate:    Phase 23: Advanced PostgreSQL Optimizations (infrastructure/p
 - [x] Monorepo quality gates: `pnpm --filter @orchestrai/events build`, `pnpm typecheck` (27/27), `pnpm lint` (`--max-warnings=0`) all passing
 - [x] Zero file line-count violations (all files in `packages/events/src/` strictly < 200 lines) with comprehensive JSDoc
 - [x] Phase 22 documentation (`docs/phases/phase-22-distributed-consistency.md`)
+
+---
+
+## Phase 23 Breakdown (Advanced PostgreSQL Optimizations)
+
+- [x] Full-Text Search (FTS) & GIN Indexing (`infrastructure/postgres/migrations/0006_advanced_postgresql_optimizations.sql`):
+  - English `tsvector` generated columns (`search_vector`) on `document_chunks` and `memory_items`
+  - GIN indexes (`idx_document_chunks_fts`, `idx_memory_items_fts`) for keyword queries
+- [x] Composite B-Tree Indexes for Multi-Tenant Scoped Lookups:
+  - `idx_executions_tenant_status`, `idx_messages_conversation_created`, `idx_memory_tenant_type_created`
+- [x] PostgreSQL Advisory Lock Helper Functions:
+  - `orchestrai_try_advisory_lock` and `orchestrai_advisory_unlock` for application session locking
+- [x] Temporal Range Table Partitioning (`outbox_partitioned`):
+  - Partitioned `BY RANGE (created_at)` with automated monthly partition creation procedure `create_outbox_partition`
+- [x] Materialized View Telemetry & Cost Aggregation (`mv_tenant_token_telemetry`):
+  - Multi-tenant token and execution latency precomputations with unique index enabling `REFRESH MATERIALIZED VIEW CONCURRENTLY`
+- [x] Query Handbooks (`infrastructure/postgres/queries/`):
+  - `07_fulltext_vector_hybrid_search.sql`: Sparse BM25 + Dense Vector Reciprocal Rank Fusion (RRF) CTEs
+  - `08_advisory_locks_and_concurrency.sql`: Advisory locks & `SELECT FOR UPDATE SKIP LOCKED` outbox queue polling
+  - `09_explain_analyze_benchmarks.sql`: Query plan profiling handbook (`EXPLAIN (ANALYZE, BUFFERS)`)
+  - `10_partitioning_and_archival.sql`: Monthly table partitioning, detachment, and MV refresh queries
+- [x] Verification Script (`infrastructure/postgres/scripts/verify-postgres-optimizations.ts`):
+  - Automated typescript script validating migration SQL syntax and query handbook completeness
+- [x] Updated directory documentation in `infrastructure/postgres/README.md`
+- [x] Zero file line-count violations (all files < 250 lines) with complete JSDoc
+- [x] Phase 23 documentation (`docs/phases/phase-23-advanced-postgres.md`)
