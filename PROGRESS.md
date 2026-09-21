@@ -8,56 +8,56 @@
 ## Current Status
 
 ```text
-Current Phase:     Phase 20 — Reliability Engineering & Resilience
-Current Feature:   Chaos testing, circuit breakers, fallback degradation, and deadline propagation
+Current Phase:     Phase 21 — Security & Sandboxing
+Current Feature:   Agent security boundary, RBAC/ABAC policies, capability security, and sandboxing
 Current Status:    [ ] Ready to begin
-Overall Progress:  Phases 0-19 Complete (100%), Phase 20 Ready
+Overall Progress:  Phases 0-20 Complete (100%), Phase 21 Ready
 Last Updated:      2026-09-21
-Next Immediate:    Implement resilience policies across workspace packages
+Next Immediate:    Implement agent security boundary and capability sandboxing
 ```
 
 ---
 
 ## Master Phase Checklist
 
-| Phase        | Description                            | Status  | Target Package / App            |
-| :----------- | :------------------------------------- | :-----: | :------------------------------ |
-| **Phase 0**  | **Workspace & Foundation**             | **[x]** | Monorepo root, configs, tooling |
-| **Phase 1**  | **Core Contracts & Domain Types**      | **[x]** | `packages/core`                 |
-| **Phase 2**  | **Models & LLM Adapters**              | **[x]** | `packages/models`               |
-| **Phase 3**  | **Tools & Execution Security**         | **[x]** | `packages/tools`                |
-| **Phase 4**  | **Agent Loop & State Transitions**     | **[x]** | `packages/agent`                |
-| **Phase 5**  | **Runtime & LangGraph Execution**      | **[x]** | `packages/runtime`              |
-| **Phase 6**  | **Database & PostgreSQL Schemas**      | **[x]** | `infrastructure/postgres`       |
-| **Phase 7**  | **Queue & BullMQ Producers**           | **[x]** | `packages/queue`                |
-| **Phase 8**  | **Worker Application**                 | **[x]** | `apps/worker`                   |
-| **Phase 9**  | **Events & Outbox Bus**                | **[x]** | `packages/events`               |
-| **Phase 10** | **Persistence & Recovery**             | **[x]** | `packages/runtime`              |
-| **Phase 11** | **Human-in-the-Loop (HITL)**           | **[x]** | `packages/runtime`              |
-| **Phase 12** | **Realtime Streaming Broker**          | **[x]** | `apps/realtime`                 |
-| **Phase 13** | **Console Dashboard UI**               | **[x]** | `apps/console`                  |
-| **Phase 14** | **Agent Modes (CHAT/PLAN/ACT/AUTO)**   | **[x]** | `packages/agent`                |
-| **Phase 15** | **Memory Systems (Episodic/Semantic)** | **[x]** | `packages/memory`               |
-| **Phase 16** | **RAG & Vector Retrieval**             | **[x]** | `packages/rag`                  |
-| **Phase 17** | **API Gateway**                        | **[x]** | `apps/gateway`                  |
-| **Phase 18** | **Client SDK**                         | **[x]** | `packages/sdk`                  |
-| **Phase 19** | **Observability & OpenTelemetry**      | **[x]** | `packages/observability`        |
-| Phase 20     | Reliability Engineering & Resilience   |   [ ]   | `packages/*`                    |
-| Phase 21     | Security & Sandboxing                  |   [ ]   | `packages/tools`                |
-| Phase 22     | Distributed Consistency                |   [ ]   | `packages/events`               |
-| Phase 23     | Advanced PostgreSQL Optimizations      |   [ ]   | `infrastructure/postgres`       |
-| Phase 24     | Caching Layer                          |   [ ]   | `packages/runtime`              |
-| Phase 25     | Performance & Latency Tuning           |   [ ]   | `apps/*`                        |
-| Phase 26     | Evaluation Harness                     |   [ ]   | `packages/eval`                 |
-| Phase 27     | Specialized Research Agent             |   [ ]   | `packages/agent`                |
-| Phase 28     | Specialized Developer Agent            |   [ ]   | `packages/agent`                |
-| Phase 29     | Multi-Agent Orchestration              |   [ ]   | `packages/runtime`              |
-| Phase 30     | gRPC Inter-service Layer               |   [ ]   | `apps/*`                        |
-| Phase 31     | Kafka Event Streaming                  |   [ ]   | `packages/events`               |
-| Phase 32     | Distributed Execution Engine           |   [ ]   | `apps/worker`                   |
-| Phase 33     | Production Infrastructure & Docker     |   [ ]   | `infrastructure/docker`         |
-| Phase 34     | Kubernetes Helm Deployments            |   [ ]   | `infrastructure/k8s`            |
-| Phase 35     | Architecture Review & Audit            |   [ ]   | Whole System                    |
+| Phase        | Description                              | Status  | Target Package / App            |
+| :----------- | :--------------------------------------- | :-----: | :------------------------------ |
+| **Phase 0**  | **Workspace & Foundation**               | **[x]** | Monorepo root, configs, tooling |
+| **Phase 1**  | **Core Contracts & Domain Types**        | **[x]** | `packages/core`                 |
+| **Phase 2**  | **Models & LLM Adapters**                | **[x]** | `packages/models`               |
+| **Phase 3**  | **Tools & Execution Security**           | **[x]** | `packages/tools`                |
+| **Phase 4**  | **Agent Loop & State Transitions**       | **[x]** | `packages/agent`                |
+| **Phase 5**  | **Runtime & LangGraph Execution**        | **[x]** | `packages/runtime`              |
+| **Phase 6**  | **Database & PostgreSQL Schemas**        | **[x]** | `infrastructure/postgres`       |
+| **Phase 7**  | **Queue & BullMQ Producers**             | **[x]** | `packages/queue`                |
+| **Phase 8**  | **Worker Application**                   | **[x]** | `apps/worker`                   |
+| **Phase 9**  | **Events & Outbox Bus**                  | **[x]** | `packages/events`               |
+| **Phase 10** | **Persistence & Recovery**               | **[x]** | `packages/runtime`              |
+| **Phase 11** | **Human-in-the-Loop (HITL)**             | **[x]** | `packages/runtime`              |
+| **Phase 12** | **Realtime Streaming Broker**            | **[x]** | `apps/realtime`                 |
+| **Phase 13** | **Console Dashboard UI**                 | **[x]** | `apps/console`                  |
+| **Phase 14** | **Agent Modes (CHAT/PLAN/ACT/AUTO)**     | **[x]** | `packages/agent`                |
+| **Phase 15** | **Memory Systems (Episodic/Semantic)**   | **[x]** | `packages/memory`               |
+| **Phase 16** | **RAG & Vector Retrieval**               | **[x]** | `packages/rag`                  |
+| **Phase 17** | **API Gateway**                          | **[x]** | `apps/gateway`                  |
+| **Phase 18** | **Client SDK**                           | **[x]** | `packages/sdk`                  |
+| **Phase 19** | **Observability & OpenTelemetry**        | **[x]** | `packages/observability`        |
+| **Phase 20** | **Reliability Engineering & Resilience** | **[x]** | `packages/resilience`           |
+| Phase 21     | Security & Sandboxing                    |   [ ]   | `packages/tools`                |
+| Phase 22     | Distributed Consistency                  |   [ ]   | `packages/events`               |
+| Phase 23     | Advanced PostgreSQL Optimizations        |   [ ]   | `infrastructure/postgres`       |
+| Phase 24     | Caching Layer                            |   [ ]   | `packages/runtime`              |
+| Phase 25     | Performance & Latency Tuning             |   [ ]   | `apps/*`                        |
+| Phase 26     | Evaluation Harness                       |   [ ]   | `packages/eval`                 |
+| Phase 27     | Specialized Research Agent               |   [ ]   | `packages/agent`                |
+| Phase 28     | Specialized Developer Agent              |   [ ]   | `packages/agent`                |
+| Phase 29     | Multi-Agent Orchestration                |   [ ]   | `packages/runtime`              |
+| Phase 30     | gRPC Inter-service Layer                 |   [ ]   | `apps/*`                        |
+| Phase 31     | Kafka Event Streaming                    |   [ ]   | `packages/events`               |
+| Phase 32     | Distributed Execution Engine             |   [ ]   | `apps/worker`                   |
+| Phase 33     | Production Infrastructure & Docker       |   [ ]   | `infrastructure/docker`         |
+| Phase 34     | Kubernetes Helm Deployments              |   [ ]   | `infrastructure/k8s`            |
+| Phase 35     | Architecture Review & Audit              |   [ ]   | Whole System                    |
 
 ---
 
@@ -561,3 +561,48 @@ Next Immediate:    Implement resilience policies across workspace packages
 - [x] Monorepo quality gates: `pnpm --filter @orchestrai/observability build` (Dual ESM & CJS with full DTS), `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
 - [x] Zero file line-count violations (all 20 files in `packages/observability/src/` < 140 lines) with comprehensive JSDoc
 - [x] Phase 19 documentation (`docs/phases/phase-19-observability.md`)
+
+---
+
+## Phase 20 Breakdown (Reliability Engineering & Resilience)
+
+- [x] Scaffold `packages/resilience` (`@orchestrai/resilience`) with dual ESM/CJS build and full DTS output
+- [x] Clean barrel exports (`@/deadline`, `@/retry`, `@/circuit-breaker`, `@/bulkhead`, `@/fallback`, `@/ratelimit`, `@/pipeline`, `@/chaos`, `@/adapters`) and path aliases
+- [x] Bounded Timeouts & Hierarchical Deadlines (`src/deadline/`):
+  - `deadline.types.ts`: `TimeoutOptions`, `IDeadlineContext`
+  - `timeout-error.ts`: Typed `TimeoutError` with elapsed and limit attributes
+  - `with-timeout.ts`: Asynchronous timeout wrapper with strict timer cleanup and signal chaining
+  - `deadline-context.ts`: Hierarchical deadline budget inheritance (`createChild`, `getRemainingMs`, `isExpired`)
+- [x] Retry with Exponential Backoff & Jitter (`src/retry/`):
+  - `retry.types.ts`: `BackoffStrategy`, `JitterStrategy`, `RetryOptions`
+  - `jitter.ts`: Full jitter, equal jitter, and decorrelated jitter preventing synchronized retry storms
+  - `error-classifier.ts`: Classification of transient network/HTTP errors vs fatal client/validation errors
+  - `retry.ts`: `retryAsync` execution loop with attempt callbacks and signal cancellation
+- [x] Circuit Breaker State Machine (`src/circuit-breaker/`):
+  - `circuit-breaker.types.ts`: `CircuitState` (CLOSED, OPEN, HALF_OPEN), `CircuitBreakerMetrics`
+  - `circuit-breaker-error.ts`: `CircuitBreakerOpenError` fast-fail exception
+  - `circuit-breaker.ts`: Full state machine with cooldown probes and operational metrics
+- [x] Bulkhead Concurrency Isolation (`src/bulkhead/`):
+  - `bulkhead.types.ts`: `BulkheadOptions`, `BulkheadMetrics`
+  - `bulkhead-error.ts`: `BulkheadRejectedError` on capacity and queue saturation
+  - `bulkhead.ts`: Semaphore-based concurrency limiter preventing worker capacity starvation
+- [x] Fallback & Graceful Degradation (`src/fallback/`):
+  - `fallback.types.ts`: `FallbackHandler`, `FallbackOptions`
+  - `fallback.ts`: `withFallback` executing alternative degradation logic upon primary failure
+- [x] Token Bucket Rate Limiting (`src/ratelimit/`):
+  - `token-bucket.types.ts`: `TokenBucketOptions`, `TokenBucketMetrics`
+  - `rate-limit-error.ts`: `RateLimitExceededError` with computed `retryAfterMs`
+  - `token-bucket.ts`: Fractional token refill rate limiter with asynchronous waiting
+- [x] Composable Resilience Pipeline (`src/pipeline/`):
+  - `pipeline.types.ts`: `IResiliencePolicy`, `PipelinePolicyOptions`
+  - `resilience-pipeline.ts`: Composable execution ordering (`Fallback -> RateLimiter -> Retry -> CircuitBreaker -> Bulkhead -> Timeout -> fn`) with fluent builder
+- [x] Chaos Testing & Synthetic Fault Injection (`src/chaos/`):
+  - `chaos.types.ts`: `ChaosConfig`, `ChaosMetrics`
+  - `chaos-injector.ts`: `ChaosInjector` with probabilistic synthetic latency and failure simulation
+- [x] Out-of-the-Box Adapters (`src/adapters/`):
+  - `model-resilience.ts`: `createModelResiliencePipeline` tailored for LLM providers
+  - `tool-resilience.ts`: `createToolResiliencePipeline` tailored for agent tool execution
+  - `database-resilience.ts`: `createDatabaseResiliencePipeline` tailored for database transactions
+- [x] Monorepo quality gates: `pnpm --filter @orchestrai/resilience build`, `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
+- [x] Zero file line-count violations (all 36 files in `packages/resilience/src/` strictly < 190 lines) with comprehensive JSDoc
+- [x] Phase 20 documentation (`docs/phases/phase-20-resilience.md`)
