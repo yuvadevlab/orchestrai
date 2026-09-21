@@ -2,6 +2,24 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Environment Variable Migration (Per-App `.env` Isolation)
+
+### Completed Work
+
+- **Migrated** from a single shared root `.env` to isolated per-app `.env` files for all four apps.
+- **Root `.env`** demoted to infra-only stub (Docker Compose / migration scripts) — no app-level variables.
+- **`apps/gateway/.env`** created with full real values: DB (port 5433), Redis, JWT, rate limiting, CORS, internal service URLs, all model provider keys.
+- **`apps/realtime/.env`** created with full real values: DB (port 5433), Redis, JWT, CORS, realtime limits.
+- **`apps/worker/.env`** updated: fixed `DATABASE_URL` from stale port 5432 / wrong user `yuvarajpattabi` → port 5433 / user `orchestrai`; added individual `POSTGRES_*` vars.
+- **`apps/console/.env`** updated: same fix — DB URL and individual vars corrected to port 5433 / `orchestrai` user / `orchestrai_dev` DB.
+- **`.env.example` files** for `gateway` and `realtime` updated to reflect the new full-var structure with placeholder values (safe to commit).
+
+### Key Decision
+
+> Per-app `.env` is the chosen strategy. Each service loads only what it owns, preventing cross-service variable leakage and enabling environment-specific overrides per service independently.
+
+---
+
 ## Session: 2026-09-21 — Phase 20: Reliability Engineering & Resilience (`packages/resilience`)
 
 ### Completed Work
