@@ -2,6 +2,31 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Phase 23: Advanced PostgreSQL Optimizations (`infrastructure/postgres`)
+
+### Completed Work
+
+- Delivered advanced PostgreSQL indexing, full-text search, advisory locking, table partitioning, and query profiling handbooks.
+- **Migration 0006 (`infrastructure/postgres/migrations/0006_advanced_postgresql_optimizations.sql`)**:
+  - Full-Text Search (FTS) generated `tsvector` column (`search_vector`) on `document_chunks` and `memory_items` using `to_tsvector('english', ...)`.
+  - GIN indexes (`idx_document_chunks_fts`, `idx_memory_items_fts`) enabling low-latency keyword searching.
+  - Multi-tenant composite B-Tree indexes: `idx_executions_tenant_status`, `idx_messages_conversation_created`, `idx_memory_tenant_type_created`.
+  - PostgreSQL advisory lock helper functions (`orchestrai_try_advisory_lock`, `orchestrai_advisory_unlock`).
+  - Range-partitioned outbox event log table (`outbox_partitioned`) with automated monthly partition procedure `create_outbox_partition(partition_date)`.
+  - Materialized View `mv_tenant_token_telemetry` for precalculated multi-tenant LLM token and latency metrics with unique index supporting `REFRESH MATERIALIZED VIEW CONCURRENTLY`.
+- **Query Handbooks (`infrastructure/postgres/queries/`)**:
+  - `07_fulltext_vector_hybrid_search.sql`: Hybrid sparse BM25 + dense pgvector cosine distance retrieval with Reciprocal Rank Fusion (RRF, $k=60$) CTEs.
+  - `08_advisory_locks_and_concurrency.sql`: Session & transaction advisory locks and `SELECT FOR UPDATE SKIP LOCKED` outbox queue polling.
+  - `09_explain_analyze_benchmarks.sql`: Query plan cost profiling handbook (`EXPLAIN (ANALYZE, BUFFERS, VERBOSE)`).
+  - `10_partitioning_and_archival.sql`: Range table partitioning management, partition detachment, and MV refresh execution.
+- **Verification Script (`infrastructure/postgres/scripts/verify-postgres-optimizations.ts`)**:
+  - Automated TypeScript validator verifying presence and SQL integrity of all 6 migrations and 10 query handbooks.
+- **Documentation**:
+  - Phase guide in `docs/phases/phase-23-advanced-postgres.md`.
+  - Layout documentation in `infrastructure/postgres/README.md`.
+
+---
+
 ## Session: 2026-09-21 — Phase 22: Distributed Consistency (`packages/events`)
 
 ### Completed Work
