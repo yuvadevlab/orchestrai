@@ -2,6 +2,55 @@
 
 This log records completed milestones, architectural decisions, and session handoffs in reverse chronological order.
 
+## Session: 2026-09-21 — Phase 20: Reliability Engineering & Resilience (`packages/resilience`)
+
+### Completed Work
+
+- Established `@orchestrai/resilience` package with zero heavy third-party dependencies, strict dual ESM/CJS build, and full DTS generation per Sections 74–79 of `ORCHESTRAI-IMPLEMENTATION.md`.
+- Refactored all internal and external exports to clean barrel imports (`@/deadline`, `@/retry`, `@/circuit-breaker`, `@/bulkhead`, `@/fallback`, `@/ratelimit`, `@/pipeline`, `@/chaos`, `@/adapters`) using TypeScript path aliases (`@/*`).
+- Bounded Timeouts and Hierarchical Deadlines (`packages/resilience/src/deadline/`):
+  - `deadline.types.ts`: `TimeoutOptions`, `IDeadlineContext` contracts.
+  - `timeout-error.ts`: `TimeoutError` indicating operation name, duration, and elapsed milliseconds.
+  - `with-timeout.ts`: Asynchronous timeout wrapper with `AbortController` cancellation and guaranteed timer teardown.
+  - `deadline-context.ts`: Hierarchical deadline propagation tracking decaying execution budgets (`createChild`, `getRemainingMs`, `isExpired`).
+- Resilient Retry Loop & Exponential Backoff with Jitter (`packages/resilience/src/retry/`):
+  - `retry.types.ts`: `BackoffStrategy` (exponential, linear, fixed), `JitterStrategy` (full, equal, decorrelated, none), `RetryOptions`.
+  - `jitter.ts`: Mathematically sound jitter algorithms preventing synchronized retry storms.
+  - `error-classifier.ts`: Distinguishes transient errors (network drops, HTTP 429, 502, 503, 504) from fatal errors (400, 401, 403, 404, validation errors).
+  - `retry.ts`: `retryAsync` execution loop with attempt callbacks and signal cancellation.
+- Circuit Breaker State Machine (`packages/resilience/src/circuit-breaker/`):
+  - `circuit-breaker.types.ts`: `CircuitState` (CLOSED, OPEN, HALF_OPEN), `CircuitBreakerMetrics`.
+  - `circuit-breaker-error.ts`: `CircuitBreakerOpenError` fast-failing calls when downstream dependency is unhealthy.
+  - `circuit-breaker.ts`: Complete state machine transitioning CLOSED -> OPEN -> HALF_OPEN -> CLOSED with cooldown probe checks.
+- Bulkhead Concurrency Isolation (`packages/resilience/src/bulkhead/`):
+  - `bulkhead.types.ts`: `BulkheadOptions`, `BulkheadMetrics`.
+  - `bulkhead-error.ts`: `BulkheadRejectedError` protecting against worker capacity starvation.
+  - `bulkhead.ts`: Semaphore-based concurrency limiter with FIFO queueing.
+- Graceful Degradation & Fallback (`packages/resilience/src/fallback/`):
+  - `fallback.types.ts`: `FallbackHandler`, `FallbackOptions`.
+  - `fallback.ts`: `withFallback` seamlessly catching handled failures and returning degraded responses or executing fallback models.
+- Token Bucket Rate Limiter (`packages/resilience/src/ratelimit/`):
+  - `token-bucket.types.ts`: `TokenBucketOptions`, `TokenBucketMetrics`.
+  - `rate-limit-error.ts`: `RateLimitExceededError` with calculated `retryAfterMs`.
+  - `token-bucket.ts`: Fractional token refill rate limiter with asynchronous waiting.
+- Composable Resilience Pipeline (`packages/resilience/src/pipeline/`):
+  - `pipeline.types.ts`: `IResiliencePolicy`, `PipelinePolicyOptions`.
+  - `resilience-pipeline.ts`: Pipeline chaining policies in optimal defensive order: `Fallback -> RateLimiter -> Retry -> CircuitBreaker -> Bulkhead -> Timeout -> fn`, with fluent `ResiliencePipelineBuilder`.
+- Chaos Testing & Fault Injection (`packages/resilience/src/chaos/`):
+  - `chaos.types.ts`: `ChaosConfig`, `ChaosMetrics`.
+  - `chaos-injector.ts`: Synthetic latency and failure injection for chaos simulation without production downtime.
+- Out-of-the-Box Adapters (`packages/resilience/src/adapters/`):
+  - `model-resilience.ts`: `createModelResiliencePipeline` tailored for LLM providers (60s timeout, exponential backoff, circuit breaker, fallback).
+  - `tool-resilience.ts`: `createToolResiliencePipeline` tailored for external tools (15s timeout, bulkhead concurrency 10, circuit breaker 3 failures).
+  - `database-resilience.ts`: `createDatabaseResiliencePipeline` tailored for database transactions (5s timeout, bulkhead concurrency 20, retry 3 attempts).
+- Quality Gates Passed:
+  - `pnpm --filter @orchestrai/resilience build`: Dual ESM/CJS and DTS output compiled cleanly.
+  - `pnpm typecheck`: 27/27 tasks passed across all 19 workspace projects.
+  - `pnpm lint`: Zero ESLint warnings (`--max-warnings=0`).
+  - `pnpm build`: All 18 workspace projects built cleanly.
+  - All 36 files in `packages/resilience/src/` strictly between 8 and 189 lines (limit: 250 lines) with complete JSDoc.
+- Documented in `docs/phases/phase-20-resilience.md`.
+
 ## Session: 2026-09-21 — Phase 19: Observability & Monitoring (`packages/observability` & `infrastructure/monitoring`)
 
 ### Completed Work
