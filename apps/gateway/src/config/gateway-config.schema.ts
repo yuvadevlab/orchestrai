@@ -10,8 +10,8 @@ import { z } from "zod";
  */
 export const GatewayConfigSchema = z.object({
   /** HTTP server port */
-  port: z.coerce.number().int().positive().default(8000),
-  gatewayPort: z.coerce.number().int().positive().default(8000),
+  port: z.coerce.number().int().positive().default(4001),
+  gatewayPort: z.coerce.number().int().positive().default(4001),
   /** HTTP listening interface host */
   host: z.string().default("0.0.0.0"),
   gatewayHost: z.string().default("0.0.0.0"),

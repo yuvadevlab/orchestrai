@@ -6,8 +6,8 @@
 
 import { createOrchestrAIClient, type OrchestrAIClient } from "@orchestrai/sdk";
 
-/** Gateway base URL configured from environment variable or default local port 8000 */
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8000";
+/** Gateway base URL configured from environment variable or default local port 4001 */
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:4001";
 
 /** Singleton client instance */
 let clientInstance: OrchestrAIClient | null = null;

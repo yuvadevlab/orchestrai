@@ -15,8 +15,8 @@ export function loadGatewayConfig(): GatewayConfig {
   // Load local environment overrides if present
   dotenv.config();
 
-  const port = process.env.GATEWAY_PORT || process.env.PORT || 8000;
-  const host = process.env.GATEWAY_HOST || process.env.HOST || "0.0.0.0";
+  const port = process.env.GATEWAY_PORT || 4001;
+  const host = process.env.GATEWAY_HOST || "0.0.0.0";
   const cors = process.env.CORS_ALLOWED_ORIGINS || process.env.CORS_ORIGIN || "*";
 
   return GatewayConfigSchema.parse({
