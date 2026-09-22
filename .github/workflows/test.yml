@@ -1,4 +1,4 @@
-name: 🛡️ Build & Quality Validation
+name: 🧪 Test Suite
 
 on:
   push:
@@ -12,12 +12,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: test-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: 🔍 Lint, Typecheck & Build
+  test:
+    name: 🧪 Unit & Integration Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -36,14 +36,5 @@ jobs:
       - name: 📥 Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🎨 Verify Code Formatting (Prettier)
-        run: pnpm format:check
-
-      - name: 🧹 Execute ESLint Code Check
-        run: pnpm lint
-
-      - name: 🔎 Execute TypeScript Type Check
-        run: pnpm typecheck
-
-      - name: 🏗️ Execute Monorepo Turbo Build
-        run: pnpm build
+      - name: 🧪 Execute Test Suite
+        run: pnpm test
