@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @source "../**";
-@source "../../node_modules/@yuva-devlab/ui/src";
 @import "@yuva-devlab/tokens/preset.css";
 @import "@yuva-devlab/tokens/themes/orchestrai.css";
 @import "tw-animate-css";

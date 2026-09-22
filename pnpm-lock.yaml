@@ -81,8 +81,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       '@yuva-devlab/ui':
-        specifier: 1.0.0
-        version: 1.0.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 1.0.1
+        version: 1.0.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2462,8 +2462,8 @@ packages:
   '@yuva-devlab/tokens@1.0.0':
     resolution: {integrity: sha512-baiAcAn8Be64QVrHOVDlo50mQpA3jpq+QuRd3GgpV+PQ1BqnPIPeGRyJ3lgILBz87s6Jnos4ao5GN+k0walHUA==}
 
-  '@yuva-devlab/ui@1.0.0':
-    resolution: {integrity: sha512-pap+jl7gBvyYnpRMoKV12lYO4VYv8gLkCnptCQHXK3U8iBmNvtfzdHPjgBqjkfRA4bvmrxumemkM4tg1SUzmrA==}
+  '@yuva-devlab/ui@1.0.1':
+    resolution: {integrity: sha512-p+Tk4wlKbcAADHdJkndKgrkFgMIaxqDAZDciRa/ZWXtCxxiuw1DrBnGv2O576I/eMSy/BO+scuJvW+oA6BQf2g==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
@@ -5572,7 +5572,7 @@ snapshots:
 
   '@yuva-devlab/tokens@1.0.0': {}
 
-  '@yuva-devlab/ui@1.0.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@yuva-devlab/ui@1.0.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@radix-ui/react-accordion': 1.2.20(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@radix-ui/react-alert-dialog': 1.1.23(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

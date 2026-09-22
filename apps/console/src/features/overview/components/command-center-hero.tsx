@@ -41,7 +41,11 @@ export function CommandCenterHero(): React.JSX.Element {
 
   const handleSubmit = (event: React.FormEvent): void => {
     event.preventDefault();
-    router.push("/console");
+    if (prompt.trim()) {
+      router.push(`/console?prompt=${encodeURIComponent(prompt.trim())}`);
+    } else {
+      router.push("/console");
+    }
   };
 
   return (

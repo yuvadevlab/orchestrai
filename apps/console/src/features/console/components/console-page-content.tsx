@@ -7,7 +7,8 @@
  * @module apps/console/features/console/components
  */
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@yuva-devlab/ui";
 import { X } from "lucide-react";
 import { ConsoleHeader } from "./console-header";
@@ -22,11 +23,15 @@ import { getApiClient } from "@/lib/api-client";
  * Interactive Live Agent Execution Console.
  */
 export function ConsolePageContent(): React.JSX.Element {
-  const [prompt, setPrompt] = useState<string>("");
+  const searchParams = useSearchParams();
+  const urlPrompt = searchParams.get("prompt") || "";
+
+  const [prompt, setPrompt] = useState<string>(urlPrompt);
   const [events, setEvents] = useState<ExecutionEvent[]>([]);
   const [response, setResponse] = useState<string>("");
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [railOpen, setRailOpen] = useState<boolean>(false);
+  const autoExecutedRef = useRef<boolean>(false);
 
   const handleTriggerRun = useCallback(async (): Promise<void> => {
     if (!prompt.trim()) return;
@@ -76,6 +81,14 @@ export function ConsolePageContent(): React.JSX.Element {
       setIsRunning(false);
     }
   }, [prompt]);
+
+  // Automatically launch execution when arriving from home page with a prompt query param
+  useEffect(() => {
+    if (urlPrompt && !autoExecutedRef.current) {
+      autoExecutedRef.current = true;
+      handleTriggerRun();
+    }
+  }, [urlPrompt, handleTriggerRun]);
 
   const railProps = {
     progress: isRunning ? 50 : events.length > 0 ? 100 : 0,

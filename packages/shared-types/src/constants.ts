@@ -46,11 +46,11 @@ export const EXECUTION_LIMITS = {
  */
 export const QUEUE_NAMES = {
   /** Primary queue for agent executions */
-  AGENT_EXECUTION: "orchestrai:agent-execution",
+  AGENT_EXECUTION: "orchestrai-agent-execution",
   /** Queue for deferred or long-running tool calls */
-  TOOL_EXECUTION: "orchestrai:tool-execution",
+  TOOL_EXECUTION: "orchestrai-tool-execution",
   /** Dead-letter queue for exhausted retry attempts */
-  DEAD_LETTER: "orchestrai:dead-letter",
+  DEAD_LETTER: "orchestrai-dead-letter",
 } as const;
 
 /**

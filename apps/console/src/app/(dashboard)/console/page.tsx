@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { ConsolePageContent } from "@/features/console";
 
 /**
@@ -6,5 +6,15 @@ import { ConsolePageContent } from "@/features/console";
  * Delegating all client interactive state and live streaming to ConsolePageContent.
  */
 export default function ConsolePage(): React.JSX.Element {
-  return <ConsolePageContent />;
+  return (
+    <Suspense
+      fallback={
+        <div className="text-muted-foreground flex size-full items-center justify-center p-8 font-mono text-xs">
+          Loading console...
+        </div>
+      }
+    >
+      <ConsolePageContent />
+    </Suspense>
+  );
 }

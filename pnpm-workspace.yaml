@@ -14,6 +14,6 @@ minimumReleaseAgeExclude:
   - prettier@3.9.8
   - turbo@2.11.1
   - "@yuva-devlab/tokens@1.0.0"
-  - "@yuva-devlab/ui@1.0.0"
+  - "@yuva-devlab/ui@1.0.1"
 overrides:
   rollup-plugin-dts: "^6.5.1"
