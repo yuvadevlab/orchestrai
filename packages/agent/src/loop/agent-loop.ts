@@ -15,6 +15,7 @@ import {
   parsePlanFromResponse,
   type IModeRouter,
 } from "@/modes";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { AgentStepResult } from "./step-result.types";
 import { extractToolCalls } from "./tool-message-converter";
 import { executeStepToolCalls } from "./step-tool-executor";
@@ -42,12 +43,14 @@ export class AgentLoop {
   private readonly clearance: ToolPermissionLevel;
   private readonly modeEnforcer: ModeConstraintEnforcer;
   private readonly router?: IModeRouter;
+  private readonly logger: Logger;
 
   constructor(config: AgentLoopConfig) {
     this.config = config;
     this.clearance = config.clearance ?? ToolPermissionLevel.READ_ONLY;
     this.modeEnforcer = config.modeEnforcer ?? new ModeConstraintEnforcer();
     this.router = config.modeRouter;
+    this.logger = loggerWithConfig(new Logger("AgentLoop"));
   }
 
   /**
@@ -58,6 +61,7 @@ export class AgentLoop {
    */
   public async step(history: readonly AIMessage[]): Promise<AgentStepResult> {
     const stepIndex = this.config.state.advanceStep();
+    this.logger.debug("Entering AgentLoop step", { stepIndex, historyLength: history.length });
 
     // 1. Resolve operational mode (dynamically routed in AUTO mode if router present)
     const activeMode =

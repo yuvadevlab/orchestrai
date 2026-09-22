@@ -3,7 +3,7 @@
  * @description Distributed Redis-backed implementation of IIdempotencyStore using SETNX.
  */
 
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { Redis } from "ioredis";
 import type { IdempotencyRecord } from "./idempotency-record.schema";
 import type { AcquireKeyResult, IIdempotencyStore } from "./idempotency-store.interface";
@@ -15,7 +15,7 @@ export class RedisIdempotencyStore implements IIdempotencyStore {
   /**
    * Internal logger instance.
    */
-  private readonly logger = createLogger("RedisIdempotencyStore");
+  private readonly logger = loggerWithConfig(new Logger("RedisIdempotencyStore"));
 
   /**
    * Constructs a RedisIdempotencyStore instance.

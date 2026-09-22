@@ -849,3 +849,24 @@ This log records completed milestones, architectural decisions, and session hand
 4. Mark Phase 0 as complete `[x]` and begin Phase 1 contracts implementation.
 
 ---
+
+## Session Log: Application Logging Refactoring (`@yuva-devlab/logger`)
+
+**Date:** 2026-09-22  
+**Scope:** Monorepo-wide Application Logging Refactoring
+
+### Accomplished
+
+- Removed internal `packages/logger` workspace package (`@orchestrai/logger`).
+- Configured all backend services and packages (`apps/gateway`, `apps/realtime`, `apps/worker`, `packages/*`) to depend on `@yuva-devlab/logger@1.1.0`.
+- Integrated `requestLogger` Express/connect middleware in `apps/gateway` (`GatewayServer`) and `apps/realtime` (`http-router.ts`), active when `LOG_REQUESTS !== "false"`.
+- Added contextual entry, exit, execution block, and error log statements across backend services, workers, handlers, brokers, and core domain packages using `loggerWithConfig(new Logger("ContextName"))`.
+- Ran `pnpm typecheck` across all 28 workspace tasks with 100% clean compilation.
+
+### Environmental Control Reference
+
+- `LOG_ENABLED` (boolean, default `"true"`): Master switch to toggle logger output.
+- `LOG_LEVEL` (string, default `"info"`): Minimum severity (`debug` | `info` | `warn` | `error`).
+- `LOG_REQUESTS` (boolean, default `"true"`): HTTP request logger middleware toggle.
+- `LOG_PERSIST` (boolean, default `"false"`): Persists log streams to disk when `"true"`.
+- `LOG_FILE` (string): Target log file path for disk persistence.

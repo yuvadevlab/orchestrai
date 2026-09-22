@@ -6,9 +6,9 @@
 import type { Job, Processor } from "bullmq";
 import { DeadLetterJobPayloadSchema, type DeadLetterJobPayload } from "@orchestrai/queue";
 import { ValidationError } from "@orchestrai/core";
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 
-const defaultLogger = createLogger("DLQ");
+const defaultLogger = loggerWithConfig(new Logger("DLQ"));
 
 /**
  * Result returned from dead letter processing.

@@ -23,6 +23,7 @@
   "dependencies": {
     "@orchestrai/core": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
+    "@yuva-devlab/logger": "1.1.0",
     "bullmq": "^6.3.6",
     "ioredis": "^6.0.0",
     "zod": "^4.6.5"

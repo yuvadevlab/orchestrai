@@ -5,7 +5,7 @@
 
 import { Worker, type Processor, type WorkerOptions } from "bullmq";
 import type { Redis } from "ioredis";
-import { createLogger, type ILogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 
 /**
  * Common configuration options for an OrchestrAI background worker.
@@ -25,12 +25,12 @@ export abstract class BaseWorker<TPayload = unknown, TResult = unknown> {
   protected readonly worker: Worker<TPayload, TResult, string>;
   protected readonly queueName: string;
   protected readonly workerName: string;
-  protected readonly logger: ILogger;
+  protected readonly logger: Logger;
 
   constructor(config: BaseWorkerConfig<TPayload, TResult>) {
     this.queueName = config.queueName;
     this.workerName = config.name ?? `${config.queueName}-worker`;
-    this.logger = createLogger(this.workerName);
+    this.logger = loggerWithConfig(new Logger(this.workerName));
 
     const workerOptions: WorkerOptions = {
       connection: config.connection,

@@ -3,9 +3,10 @@
  * @description Two-stage graceful shutdown coordinator for SIGTERM and SIGINT signals.
  */
 
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { RealtimeServer } from "./realtime-server";
 
+const logger = loggerWithConfig(new Logger("RealtimeLifecycle"));
 const DRAIN_TIMEOUT_MS = 10_000;
 
 /**
@@ -14,7 +15,7 @@ const DRAIN_TIMEOUT_MS = 10_000;
  * @param server - The active RealtimeServer instance to shut down
  */
 async function gracefulShutdown(server: RealtimeServer): Promise<void> {
-  defaultLogger.info("Graceful shutdown initiated — draining connections...");
+  logger.info("Graceful shutdown initiated — draining connections...");
 
   const httpServer = server.getHttpServer();
 
@@ -35,7 +36,7 @@ async function gracefulShutdown(server: RealtimeServer): Promise<void> {
 
   // Stage 2: Force-terminate remaining client connections after drain timeout
   const drainTimeout = setTimeout(() => {
-    defaultLogger.warn("Drain timeout exceeded — forcibly terminating remaining sessions");
+    logger.warn("Drain timeout exceeded — forcibly terminating remaining sessions");
     const sessions = server.registry.getAll();
     for (const session of sessions) {
       session.close(1001, "Server shutting down");
@@ -53,7 +54,7 @@ async function gracefulShutdown(server: RealtimeServer): Promise<void> {
     }, 500);
   });
 
-  defaultLogger.info("Graceful shutdown complete");
+  logger.info("Graceful shutdown complete");
 }
 
 /**
@@ -63,12 +64,12 @@ async function gracefulShutdown(server: RealtimeServer): Promise<void> {
  */
 export function registerProcessLifecycle(server: RealtimeServer): void {
   const shutdown = async (signal: string): Promise<void> => {
-    defaultLogger.info(`Received ${signal} — beginning graceful shutdown`);
+    logger.info(`Received ${signal} — beginning graceful shutdown`);
     try {
       await gracefulShutdown(server);
       process.exit(0);
     } catch (err) {
-      defaultLogger.error("Shutdown failed", { error: String(err) });
+      logger.error("Shutdown failed", { error: String(err) });
       process.exit(1);
     }
   };
@@ -80,11 +81,11 @@ export function registerProcessLifecycle(server: RealtimeServer): void {
   process.on("SIGINT", () => void shutdown("SIGINT"));
 
   process.on("uncaughtException", (err) => {
-    defaultLogger.error("Uncaught exception — shutting down", { error: String(err) });
+    logger.error("Uncaught exception — shutting down", { error: String(err) });
     void shutdown("uncaughtException");
   });
 
   process.on("unhandledRejection", (reason) => {
-    defaultLogger.error("Unhandled promise rejection", { reason: String(reason) });
+    logger.error("Unhandled promise rejection", { reason: String(reason) });
   });
 }

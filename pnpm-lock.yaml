@@ -77,12 +77,12 @@ importers:
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
-      '@yuva-devlab/tokens':
-        specifier: 1.0.0
-        version: 1.0.0
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       '@yuva-devlab/ui':
-        specifier: 1.0.1
-        version: 1.0.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 1.1.0
+        version: 1.1.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -150,15 +150,15 @@ importers:
       '@orchestrai/events':
         specifier: workspace:*
         version: link:../../packages/events
-      '@orchestrai/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
       '@orchestrai/queue':
         specifier: workspace:*
         version: link:../../packages/queue
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -184,12 +184,12 @@ importers:
       '@orchestrai/events':
         specifier: workspace:*
         version: link:../../packages/events
-      '@orchestrai/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -224,9 +224,6 @@ importers:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@orchestrai/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
       '@orchestrai/models':
         specifier: workspace:*
         version: link:../../packages/models
@@ -242,6 +239,9 @@ importers:
       '@orchestrai/tools':
         specifier: workspace:*
         version: link:../../packages/tools
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       bullmq:
         specifier: ^6.3.6
         version: 6.3.6(ioredis@6.0.0)
@@ -279,6 +279,9 @@ importers:
       '@orchestrai/tools':
         specifier: workspace:*
         version: link:../tools
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -339,12 +342,12 @@ importers:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../core
-      '@orchestrai/logger':
-        specifier: workspace:*
-        version: link:../logger
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       ioredis:
         specifier: ^6.0.0
         version: 6.0.0
@@ -384,29 +387,17 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
-  packages/logger:
-    devDependencies:
-      '@types/node':
-        specifier: ^26.6.1
-        version: 26.6.1
-      tsup:
-        specifier: ^8.5.1
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-
   packages/memory:
     dependencies:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../core
-      '@orchestrai/logger':
-        specifier: workspace:*
-        version: link:../logger
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -429,6 +420,9 @@ importers:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../core
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       ollama:
         specifier: '>=0.5.0'
         version: 0.6.3
@@ -454,12 +448,12 @@ importers:
 
   packages/observability:
     dependencies:
-      '@orchestrai/logger':
-        specifier: workspace:*
-        version: link:../logger
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
     devDependencies:
       tsup:
         specifier: ^8.5.1
@@ -476,6 +470,9 @@ importers:
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       bullmq:
         specifier: ^6.3.6
         version: 6.3.6(ioredis@6.0.0)
@@ -501,12 +498,12 @@ importers:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../core
-      '@orchestrai/logger':
-        specifier: workspace:*
-        version: link:../logger
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -554,6 +551,9 @@ importers:
       '@orchestrai/tools':
         specifier: workspace:*
         version: link:../tools
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -598,12 +598,12 @@ importers:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../core
-      '@orchestrai/logger':
-        specifier: workspace:*
-        version: link:../logger
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -2459,11 +2459,11 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
-  '@yuva-devlab/tokens@1.0.0':
-    resolution: {integrity: sha512-baiAcAn8Be64QVrHOVDlo50mQpA3jpq+QuRd3GgpV+PQ1BqnPIPeGRyJ3lgILBz87s6Jnos4ao5GN+k0walHUA==}
+  '@yuva-devlab/logger@1.1.0':
+    resolution: {integrity: sha512-lxj5yv09fNQmzZbhoo1UJbSepbI/PKNXC5rYDg+ITr5pF3njeLTW0L0uTMaOMI0HSgtTOYbnRPg1EXMUeTrBaQ==}
 
-  '@yuva-devlab/ui@1.0.1':
-    resolution: {integrity: sha512-p+Tk4wlKbcAADHdJkndKgrkFgMIaxqDAZDciRa/ZWXtCxxiuw1DrBnGv2O576I/eMSy/BO+scuJvW+oA6BQf2g==}
+  '@yuva-devlab/ui@1.1.0':
+    resolution: {integrity: sha512-TwYyZVi1NFDFXURvXmlI6YXSNFDCZTI/yGs1uC/FKTORPZ/Qhnb1Ydt3Skk4Pt8lD21v3p5/MSXMccbON/q90g==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
@@ -5570,9 +5570,9 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
-  '@yuva-devlab/tokens@1.0.0': {}
+  '@yuva-devlab/logger@1.1.0': {}
 
-  '@yuva-devlab/ui@1.0.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@yuva-devlab/ui@1.1.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@radix-ui/react-accordion': 1.2.20(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@radix-ui/react-alert-dialog': 1.1.23(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

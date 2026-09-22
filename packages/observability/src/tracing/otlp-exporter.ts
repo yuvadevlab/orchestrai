@@ -5,7 +5,9 @@
 
 import type { ISpanExporter } from "./span-exporter.interface";
 import type { Span } from "./span";
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
+
+const logger = loggerWithConfig(new Logger("OtlpExporter"));
 
 /**
  * Exporter posting standard OTLP JSON spans to an OpenTelemetry Collector HTTP endpoint.
@@ -69,7 +71,7 @@ export class OtlpHttpSpanExporter implements ISpanExporter {
         body: JSON.stringify(payload),
       });
     } catch (err) {
-      defaultLogger.warn("Failed to export trace spans to OTLP collector", {
+      logger.warn("Failed to export trace spans to OTLP collector", {
         endpoint: this.endpoint,
         error: String(err),
       });

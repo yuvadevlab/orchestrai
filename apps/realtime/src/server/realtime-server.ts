@@ -4,7 +4,7 @@
  */
 
 import { createServer, type Server } from "node:http";
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { ConnectionRegistry } from "@/connection";
 import { SubscriptionManager } from "@/subscriptions";
 import { RedisPubSubBroker } from "@/broker";
@@ -18,6 +18,7 @@ import type { RealtimeConfig } from "@/config";
  */
 export class RealtimeServer {
   private readonly config: RealtimeConfig;
+  private readonly logger: Logger;
   private httpServer?: Server;
   private wssGateway?: WsGateway;
   private redisBroker?: RedisPubSubBroker;
@@ -27,6 +28,7 @@ export class RealtimeServer {
 
   public constructor(config: RealtimeConfig) {
     this.config = config;
+    this.logger = loggerWithConfig(new Logger("RealtimeServer"));
     this.registry = new ConnectionRegistry(config.maxConnections);
     this.subscriptions = new SubscriptionManager();
   }
@@ -35,6 +37,7 @@ export class RealtimeServer {
    * Starts all services: Redis Pub/Sub, HTTP server, and WebSocket gateway.
    */
   public async start(): Promise<void> {
+    this.logger.info("Starting Realtime Server components...");
     // 1. Connect Redis broker with in-memory fallback if unavailable
     this.redisBroker = new RedisPubSubBroker(this.config.redisUrl);
     await this.redisBroker.start();
@@ -70,7 +73,7 @@ export class RealtimeServer {
     // 6. Start HTTP server listener
     await new Promise<void>((resolve) => {
       this.httpServer!.listen(this.config.port, this.config.host, () => {
-        defaultLogger.info("OrchestrAI Realtime Broker started", {
+        this.logger.info("OrchestrAI Realtime Broker started", {
           port: this.config.port,
           host: this.config.host,
         });
@@ -89,7 +92,7 @@ export class RealtimeServer {
     const delivered = this.subscriptions.broadcastToTopic(topic, message, this.registry);
 
     if (delivered > 0) {
-      defaultLogger.debug("Redis message fanned out", { channel, topic, delivered });
+      this.logger.debug("Redis message fanned out", { channel, topic, delivered });
     }
   }
 

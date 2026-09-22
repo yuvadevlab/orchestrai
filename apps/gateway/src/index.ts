@@ -3,8 +3,10 @@
  * @description Application bootstrap entry point for the OrchestrAI Public API Gateway.
  */
 
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { loadGatewayConfig } from "@/config";
+
+const logger = loggerWithConfig(new Logger("Gateway"));
 import {
   Router,
   registerHealthRoutes,
@@ -31,7 +33,7 @@ export * from "./server";
  */
 export async function bootstrap(): Promise<GatewayServer> {
   const config = loadGatewayConfig();
-  defaultLogger.info("Bootstrapping OrchestrAI Gateway service...", {
+  logger.info("Bootstrapping OrchestrAI Gateway service...", {
     host: config.gatewayHost,
     port: config.gatewayPort,
   });
@@ -58,7 +60,7 @@ export async function bootstrap(): Promise<GatewayServer> {
 // Auto-start when invoked directly in non-test environments
 if (process.env.NODE_ENV !== "test") {
   bootstrap().catch((err) => {
-    defaultLogger.error("Failed to start gateway server", { error: String(err) });
+    logger.error("Failed to start gateway server", { error: String(err) });
     process.exit(1);
   });
 }

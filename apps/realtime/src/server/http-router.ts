@@ -4,6 +4,7 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { Logger, loggerWithConfig, requestLogger } from "@yuva-devlab/logger";
 import { handleExecutionSseStream, handleGlobalSseStream } from "@/sse";
 import type { ConnectionRegistry } from "@/connection";
 import type { SubscriptionManager } from "@/subscriptions";
@@ -77,7 +78,14 @@ function handleNotFound(res: ServerResponse): void {
  * Master HTTP request dispatcher routing to appropriate handlers by method and path.
  */
 export function createHttpRouter(deps: RouterDeps) {
+  const logger = loggerWithConfig(new Logger("RealtimeRouter"));
+  const reqLogger = requestLogger(logger);
+
   return function dispatch(req: IncomingMessage, res: ServerResponse): void {
+    if (process.env.LOG_REQUESTS !== "false") {
+      reqLogger(req, res, () => {});
+    }
+
     const { url = "/", method = "GET" } = req;
     const origin = req.headers.origin ?? "*";
     const corsOrigin = deps.corsOrigins.includes(origin) ? origin : (deps.corsOrigins[0] ?? "*");
