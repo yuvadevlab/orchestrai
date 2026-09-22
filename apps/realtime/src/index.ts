@@ -5,10 +5,12 @@
  */
 
 import "dotenv/config";
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { loadRealtimeConfig } from "./config/realtime-config";
 import { RealtimeServer } from "./server/realtime-server";
 import { registerProcessLifecycle } from "./server/lifecycle";
+
+const logger = loggerWithConfig(new Logger("RealtimeIndex"));
 
 /**
  * Bootstrap function: initializes and starts the complete realtime streaming service.
@@ -17,7 +19,7 @@ async function bootstrap(): Promise<void> {
   // 1. Load and validate configuration from environment
   const config = loadRealtimeConfig(process.env as Record<string, string | undefined>);
 
-  defaultLogger.info("Starting OrchestrAI Realtime Streaming Broker", {
+  logger.info("Starting OrchestrAI Realtime Streaming Broker", {
     port: config.port,
     host: config.host,
     env: config.nodeEnv,
@@ -33,7 +35,7 @@ async function bootstrap(): Promise<void> {
   // 4. Start all services: Redis broker, HTTP server, WebSocket gateway
   await server.start();
 
-  defaultLogger.info("Realtime Streaming Broker ready", {
+  logger.info("Realtime Streaming Broker ready", {
     healthEndpoint: `http://${config.host}:${config.port}/health`,
     metricsEndpoint: `http://${config.host}:${config.port}/metrics`,
     sseEndpoint: `http://${config.host}:${config.port}/api/v1/executions/:id/stream`,
@@ -43,7 +45,7 @@ async function bootstrap(): Promise<void> {
 
 // Execute and handle top-level boot failures with descriptive process exit
 bootstrap().catch((err: unknown) => {
-  defaultLogger.error("Fatal startup error — process exiting", {
+  logger.error("Fatal startup error — process exiting", {
     error: err instanceof Error ? err.message : String(err),
   });
   process.exit(1);

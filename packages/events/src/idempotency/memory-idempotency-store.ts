@@ -3,7 +3,7 @@
  * @description Thread-safe, in-memory implementation of IIdempotencyStore with automatic expiration.
  */
 
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { IdempotencyRecord } from "./idempotency-record.schema";
 import type { AcquireKeyResult, IIdempotencyStore } from "./idempotency-store.interface";
 
@@ -14,7 +14,7 @@ export class MemoryIdempotencyStore implements IIdempotencyStore {
   /**
    * Internal logger instance for idempotency operations.
    */
-  private readonly logger = createLogger("MemoryIdempotencyStore");
+  private readonly logger = loggerWithConfig(new Logger("MemoryIdempotencyStore"));
 
   /**
    * Map storing active idempotency records indexed by key.

@@ -5,7 +5,7 @@
 
 import { WebSocketServer, WebSocket } from "ws";
 import type { Server as HttpServer, IncomingMessage } from "node:http";
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { ClientSession, ConnectionRegistry } from "@/connection";
 import { ServerMessageType } from "@/contracts";
 import type { SubscriptionManager } from "@/subscriptions";
@@ -29,9 +29,11 @@ export class WsGateway {
   private wss?: WebSocketServer;
   private heartbeatTimer?: NodeJS.Timeout;
   private readonly deps: WsGatewayDeps;
+  private readonly logger: Logger;
 
   public constructor(deps: WsGatewayDeps) {
     this.deps = deps;
+    this.logger = loggerWithConfig(new Logger("WsGateway"));
   }
 
   /**
@@ -49,7 +51,7 @@ export class WsGateway {
     });
 
     this.wss.on("error", (err) => {
-      defaultLogger.error("WebSocket server error", { error: String(err) });
+      this.logger.error("WebSocket server error", { error: String(err) });
     });
 
     // Start heartbeat sweep interval to detect dead connections
@@ -57,7 +59,7 @@ export class WsGateway {
       this.sweepDeadConnections();
     }, this.deps.heartbeatIntervalMs);
 
-    defaultLogger.info("WebSocket gateway attached on path /ws");
+    this.logger.info("WebSocket gateway attached on path /ws");
   }
 
   /**
@@ -116,11 +118,11 @@ export class WsGateway {
     socket.on("close", () => {
       this.deps.subscriptions.unsubscribeAll(sessionId);
       this.deps.registry.unregister(sessionId);
-      defaultLogger.debug("WebSocket client disconnected", { sessionId });
+      this.logger.debug("WebSocket client disconnected", { sessionId });
     });
 
     socket.on("error", (err) => {
-      defaultLogger.warn("WebSocket client error", { sessionId, error: String(err) });
+      this.logger.warn("WebSocket client error", { sessionId, error: String(err) });
     });
 
     // Mark socket as alive for heartbeat tracking
@@ -129,7 +131,7 @@ export class WsGateway {
       (socket as WebSocket & { isAlive?: boolean }).isAlive = true;
     });
 
-    defaultLogger.debug("WebSocket client connected", { sessionId });
+    this.logger.debug("WebSocket client connected", { sessionId });
   }
 
   /**

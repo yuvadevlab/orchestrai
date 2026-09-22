@@ -3,7 +3,7 @@
  * @description Distributed Redis-backed lock implementation using atomic Lua scripts.
  */
 
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { Redis } from "ioredis";
 import type { IDistributedLock, LockHandle } from "./distributed-lock.interface";
 import { LockOptionsSchema, type LockOptions } from "./lock-options.schema";
@@ -37,7 +37,7 @@ export class RedisDistributedLock implements IDistributedLock {
   /**
    * Logger instance for lock events.
    */
-  private readonly logger = createLogger("RedisDistributedLock");
+  private readonly logger = loggerWithConfig(new Logger("RedisDistributedLock"));
 
   /**
    * Constructs a RedisDistributedLock instance.

@@ -10,12 +10,12 @@
  * ─────────────────────────────────────────────────────────────────────
  */
 
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { SecurityAuditEvent } from "./audit-event.schema";
 import type { IAuditStore } from "./audit-store.interface";
 
 /** Package-scoped logger for security audit events */
-const logger = createLogger("Audit");
+const logger = loggerWithConfig(new Logger("Audit"));
 
 /**
  * IAuditLogger is the interface SandboxExecutor depends on.
@@ -58,7 +58,7 @@ export class MemoryAuditStore implements IAuditStore {
 }
 
 /**
- * Concrete audit logger that writes structured events via `@orchestrai/logger`
+ * Concrete audit logger that writes structured events via `@yuva-devlab/logger`
  * and optionally persists them to an IAuditStore backend.
  */
 export class AuditLogger implements IAuditLogger {

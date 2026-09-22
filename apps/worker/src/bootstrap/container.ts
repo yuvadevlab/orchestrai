@@ -11,7 +11,7 @@ import { ModelRegistry, createAdapter } from "@orchestrai/models";
 import { AgentMode, ModelProvider } from "@orchestrai/shared-types";
 import type { AgentDefinition, AgentId, TenantId } from "@orchestrai/core";
 import type { WorkerConfig } from "./config";
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import {
   AgentExecutionWorker,
   ToolExecutionWorker,
@@ -55,7 +55,7 @@ export async function createWorkerContainer(config: WorkerConfig): Promise<Worke
 
   // 3. Initialize model registry and default local adapter
   const modelRegistry = new ModelRegistry();
-  const logger = createLogger("WorkerContainer", { level: config.logLevel });
+  const logger = loggerWithConfig(new Logger("WorkerContainer"));
   try {
     const defaultAdapter = await createAdapter(ModelProvider.OLLAMA, {
       host: "http://localhost:11434",

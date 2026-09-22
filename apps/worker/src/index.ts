@@ -3,7 +3,7 @@
  * @description Master entry point and executable daemon for the OrchestrAI background worker.
  */
 
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import {
   loadWorkerConfig,
   createWorkerContainer,
@@ -11,7 +11,7 @@ import {
   type WorkerContainer,
 } from "./bootstrap";
 
-const logger = createLogger("WorkerBootstrap");
+const logger = loggerWithConfig(new Logger("WorkerBootstrap"));
 
 export * from "./bootstrap";
 export * from "./jobs";

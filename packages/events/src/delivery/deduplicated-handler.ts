@@ -3,7 +3,7 @@
  * @description Higher-order event handler wrapper enforcing exactly-once processing on top of at-least-once streams.
  */
 
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { DomainEventEnvelope } from "@orchestrai/core";
 import type { IIdempotencyStore } from "../idempotency";
 
@@ -35,7 +35,7 @@ export function createDeduplicatedHandler<TEvent extends DomainEventEnvelope>(
   handler: (event: TEvent) => Promise<void>,
   options?: DeduplicatedHandlerOptions,
 ): (event: TEvent) => Promise<void> {
-  const logger = createLogger("DeduplicatedHandler");
+  const logger = loggerWithConfig(new Logger("DeduplicatedHandler"));
   const ttlMs = options?.ttlMs ?? 60000;
   const getKey = options?.keyExtractor ?? ((e: DomainEventEnvelope) => e.eventId);
 

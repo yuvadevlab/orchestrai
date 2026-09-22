@@ -3,11 +3,13 @@
  * @description Validates and dispatches incoming WebSocket frames to subscription, auth, and action handlers.
  */
 
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { ChannelTopics, ClientMessageSchema, ServerMessageType } from "@/contracts";
 import type { ClientSession, ConnectionRegistry } from "@/connection";
 import type { SubscriptionManager } from "@/subscriptions";
 import { authenticateSession } from "./ws-authenticator";
+
+const logger = loggerWithConfig(new Logger("WsMessageHandler"));
 
 interface MessageHandlerDeps {
   readonly registry: ConnectionRegistry;
@@ -107,7 +109,7 @@ export function handleWsMessage(
 
     case "ACTION": {
       // Phase 12: Log action; actual approval/cancel routing handled by Gateway HTTP API
-      defaultLogger.info("WebSocket ACTION received", {
+      logger.info("WebSocket ACTION received", {
         sessionId: session.id,
         action: msg.action,
         executionId: msg.executionId,

@@ -3,7 +3,7 @@
  * @description Thread-safe, single-process in-memory implementation of IDistributedLock.
  */
 
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { IDistributedLock, LockHandle } from "./distributed-lock.interface";
 import { LockOptionsSchema, type LockOptions } from "./lock-options.schema";
 
@@ -14,7 +14,7 @@ export class MemoryDistributedLock implements IDistributedLock {
   /**
    * Internal logger instance.
    */
-  private readonly logger = createLogger("MemoryDistributedLock");
+  private readonly logger = loggerWithConfig(new Logger("MemoryDistributedLock"));
 
   /**
    * Active locks stored by resource key.

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @source "../**";
-@import "@yuva-devlab/tokens/preset.css";
-@import "@yuva-devlab/tokens/themes/orchestrai.css";
+@import "@yuva-devlab/ui/preset.css";
+@import "@yuva-devlab/ui/themes/orchestrai.css";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));

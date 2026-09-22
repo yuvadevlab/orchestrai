@@ -4,7 +4,7 @@
  */
 
 import { Redis } from "ioredis";
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { IRedisPubSubBroker, PubSubMessageHandler } from "./redis-pubsub-broker.interface";
 
 /**
@@ -12,6 +12,7 @@ import type { IRedisPubSubBroker, PubSubMessageHandler } from "./redis-pubsub-br
  */
 export class RedisPubSubBroker implements IRedisPubSubBroker {
   private readonly redisUrl: string;
+  private readonly logger: Logger;
   private publisher?: Redis;
   private subscriber?: Redis;
   private messageHandler?: PubSubMessageHandler;
@@ -21,6 +22,7 @@ export class RedisPubSubBroker implements IRedisPubSubBroker {
 
   public constructor(redisUrl: string) {
     this.redisUrl = redisUrl;
+    this.logger = loggerWithConfig(new Logger("RedisPubSubBroker"));
   }
 
   public get isConnected(): boolean {
@@ -46,11 +48,11 @@ export class RedisPubSubBroker implements IRedisPubSubBroker {
 
       // Attach error listeners to prevent uncaught exceptions
       this.publisher.on("error", (err) => {
-        defaultLogger.warn("Redis publisher connection warning", { error: String(err) });
+        this.logger.warn("Redis publisher connection warning", { error: String(err) });
       });
 
       this.subscriber.on("error", (err) => {
-        defaultLogger.warn("Redis subscriber connection warning", { error: String(err) });
+        this.logger.warn("Redis subscriber connection warning", { error: String(err) });
       });
 
       await Promise.all([this.publisher.connect(), this.subscriber.connect()]);
@@ -69,12 +71,12 @@ export class RedisPubSubBroker implements IRedisPubSubBroker {
       });
 
       this._isConnected = true;
-      defaultLogger.info("Redis Pub/Sub broker connected successfully", { url: this.redisUrl });
+      this.logger.info("Redis Pub/Sub broker connected successfully", { url: this.redisUrl });
     } catch (err) {
       // Invariant: In development or test environments, fallback to in-memory broker
       this.isFallbackMode = true;
       this._isConnected = true;
-      defaultLogger.warn("Redis Pub/Sub unavailable; falling back to in-process memory broker", {
+      this.logger.warn("Redis Pub/Sub unavailable; falling back to in-process memory broker", {
         error: String(err),
       });
     }

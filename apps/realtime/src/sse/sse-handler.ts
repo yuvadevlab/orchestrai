@@ -4,11 +4,13 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { defaultLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { ClientSession, ConnectionRegistry } from "@/connection";
 import { SubscriptionManager } from "@/subscriptions";
 import { ChannelTopics } from "@/contracts";
 import { configureSseHeaders, sendSseEvent, sendSseKeepalive, closeSseStream } from "./sse-channel";
+
+const logger = loggerWithConfig(new Logger("SseHandler"));
 
 interface SseHandlerDeps {
   readonly registry: ConnectionRegistry;
@@ -88,10 +90,10 @@ export function handleExecutionSseStream(
     deps.subscriptions.unsubscribeAll(sessionId);
     deps.registry.unregister(sessionId);
     closeSseStream(res, "Client disconnected");
-    defaultLogger.debug("SSE client disconnected", { sessionId, executionId });
+    logger.debug("SSE client disconnected", { sessionId, executionId });
   });
 
-  defaultLogger.info("SSE stream established", { sessionId, executionId });
+  logger.info("SSE stream established", { sessionId, executionId });
 }
 
 /**
@@ -145,6 +147,6 @@ export function handleGlobalSseStream(
     clearInterval(heartbeat);
     deps.subscriptions.unsubscribeAll(sessionId);
     deps.registry.unregister(sessionId);
-    defaultLogger.debug("Global SSE client disconnected", { sessionId });
+    logger.debug("Global SSE client disconnected", { sessionId });
   });
 }

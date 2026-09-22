@@ -3,7 +3,7 @@
  * @description Distributed Saga orchestrator executing forward steps and backward compensating steps.
  */
 
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { SagaState, type SagaDefinition, type SagaResult, type SagaStep } from "./saga.types";
 
 /**
@@ -13,7 +13,7 @@ export class SagaCoordinator {
   /**
    * Internal logger instance.
    */
-  private readonly logger = createLogger("SagaCoordinator");
+  private readonly logger = loggerWithConfig(new Logger("SagaCoordinator"));
 
   /**
    * Executes a defined Saga workflow.

@@ -4,9 +4,9 @@
  */
 
 import type { WorkerContainer } from "./container";
-import { createLogger } from "@orchestrai/logger";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 
-const logger = createLogger("Lifecycle");
+const logger = loggerWithConfig(new Logger("Lifecycle"));
 
 /**
  * Registers OS signal listeners and global crash handlers to ensure zero job corruption on exit.

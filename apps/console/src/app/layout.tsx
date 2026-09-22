@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import React from "react";
 import { JetBrains_Mono, Manrope, Sora } from "next/font/google";
-import { ThemeProvider, Toaster } from "@yuva-devlab/ui";
+import { ConfigProvider, Toaster } from "@yuva-devlab/ui";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 
 /**
  * Root Layout for OrchestrAI Console application.
- * Injects Google Fonts, global theme provider, toast notifications, and root document shell.
+ * Injects Google Fonts, brand-aware ConfigProvider, toast notifications, and root document shell.
  *
  * @param props.children - Route segment children.
  */
@@ -44,10 +44,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       className={`${manrope.variable} ${sora.variable} ${jetbrainsMono.variable}`}
     >
       <body className="bg-background text-foreground min-h-screen font-sans antialiased">
-        <ThemeProvider defaultTheme="orchestrai" storageKey="orchestrai-theme">
+        <ConfigProvider brand="orchestrai" defaultTheme="dark" storageKey="orchestrai-theme">
           {children}
           <Toaster />
-        </ThemeProvider>
+        </ConfigProvider>
       </body>
     </html>
   );

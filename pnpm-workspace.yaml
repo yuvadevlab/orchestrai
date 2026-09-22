@@ -15,5 +15,7 @@ minimumReleaseAgeExclude:
   - turbo@2.11.1
   - "@yuva-devlab/tokens@1.0.0"
   - "@yuva-devlab/ui@1.0.1"
+  - "@yuva-devlab/ui@1.1.0"
+  - "@yuva-devlab/logger@1.1.0"
 overrides:
   rollup-plugin-dts: "^6.5.1"
