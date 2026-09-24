@@ -1,6 +1,0 @@
-apiVersion: v2
-name: orchestrai
-description: Helm chart for OrchestrAI modular AI agent orchestration platform
-type: application
-version: 0.1.0
-appVersion: "1.0.0"

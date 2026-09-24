@@ -15,6 +15,14 @@ import {
   registerAgentRoutes,
   registerRagRoutes,
   registerApprovalRoutes,
+  registerAuthRoutes,
+  registerLlmProviderRoutes,
+  registerLlmModelRoutes,
+  registerPlatformModeRoutes,
+  registerNavItemRoutes,
+  registerPlatformRoleRoutes,
+  registerPlatformPermissionRoutes,
+  registerPlatformToolRoutes,
 } from "@/routes";
 import { GatewayServer, registerProcessLifecycle } from "@/server";
 
@@ -40,13 +48,26 @@ export async function bootstrap(): Promise<GatewayServer> {
 
   const router = new Router();
 
-  // Register all subsystem REST route handlers
+  // Register root health probes
   registerHealthRoutes(router);
-  registerExecutionRoutes(router);
-  registerConversationRoutes(router);
-  registerAgentRoutes(router);
-  registerRagRoutes(router);
-  registerApprovalRoutes(router);
+
+  // Group all v1 API feature routes under /api/v1 prefix
+  router.group("/api/v1", (api) => {
+    registerAuthRoutes(api);
+    registerExecutionRoutes(api);
+    registerConversationRoutes(api);
+    registerAgentRoutes(api);
+    registerRagRoutes(api);
+    registerApprovalRoutes(api);
+    // Individual service routes for providers, models, modes, nav items, roles, permissions, tools
+    registerLlmProviderRoutes(api);
+    registerLlmModelRoutes(api);
+    registerPlatformModeRoutes(api);
+    registerNavItemRoutes(api);
+    registerPlatformRoleRoutes(api);
+    registerPlatformPermissionRoutes(api);
+    registerPlatformToolRoutes(api);
+  });
 
   const server = new GatewayServer(config, router);
 

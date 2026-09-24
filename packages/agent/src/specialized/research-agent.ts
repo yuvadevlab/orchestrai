@@ -4,9 +4,10 @@
  * @module @orchestrai/agent/specialized
  */
 
-import { AgentMode, ModelProvider } from "@orchestrai/shared-types";
+import { AgentMode } from "@orchestrai/shared-types";
+import { RESEARCHER_PERSONA_PROMPT } from "@orchestrai/prompts";
 import { AgentBuilder } from "../builder/agent-builder";
-import { AgentDefinition } from "@orchestrai/core";
+import { AgentDefinition, AGENT_EXECUTION_DEFAULTS } from "@orchestrai/core";
 
 /** Configuration options for initializing a ResearchAgent */
 export interface ResearchAgentOptions {
@@ -22,21 +23,26 @@ export interface ResearchAgentOptions {
  * @returns Configured AgentDefinition instance.
  */
 export function createResearchAgent(options?: ResearchAgentOptions): AgentDefinition {
-  return new AgentBuilder()
+  const builder = new AgentBuilder()
     .withName(options?.name ?? "Research Assistant")
     .withDescription(
       "Specialized agent executing multi-step web research, document parsing, and citation synthesis.",
     )
     .withMode(AgentMode.PLAN)
-    .withSystemPrompt(
-      "You are a specialized Research Agent. Your task is to inspect facts, retrieve relevant documents, verify sources, and synthesize comprehensive reports with structured citations.",
-    )
-    .withModel({
-      provider: ModelProvider.OPENAI,
-      modelName: options?.model ?? "gpt-4o-mini",
-      temperature: 0.2,
-    })
+    .withSystemPrompt(RESEARCHER_PERSONA_PROMPT)
     .withTools(["http_fetch", "read_file", "list_directory"])
-    .withMaxSteps(options?.maxSteps ?? 20)
-    .build();
+    .withMaxSteps(options?.maxSteps ?? AGENT_EXECUTION_DEFAULTS.DEFAULT_MAX_STEPS);
+
+  if (options?.model) {
+    builder.withModel({
+      modelName: options.model,
+      temperature: AGENT_EXECUTION_DEFAULTS.FACTUAL_TEMPERATURE,
+    });
+  } else {
+    builder.withModel({
+      temperature: AGENT_EXECUTION_DEFAULTS.FACTUAL_TEMPERATURE,
+    });
+  }
+
+  return builder.build();
 }

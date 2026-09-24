@@ -1,69 +1,134 @@
-import React from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@yuva-devlab/ui";
-import { cn } from "@/lib/utils";
+/**
+ * @file page-shell.tsx
+ * @description Standard page container for all Console routes.
+ *
+ * Composes `PageHeader` for the shared header row and wraps page content
+ * in a scrollable `<main>` region. All routes that use `PageShell` get the
+ * same header/content split without duplicating layout logic.
+ *
+ * @module apps/console/components/layout
+ */
 
+import React from "react";
+import { cn } from "@/lib/utils";
+import { PageHeader } from "./page-header";
+import type { BreadcrumbSegment } from "./page-header";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+/**
+ * Props accepted by the `PageShell` layout wrapper.
+ *
+ * All header customisations are forwarded to `PageHeader` internally.
+ */
 export interface PageShellProps {
+  /** Primary page heading (maps to PageHeader `heading`). */
   title: string;
+
+  /**
+   * Optional single breadcrumb label appended after "OrchestrAI".
+   * Provide a full `breadcrumbs` array instead when you need custom hrefs
+   * or more than two levels of depth.
+   */
   breadcrumb?: string;
-  description?: string;
+
+  /**
+   * Fully custom breadcrumb trail.
+   * When provided, takes precedence over the `breadcrumb` shorthand.
+   */
+  breadcrumbs?: BreadcrumbSegment[];
+
+  /**
+   * Right-side slot for the header Row 1.
+   * Accepts stats chips, action buttons, badge pills, or any ReactNode.
+   * `stats` (plain string) and `actions` (buttons) are merged here and
+   * rendered together so callers can still pass them separately.
+   */
+  stats?: React.ReactNode;
+  /** Action buttons or icon controls rendered in the right header slot. */
   actions?: React.ReactNode;
+
+  /**
+   * Optional muted description rendered below the `<h1>`.
+   * Maps directly to PageHeader `subHeading`.
+   */
+  description?: string;
+
+  /** Page body content rendered inside the scrollable `<main>` region. */
   children: React.ReactNode;
+
+  /** Extra className applied to the `<main>` element. */
   className?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 /**
- * Standard page container for all Console routes.
- * Provides the signature breadcrumb header, typography hierarchy, and scroll area.
+ * Standard page container shared by every Console route.
+ *
+ * Renders:
+ *   • `PageHeader` — breadcrumb, title, right-side stats/actions, description
+ *   • `<main>` — scrollable content viewport
+ *
+ * @example
+ * ```tsx
+ * <PageShell
+ *   title="Agents"
+ *   breadcrumb="Agents"
+ *   stats="12 registered"
+ *   actions={<Button size="sm">Register Agent</Button>}
+ *   description="Live agent definitions in the local cluster."
+ * >
+ *   <AgentGrid />
+ * </PageShell>
+ * ```
  */
 export function PageShell({
   title,
   breadcrumb,
-  description,
+  breadcrumbs: breadcrumbsProp,
+  stats,
   actions,
+  description,
   children,
   className,
 }: PageShellProps): React.JSX.Element {
+  /**
+   * Resolve the breadcrumb trail.
+   * Priority: explicit `breadcrumbs` array > shorthand `breadcrumb` string.
+   */
+  const resolvedBreadcrumbs: BreadcrumbSegment[] = breadcrumbsProp
+    ? breadcrumbsProp
+    : [{ label: "OrchestrAI", href: "/" }, ...(breadcrumb ? [{ label: breadcrumb }] : [])];
+
+  /**
+   * Merge `stats` and `actions` into a single right-side ReactNode.
+   * Both are optional; rendering is skipped when neither is provided.
+   */
+  const rightContent =
+    stats || actions ? (
+      <>
+        {stats ? <span className="text-muted-foreground font-mono text-xs">{stats}</span> : null}
+        {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+      </>
+    ) : undefined;
+
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-      {/* Sticky Header */}
-      <header className="border-border bg-background/95 shrink-0 border-b px-4 py-3 backdrop-blur md:px-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="min-w-0">
-            <Breadcrumb className="mb-1">
-              <BreadcrumbList className="text-muted-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">OrchestrAI</BreadcrumbLink>
-                </BreadcrumbItem>
-                {breadcrumb ? (
-                  <>
-                    <BreadcrumbSeparator className="[&>svg]:size-3" />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>{breadcrumb}</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </>
-                ) : null}
-              </BreadcrumbList>
-            </Breadcrumb>
-            <h1 className="font-display text-lg leading-tight font-semibold">{title}</h1>
-          </div>
-          {actions ? <div className="ml-auto flex items-center gap-2">{actions}</div> : null}
-        </div>
-        {description ? (
-          <p className="text-muted-foreground mt-1 max-w-3xl text-xs">{description}</p>
-        ) : null}
-      </header>
+      {/* Shared header — breadcrumb, h1, right-side stats/actions, description */}
+      <PageHeader
+        breadcrumbs={resolvedBreadcrumbs}
+        heading={title}
+        subHeading={description}
+        rightContent={rightContent}
+      />
 
-      {/* Main Viewport Content */}
-      <main className={cn("min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6", className)}>
-        {children}
-      </main>
+      {/* Main Viewport — scrollable page content */}
+      <main className={cn("min-h-0 flex-1 overflow-y-auto p-6", className)}>{children}</main>
     </div>
   );
 }

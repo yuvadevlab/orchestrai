@@ -5,7 +5,7 @@
 
 import { z } from "zod";
 import dotenv from "dotenv";
-import { ValidationError } from "@orchestrai/core";
+import { ValidationError, AGENT_EXECUTION_DEFAULTS } from "@orchestrai/core";
 
 // Load local environment variables from .env file if present
 dotenv.config();
@@ -43,6 +43,51 @@ export const WorkerConfigSchema = z.object({
 
   /** Maximum milliseconds to wait for active jobs to complete during graceful shutdown */
   gracefulShutdownTimeoutMs: z.coerce.number().int().positive().default(15_000),
+
+  /** Default application-wide LLM Provider configured via environment */
+  defaultModelProvider: z.string().default(process.env.DEFAULT_MODEL_PROVIDER || "ollama"),
+  /** Default application-wide LLM Model configured via environment */
+  defaultModelName: z.string().default(process.env.DEFAULT_MODEL_NAME || "qwen2.5:7b"),
+  /** Default sampling temperature for worker-orchestrated agents */
+  defaultAgentTemperature: z.coerce
+    .number()
+    .min(0)
+    .max(2)
+    .default(
+      process.env.DEFAULT_AGENT_TEMPERATURE
+        ? Number(process.env.DEFAULT_AGENT_TEMPERATURE)
+        : AGENT_EXECUTION_DEFAULTS.DEFAULT_TEMPERATURE,
+    ),
+  /** Default max steps for worker-orchestrated agents */
+  defaultMaxSteps: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(
+      process.env.DEFAULT_MAX_AGENT_STEPS
+        ? Number(process.env.DEFAULT_MAX_AGENT_STEPS)
+        : AGENT_EXECUTION_DEFAULTS.DEFAULT_MAX_STEPS,
+    ),
+  /** Default context window size for fallback model adapters */
+  defaultContextWindow: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(
+      process.env.DEFAULT_CONTEXT_WINDOW
+        ? Number(process.env.DEFAULT_CONTEXT_WINDOW)
+        : AGENT_EXECUTION_DEFAULTS.DEFAULT_CONTEXT_WINDOW,
+    ),
+  /** Default max output tokens for fallback model adapters */
+  defaultMaxOutputTokens: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(
+      process.env.DEFAULT_MAX_OUTPUT_TOKENS
+        ? Number(process.env.DEFAULT_MAX_OUTPUT_TOKENS)
+        : AGENT_EXECUTION_DEFAULTS.DEFAULT_MAX_OUTPUT_TOKENS,
+    ),
 });
 
 export type WorkerConfig = z.infer<typeof WorkerConfigSchema>;
@@ -66,6 +111,12 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv = process.env): WorkerCo
     workerId: env.WORKER_ID,
     logLevel: env.LOG_LEVEL,
     gracefulShutdownTimeoutMs: env.GRACEFUL_SHUTDOWN_TIMEOUT_MS,
+    defaultModelProvider: env.DEFAULT_MODEL_PROVIDER,
+    defaultModelName: env.DEFAULT_MODEL_NAME,
+    defaultAgentTemperature: env.DEFAULT_AGENT_TEMPERATURE,
+    defaultMaxSteps: env.DEFAULT_MAX_AGENT_STEPS,
+    defaultContextWindow: env.DEFAULT_CONTEXT_WINDOW,
+    defaultMaxOutputTokens: env.DEFAULT_MAX_OUTPUT_TOKENS,
   });
 
   // Guard against invalid configuration and provide clear diagnostics

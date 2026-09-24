@@ -1,19 +1,16 @@
-import React from "react";
-import { PageShell } from "@/components/layout/page-shell";
-import { AgentsPageContent } from "@/features/agents";
-
 /**
- * SSR Page Shell for Agent Roster Management.
- * Delegating all client state and interactive rendering to AgentsPageContent.
+ * @file page.tsx
+ * @description Agent Roster route.
+ * @module apps/console/app/(dashboard)/agents
  */
+
+import React from "react";
+import dynamic from "next/dynamic";
+
+const AgentsPageContent = dynamic(() =>
+  import("@/features/agents").then((m) => ({ default: m.AgentsPageContent })),
+);
+
 export default function AgentsPage(): React.JSX.Element {
-  return (
-    <PageShell
-      title="Agent Roster"
-      breadcrumb="Agents"
-      description="Every autonomous agent entity available to the orchestrator, with its operating mode, capabilities, and reliability."
-    >
-      <AgentsPageContent />
-    </PageShell>
-  );
+  return <AgentsPageContent />;
 }

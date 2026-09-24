@@ -23,7 +23,6 @@ export interface OrchestrAIClientOptions {
 
   /**
    * Multi-tenant partition identifier.
-   * @default "default-tenant"
    */
   tenantId?: string;
 

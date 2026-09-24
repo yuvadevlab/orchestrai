@@ -23,12 +23,12 @@ export interface RequestOptions {
  */
 export class HttpClient {
   private readonly baseUrl: string;
-  private readonly tenantId: string;
+  private readonly tenantId?: string;
   private readonly retryPolicy: RetryPolicy;
 
   constructor(private readonly options: OrchestrAIClientOptions = {}) {
     this.baseUrl = (options.baseUrl || "http://localhost:8000").replace(/\/$/, "");
-    this.tenantId = options.tenantId || "default-tenant";
+    this.tenantId = options.tenantId;
     this.retryPolicy = new RetryPolicy({ maxRetries: options.maxRetries ?? 3 });
   }
 
@@ -131,7 +131,7 @@ export class HttpClient {
   ): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      "X-Tenant-ID": this.tenantId,
+      ...(this.tenantId ? { "X-Tenant-ID": this.tenantId } : {}),
       ...this.options.customHeaders,
       ...options.headers,
     };

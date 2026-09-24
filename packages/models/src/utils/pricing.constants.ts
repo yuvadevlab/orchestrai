@@ -1,17 +1,8 @@
 /**
  * @file packages/models/src/utils/pricing.constants.ts
- * @description Hardcoded per-token pricing rates for supported LLM providers.
- *
- * ─── Why hardcoded? (Learning note) ──────────────────────────────────────────
- * Pricing configs loaded from a database or API introduce I/O latency and
- * failure modes into every cost estimate call. Since pricing changes infrequently
- * (usually quarterly), constants are the right trade-off for now.
- * When pricing changes: update these constants and bump the package version.
- * ────────────────────────────────────────────────────────────────────────────
- *
- * Prices are in USD per 1,000 tokens (millicents per token * 10).
- * Source: Provider pricing pages as of 2025-09.
- * Local models (Ollama) have zero cost.
+ * @description Dynamic token pricing configuration and fallback rate defaults.
+ * Pricing rates are dynamically stored in and loaded from the database catalog (llm_models.defaultConfig).
+ * @module @orchestrai/models/utils
  */
 
 import type { ModelProvider } from "@orchestrai/core";
@@ -28,46 +19,61 @@ export interface TokenPricingConfig {
 }
 
 /**
- * Pricing registry keyed by `"provider/modelName"`.
- * Add new models here when pricing is needed for cost tracking.
- *
- * Design note: We use a plain Record rather than a Map because this data
- * is static and known at compile time — a Map would add runtime overhead
- * with no benefit for a static lookup table.
+ * Default zero-cost pricing config for local or unconfigured models.
  */
-export const MODEL_PRICING: Readonly<Record<string, TokenPricingConfig>> = {
-  // ── Ollama (local) ─────────────────────────────────────────────────────────
-  // All local models are free — cost is only hardware/electricity
-  "ollama/qwen2.5:7b": { promptPer1kUsd: 0, completionPer1kUsd: 0 },
-  "ollama/llama3.2:3b": { promptPer1kUsd: 0, completionPer1kUsd: 0 },
-  "ollama/mistral:7b": { promptPer1kUsd: 0, completionPer1kUsd: 0 },
-  "ollama/deepseek-r1:7b": { promptPer1kUsd: 0, completionPer1kUsd: 0 },
-
-  // ── OpenAI ─────────────────────────────────────────────────────────────────
-  "openai/gpt-4o": { promptPer1kUsd: 0.005, completionPer1kUsd: 0.015 },
-  "openai/gpt-4o-mini": { promptPer1kUsd: 0.00015, completionPer1kUsd: 0.0006 },
-  "openai/gpt-4-turbo": { promptPer1kUsd: 0.01, completionPer1kUsd: 0.03 },
-  "openai/o1": { promptPer1kUsd: 0.015, completionPer1kUsd: 0.06 },
-  "openai/o1-mini": { promptPer1kUsd: 0.003, completionPer1kUsd: 0.012 },
-
-  // ── Anthropic ──────────────────────────────────────────────────────────────
-  "anthropic/claude-3-5-sonnet-20241022": { promptPer1kUsd: 0.003, completionPer1kUsd: 0.015 },
-  "anthropic/claude-3-5-haiku-20241022": { promptPer1kUsd: 0.0008, completionPer1kUsd: 0.004 },
-  "anthropic/claude-3-opus-20240229": { promptPer1kUsd: 0.015, completionPer1kUsd: 0.075 },
+export const DEFAULT_TOKEN_PRICING: TokenPricingConfig = {
+  promptPer1kUsd: 0,
+  completionPer1kUsd: 0,
 };
 
 /**
- * Resolves pricing config for a given provider + model name.
- * Falls back to zero-cost config if the model is not in the registry,
- * so unconfigured models don't crash cost estimation.
+ * Dynamic in-memory pricing cache keyed by "provider/modelIdentifier".
+ * Dynamically registered at runtime when model records are queried from the database.
+ */
+const dynamicPricingStore = new Map<string, TokenPricingConfig>();
+
+/**
+ * Registers pricing rates dynamically from database records or API responses.
  *
- * @param provider - ModelProvider enum value
- * @param modelName - Provider model name string
+ * @param provider - Provider identifier (e.g. "openai", "anthropic", "ollama")
+ * @param modelIdentifier - Model identifier string
+ * @param pricing - Pricing rates in USD per 1k tokens
+ */
+export function registerModelPricing(
+  provider: string,
+  modelIdentifier: string,
+  pricing: TokenPricingConfig,
+): void {
+  const key = `${provider}/${modelIdentifier}`.toLowerCase();
+  dynamicPricingStore.set(key, pricing);
+}
+
+/**
+ * Resolves pricing config for a given provider + model name.
+ * Uses dynamic registered pricing if present, or optional explicit override,
+ * falling back to zero-cost config so unconfigured models don't crash cost estimation.
+ *
+ * @param provider - ModelProvider enum value or string
+ * @param modelName - Provider model identifier string
+ * @param explicitPricing - Optional explicit pricing override
  * @returns TokenPricingConfig (zero cost if model is unknown)
  */
-export function resolvePricing(provider: ModelProvider, modelName: string): TokenPricingConfig {
-  const key = `${provider}/${modelName}`;
-  // Fall back to zero-cost rather than throwing — unknown models shouldn't
-  // block execution, they just won't have accurate cost tracking
-  return MODEL_PRICING[key] ?? { promptPer1kUsd: 0, completionPer1kUsd: 0 };
+export function resolvePricing(
+  provider?: ModelProvider | string,
+  modelName?: string,
+  explicitPricing?: TokenPricingConfig,
+): TokenPricingConfig {
+  // 1. Honor explicit pricing override if provided by caller
+  if (explicitPricing) {
+    return explicitPricing;
+  }
+
+  // 2. If provider or model name is missing, fall back to default zero cost
+  if (!provider || !modelName) {
+    return DEFAULT_TOKEN_PRICING;
+  }
+
+  // 3. Look up dynamically registered pricing from database model catalog
+  const key = `${provider}/${modelName}`.toLowerCase();
+  return dynamicPricingStore.get(key) ?? DEFAULT_TOKEN_PRICING;
 }

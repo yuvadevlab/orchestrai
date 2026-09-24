@@ -2,8 +2,10 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
+  "@prisma/engines": true
   esbuild: true
   msgpackr-extract: true
+  prisma: true
 minimumReleaseAgeExclude:
   - "@turbo/darwin-64@2.11.1"
   - "@turbo/darwin-arm64@2.11.1"
@@ -19,3 +21,7 @@ minimumReleaseAgeExclude:
   - "@yuva-devlab/logger@1.1.0"
 overrides:
   rollup-plugin-dts: "^6.5.1"
+  # Redirect @yuva-devlab/ui to the local devlab-shared source so theme and
+  # component changes take effect immediately without a publish cycle.
+  # This link: protocol is pnpm-native — no symlink management needed manually.
+  "@yuva-devlab/ui": "link:../devlab-shared/packages/ui"

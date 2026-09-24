@@ -41,9 +41,11 @@ export function sanitizePath(candidatePath: string, allowedRoot: string): string
     : path.resolve(resolvedRoot, candidatePath);
 
   // Check if resolved target begins with the allowed root path + separator
-  // (or is exactly equal to the allowed root)
+  // (or is exactly equal to the allowed root, or root is root directory '/')
   const isContained =
-    resolvedTarget === resolvedRoot || resolvedTarget.startsWith(`${resolvedRoot}${path.sep}`);
+    resolvedTarget === resolvedRoot ||
+    resolvedRoot === path.sep ||
+    resolvedTarget.startsWith(`${resolvedRoot}${path.sep}`);
 
   if (!isContained) {
     throw new OrchestrAIError(

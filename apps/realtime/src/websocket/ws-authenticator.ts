@@ -1,8 +1,10 @@
 /**
  * @file apps/realtime/src/websocket/ws-authenticator.ts
- * @description Validates client tokens on WebSocket connections and populates session identity.
+ * @description Validates HMAC signed tokens on WebSocket connections and populates session identity.
+ * @module apps/realtime/websocket
  */
 
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { IncomingMessage } from "node:http";
 import type { ConnectionRegistry } from "@/connection";
 
@@ -10,47 +12,83 @@ export interface AuthResult {
   readonly authenticated: boolean;
   readonly userId?: string;
   readonly tenantId?: string;
+  readonly email?: string;
   readonly reason?: string;
 }
 
+interface DecodedClaims {
+  sub: string;
+  tenantId: string;
+  email: string;
+  role: string;
+  exp: number;
+}
+
 /**
- * Performs lightweight auth validation for incoming WebSocket upgrade requests.
+ * Verifies an HMAC-SHA256 session token against configured secret.
+ */
+function verifySessionToken(token: string, secret: string): DecodedClaims | null {
+  try {
+    if (!token.startsWith("orch_tok.")) return null;
+    const parts = token.slice("orch_tok.".length).split(".");
+    if (parts.length !== 2) return null;
+
+    const [encodedPayload, providedSignature] = parts;
+    if (!encodedPayload || !providedSignature) return null;
+
+    const expectedSignature = createHmac("sha256", secret)
+      .update(encodedPayload)
+      .digest("base64url");
+
+    const providedBuffer = Buffer.from(providedSignature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+
+    if (providedBuffer.length !== expectedBuffer.length) return null;
+    if (!timingSafeEqual(providedBuffer, expectedBuffer)) return null;
+
+    const decoded = JSON.parse(
+      Buffer.from(encodedPayload, "base64url").toString("utf-8"),
+    ) as DecodedClaims;
+    if (Date.now() > decoded.exp) return null;
+
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Performs auth validation for incoming WebSocket upgrade requests.
  *
  * @param req - Upgrade HTTP request containing Authorization or token query param
  * @param jwtSecret - Secret key for verifying bearer tokens
  * @returns AuthResult indicating success and principal identity
  */
 export function validateWsUpgradeToken(req: IncomingMessage, jwtSecret: string): AuthResult {
-  // Extract token from Authorization header or 'token' query parameter
   const authHeader = req.headers.authorization ?? "";
   const urlParams = new URLSearchParams(req.url?.split("?")[1] ?? "");
   const tokenFromQuery = urlParams.get("token") ?? "";
 
   const rawToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : tokenFromQuery;
 
-  // Guard: Allow anonymous connections in development; require token in production
   if (!rawToken) {
-    // Development-mode anonymous identity
-    return {
-      authenticated: false,
-      reason: "No authentication token provided",
-    };
+    return { authenticated: false, reason: "No authentication token provided" };
   }
 
-  // Invariant: In production this must perform full JWT signature verification.
-  // For Phase 12 we validate the token's presence and non-emptiness.
-  // Phase 19 (Observability + Security) will add full RS256 JWT verification.
-  if (rawToken.length < 8 || !jwtSecret) {
-    return {
-      authenticated: false,
-      reason: "Token too short or JWT secret missing",
-    };
+  if (!jwtSecret) {
+    return { authenticated: false, reason: "JWT secret unconfigured" };
   }
 
-  // Stub successful auth with a deterministic userId derived from token prefix
+  const claims = verifySessionToken(rawToken, jwtSecret);
+  if (!claims) {
+    return { authenticated: false, reason: "Invalid or expired token" };
+  }
+
   return {
     authenticated: true,
-    userId: `user:${rawToken.slice(0, 8)}`,
+    userId: claims.sub,
+    tenantId: claims.tenantId,
+    email: claims.email,
   };
 }
 
@@ -69,18 +107,20 @@ export function authenticateSession(
   jwtSecret: string,
   registry: ConnectionRegistry,
 ): AuthResult {
-  // Guard: Ensure secret is provided for signature verification
   if (!jwtSecret) {
     return { authenticated: false, reason: "JWT secret unconfigured" };
   }
 
-  if (!token || token.length < 8) {
-    return { authenticated: false, reason: "Invalid token format" };
+  const claims = verifySessionToken(token, jwtSecret);
+  if (!claims) {
+    return { authenticated: false, reason: "Invalid or expired token" };
   }
 
-  // Phase 12: stub identity extraction; Phase 19 will add full JWT decoding
-  const userId = `user:${token.slice(0, 8)}`;
-  registry.bindUser(sessionId, userId);
-
-  return { authenticated: true, userId };
+  registry.bindUser(sessionId, claims.sub);
+  return {
+    authenticated: true,
+    userId: claims.sub,
+    tenantId: claims.tenantId,
+    email: claims.email,
+  };
 }

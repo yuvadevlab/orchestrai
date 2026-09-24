@@ -3,21 +3,24 @@
  * @description REST API routes for registering, querying, and updating agent definitions.
  */
 
-import type { Router } from "./router";
+import type { RouteGroup } from "./router";
 import { AgentController } from "@/controllers";
 
 /**
- * Registers agent definition routes onto the gateway router.
+ * Registers agent definition routes onto the gateway router scoped under /agents.
  *
- * @param router - Gateway router instance
+ * @param api - Scoped API v1 route group instance
  * @param controller - Agent controller instance
  */
 export function registerAgentRoutes(
-  router: Router,
+  api: RouteGroup,
   controller: AgentController = new AgentController(),
 ): void {
-  router.get("/api/v1/agents", (req, res) => controller.listAgents(req, res));
-  router.post("/api/v1/agents", (req, res) => controller.createAgent(req, res));
-  router.get("/api/v1/agents/:id", (req, res) => controller.getAgent(req, res));
-  router.put("/api/v1/agents/:id", (req, res) => controller.updateAgent(req, res));
+  api.group("/agents", (group) => {
+    group.get("/", (req, res) => controller.listAgents(req, res));
+    group.post("/", (req, res) => controller.createAgent(req, res));
+    group.get("/:id", (req, res) => controller.getAgent(req, res));
+    group.put("/:id", (req, res) => controller.updateAgent(req, res));
+    group.delete("/:id", (req, res) => controller.deleteAgent(req, res));
+  });
 }

@@ -8,35 +8,35 @@ Welcome to **OrchestrAI**, a local-first, modular AI agent orchestration platfor
 
 ### Applications (`apps/*`)
 
-| Application                                                                                         |  Port  | Purpose & Primary Responsibility                                                                                                                                            |
-| :-------------------------------------------------------------------------------------------------- | :----: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[`apps/gateway`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/gateway)**   | `8000` | **Public API Gateway**: Central REST HTTP endpoint managing tenant authentication, rate limiting, request context, and routing requests to internal runtime services.       |
-| **[`apps/realtime`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/realtime)** | `8001` | **Realtime Streaming Broker**: Standalone WebSocket and Server-Sent Events (SSE) gateway multiplexing domain events and presence channels to frontend clients.              |
-| **[`apps/worker`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/worker)**     |  N/A   | **Asynchronous Worker Application**: Background process running BullMQ processors, long-running agent DAG executions, document chunking, and DLQ maintenance.               |
-| **[`apps/console`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/console)**   | `3001` | **Console Dashboard UI**: Modern Next.js 15 App Router interface providing interactive prompt execution, live SSE DAG streaming, agent builder cards, and telemetry charts. |
+| Application                                                                                         |  Port  | Purpose & Primary Responsibility                                                                                                                                           |
+| :-------------------------------------------------------------------------------------------------- | :----: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[`apps/gateway`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/gateway)**   | `4001` | **Public API Gateway**: Central REST HTTP endpoint managing tenant authentication, rate limiting, request context, and routing requests to internal runtime services.      |
+| **[`apps/realtime`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/realtime)** | `4002` | **Realtime Streaming Broker**: Standalone WebSocket and Server-Sent Events (SSE) gateway multiplexing domain events and presence channels to frontend clients.             |
+| **[`apps/worker`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/worker)**     | `4003` | **Asynchronous Worker Application**: Background process running BullMQ processors, long-running agent DAG executions, document chunking, and DLQ maintenance.              |
+| **[`apps/console`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/console)**   | `3001` | **Universal Cowork Studio UI**: Modern Next.js 15 interface providing interactive prompt execution, threaded sessions, reasoning drawers, artifacts, and telemetry stream. |
 
 ---
 
 ### Workspace Packages (`packages/*`)
 
-| Package                                                                                                                  | Purpose & Primary Responsibility                                                                                                                                                                               |
-| :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[`@orchestrai/core`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/core)**                   | **Absolute Source of Truth**: Houses all domain contracts, Zod schemas, branded UUID identifiers, and domain error hierarchies with zero workspace dependencies.                                               |
-| **[`@orchestrai/shared-types`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/shared-types)**   | **Shared Enums & Constants**: Common enums (`AgentMode`, `ExecutionStatus`, `MessageRole`, `ModelProvider`, `ToolPermissionLevel`).                                                                            |
-| **[`@orchestrai/models`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/models)**               | **LLM Adapter Layer**: Unified `ILlmAdapter` interface connecting to Ollama, OpenAI, and Anthropic with token pricing & usage aggregators.                                                                     |
-| **[`@orchestrai/tools`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/tools)**                 | **Security Perimeter & Tools**: Tool catalog (`read_file`, `write_file`, `bash`, `http_fetch`) with path jail sandboxing, SSRF allowlists, and permission clearance evaluators.                                |
-| **[`@orchestrai/agent`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/agent)**                 | **Agent Loop & Mode Enforcer**: State machine controller, multi-tier prompt compiler, mode constraint enforcer (`CHAT`, `PLAN`, `ACT`, `AUTO`), and specialized agents (`ResearchAgent`, `DeveloperAgent`).    |
-| **[`@orchestrai/runtime`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/runtime)**             | **DAG Execution & StateGraph**: Directed state graph engine, durable PostgreSQL checkpointer, rewind time-travel, crash recovery, caching (`ICacheStorage`), performance quantiles, and multi-agent router.    |
-| **[`@orchestrai/memory`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/memory)**               | **Controlled Memory System**: Categorical memory storage (`CONVERSATION`, `WORKING`, `EPISODIC`, `FACT`) with pgvector search, TTL retention, and privacy sanitization.                                        |
-| **[`@orchestrai/rag`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/rag)**                     | **RAG & Retrieval Pipeline**: Text extractors, sliding-window token chunkers, embedding providers, and Reciprocal Rank Fusion (RRF) hybrid BM25 + pgvector retrieval.                                          |
-| **[`@orchestrai/events`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/events)**               | **Outbox & Event Bus**: Asynchronous `MemoryEventBus`, Redis Streams engine, PostgreSQL Transactional Outbox poller, vector clocks, distributed Saga coordinator, and Kafka adapters.                          |
-| **[`@orchestrai/queue`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/queue)**                 | **Queue & BullMQ Producers**: Redis BullMQ producer abstractions with exponential backoff, full jitter, and backpressure watermarks.                                                                           |
-| **[`@orchestrai/sdk`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/sdk)**                     | **Client SDK**: Developer SDK featuring cryptographically signed HMAC requests, automatic retries, SSE stream iterators, and fluent execution handles.                                                         |
-| **[`@orchestrai/observability`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/observability)** | **OpenTelemetry & Metrics**: W3C trace propagation, OpenTelemetry spans, OTLP HTTP exporters, and Prometheus metric text exposition.                                                                           |
-| **[`@orchestrai/resilience`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/resilience)**       | **Reliability & Fault Tolerance**: Composable resilience pipelines combining timeouts, exponential backoff, circuit breakers, bulkhead concurrency isolation, token bucket rate limiters, and chaos injection. |
-| **[`@orchestrai/grpc`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/grpc)**                   | **gRPC Inter-Service Layer**: Protobuf RPC contracts (`IGrpcExecutionService`) and gRPC transport client for binary inter-service communications.                                                              |
-| **[`@orchestrai/eval`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/eval)**                   | **Evaluation Harness**: Benchmark dataset runner scoring tool selection accuracy, output matching, and latency quantiles.                                                                                      |
-| **[`@orchestrai/logger`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/logger)**               | **Structured Logging**: Context-tagged logger with file persistence and colored output formatting.                                                                                                             |
+| Package                                                                                                                  | Purpose & Primary Responsibility                                                                                                                                                |
+| :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **[`@orchestrai/core`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/core)**                   | **Absolute Source of Truth**: Houses all domain contracts, Zod schemas, branded UUID identifiers, and domain error hierarchies with zero workspace dependencies.                |
+| **[`@orchestrai/database`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/database)**           | **Prisma ORM & Connection Pool**: PostgreSQL 16 schema, migrations, connection pool, health diagnostics, and multi-tenant isolation.                                            |
+| **[`@orchestrai/shared-types`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/shared-types)**   | **Shared Enums & Constants**: Common enums (`AgentMode`, `ExecutionStatus`, `MessageRole`, `ModelProvider`, `ToolPermissionLevel`).                                             |
+| **[`@orchestrai/models`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/models)**               | **LLM Adapter Layer**: Unified `ILlmAdapter` interface connecting to Ollama, Groq, OpenRouter, Google AI Studio, OpenAI, and Anthropic.                                         |
+| **[`@orchestrai/tools`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/tools)**                 | **Security Perimeter & Tools**: Tool catalog (`read_file`, `write_file`, `bash`, `http_fetch`) with path jail sandboxing, SSRF allowlists, and permission clearance evaluators. |
+| **[`@orchestrai/agent`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/agent)**                 | **Agent Loop & Mode Enforcer**: State machine controller, multi-tier prompt compiler, mode constraint enforcer (`CHAT`, `PLAN`, `ACT`, `AUTO`), and specialized agents.         |
+| **[`@orchestrai/runtime`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/runtime)**             | **DAG Execution & StateGraph**: Directed state graph engine, durable checkpointer, rewind time-travel, crash recovery, and multi-agent router.                                  |
+| **[`@orchestrai/memory`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/memory)**               | **Controlled Memory System**: Categorical memory storage (`CONVERSATION`, `WORKING`, `EPISODIC`, `FACT`) with pgvector search, TTL retention, and privacy sanitization.         |
+| **[`@orchestrai/rag`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/rag)**                     | **RAG & Retrieval Pipeline**: Text extractors, sliding-window token chunkers, embedding providers, and hybrid retrieval.                                                        |
+| **[`@orchestrai/events`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/events)**               | **Outbox & Event Bus**: Asynchronous `MemoryEventBus`, Redis Streams engine, PostgreSQL Transactional Outbox poller, and Saga coordinator.                                      |
+| **[`@orchestrai/queue`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/queue)**                 | **Queue & BullMQ Producers**: Redis BullMQ producer abstractions with exponential backoff and backpressure watermarks.                                                          |
+| **[`@orchestrai/sdk`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/sdk)**                     | **Client SDK**: Developer SDK featuring cryptographically signed HMAC requests, automatic retries, and SSE stream iterators.                                                    |
+| **[`@orchestrai/observability`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/observability)** | **OpenTelemetry & Metrics**: W3C trace propagation, OpenTelemetry spans, and Prometheus metric text exposition.                                                                 |
+| **[`@orchestrai/resilience`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/resilience)**       | **Reliability & Fault Tolerance**: Composable resilience pipelines combining timeouts, exponential backoff, circuit breakers, and rate limiters.                                |
+| **[`@orchestrai/grpc`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/grpc)**                   | **gRPC Inter-Service Layer**: Protobuf RPC contracts and gRPC transport client for binary inter-service communications.                                                         |
+| **[`@orchestrai/eval`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/eval)**                   | **Evaluation Harness**: Benchmark dataset runner scoring tool selection accuracy, output matching, and latency quantiles.                                                       |
 
 ---
 
@@ -143,57 +143,35 @@ flowchart TD
 
 ## 3. How to Run & Deploy
 
-### Option A: Local Development Server
+### Native Local Development (Zero Docker)
 
-1. **Start Database & Redis Containers**:
-
-   ```bash
-   docker compose -f infrastructure/docker/docker-compose.postgres.yml up -d
-   ```
-
-2. **Environment Variable Setup**:
+1. **Environment Variable Setup**:
+   Copy `.env.example` to `.env` in the root:
 
    ```bash
-   cp apps/gateway/.env.example apps/gateway/.env
-   cp apps/realtime/.env.example apps/realtime/.env
-   cp apps/worker/.env.example apps/worker/.env
-   cp apps/console/.env.example apps/console/.env
+   cp .env.example .env
    ```
 
-3. **Install & Build Monorepo**:
+2. **Run Prisma Migrations**:
+
+   ```bash
+   pnpm db:migrate
+   ```
+
+3. **Install Dependencies**:
 
    ```bash
    pnpm install
-   pnpm build
    ```
 
 4. **Start Development Services**:
    ```bash
    pnpm dev
    ```
-   - Open Console UI: `http://localhost:3001`
-   - Gateway API: `http://localhost:8000`
-   - Realtime Broker: `http://localhost:8001`
-
----
-
-### Option B: Unified Docker Compose Stack
-
-Run all microservices, databases, and telemetry collectors in containers:
-
-```bash
-docker compose up -d
-```
-
----
-
-### Option C: Kubernetes Helm Deployment
-
-Deploy to Kubernetes cluster:
-
-```bash
-helm install orchestrai infrastructure/k8s/orchestrai/
-```
+   - **Console UI**: `http://localhost:3001`
+   - **Gateway API**: `http://localhost:4001`
+   - **Realtime Broker**: `http://localhost:4002`
+   - **Worker Daemon**: `http://localhost:4003`
 
 ---
 
@@ -207,7 +185,7 @@ Create a script `test-execution.js`:
 import { createOrchestrAIClient } from "@orchestrai/sdk";
 
 const client = createOrchestrAIClient({
-  baseUrl: "http://localhost:8000",
+  baseUrl: "http://localhost:4001",
   apiKey: "dev-key",
 });
 

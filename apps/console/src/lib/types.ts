@@ -1,6 +1,6 @@
 /**
  * @fileoverview Core UI domain entities and types for the OrchestrAI Console.
- * Sourced and refined from the high-density lovable agent platform specification.
+ * Sourced and refined from the high-density agent platform specification.
  */
 
 /**

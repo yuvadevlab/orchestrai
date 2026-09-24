@@ -59,4 +59,13 @@ export class ExecutionController {
     const result = await this.service.resumeExecution(executionId, dto, req.context.tenantId);
     sendJson(res, 200, result);
   }
+
+  /**
+   * Streams SSE tokens for an active execution.
+   */
+  public streamExecution(req: GatewayRequest, res: GatewayResponse): void {
+    const params = parseQueryParams(req.url);
+    const executionId = req.params.id || params.executionId || "";
+    this.service.streamExecution(executionId, res);
+  }
 }

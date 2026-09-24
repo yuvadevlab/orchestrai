@@ -48,10 +48,14 @@ export class GatewayServer {
         }
 
         // 2. Attach request context (requestId, tenantId, timestamp)
-        req.context = createRequestContext(req, this.config.tenantHeaderName);
+        req.context = createRequestContext(
+          req,
+          this.config.tenantHeaderName,
+          this.config.requestIdHeaderName,
+        );
 
         // 3. Authenticate request credentials
-        const isAuthenticated = authenticateRequest(req, res, this.config);
+        const isAuthenticated = await authenticateRequest(req, res, this.config);
         if (!isAuthenticated) {
           this.logger.warn("Authentication failed", { url: req.url });
           return;

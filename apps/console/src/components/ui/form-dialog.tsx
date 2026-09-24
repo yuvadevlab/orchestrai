@@ -3,15 +3,26 @@
 /**
  * @file form-dialog.tsx
  * @description Design System FormDialog component for modal forms matching FinAI standards.
+ * Features a fixed header, scrollable body with 2-column responsive grid, and pinned action footer.
  * @module apps/console/components/ui
  */
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@yuva-devlab/ui";
-import { X, Check, Loader2 } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { FormDialogField, type FormFieldConfig } from "./form-dialog-field";
 
 export type { FormFieldConfig };
+
+/** Supported maximum width constraints for modal presentation. */
+export type FormDialogMaxWidth = "md" | "lg" | "xl" | "2xl";
+
+const MAX_WIDTH_CLASSES: Record<FormDialogMaxWidth, string> = {
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+};
 
 export interface FormDialogProps {
   isOpen: boolean;
@@ -19,12 +30,14 @@ export interface FormDialogProps {
   description?: string;
   fields: FormFieldConfig[];
   submitText?: string;
+  maxWidth?: FormDialogMaxWidth;
   onClose: () => void;
   onSubmit: (formData: Record<string, string>) => Promise<void> | void;
 }
 
 /**
  * Design System Form Dialog modal component.
+ * Carefully balances scrollable content, fixed action controls, and 2-column layouts.
  */
 export function FormDialog({
   isOpen,
@@ -32,14 +45,13 @@ export function FormDialog({
   description,
   fields,
   submitText = "Save",
+  maxWidth = "xl",
   onClose,
   onSubmit,
 }: FormDialogProps): React.JSX.Element | null {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,8 +63,6 @@ export function FormDialog({
       });
       setFormData(initial);
       setFieldErrors({});
-      setErrorMsg(null);
-      setSuccessMsg(null);
     }
   }, [isOpen, fields]);
 
@@ -61,20 +71,20 @@ export function FormDialog({
   const handleFieldChange = (name: string, value: string): void => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-    setErrorMsg(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.SubmitEvent): Promise<void> => {
     e.preventDefault();
-    setErrorMsg(null);
     const errors: Record<string, string> = {};
 
+    // Validate required fields
     fields.forEach((f) => {
       if (f.required && !formData[f.name]?.trim()) {
         errors[f.name] = `${f.label} is required.`;
       }
     });
 
+    // Guard: Prevent submit if validation errors exist
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -83,13 +93,9 @@ export function FormDialog({
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
-      setSuccessMsg("Submitted successfully.");
-      setTimeout(() => {
-        setSuccessMsg(null);
-        onClose();
-      }, 1000);
-    } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Failed to process form request.");
+      onClose();
+    } catch {
+      // Action feedback (error/success) is communicated via toast notification
     } finally {
       setIsSubmitting(false);
     }
@@ -97,18 +103,21 @@ export function FormDialog({
 
   return (
     <div
-      className="bg-background/80 fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      className="bg-background/80 animate-in fade-in-0 fixed inset-0 z-50 flex items-center justify-center p-3 backdrop-blur-sm sm:p-6"
       onClick={onClose}
     >
       <div
-        className="border-border bg-card w-full max-w-md space-y-4 rounded-xl border p-6 shadow-2xl"
+        className={`border-border bg-card relative flex w-full flex-col ${MAX_WIDTH_CLASSES[maxWidth]} max-h-[min(90vh,760px)] overflow-hidden rounded-md border shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="font-display text-base font-bold tracking-tight">{title}</h2>
+        {/* Pinned Header */}
+        <div className="border-border/70 bg-card flex shrink-0 items-start justify-between border-b px-6 py-4">
+          <div className="pr-4">
+            <h2 className="font-display text-foreground text-base font-bold tracking-tight">
+              {title}
+            </h2>
             {description ? (
-              <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>
+              <p className="text-muted-foreground mt-0.5 text-xs leading-normal">{description}</p>
             ) : null}
           </div>
           <Button
@@ -116,43 +125,37 @@ export function FormDialog({
             size="icon"
             onClick={onClose}
             aria-label="Close modal"
-            className="size-7 cursor-pointer rounded-md"
+            className="hover:bg-accent text-muted-foreground hover:text-foreground size-7 shrink-0 cursor-pointer rounded-md"
           >
             <X className="size-4" />
           </Button>
         </div>
 
-        {errorMsg ? (
-          <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border p-2.5 font-mono text-xs">
-            {errorMsg}
+        {/* Form with Scrollable Body and Pinned Footer */}
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {/* Scrollable Form Fields Grid */}
+          <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-4">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
+              {fields.map((field) => (
+                <FormDialogField
+                  key={field.name}
+                  field={field}
+                  value={formData[field.name] ?? ""}
+                  onChange={handleFieldChange}
+                  error={fieldErrors[field.name]}
+                />
+              ))}
+            </div>
           </div>
-        ) : null}
 
-        {successMsg ? (
-          <div className="border-primary/40 bg-primary/10 text-primary flex items-center gap-2 rounded-md border p-2.5 font-mono text-xs">
-            <Check className="size-4" />
-            <span>{successMsg}</span>
-          </div>
-        ) : null}
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {fields.map((field) => (
-            <FormDialogField
-              key={field.name}
-              field={field}
-              value={formData[field.name] ?? ""}
-              onChange={handleFieldChange}
-              error={fieldErrors[field.name]}
-            />
-          ))}
-
-          <div className="border-border flex items-center justify-end gap-2 border-t pt-3">
+          {/* Pinned Action Footer */}
+          <div className="border-border/70 bg-card/95 flex shrink-0 items-center justify-end gap-2.5 border-t px-6 py-3.5 backdrop-blur-xs">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="h-8 cursor-pointer font-mono text-xs"
+              className="h-8 cursor-pointer text-xs"
             >
               Cancel
             </Button>
@@ -161,7 +164,7 @@ export function FormDialog({
               variant="default"
               size="sm"
               disabled={isSubmitting}
-              className="h-8 cursor-pointer gap-1.5 font-mono text-xs font-medium"
+              className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
             >
               {isSubmitting ? (
                 <>

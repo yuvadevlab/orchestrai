@@ -4,7 +4,14 @@
  * Bootstraps configuration, starts all server components, and registers process lifecycle hooks.
  */
 
-import "dotenv/config";
+import dotenv from "dotenv";
+import { resolve } from "node:path";
+
+// Load root shared infrastructure env and app-specific overrides
+dotenv.config({ path: resolve(process.cwd(), "../../.env") });
+dotenv.config({ path: resolve(process.cwd(), ".env") });
+dotenv.config();
+
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { loadRealtimeConfig } from "./config/realtime-config";
 import { RealtimeServer } from "./server/realtime-server";

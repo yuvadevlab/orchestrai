@@ -50,4 +50,13 @@ export class AgentController {
     const result = await this.service.updateAgent(agentId, dto, req.context.tenantId);
     sendJson(res, 200, result);
   }
+
+  /**
+   * Deletes an agent definition by identifier.
+   */
+  public async deleteAgent(req: GatewayRequest, res: GatewayResponse): Promise<void> {
+    const agentId = req.params.id || "";
+    await this.service.deleteAgent(agentId, req.context.tenantId);
+    sendJson(res, 200, { success: true, agentId });
+  }
 }

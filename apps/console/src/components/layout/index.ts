@@ -4,5 +4,6 @@
  * @module apps/console/components/layout
  */
 
+export * from "./page-header";
 export * from "./page-shell";
 export * from "./product-nav";

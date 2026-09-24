@@ -13,7 +13,7 @@
 
 import { z } from "zod";
 import type { ModelProvider } from "@orchestrai/core";
-import { AIMessageSchema, ModelUsageSchema } from "@orchestrai/core";
+import { AIMessageSchema, ModelUsageSchema, AGENT_EXECUTION_DEFAULTS } from "@orchestrai/core";
 
 // ─── Request Schema ─────────────────────────────────────────────────────────
 
@@ -35,14 +35,19 @@ import { AIMessageSchema, ModelUsageSchema } from "@orchestrai/core";
  * };
  */
 export const LlmRequestSchema = z.object({
-  /** Provider-specific model identifier string (e.g. "qwen2.5:7b", "gpt-4o") */
-  model: z.string().min(1).describe("Provider model name"),
+  /** Provider-specific model identifier string */
+  model: z.string().min(1).optional().describe("Provider model name"),
 
   /** Ordered conversation history including system, user, and assistant turns */
   messages: z.array(AIMessageSchema).min(1).describe("Ordered message history sent to the model"),
 
-  /** Sampling temperature: 0.0 = deterministic, 1.0 = creative (default: 0.7) */
-  temperature: z.number().min(0).max(2).default(0.7).describe("Sampling temperature"),
+  /** Sampling temperature: 0.0 = deterministic, 1.0 = creative (default: AGENT_EXECUTION_DEFAULTS.DEFAULT_TEMPERATURE) */
+  temperature: z
+    .number()
+    .min(0)
+    .max(2)
+    .default(AGENT_EXECUTION_DEFAULTS.DEFAULT_TEMPERATURE)
+    .describe("Sampling temperature"),
 
   /** Hard cap on generated output tokens to prevent runaway completions */
   maxTokens: z.number().int().positive().optional().describe("Maximum output tokens"),

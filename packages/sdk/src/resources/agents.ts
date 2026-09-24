@@ -29,6 +29,7 @@ export interface RunAgentParams {
   mode?: string;
   input: string;
   conversationId?: string;
+  history?: Array<{ role: string; content: string }>;
   variables?: Record<string, unknown>;
   budget?: CostBudgetOptions;
 }
@@ -87,6 +88,7 @@ export class AgentsResource extends ResourceBase {
         conversationId: params.conversationId,
         mode: params.mode,
         input: params.input,
+        history: params.history,
         variables: {
           ...params.variables,
           budget: effectiveBudget,

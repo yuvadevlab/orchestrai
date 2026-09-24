@@ -11,6 +11,9 @@ import {
   ConversationsResource,
   RagResource,
   ApprovalsResource,
+  WorkflowsResource,
+  ToolsResource,
+  ModelsResource,
 } from "./resources";
 
 /**
@@ -35,6 +38,15 @@ export class OrchestrAIClient {
   /** Human-in-the-loop operator approval workflows */
   public readonly approvals: ApprovalsResource;
 
+  /** Workflow DAG pipeline definitions */
+  public readonly workflows: WorkflowsResource;
+
+  /** Tool plugins and sandbox registrations */
+  public readonly tools: ToolsResource;
+
+  /** Model provider endpoints and routing configurations */
+  public readonly models: ModelsResource;
+
   constructor(options: OrchestrAIClientOptions = {}) {
     this.http = new HttpClient(options);
     this.agents = new AgentsResource(this.http, options);
@@ -42,5 +54,8 @@ export class OrchestrAIClient {
     this.conversations = new ConversationsResource(this.http, options);
     this.rag = new RagResource(this.http, options);
     this.approvals = new ApprovalsResource(this.http, options);
+    this.workflows = new WorkflowsResource(this.http, options);
+    this.tools = new ToolsResource(this.http, options);
+    this.models = new ModelsResource(this.http, options);
   }
 }

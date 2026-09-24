@@ -13,7 +13,7 @@
  *  - Config schemas for each adapter (for runtime validation)
  *  - createAdapter() factory function for ergonomic adapter construction
  *  - Pure utilities: mergeUsage(), estimateCost(), enrichUsageWithCost()
- *  - Pricing constants: MODEL_PRICING, resolvePricing()
+ *  - Dynamic pricing: registerModelPricing(), resolvePricing(), DEFAULT_TOKEN_PRICING
  */
 
 // ── Interface contract ────────────────────────────────────────────────────────

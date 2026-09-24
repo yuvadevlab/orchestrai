@@ -72,6 +72,7 @@ const config: UserConfig = {
 
         // Packages
         "core",
+        "database",
         "models",
         "tools",
         "agent",

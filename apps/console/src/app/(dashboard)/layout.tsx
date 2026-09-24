@@ -12,7 +12,7 @@ export default function DashboardLayout({
 }): React.JSX.Element {
   return (
     <div className="bg-background text-foreground h-dvh overflow-hidden">
-      <div className="flex h-full">
+      <div className="mesh-bg flex h-full">
         <ProductNav />
         {children}
       </div>

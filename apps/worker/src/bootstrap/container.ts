@@ -57,16 +57,19 @@ export async function createWorkerContainer(config: WorkerConfig): Promise<Worke
   const modelRegistry = new ModelRegistry();
   const logger = loggerWithConfig(new Logger("WorkerContainer"));
   try {
-    const defaultAdapter = await createAdapter(ModelProvider.OLLAMA, {
-      host: "http://localhost:11434",
-      defaultModel: "qwen2.5:7b",
+    const provider = (config.defaultModelProvider?.toLowerCase() ||
+      ModelProvider.OLLAMA) as ModelProvider;
+    const defaultAdapter = await createAdapter(provider, {
+      host: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+      apiKey: process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || "",
+      defaultModel: config.defaultModelName,
     });
 
     modelRegistry.register({
       identifier: {
-        provider: ModelProvider.OLLAMA,
-        modelName: "qwen2.5:7b",
-        contextWindow: 8192,
+        provider,
+        modelName: config.defaultModelName,
+        contextWindow: config.defaultContextWindow,
       },
       capabilities: {
         supportsStreaming: true,
@@ -74,14 +77,14 @@ export async function createWorkerContainer(config: WorkerConfig): Promise<Worke
         supportsVision: false,
         supportsThinking: false,
         supportsJsonMode: true,
-        maxOutputTokens: 2048,
+        maxOutputTokens: config.defaultMaxOutputTokens,
       },
       adapter: defaultAdapter,
     });
   } catch (error) {
-    // If Ollama is not configured/running locally, register warning but don't halt bootstrap
+    // If provider is not configured/running locally, register warning but don't halt bootstrap
     logger.warn(
-      "[WorkerContainer] Warning: Failed to pre-warm Ollama adapter",
+      "[WorkerContainer] Warning: Failed to pre-warm default model adapter",
       error instanceof Error ? error.message : String(error),
     );
   }
@@ -102,12 +105,10 @@ export async function createWorkerContainer(config: WorkerConfig): Promise<Worke
       mode: AgentMode.ACT,
       systemPrompt: "You are an AI assistant orchestrating background tasks.",
       modelConfig: {
-        provider: ModelProvider.OLLAMA,
-        modelName: "qwen2.5:7b",
-        temperature: 0.2,
+        temperature: config.defaultAgentTemperature,
       },
       enabledTools: ["read_file"],
-      maxSteps: 20,
+      maxSteps: config.defaultMaxSteps,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -120,7 +121,7 @@ export async function createWorkerContainer(config: WorkerConfig): Promise<Worke
     dependencies: {
       runtime,
       toolRegistry,
-      resolveModelAdapter: (provider: ModelProvider, modelName: string) => {
+      resolveModelAdapter: (provider?: ModelProvider, modelName?: string) => {
         const entry = modelRegistry.resolve(provider, modelName);
         return entry.adapter;
       },

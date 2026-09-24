@@ -11,6 +11,11 @@ import { ApprovalStatus } from "@orchestrai/shared-types";
  */
 export const ResolveApprovalSchema = z.object({
   decision: z.enum(["APPROVED", "REJECTED", "CANCELLED"]).describe("Operator resolution verdict"),
+  scope: z
+    .enum(["once", "session", "permanent", "deny"])
+    .optional()
+    .default("once")
+    .describe("Permission clearance scope lifetime"),
   reason: z.string().max(500).optional().describe("Operator rationale or rejection notes"),
   modifiedArguments: z
     .record(z.string(), z.unknown())

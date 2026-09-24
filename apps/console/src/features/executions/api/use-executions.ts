@@ -7,6 +7,7 @@
  */
 
 import { useApiData, type UseApiDataResult } from "@/lib/use-api-data";
+import { useAuth } from "@/lib/auth";
 import type { ExecutionRun, ExecutionStatus } from "../types";
 import type { Execution } from "@orchestrai/sdk";
 
@@ -16,8 +17,22 @@ import type { Execution } from "@orchestrai/sdk";
  * @returns Query result containing execution runs, loading state, error, and refetch handler.
  */
 export function useExecutions(): UseApiDataResult<ExecutionRun[]> {
+  const { tenantId, isLoading: isAuthLoading } = useAuth();
+
+  // Strict Tenancy Invariant: Require a resolved tenant ID; never fallback to a hardcoded string
+  if (!isAuthLoading && !tenantId) {
+    throw new Error(
+      "Active workspace or tenant ID is missing. Please sign in to access execution traces.",
+    );
+  }
+
   return useApiData<ExecutionRun[]>({
     fetchFn: async (client): Promise<ExecutionRun[]> => {
+      if (!tenantId) {
+        throw new Error(
+          "Active workspace or tenant ID is missing. Please sign in to access execution traces.",
+        );
+      }
       const response = await client.executions.list();
       const items: Execution[] = response?.items ?? [];
 
@@ -45,5 +60,7 @@ export function useExecutions(): UseApiDataResult<ExecutionRun[]> {
       });
     },
     initialData: [],
+    queryKey: ["executions", tenantId],
+    enabled: !isAuthLoading && Boolean(tenantId),
   });
 }

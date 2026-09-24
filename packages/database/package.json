@@ -1,0 +1,45 @@
+{
+  "name": "@orchestrai/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Enterprise PostgreSQL database client, Prisma schemas, tenant isolation, and connection pooling for OrchestrAI",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "db:validate": "prisma validate --schema=./prisma/schema.prisma",
+    "db:generate": "prisma generate --schema=./prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema=./prisma/schema.prisma",
+    "db:migrate:deploy": "prisma migrate deploy --schema=./prisma/schema.prisma",
+    "db:migrate:status": "prisma migrate status --schema=./prisma/schema.prisma",
+    "db:studio": "prisma studio --schema=./prisma/schema.prisma",
+    "db:pull": "prisma db pull --schema=./prisma/schema.prisma",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/core": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@yuva-devlab/logger": "1.1.0",
+    "dotenv": "^17.4.2",
+    "pg": "^8.23.0",
+    "prisma": "^7.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "@types/pg": "^8.16.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}

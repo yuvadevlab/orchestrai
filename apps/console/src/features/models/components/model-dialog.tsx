@@ -7,13 +7,16 @@
  */
 
 import React from "react";
+import { toast } from "sonner";
+import { formatApiError } from "@/lib/error-utils";
 import { FormDialog } from "@/components/ui";
-import { MODEL_FIELDS } from "./model-form-fields";
+import { buildModelFields } from "./model-form-fields";
+import { useProviders, useRegisterModelMutation } from "../api";
 
 export interface ModelDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => Promise<void> | void;
+  onSuccess?: () => Promise<void> | void;
 }
 
 /**
@@ -24,18 +27,41 @@ export function ModelDialog({
   onClose,
   onSuccess,
 }: ModelDialogProps): React.JSX.Element | null {
-  const handleAddModel = async (_formData: Record<string, string>): Promise<void> => {
-    await new Promise((r) => setTimeout(r, 600));
-    await onSuccess();
+  const { data: providers = [] } = useProviders();
+  const registerMutation = useRegisterModelMutation();
+
+  const handleAddModel = async (formData: Record<string, string>): Promise<void> => {
+    const modelPromise = registerMutation.mutateAsync({
+      name: formData.name || "Custom Model",
+      providerId: formData.providerId || (providers[0]?.providerId ?? ""),
+      modelIdentifier: formData.modelIdentifier || formData.name || "custom-model",
+      description: formData.description,
+      contextWindow: formData.contextWindow ? parseInt(formData.contextWindow, 10) : 8192,
+      isDefault: formData.isDefault === "true",
+    });
+
+    toast.promise(modelPromise, {
+      loading: "Registering model...",
+      success: "Model registered successfully!",
+      error: (err) => formatApiError(err, "Failed to register model"),
+    });
+
+    await modelPromise;
+    onClose();
+    if (onSuccess) {
+      await onSuccess();
+    }
   };
+
+  const fields = buildModelFields(providers);
 
   return (
     <FormDialog
       isOpen={isOpen}
-      title="Add LLM Model Provider"
-      description="Configure an LLM provider endpoint or local inference server."
-      fields={MODEL_FIELDS}
-      submitText="Add Provider"
+      title="Add LLM Model"
+      description="Register a new AI model under an active provider."
+      fields={fields}
+      submitText="Add Model"
       onClose={onClose}
       onSubmit={handleAddModel}
     />

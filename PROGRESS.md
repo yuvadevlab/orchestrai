@@ -1,709 +1,121 @@
-# OrchestrAI — Implementation Progress
+# OrchestrAI — Engineering Progress Tracker
 
-> This document tracks the active state of OrchestrAI development across sessions and AI agents.
-> **All agents must check and update this document at the start and end of every session.**
-
----
-
-## Current Status
-
-```text
-Current Phase:     Phase 35 — Architecture Review & Audit (Whole System Complete)
-Current Feature:   All 35 Roadmap Phases Completed (100%), Master User & Architecture Guide Created
-Current Status:    [x] Completed
-Overall Progress:  Phases 0-35 Complete + Application Logging with @yuva-devlab/logger
-Last Updated:      2026-09-22
-Next Immediate:    Production Deployment & Multi-Node Cluster Scale
-```
-
-> ✅ **Env Migration Complete**: Hybrid strategy applied — root `.env` holds shared infra (DB, Redis, JWT, API keys); each `apps/*/.env` holds app-specific vars only (PORT, CORS, feature flags). Zero duplication.
-> ✅ **Application Logger Integration**: Internal `packages/logger` deleted; `@yuva-devlab/logger@1.1.0` integrated across all backend services & packages (`apps/gateway`, `apps/realtime`, `apps/worker`, `packages/*`) with `requestLogger` middleware and contextual entry/exit/block logging.
+Live progress tracking for the **OrchestrAI** Universal Autonomous AI Agent & Cowork Platform.
 
 ---
 
-## Master Phase Checklist
+## 1. Architecture Milestones
 
-| Phase        | Description                              | Status  | Target Package / App            |
-| :----------- | :--------------------------------------- | :-----: | :------------------------------ |
-| **Phase 0**  | **Workspace & Foundation**               | **[x]** | Monorepo root, configs, tooling |
-| **Phase 1**  | **Core Contracts & Domain Types**        | **[x]** | `packages/core`                 |
-| **Phase 2**  | **Models & LLM Adapters**                | **[x]** | `packages/models`               |
-| **Phase 3**  | **Tools & Execution Security**           | **[x]** | `packages/tools`                |
-| **Phase 4**  | **Agent Loop & State Transitions**       | **[x]** | `packages/agent`                |
-| **Phase 5**  | **Runtime & LangGraph Execution**        | **[x]** | `packages/runtime`              |
-| **Phase 6**  | **Database & PostgreSQL Schemas**        | **[x]** | `infrastructure/postgres`       |
-| **Phase 7**  | **Queue & BullMQ Producers**             | **[x]** | `packages/queue`                |
-| **Phase 8**  | **Worker Application**                   | **[x]** | `apps/worker`                   |
-| **Phase 9**  | **Events & Outbox Bus**                  | **[x]** | `packages/events`               |
-| **Phase 10** | **Persistence & Recovery**               | **[x]** | `packages/runtime`              |
-| **Phase 11** | **Human-in-the-Loop (HITL)**             | **[x]** | `packages/runtime`              |
-| **Phase 12** | **Realtime Streaming Broker**            | **[x]** | `apps/realtime`                 |
-| **Phase 13** | **Console Dashboard UI**                 | **[x]** | `apps/console`                  |
-| **Phase 14** | **Agent Modes (CHAT/PLAN/ACT/AUTO)**     | **[x]** | `packages/agent`                |
-| **Phase 15** | **Memory Systems (Episodic/Semantic)**   | **[x]** | `packages/memory`               |
-| **Phase 16** | **RAG & Vector Retrieval**               | **[x]** | `packages/rag`                  |
-| **Phase 17** | **API Gateway**                          | **[x]** | `apps/gateway`                  |
-| **Phase 18** | **Client SDK**                           | **[x]** | `packages/sdk`                  |
-| **Phase 19** | **Observability & OpenTelemetry**        | **[x]** | `packages/observability`        |
-| **Phase 20** | **Reliability Engineering & Resilience** | **[x]** | `packages/resilience`           |
-| **Phase 21** | **Security & Sandboxing**                | **[x]** | `packages/tools`                |
-| **Phase 22** | **Distributed Consistency**              | **[x]** | `packages/events`               |
-| **Phase 23** | **Advanced PostgreSQL Optimizations**    | **[x]** | `infrastructure/postgres`       |
-| **Phase 24** | **Caching Layer**                        | **[x]** | `packages/runtime`              |
-| **Phase 25** | **Performance & Latency Tuning**         | **[x]** | `apps/*`                        |
-| **Phase 26** | **Evaluation Harness**                   | **[x]** | `packages/eval`                 |
-| **Phase 27** | **Specialized Research Agent**           | **[x]** | `packages/agent`                |
-| **Phase 28** | **Specialized Developer Agent**          | **[x]** | `packages/agent`                |
-| **Phase 29** | **Multi-Agent Orchestration**            | **[x]** | `packages/runtime`              |
-| **Phase 30** | **gRPC Inter-service Layer**             | **[x]** | `packages/grpc`                 |
-| **Phase 31** | **Kafka Event Streaming**                | **[x]** | `packages/events`               |
-| **Phase 32** | **Distributed Execution Engine**         | **[x]** | `apps/worker`                   |
-| **Phase 33** | **Production Infrastructure & Docker**   | **[x]** | `infrastructure/docker`         |
-| **Phase 34** | **Kubernetes Helm Deployments**          | **[x]** | `infrastructure/k8s`            |
-| **Phase 35** | **Architecture Review & Audit**          | **[x]** | Whole System                    |
+### Milestone 1: Monorepo Foundation & Core Contracts
+
+- [x] Turborepo + pnpm v12 monorepo setup (`apps/*`, `packages/*`)
+- [x] `@orchestrai/core` — Zero-dependency source of truth for all domain types, enums, and schemas
+- [x] `@orchestrai/shared-types` — Protocol enums (`AgentMode`, `ExecutionStatus`, `ModelProvider`)
+- [x] Conventional Commits + Commitlint + Husky pre-commit quality gates
 
 ---
 
-## Phase 0 Breakdown
+### Milestone 2: Enterprise Database & Persistence (`@orchestrai/database`)
 
-- [x] Monorepo workspace configuration (`pnpm-workspace.yaml`, `package.json`)
-- [x] Turborepo task pipeline (`turbo.json`)
-- [x] TypeScript base strict configuration (`tsconfig.base.json`, `tsconfig.json`)
-- [x] Code formatting & linting configuration (`.prettierrc`, `eslint.config.mjs`)
-- [x] Repository directory skeleton (`apps/*`, `packages/*`, `infrastructure/*`, `docs/*`, `scripts/*`)
-- [x] AI agent configuration rules (`.agents/AGENTS.md`, `.agents/rules/*`, `.agents/skills/*`, `.github/copilot-instructions.md`)
-- [x] GitHub Actions CI workflows & PR templates (`.github/workflows/ci.yml`, `commitlint.yml`, `pull_request_template.md`)
-- [x] Core documentation skeleton (`README.md`, `ARCHITECTURE.md`, `ADR-001`, phase guides)
-- [x] Base package declarations (`package.json` inside packages/core)
-- [x] Install dependencies (`pnpm install`) and verify turbo pipeline runs cleanly
-- [x] Phase 0 signoff and handoff to Phase 1 (`packages/core`)
+- [x] Native PostgreSQL 16 + Prisma 7 ORM pipeline (Zero-Docker required)
+- [x] Declarative schema (`schema.prisma`) with 15 production models (Tenants, Users, Agents, Executions, Conversations, Messages, Memory, Outbox)
+- [x] Automated migrations applied to `orchestrai_dev` (`pnpm db:migrate`)
+- [x] `pg.Pool` connection adapter with `@prisma/adapter-pg`
+- [x] Round-trip latency and pool health probe (`checkDatabaseHealth`)
+- [x] Row-level multi-tenant query isolation (`executeTenantQuery`)
+- [x] Zero-Docker embedded JSON fallback (`.data/orchestrai-local-store.json`)
 
 ---
 
-## Phase 1 Breakdown
+### Milestone 3: Universal Autonomous Cowork Studio (`apps/console`)
 
-- [x] `@orchestrai/shared-types` package — enums (`AgentMode`, `ExecutionStatus`, `MessageRole`, `ToolPermissionLevel`, `ModelProvider`, `EventType`) and constants
-- [x] Branded identifier schemas (UUIDs) via `packages/core/src/identifiers`
-- [x] Agent domain: `agent-definition.schema.ts`, `agent-mode.schema.ts`, `agent-state.schema.ts`
-- [x] Execution domain: `execution-status.schema.ts` (state machine transitions), `execution-context.schema.ts`, `execution-step.schema.ts`, `approval.schema.ts`
-- [x] Message domain: `chat-message.schema.ts`, `content-block.schema.ts`, `message-role.schema.ts`
-- [x] Model domain: `model-identifier.schema.ts`, `model-capabilities.schema.ts`, `model-usage.schema.ts`
-- [x] Tool domain: `tool-definition.schema.ts`, `tool-call.schema.ts`, `tool-result.schema.ts`
-- [x] Event domain: `domain-event.schema.ts`
-- [x] Streaming domain: `sse-chunk.schema.ts`, `ws-envelope.schema.ts`
-- [x] Error hierarchy: `OrchestrAIError` base + 6 domain error subclasses
-- [x] Vitest config with `@/` alias resolution (`vitest.config.ts`)
-- [x] Split tsconfig strategy: `tsconfig.json` (full project + tests) / `tsconfig.build.json` (src-only for tsup)
-- [ ] Unit tests — deferred to a dedicated test session
-
----
-
-## Phase 2 Breakdown
-
-- [x] Unified adapter interface (`ILlmAdapter`, `LlmRequest`, `LlmResponse`, `LlmStreamChunk`)
-- [x] Ollama adapter (`OllamaAdapter`, `OllamaConfigSchema`, `ollama.mapper.ts` for multimodal images)
-- [x] OpenAI adapter (`OpenAiAdapter`, `OpenAiConfigSchema`)
-- [x] Anthropic adapter (`AnthropicAdapter`, `AnthropicConfigSchema`)
-- [x] Dynamic adapter factory (`createAdapter`) with provider routing and runtime peer-dep validation
-- [x] In-memory Model Registry (`ModelRegistry`, capability matrix lookups, fallback resolution)
-- [x] Token pricing catalog (`pricing.constants.ts`) and pure usage aggregation (`usage-aggregator.ts`)
-- [x] Strict package boundaries & 250-line maximum compliance
-- [x] Phase 2 documentation (`docs/phases/phase-02-models.md`)
+- [x] **Threaded Session Engine**: URL route synchronization (`/session/:sessionId`), `localStorage` persistence, and title auto-naming
+- [x] **Session History Drawer**: In-flow collapsible sidebar with live search, three-dots action menu (`...`), and thread deletion
+- [x] **Studio Workspace Coordinator**: Full multi-agent canvas with real-time SSE stream ingestion
+- [x] **Universal Starter Cards**: 4 multi-domain starters (Research, Writing, Engineering, Analytics)
+- [x] **Reasoning Drawer**: Collapsible chain-of-thought thinking block with live duration timers
+- [x] **Interactive Plan Checklist**: Real-time progress tracker (`[x]`, `[~]`, `[ ]`)
+- [x] **Multi-Domain Artifact Cards**:
+  - 📄 Document / PRD viewer with copy & `.md` download
+  - 💻 Code & Diff card with syntax highlighting
+  - ⚡ Dark Terminal window with stdout logs and exit codes
+  - 🔍 Web search & citation card
+- [x] **Command Prompt Station**: Auto-expanding input with specialist tags, keyboard shortcuts (`⌘ + Enter`), and suggestion pills
+- [x] **Live Inspector Rail**: Real-time telemetry audit events and system health
+- [x] **Light & Dark Theme Engine**: Full system/manual theme toggle integrated into 56px Nav Rail
+- [x] **TanStack Query Enterprise Caching**: `AppQueryProvider` with scoped cache keys (`['agents']`, `['tools']`, `['models']`, `['executions']`), background cache deduping, mutations with automatic cache invalidation (`useCreateAgentMutation`, `useRegisterModelMutation`, `useRegisterToolMutation`, `useLoginMutation`, `useSignupMutation`, `useForgotPasswordMutation`), and cross-tab cache clearing on logout
+- [x] **5 Core Product Hubs**: Studio (`/`), Specialists (`/agents`), Tools (`/tools`), Executions (`/executions`), Models (`/models`)
 
 ---
 
-## Phase 3 Breakdown
+### Milestone 4: Ingress Gateway & Authentication (`apps/gateway`)
 
-- [x] Master tool interface (`ITool<TInput, TOutput>`) and execution context (`ToolExecutionContext`)
-- [x] Security perimeter: sandbox path jail (`PathSanitizer`) preventing directory traversal attacks
-- [x] Hierarchical permission clearance evaluator (`evaluateToolPermission`) with HITL triggers for `DANGEROUS` tools
-- [x] Central tool catalog and discovery registry (`ToolRegistry`) with OpenAI, Anthropic, and Ollama schema converters
-- [x] Sandboxed runner (`executeTool`) enforcing input Zod validation, timeouts via abort signals, and error containment
-- [x] Built-in filesystem tools: `read_file` (windowing), `write_file` (recursive mkdir), `list_directory` (bounded)
-- [x] Built-in network tools: `http_fetch` (URL protocol validation, body size caps)
-- [x] Built-in system tools: `bash` (classified `DANGEROUS`, subprocess execution, HITL mandatory)
-- [x] Zero file line-count violations (all files < 170 lines) with complete JSDoc
-- [x] Phase 3 documentation (`docs/phases/phase-03-tools.md`)
+- [x] Fastify HTTP REST, SSE, and WebSocket endpoints (Port `4001`)
+- [x] HMAC-signed bearer token issuance & validation (`TokenService`)
+- [x] `scrypt` cryptographic password hashing with unique per-user salts
+- [x] Prisma-backed user signup, login, and password reset (`AuthService`, `PasswordResetService`)
+- [x] Rate limiting, CORS origin configuration, and request ID tracing middleware
+- [x] Asynchronous execution dispatch and cancellation (`ExecutionService`)
 
 ---
 
-## Phase 4 Breakdown
+### Milestone 5: Streaming Realtime Broker (`apps/realtime`)
 
-- [x] Dynamic state machine controller (`AgentStateMachine`) managing step indices, context vars, and termination guards
-- [x] Infinite action repetition loop detector (`LoopDetector`) preventing token drain
-- [x] Multi-tier prompt compilation pipeline (`prompt-compiler.ts`) assembling personas, mode instructions, and context
-- [x] Pluggable agent mode strategies (`CHAT`, `PLAN`, `ACT`, `AUTO`) via `IModeStrategy` and `resolveModeStrategy`
-- [x] Single-step controller (`AgentLoop.step`) and multi-turn runner (`runAgentUntilHalt`)
-- [x] Clean Human-In-The-Loop (HITL) suspension when destructive tools are encountered
-- [x] Tool-to-message formatting bridge (`createToolResultMessage`, `extractToolCalls`)
-- [x] Fluent agent definition builder (`AgentBuilder`)
-- [x] Strict package boundaries and 250-line rule adherence across all files
-- [x] Phase 4 documentation (`docs/phases/phase-04-agent.md`)
+- [x] High-concurrency WebSocket & SSE server (Port `4002`)
+- [x] Distributed Redis Pub/Sub adapter with automatic in-process memory event bus fallback
+- [x] Heartbeat liveness ping/pong, tenant topic channels, and connection draining
 
 ---
 
-## Phase 5 Breakdown
+### Milestone 6: Background Task Worker (`apps/worker`)
 
-- [x] Directed state graph DAG engine (`StateGraph`, `CompiledGraph`, `START`, `END` sentinels)
-- [x] Pluggable state checkpoint persistence interface (`ICheckpointer`) and in-memory engine (`MemoryCheckpointer`)
-- [x] Core execution DAG nodes: `ModelNode`, `ToolEvaluatorNode`, `ToolExecutorNode`, `ApprovalGateNode`
-- [x] Cyclic multi-turn graph execution with dynamic conditional edge routing
-- [x] Clean Human-In-The-Loop (HITL) suspension and resumption from checkpoints
-- [x] Master runtime coordinator (`OrchestrAIRuntime`) managing workflow initiation and resumption
-- [x] Zero file line-count violations (all files < 180 lines) with complete JSDoc
-- [x] Phase 5 documentation (`docs/phases/phase-05-runtime.md`)
+- [x] Distributed BullMQ job processing engine (Port `4003`)
+- [x] Agent execution worker (`AgentExecutionWorker`), tool executor (`ToolExecutionWorker`), and dead-letter queue (`DeadLetterWorker`)
+- [x] Concurrency limits, retry backoff, and graceful signal handling
 
 ---
 
-## Phase 6 Breakdown
+### Milestone 7: Domain Engines & Tooling Packages
 
-- [x] PostgreSQL 16 initialization script (`init/01_extensions.sql`) enabling `uuid-ossp`, `pgcrypto`, and `vector`
-- [x] Core relational schema migrations (`migrations/0001_core_entities.sql`, `0002_messages_and_tools.sql`)
-- [x] Durable execution DAG checkpoint table (`checkpoints`) with unique `(execution_id, step_index)`
-- [x] Transactional Outbox pattern table (`outbox`) solving distributed dual-write inconsistency
-- [x] Memory & RAG vector schema (`memory_items`, `documents`, `document_chunks`) with 1536-dim pgvector
-- [x] Performance indexing: partial indexes for pending approvals/outbox, GIN on JSONB, HNSW on embeddings
-- [x] Prisma ORM schema definition (`prisma/schema.prisma`) and `prisma.config.ts`
-- [x] Educational SQL query handbook covering ACID outbox, UPSERT, `FOR UPDATE SKIP LOCKED`, CTE window functions, recursive CTEs, and materialized views with concurrent refresh
-- [x] Local Docker Compose configuration (`infrastructure/docker/docker-compose.postgres.yml`)
-- [x] Phase 6 documentation (`docs/phases/phase-06-postgres.md`)
-
----
-
-## Phase 7 Breakdown
-
-- [x] `@orchestrai/queue` package configured with dual ESM/CJS build via `tsup`
-- [x] Zod-validated job payload schemas: `AgentExecutionJobPayload`, `ToolExecutionJobPayload`, `DeadLetterJobPayload`
-- [x] BullMQ-tuned Redis connection manager (`createRedisConnection`, `closeRedisConnection`) with `maxRetriesPerRequest: null`
-- [x] Exponential backoff calculator with Full Jitter (`calculateBackoffWithJitter`) preventing thundering herds
-- [x] Queue backpressure controller (`BackpressureController`) evaluating low/high watermarks
-- [x] Generic producer contract (`IQueueProducer<TPayload>`) and BullMQ-backed `BaseQueueProducer`
-- [x] `AgentExecutionProducer` dispatching execution runs with automatic `idempotencyKey` deduplication
-- [x] `ToolExecutionProducer` offloading background tool calls with step deduplication
-- [x] `DeadLetterProducer` capturing forensic information for exhausted retry jobs
-- [x] Full integration with `OrchestrAIError` hierarchy (`QueueError`, `QueueBackpressureError`, `ValidationError`)
-- [x] Zero file line-count violations (all files < 170 lines) with complete JSDoc
-- [x] Phase 7 documentation (`docs/phases/phase-07-queue.md`)
+- [x] `@orchestrai/models` — Unified adapter registry for Ollama (local), Groq, OpenRouter, Google AI Studio, OpenAI, Anthropic
+- [x] `@orchestrai/tools` — Sandboxed tool execution registry with permission levels (`READ_ONLY`, `WRITE_SAFE`, `SENSITIVE`, `DANGEROUS`)
+- [x] `@orchestrai/agent` — Autonomous agent execution loop, state machines, and reflection
+- [x] `@orchestrai/runtime` — Multi-step DAG orchestration with checkpoint recovery
+- [x] `@orchestrai/queue` — BullMQ job producers with priority scheduling
+- [x] `@orchestrai/events` — Distributed event bus, outbox pattern, and idempotency store
+- [x] `@orchestrai/memory` — Multi-tiered short-term, episodic, and semantic memory stores
+- [x] `@orchestrai/rag` — Document chunking, vector indexing, and embedding retrieval
+- [x] `@orchestrai/observability` — OpenTelemetry distributed tracing and structured JSON logging
+- [x] `@orchestrai/sdk` — TypeScript client library for Gateway integrations
 
 ---
 
-## Phase 8 Breakdown
+### Milestone 8: Autonomous Multi-Turn Execution & HITL Multi-Workspace Security
 
-- [x] `apps/worker` application configured with build scripts and TS 6 tooling
-- [x] Dedicated `@orchestrai/logger` package with colored output, context tags, file persistence, and zero console warnings
-- [x] Environment configuration validation with Zod (`WorkerConfigSchema`, `loadWorkerConfig`)
-- [x] Job handlers:
-  - `agent-job.handler`: Executes `@orchestrai/runtime` DAG execution loop, checkpointing, and output extraction
-  - `document-job.handler`: Text extraction and chunking pipeline stub for Phase 16 RAG
-  - `evaluation-job.handler`: Offline benchmark and evaluation suite stub for Phase 26
-  - `maintenance-job.handler`: DLQ inspection, stale record cleanup, and runtime memory diagnostics
-- [x] BullMQ processors:
-  - `agent-execution.processor`: Progress reporting (10% -> 100%) and error boundaries
-  - `tool-execution.processor`: Detached tool execution with `ToolExecutionContext` and `ToolRegistry`
-  - `dead-letter.processor`: Forensic payload capture and operational alerting
-- [x] Worker daemons:
-  - `BaseWorker`: Lifecycle management, event telemetry (`completed`, `failed`, `stalled`, `error`), pause/resume/close
-  - `AgentExecutionWorker`, `ToolExecutionWorker`, `DeadLetterWorker`
-  - `WorkerManager`: Multi-worker coordination (`pauseAll`, `resumeAll`, `stopAll`, `getStatuses`)
-- [x] DI Service container (`createWorkerContainer`) wiring Redis, ToolRegistry, ModelRegistry, and WorkerManager
-- [x] Two-stage graceful shutdown coordinator (`registerProcessLifecycle`) with `SIGTERM`/`SIGINT` traps and in-flight job drain
-- [x] Zero file line-count violations (all 23 files < 165 lines) with comprehensive JSDoc
-- [x] Removed placeholder `.gitkeep`
-- [x] Phase 8 documentation (`docs/phases/phase-08-worker.md`)
+- [x] `@orchestrai/prompts` — Centralized persona prompts, autonomous tool prompt specifications, and template builders
+- [x] Multi-Workspace Trust Engine (`PermissionPolicyManager`) with `.orchestrai/permissions.json` file-backed persistence
+- [x] Continuous Multi-Turn Context Memory — Dynamic message history passing across turns ensuring LLM context retention
+- [x] PostgreSQL Thread & Message Persistence — Synchronizing user prompts and assistant outputs into Prisma `conversations` and `messages` tables
+- [x] Bash Clearance & Child Process Sandbox — Proper working directory anchoring and permission resolution
+- [x] Interactive 4-Action Clearance Card (`StudioPermissionCard`) with inline status collapse
 
 ---
 
-## Phase 9 Breakdown (Events & Outbox Bus)
+### Milestone 9: Zero Hardcoded Dynamic Database Architecture
 
-- [x] Scaffold `@orchestrai/events` package with `package.json`, `tsconfig.json`, `tsconfig.build.json`, and `tsup.config.ts`
-- [x] Domain event payload Zod schemas (`ExecutionCreated`, `ExecutionStarted`, `ExecutionCompleted`, `ExecutionFailed`, `StepStarted`, `StepCompleted`, `ToolCalled`, `ToolCompleted`, `ApprovalRequested`, `ApprovalResolved`)
-- [x] Canonical `createDomainEvent` factory helper stamping UUIDs and ISO timestamps
-- [x] Interfaces `IEventPublisher`, `IEventSubscriber`, and `IEventBus`
-- [x] In-memory asynchronous `MemoryEventBus` with wildcard `*` topics and error containment
-- [x] Redis Streams engine:
-  - `RedisStreamPublisherConfigSchema` & `RedisStreamConsumerConfigSchema`
-  - Hash serializer / deserializer with metadata headers (`eventType`, `eventId`, `executionId`)
-  - `RedisStreamPublisher` with `XADD` and approximate trimming (`MAXLEN ~`)
-  - `RedisStreamConsumer` worker with consumer groups (`MKSTREAM`), `XREADGROUP`, and `XACK`
-- [x] Transactional Outbox subsystem:
-  - `IOutboxStorage` contract and `OutboxRecord` with status lifecycle (`PENDING` -> `PROCESSING` -> `PUBLISHED` / `FAILED`)
-  - `MemoryOutboxStorage` adapter for local development and testing
-  - `OutboxPoller` background engine with interval sweep, batch claiming, and publisher dispatch
-- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 19 workspace projects
-- [x] Zero file line-count violations (all 16 files < 160 lines) with comprehensive JSDoc
-- [x] Phase 9 documentation (`docs/phases/phase-09-events.md`)
+- [x] **Zero Hardcoded Specialists**: Purged all static personas and fallbacks (`specialists-data.ts` removed). Studio queries agents live from PostgreSQL via `useAgents()`.
+- [x] **Zero Hardcoded Models & Providers**: Catalog loaded live from `llm_models` and `llm_providers` database tables via `useModels()` and `useProviders()`.
+- [x] **Zero Hardcoded Autonomy Modes**: Segmented toggles and execution modes fetched live from `platform_modes` table via `usePlatformModes()`.
+- [x] **Zero Hardcoded Roles & Permissions**: Form dialogs, badges, and filters dynamically driven by `platform_roles` and `platform_permissions` tables via `useAgentRoles()` and `usePermissions()`.
+- [x] **Zero Hardcoded Tools**: Tool catalog and security sandboxes queried live from `platform_tools` table via `useTools()`.
+- [x] **Lowercase snake_case Normalization**: All database slugs, tiers, and permissions normalized to lowercase format (`read_only`, `write_safe`, `strategy`, `research`, etc.).
+- [x] **Full Enum Normalization (All Types)**: Every Prisma enum (`ExecutionStatus`, `MessageRole`, `ApprovalStatus`, `ToolPermissionLevel`, `OutboxStatus`, `PlatformScope`) migrated to lowercase in the DB via `ALTER TYPE RENAME VALUE`. Schema.prisma, Prisma client, shared-types, and all gateway services aligned. 32/32 typecheck targets passing.
 
 ---
 
-## Phase 10 Breakdown (Persistence & Recovery)
+## 2. Invariant Compliance
 
-- [x] Abstract database query runner interface `IDatabaseQueryRunner` and extended `IPersistentCheckpointer`
-- [x] Durable PostgreSQL checkpointer `PostgresCheckpointer` with idempotent atomic UPSERTs matching `checkpoints` table (`0003_checkpoints_and_outbox.sql`)
-- [x] Checkpoint serialization and hydration subsystem (`packages/runtime/src/checkpoint/serializer/`):
-  - `state-serializer.ts`: Type-preserving serialization for `Date`, `Set`, `Map`, `RegExp`, and `Error` / `OrchestrAIError`
-  - `state-hasher.ts`: Canonical key-sorted SHA-256 state checksum calculation (`calculateStateHash`, `verifyStateHash`)
-- [x] State rewind & time-travel debugging engine (`packages/runtime/src/checkpoint/rewind/`):
-  - `rewind-policy.ts`: Policy schemas (`PRUNE_SUBSEQUENT`, `BRANCH_FORK`) and rewind options
-  - `state-diff.ts`: Deep object delta comparison (`added`, `modified`, `deleted`) between snapshots
-  - `state-rewind-engine.ts`: Execution rollback with downstream pruning or branch forking
-- [x] Checkpoint retention & pruning sweeper (`packages/runtime/src/checkpoint/retention/`):
-  - `retention-policy.ts`: Retention thresholds with milestone node protection
-  - `checkpoint-pruner.ts`: Timeline compaction algorithm preserving critical milestones
-- [x] Crash recovery coordinator (`packages/runtime/src/recovery/`):
-  - `recovery-types.ts`: Diagnostic inspection contracts and recovery plans
-  - `execution-recovery-manager.ts`: Stalled execution detector, checksum verifier, and DAG resumption planner
-- [x] Master runtime integration:
-  - Added `rewind(executionId, options)` and `recover(executionId, deps)` to `OrchestrAIRuntime`
-- [x] Introduced `EXECUTION_ERROR` code to `@orchestrai/shared-types` and `ExecutionError` class to `@orchestrai/core`
-- [x] Quality gates passed: `pnpm --filter @orchestrai/runtime build` and full monorepo `pnpm typecheck` (19 of 19 projects clean)
-- [x] Strict invariant adherence: 0 test cases added (per user directive) and 100% of files < 217 lines
-- [x] Phase 10 documentation (`docs/phases/phase-10-persistence.md`)
-
----
-
-## Phase 11 Breakdown (Human-in-the-Loop Architecture)
-
-- [x] HITL approval ticket contracts & schemas (`packages/runtime/src/hitl/contracts/`):
-  - `RiskLevel` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) and `ApprovalTicket` interface
-  - `ApprovalResolutionInputSchema` (`decision: APPROVED | REJECTED | CANCELLED`, `operatorId`, `reason`, `modifiedArguments`)
-  - `IApprovalStorage` interface (`createTicket`, `getTicket`, `listPending`, `resolveTicket`, `expireStaleTickets`)
-- [x] Storage adapters (`packages/runtime/src/hitl/storage/`):
-  - `MemoryApprovalStorage` for development, ephemeral testing, and local runs
-  - `PostgresApprovalStorage` targeting relational `approvals` table with optimistic concurrency control (`WHERE approval_id = $6 AND status = 'PENDING'`)
-- [x] Policy & risk classification engine (`packages/runtime/src/hitl/policy/`):
-  - `ApprovalPolicyConfigSchema` (`defaultTimeoutMs`, `autoApproveClearance`, `alwaysRequireApprovalTools`)
-  - `ApprovalPolicyEngine` evaluating mandatory tools, destructive flags, `ToolPermissionLevel.DANGEROUS`, and clearance hierarchy
-- [x] Decision engine & watchdog sweeper (`packages/runtime/src/hitl/decision/` & `watchdog/`):
-  - `ApprovalDecisionEngine` validating operator verdicts, argument overrides, and cancellation
-  - `ApprovalWatchdog` periodic background timer marking stale pending tickets as `TIMED_OUT`
-- [x] Runtime engine modularization (`packages/runtime/src/engine/`):
-  - Extracted `AgentGraphBuilder` (`agent-graph-builder.ts`, 68 lines) to keep files strictly < 250 lines
-  - Extracted `RuntimeApprovalCoordinator` (`runtime-approval-coordinator.ts`, 160 lines) for `resumeApprovalRun`, `cancelApprovalRun`, and `resolveApprovalRun`
-  - Modularized `OrchestrAIRuntime` (`orchestrai-runtime.ts`, 193 lines)
-  - Integrated `ToolEvaluatorNode` with approval policy evaluation and automatic ticket creation
-- [x] Quality gates passed: `pnpm --filter @orchestrai/runtime build` (ESM, CJS, DTS) and full monorepo `pnpm typecheck` (19 of 19 projects clean)
-- [x] Phase 11 documentation (`docs/phases/phase-11-hitl.md`)
-
----
-
-## Phase 12 Breakdown (Real-Time Streaming Broker)
-
-- [x] Scaffold standalone `@orchestrai/realtime` service application with `package.json`, `tsconfig.json`, `tsup.config.ts`, and local `.env.example`
-- [x] Environment configuration validation with Zod (`RealtimeConfigSchema`, `loadRealtimeConfig`)
-- [x] Channel topics and WS wire protocol types (`executions:{id}`, `agents:{id}`, `presence:{id}`, `system:alerts`)
-- [x] Connection & session management:
-  - `ClientSession`: Unified session metadata abstraction across WebSocket and SSE connections with heartbeat tracking
-  - `ConnectionRegistry`: Map-indexed connection registry supporting lookups by session ID, user ID, channel topic, and backpressure guards
-- [x] Redis Pub/Sub integration:
-  - `IRedisPubSubBroker` interface defining topic publish, subscribe, unsubscribe, and listener routing
-  - `RedisPubSubBroker`: Resilient dual-client Redis Pub/Sub adapter with automatic fallback to in-memory event broker
-- [x] Subscription engine (`SubscriptionManager`):
-  - Multi-topic subscription tracking per session with topic deduplication and dynamic cleanup on disconnect
-- [x] Presence subsystem (`PresenceManager`):
-  - Connected operator tracking per execution room with join/leave detection and presence broadcast
-- [x] Server-Sent Events (SSE) streaming (`apps/realtime/src/sse/`):
-  - `sse-channel.ts`: Line-protocol formatting, keepalive comments (`: keepalive`), and multi-line data framing
-  - `sse-handler.ts`: HTTP request handlers for single-execution streams (`/api/v1/stream/executions/:id`) and global event streams (`/api/v1/stream/events`)
-- [x] WebSocket gateway subsystem (`apps/realtime/src/websocket/`):
-  - `ws-authenticator.ts`: Bearer token extraction and authentication verification
-  - `ws-message-handler.ts`: Client payload validation and action dispatching
-  - `ws-gateway.ts`: WebSocketServer lifecycle, HTTP upgrade handling on `/ws`, and periodic heartbeat sweeps
-- [x] Server coordinator & graceful shutdown (`apps/realtime/src/server/`):
-  - `http-router.ts`: Zero-dependency HTTP router handling `/health`, `/metrics`, and SSE streaming routes with CORS headers
-  - `realtime-server.ts`: Coordinates HTTP server, WebSocket gateway, Redis Pub/Sub broker, and cross-protocol fan-out
-  - `lifecycle.ts`: Two-stage graceful shutdown coordinator trapping `SIGTERM` and `SIGINT` with connection draining
-- [x] Application entrypoint (`apps/realtime/src/index.ts`): Environment bootstrapping, server start, and lifecycle registration
-- [x] Removed placeholder `.gitkeep` from `apps/realtime`
-- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 21 workspace projects
-- [x] Zero file line-count violations (all 27 files < 180 lines) with comprehensive JSDoc
-- [x] Phase 12 documentation (`docs/phases/phase-12-realtime.md`)
-
----
-
-## Phase 13 Breakdown (Console Dashboard UI)
-
-- [x] Cross-repository `@yuva-devlab/design-system` integration via local symlinks
-- [x] Shared `@yuva-devlab/tokens` with Tailwind 4 `@theme inline` preset and theme variants (`theme-finai.css` Emerald, `theme-orchestrai.css` Terminal Moss)
-- [x] 46 production UI components in `@yuva-devlab/ui` with Radix UI, CVA, and Tailwind 4
-- [x] Standalone interactive `apps/cookbook` in `design-system` with live FinAI/OrchestrAI theme switching
-- [x] Next.js 15 App Router frontend scaffolded in `apps/console` with TypeScript 6 and Tailwind 4
-- [x] Google/Meta-grade feature-driven architecture (`src/features/<feature>/...`)
-- [x] Thin routing wrappers: all `page.tsx` and `layout.tsx` files strictly 5-15 lines
-- [x] Dashboard Shell (`SidebarNav`, `TopBar`, `DashboardShell`)
-- [x] Feature modules implemented:
-  - `features/console`: Live prompt execution, SSE event stream, agent markdown output card, token telemetry
-  - `features/agents`: Agent cards with execution stats, status badges, model tags, and filter tabs
-  - `features/executions`: Execution runs table with status icons, duration, and latency metrics
-  - `features/workflows`: Visual DAG pipeline builder cards with test run actions
-  - `features/tools`: Tool registry catalog with sandbox validation indicators and execution metrics
-  - `features/models`: Dynamic LLM fallback cascade cards with 1M token pricing and latency
-  - `features/activity`: Real-time diagnostic audit stream for outbox flushes and queue drains
-  - `features/settings`: PostgreSQL topology, transactional outbox poller toggle, and security execution limits
-- [x] Prime Invariants enforced: 100% of files < 125 lines (zero violations of 250-line rule)
-- [x] ESLint `max-lines` (250) and `max-len` (100) rules enforced across monorepo
-- [x] Scoped Tailwind linting configured, verified clean across all packages and apps with 0 errors and 0 warnings
-- [x] Monorepo-wide typecheck (`pnpm typecheck`) and build (`pnpm build`) passing
-
----
-
-## Phase 14 Breakdown (Agent Modes: CHAT / PLAN / ACT / AUTO)
-
-- [x] Core Operating Modes and Invariant:
-  - `CHAT`: Zero external side-effects; pure conversational dialogue with strict blocking of mutation tools
-  - `PLAN`: Read-only exploration and inspection tools allowed (`ToolPermissionLevel.READ_ONLY`), enforcing structured task deconstruction
-  - `ACT`: Autonomous tool execution loop with authorized mutations governed by operator clearance tiers and HITL safety gates
-  - `AUTO`: Application-controlled routing dynamically selecting the appropriate operational mode
-  - Core Invariant: "The LLM proposes behavior; the application enforces permissions and mode constraints." Mode is not a security boundary on its own; authorization remains authoritative
-- [x] Structured Planning Engine (`packages/agent/src/modes/plan/`):
-  - `plan.schema.ts`: Zod schemas for `PlanStep` (`id`, `title`, `description`, `toolTarget`, `dependencies`, `status`, `verificationCriteria`), `PlanStepStatus`, and `Plan`
-  - `plan-parser.ts`: Extracts structured plans from model outputs across Markdown JSON blocks, XML `<plan>` tags, or raw payloads
-  - `plan-tracker.ts`: Tracks plan execution state, dependency resolution, step state progression (`PENDING` -> `IN_PROGRESS` -> `COMPLETED`), and overall completion percentage
-- [x] Mode Constraint Enforcement (`packages/agent/src/modes/enforcement/`):
-  - `mode-constraint.types.ts`: `ModeCheckResult` and `ModeEnforcerOptions`
-  - `mode-constraint-enforcer.ts`: Evaluates proposed tool calls before dispatch, guaranteeing that an LLM cannot execute tools forbidden by its active mode
-- [x] Application-Controlled Dynamic Mode Routing (`packages/agent/src/modes/routing/`):
-  - `mode-router.interface.ts`: `IModeRouter` and `ModeRoutingContext`
-  - `heuristic-mode-router.ts`: Fast, zero-latency rule-based classifier evaluating lexical markers, intent verbs, and question styles to route to `CHAT`, `PLAN`, or `ACT`
-- [x] Mode Controller & Transition History (`packages/agent/src/modes/controller/`):
-  - `mode-controller.ts`: Manages current operational mode, tracks transition audit trail (`ModeTransitionRecord`), and invokes listeners
-- [x] Agent Loop & Tool Execution Modularization (`packages/agent/src/loop/`):
-  - `step-tool-executor.ts`: Extracted modular tool execution handler enforcing loop detection, mode constraints, HITL gates, and sandbox runs (< 120 lines)
-  - `agent-loop.ts`: Integrated mode-filtered tool lists, dynamic AUTO mode routing, plan extraction, and step execution (< 175 lines)
-- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 21 workspace projects
-- [x] Zero file line-count violations (all 34 files in `packages/agent/src/` < 175 lines) with comprehensive JSDoc
-- [x] Phase 14 documentation (`docs/phases/phase-14-modes.md`)
-
----
-
-## Phase 15 Breakdown (Memory Systems)
-
-- [x] Controlled Memory Principles (Section 59-60):
-  - In-monorepo evolutionary architecture: `packages/memory`
-  - Explicit categorical classifications: `CONVERSATION`, `WORKING`, `USER_PREFERENCE`, `FACT`, `EPISODIC`, `TASK`, `SYSTEM`
-  - Strict governance enforcing relevance, privacy, retention, lifecycle, and retrieval
-- [x] Domain Contracts & Schemas (`packages/memory/src/contracts/`):
-  - `memory-type.schema.ts`: Zod validation for `MemoryType`
-  - `memory-item.schema.ts`: `MemoryItem` Zod schema and `ScoredMemoryItem` interface
-  - `memory-query.schema.ts`: `MemoryFilter` and `MemorySearchQuery` schemas
-  - `memory-storage.interface.ts`: `IMemoryStorage` contract for persistent and ephemeral backends
-- [x] Storage Engines (`packages/memory/src/storage/`):
-  - `vector-math.ts`: Pure vector cosine similarity calculations (`calculateCosineSimilarity`)
-  - `memory-storage.ts`: Thread-safe, in-memory storage adapter with cosine vector search and TTL pruning
-  - `database-runner.interface.ts`: Decoupled `IDatabaseQueryRunner` contract
-  - `postgres-memory-storage.ts`: Production PostgreSQL adapter targeting `memory_items` table with pgvector `<=>` cosine distance
-- [x] Memory Subsystems (`packages/memory/src/`):
-  - `conversation/conversation-window.ts`: Token-aware sliding-window conversation memory buffer
-  - `working/working-memory.ts`: Execution-scoped scratchpad for intermediate reasoning and task variables
-  - `episodic/`:
-    - `episode.types.ts`: `EpisodeRecord` schema
-    - `episodic-recorder.ts`: Encodes and records execution runs into episodic narrative memories
-  - `semantic/semantic-search.ts`: Multi-factor hybrid relevance re-ranking combining vector similarity, inherent importance score, and half-life recency decay
-- [x] Lifecycle, Privacy & Relevance (`packages/memory/src/lifecycle/`):
-  - `relevance-filter.ts`: Rejects low-entropy pleasantries ("ok", "thanks") from polluting long-term memory
-  - `privacy-sanitizer.ts`: Redacts secrets, tokens, API keys, and sensitive credentials prior to persistence
-  - `retention-manager.ts`: Manages TTL per MemoryType and schedules automated sweeps
-- [x] Master Facade (`packages/memory/src/manager/`):
-  - `memory-manager.ts`: High-level entrypoint orchestrating `remember`, `recall`, `list`, `createWorkingMemory`, `createConversationWindow`, `recordEpisode`, and `pruneExpired`
-- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 22 workspace projects
-- [x] Zero file line-count violations (all 26 files in `packages/memory/src/` < 195 lines) with comprehensive JSDoc
-- [x] Phase 15 documentation (`docs/phases/phase-15-memory.md`)
-
----
-
-## Phase 16 Breakdown (RAG & Vector Retrieval Pipeline)
-
-- [x] Scaffold `@orchestrai/rag` package with `package.json`, `tsconfig.json`, `tsconfig.build.json`, and `tsup.config.ts`
-- [x] Evolutionary architecture: In-monorepo TypeScript package first with clean evolution path to Python microservice (`apps/rag`)
-- [x] Domain contracts & Zod schemas (`packages/rag/src/contracts/`):
-  - `document.schema.ts`: `Document` and `CreateDocumentInput` schemas
-  - `chunk.schema.ts`: `DocumentChunk`, `CreateChunkInput`, and `ScoredDocumentChunk`
-  - `rag-query.schema.ts`: `RagFilter`, `RagSearchQuery`, `VectorSearchOptions`, `KeywordSearchOptions`, `HybridSearchOptions`
-  - `rag-storage.interface.ts`: `IRagStorage` persistence abstraction
-- [x] Ingestion & text extraction subsystem (`packages/rag/src/ingestion/`):
-  - `extractor.interface.ts`: `ITextExtractor` and `ExtractedDocument` contracts
-  - `text-extractor.ts`: Plain text, markdown, csv, and delimited text extraction with heading-based title inference
-  - `json-extractor.ts`: Structured JSON document extraction with attribute flattening
-  - `document-ingestor.ts`: Multi-format ingestion coordinator with fallback
-- [x] Text chunking & token budgeting subsystem (`packages/rag/src/chunking/`):
-  - `chunker.interface.ts`: `ITextChunker`, `ChunkOptions`, and `TextChunkResult`
-  - `token-estimator.ts`: Fast zero-dependency token count estimator
-  - `text-chunker.ts`: Boundary-aware sliding-window chunker with sentence/paragraph splitting and configurable token overlap
-- [x] Embedding provider subsystem (`packages/rag/src/embeddings/`):
-  - `embedding-provider.interface.ts`: `IEmbeddingProvider` contract
-  - `mock-embedding-provider.ts`: Deterministic, unit-normalized 1536-dimensional embedding provider for reproducible testing and offline runs
-  - `ollama-embedding-provider.ts`: HTTP client connecting to Ollama instances (`/api/embed` and `/api/embeddings`) with timeout and error handling
-- [x] Storage engines & adapters (`packages/rag/src/storage/`):
-  - `vector-math.ts`: Pure vector cosine similarity calculations
-  - `database-runner.interface.ts`: Decoupled `IDatabaseQueryRunner` contract
-  - `memory-matchers.ts`: In-memory tenancy filtering and term density scorers
-  - `memory-rag-storage.ts`: Thread-safe in-memory vector & lexical storage adapter
-  - `postgres-row-mappers.ts`: Type-safe row mapping functions for database rows
-  - `postgres-rag-storage.ts`: PostgreSQL storage adapter targeting `documents` and `document_chunks` with pgvector `<=>` cosine distance
-- [x] Hybrid retrieval & reranking (`packages/rag/src/retrieval/` & `reranking/`):
-  - `hybrid-retriever.ts`: Reciprocal Rank Fusion (RRF, k=60) and linear score fusion combining dense vectors and sparse keywords
-  - `relevance-reranker.ts`: Multi-factor relevance reranking combining semantic similarity, lexical density, and document diversity penalties
-- [x] Context construction & citations (`packages/rag/src/context/`):
-  - `context-builder.types.ts`: `ContextCitation`, `ContextBuildOptions`, `FormattedContext`
-  - `context-builder.ts`: Assembles ranked chunks into prompt-ready markdown context strings with structured citations (`[1] Source: ...`) and token budget enforcement
-- [x] Master Facade (`packages/rag/src/pipeline/`):
-  - `rag-pipeline.ts`: End-to-end facade orchestrating `ingest`, `query`, and document lifecycle
-- [x] Added `RAG_ERROR` to `ErrorCode` in `@orchestrai/shared-types` and `RagError` to `@orchestrai/core`
-- [x] Clean build (`tsup` producing ESM, CJS, and DTS) and typecheck passing across all 23 workspace projects
-- [x] Zero file line-count violations (all 29 files in `packages/rag/src/` < 180 lines) with comprehensive JSDoc
-- [x] Phase 16 documentation (`docs/phases/phase-16-rag.md`)
-
----
-
-## Phase 17 Breakdown (Public API Gateway)
-
-- [x] Scaffold `apps/gateway` with `package.json`, `tsconfig.json`, `tsup.config.ts`, `.env.example`
-- [x] Clean layered architecture: `Routes -> Controllers -> Services` adhering to enterprise AI company standards
-- [x] Configuration & request context (`apps/gateway/src/config/` & `context/`):
-  - `gateway-config.schema.ts`: Zod schema validating port, host, security keys, rate limits, and shutdown timeouts
-  - `gateway-config.ts`: Environment variable parsing and defaults loader
-  - `request-context.ts`: Tenancy isolation (`x-tenant-id`), correlation trace ID (`x-request-id`), remote IP, and user identity extraction
-- [x] Security & policy middleware (`apps/gateway/src/middleware/`):
-  - `cors.middleware.ts`: CORS headers and preflight 204 response
-  - `auth.middleware.ts`: API key (`X-API-Key`) and Bearer token (`Authorization`) guard with 401 error response
-  - `rate-limiter.ts`: In-memory sliding-window rate limiter with RFC headers (`X-RateLimit-*`, `Retry-After`)
-  - `error.middleware.ts`: Global error handler mapping Zod, OrchestrAI domain errors, and JSON syntax errors
-- [x] Validation schemas & DTOs (`apps/gateway/src/validation/`):
-  - `execution.schema.ts`: `CreateExecutionDto`, `ExecutionFilterDto`, `ResumeExecutionDto`
-  - `conversation.schema.ts`: `CreateConversationDto`, `AddMessageDto`, `MessageQueryDto`
-  - `agent.schema.ts`: `CreateAgentDto`, `UpdateAgentDto`, `AgentFilterDto`
-  - `rag.schema.ts`: `IngestDocumentDto`, `QueryRagDto`
-  - `approval.schema.ts`: `ResolveApprovalDto`, `ApprovalFilterDto`
-- [x] Domain services layer (`apps/gateway/src/services/`):
-  - `execution.service.ts`: Execution dispatch, query, cancel, and resume operations
-  - `conversation.service.ts`: Multi-turn session creation and message appending
-  - `agent.service.ts`: Agent definition registration, query, and update operations
-  - `rag.service.ts`: Document ingestion and vector query orchestration
-  - `approval.service.ts`: Human-in-the-loop approval listing and resolution
-- [x] HTTP controllers layer (`apps/gateway/src/controllers/`):
-  - `health.controller.ts`: Liveness (`/health`) and readiness (`/ready`) probes
-  - `execution.controller.ts`: Execution REST HTTP request handling
-  - `conversation.controller.ts`: Conversation and messaging HTTP request handling
-  - `agent.controller.ts`: Agent management HTTP request handling
-  - `rag.controller.ts`: RAG ingestion and retrieval HTTP request handling
-  - `approval.controller.ts`: Approval ticket resolution HTTP request handling
-- [x] Routing & server orchestration (`apps/gateway/src/routes/` & `server/`):
-  - `router.ts`: Lightweight parameterized route dispatcher with URL parameter parsing (`:id`) and JSON streaming body reader
-  - `gateway-server.ts`: HTTP server orchestrating CORS -> Context -> Auth -> RateLimit -> Router pipeline
-  - `lifecycle.ts`: Graceful shutdown draining in-flight requests on SIGTERM/SIGINT
-- [x] Central barrel files and `@/*` path aliases across all gateway modules
-- [x] Monorepo quality gates: `pnpm --filter @orchestrai/gateway build`, `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` passing with zero errors
-- [x] Zero file line-count violations (all 43 files in `apps/gateway/src/` < 120 lines) with comprehensive JSDoc
-- [x] Phase 17 documentation (`docs/phases/phase-17-gateway.md`)
-
----
-
-## Phase 18 Breakdown (Client SDK with AI Cost Protection & HMAC Signing)
-
-- [x] Scaffold `packages/sdk` with `package.json`, `tsconfig.json`, `tsconfig.build.json`, `tsup.config.ts`
-- [x] Enterprise security & HMAC request signing (`packages/sdk/src/security/`):
-  - `nonce-generator.ts`: Cryptographically secure UUIDv4 nonces for replay attack prevention
-  - `hmac-signer.ts`: Web Crypto HMAC-SHA256 signature generator over `(METHOD, PATH, TIMESTAMP, NONCE, CONTENT_HASH)`
-  - `credential-sanitizer.ts`: Masking of tokens, API keys, and client secrets in logs and errors
-- [x] Strongly-typed error hierarchy (`packages/sdk/src/errors/`):
-  - `sdk-error.ts`: Base `OrchestrAISDKError` with request ID and status code
-  - `http-errors.ts`: `AuthenticationError`, `PermissionDeniedError`, `NotFoundError`, `RateLimitError`, `ValidationError`, `BudgetExceededError`, `GatewayTimeoutError`
-- [x] Resilient HTTP transport & cost protection (`packages/sdk/src/transport/`):
-  - `retry-policy.ts`: Exponential backoff with full jitter and `Retry-After` header support
-  - `idempotency.ts`: Automatic idempotency key generation guarding against duplicate execution charges
-  - `error-mapper.ts`: Maps HTTP response bodies and status codes to typed SDK errors
-  - `http-client.ts`: Resilient Web `fetch` client managing HMAC signing, headers, timeouts, and streaming
-- [x] Streaming subsystem (`packages/sdk/src/streaming/`):
-  - `sse-parser.ts`: Zero-dependency Server-Sent Events stream decoder
-  - `stream-iterator.ts`: `AsyncIterableIterator<StreamEvent>` for native `for await (const event of ...)`
-- [x] Fluent domain resources (`packages/sdk/src/resources/`):
-  - `resource-base.ts`: Abstract base class providing transport access
-  - `agents.ts`: `AgentsResource` (`list`, `get`, `create`, `update`, `run`)
-  - `executions.ts`: `ExecutionsResource` (`get`, `list`, `cancel`, `resume`, `stream`)
-  - `execution-handle.ts`: `ExecutionHandle` fluent controller (`.stream()`, `.wait()`, `.cancel()`, `.resume()`)
-  - `conversations.ts`: `ConversationsResource` (`create`, `getMessages`, `sendMessage`)
-  - `rag.ts`: `RagResource` (`ingest`, `query`)
-  - `approvals.ts`: `ApprovalsResource` (`list`, `resolve`)
-- [x] Master Client and factory (`packages/sdk/src/client.ts` & `src/index.ts`):
-  - `OrchestrAIClient`: Top-level client with sub-resource properties
-  - `createOrchestrAIClient`: Factory helper
-- [x] Monorepo quality gates: `pnpm --filter @orchestrai/sdk build` (Dual ESM & CJS with full DTS), `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
-- [x] Zero file line-count violations (all 29 files in `packages/sdk/src/` < 175 lines) with comprehensive JSDoc
-- [x] Phase 18 documentation (`docs/phases/phase-18-sdk.md`)
-
----
-
-## Phase 19 Breakdown (Observability & OpenTelemetry)
-
-- [x] Scaffold `packages/observability` with `package.json`, `tsconfig.json`, `tsconfig.build.json`, `tsup.config.ts`
-- [x] Clean separation of concerns: SDK telemetry library in `packages/observability`, deployment manifests in `infrastructure/monitoring/`
-- [x] Correlation context & W3C trace propagation (`packages/observability/src/context/`):
-  - `correlation-context.ts`: `AsyncLocalStorage`-backed ambient store for `traceId`, `spanId`, `executionId`, `tenantId`, `userId`, `correlationId`
-  - `propagation.ts`: W3C `traceparent` (`00-${traceId}-${spanId}-${flags}`) header parser, serializer, and ID generators
-- [x] Distributed tracing engine (`packages/observability/src/tracing/`):
-  - `span.types.ts`: `SpanKind`, `StatusCode`, `SpanAttributes`, `SpanEvent`, `ISpan`, `ITracer`
-  - `span.ts`: OpenTelemetry-compatible `Span` implementation with lifecycle timestamps, events, and duration tracking
-  - `span-exporter.interface.ts`: `ISpanExporter` contract
-  - `memory-exporter.ts`: In-memory span exporter for development and unit testing
-  - `otlp-exporter.ts`: Zero-dependency OTLP HTTP JSON exporter transmitting spans to OTel Collector (`:4318/v1/traces`)
-  - `tracer.ts`: Master `Tracer` with `startSpan()` and `startActiveSpan()` nesting
-- [x] Prometheus metrics engine (`packages/observability/src/metrics/`):
-  - `metric.types.ts`: `Counter`, `Gauge`, `Histogram` interfaces and sample models
-  - `metric-instruments.ts`: Concrete thread-safe Counter, Gauge, and Histogram classes
-  - `metric-registry.ts`: Registry storing metric series and label keys
-  - `standard-metrics.ts`: Pre-registered platform metrics from Section 72 (Agent, LLM, Tools, Queue, Realtime)
-  - `prometheus-serializer.ts`: Official Prometheus text exposition serializer for `/metrics` HTTP endpoints
-- [x] Sensitive data redaction & logging (`packages/observability/src/logging/`):
-  - `sensitive-data-redactor.ts`: Recursive sanitizer redacting passwords, tokens, API keys, secrets, and private credentials
-  - `log-context-enricher.ts`: Enriches structured logs with ambient `traceId`, `spanId`, and sanitized context
-- [x] Master facade (`packages/observability/src/index.ts`):
-  - Global `initObservability()`, `getTracer()`, `getMetricRegistry()`, `getStandardMetrics()`
-- [x] Monitoring infrastructure (`infrastructure/monitoring/`):
-  - `prometheus.yml`: Scrape configuration targeting Gateway (`:8000`), Realtime (`:8001`), Worker (`:9100`), and OTel Collector (`:8889`)
-  - `otel-collector-config.yml`: OpenTelemetry Collector pipelines routing OTLP traces and metrics to Prometheus and debug
-  - `docker-compose.monitoring.yml`: Local Docker Compose stack with Prometheus, Grafana, and OTel Collector
-- [x] Monorepo quality gates: `pnpm --filter @orchestrai/observability build` (Dual ESM & CJS with full DTS), `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
-- [x] Zero file line-count violations (all 20 files in `packages/observability/src/` < 140 lines) with comprehensive JSDoc
-- [x] Phase 19 documentation (`docs/phases/phase-19-observability.md`)
-
----
-
-## Phase 20 Breakdown (Reliability Engineering & Resilience)
-
-- [x] Scaffold `packages/resilience` (`@orchestrai/resilience`) with dual ESM/CJS build and full DTS output
-- [x] Clean barrel exports (`@/deadline`, `@/retry`, `@/circuit-breaker`, `@/bulkhead`, `@/fallback`, `@/ratelimit`, `@/pipeline`, `@/chaos`, `@/adapters`) and path aliases
-- [x] Bounded Timeouts & Hierarchical Deadlines (`src/deadline/`):
-  - `deadline.types.ts`: `TimeoutOptions`, `IDeadlineContext`
-  - `timeout-error.ts`: Typed `TimeoutError` with elapsed and limit attributes
-  - `with-timeout.ts`: Asynchronous timeout wrapper with strict timer cleanup and signal chaining
-  - `deadline-context.ts`: Hierarchical deadline budget inheritance (`createChild`, `getRemainingMs`, `isExpired`)
-- [x] Retry with Exponential Backoff & Jitter (`src/retry/`):
-  - `retry.types.ts`: `BackoffStrategy`, `JitterStrategy`, `RetryOptions`
-  - `jitter.ts`: Full jitter, equal jitter, and decorrelated jitter preventing synchronized retry storms
-  - `error-classifier.ts`: Classification of transient network/HTTP errors vs fatal client/validation errors
-  - `retry.ts`: `retryAsync` execution loop with attempt callbacks and signal cancellation
-- [x] Circuit Breaker State Machine (`src/circuit-breaker/`):
-  - `circuit-breaker.types.ts`: `CircuitState` (CLOSED, OPEN, HALF_OPEN), `CircuitBreakerMetrics`
-  - `circuit-breaker-error.ts`: `CircuitBreakerOpenError` fast-fail exception
-  - `circuit-breaker.ts`: Full state machine with cooldown probes and operational metrics
-- [x] Bulkhead Concurrency Isolation (`src/bulkhead/`):
-  - `bulkhead.types.ts`: `BulkheadOptions`, `BulkheadMetrics`
-  - `bulkhead-error.ts`: `BulkheadRejectedError` on capacity and queue saturation
-  - `bulkhead.ts`: Semaphore-based concurrency limiter preventing worker capacity starvation
-- [x] Fallback & Graceful Degradation (`src/fallback/`):
-  - `fallback.types.ts`: `FallbackHandler`, `FallbackOptions`
-  - `fallback.ts`: `withFallback` executing alternative degradation logic upon primary failure
-- [x] Token Bucket Rate Limiting (`src/ratelimit/`):
-  - `token-bucket.types.ts`: `TokenBucketOptions`, `TokenBucketMetrics`
-  - `rate-limit-error.ts`: `RateLimitExceededError` with computed `retryAfterMs`
-  - `token-bucket.ts`: Fractional token refill rate limiter with asynchronous waiting
-- [x] Composable Resilience Pipeline (`src/pipeline/`):
-  - `pipeline.types.ts`: `IResiliencePolicy`, `PipelinePolicyOptions`
-  - `resilience-pipeline.ts`: Composable execution ordering (`Fallback -> RateLimiter -> Retry -> CircuitBreaker -> Bulkhead -> Timeout -> fn`) with fluent builder
-- [x] Chaos Testing & Synthetic Fault Injection (`src/chaos/`):
-  - `chaos.types.ts`: `ChaosConfig`, `ChaosMetrics`
-  - `chaos-injector.ts`: `ChaosInjector` with probabilistic synthetic latency and failure simulation
-- [x] Out-of-the-Box Adapters (`src/adapters/`):
-  - `model-resilience.ts`: `createModelResiliencePipeline` tailored for LLM providers
-  - `tool-resilience.ts`: `createToolResiliencePipeline` tailored for agent tool execution
-  - `database-resilience.ts`: `createDatabaseResiliencePipeline` tailored for database transactions
-- [x] Monorepo quality gates: `pnpm --filter @orchestrai/resilience build`, `pnpm typecheck`, `pnpm lint` (`--max-warnings=0`), and `pnpm build` all passing
-- [x] Zero file line-count violations (all 36 files in `packages/resilience/src/` strictly < 190 lines) with comprehensive JSDoc
-- [x] Phase 20 documentation (`docs/phases/phase-20-resilience.md`)
-
----
-
-## Environment Variable Migration (Cross-Cutting)
-
-- [x] Hybrid strategy: root `.env` = shared infra & secrets; `apps/*/.env` = app-specific overrides only
-- [x] Root `.env` holds: `DATABASE_URL`, `POSTGRES_*`, `REDIS_*`, `JWT_SECRET`, all LLM provider keys
-- [x] `apps/gateway/.env`: PORT, HOST, GATEWAY_API_KEY, RATE_LIMIT_*, CORS_ORIGIN, internal service URLs, execution bounds
-- [x] `apps/realtime/.env`: PORT, HOST, CORS_ORIGINS, heartbeat/connection/rate limits
-- [x] `apps/worker/.env`: WORKER_PORT, WORKER_ID, concurrency limits, graceful shutdown timeout
-- [x] `apps/console/.env`: PORT, NEXT_PUBLIC_* vars, backend service URLs, execution bounds, telemetry flag
-- [x] Deleted stale `apps/console/src/.env` (wrong DB port 5432)
-- [x] Updated all `.env.example` files to reflect the new structure
-
----
-
-## Phase 21 Breakdown (Security & Sandboxing)
-
-- [x] Capability-Based Security Model (`packages/tools/src/capabilities/`):
-  - `capability.types.ts`: `Capability` enum and `CapabilitySet`
-  - `capability-grant.schema.ts`: Zod schema for grants with scope constraints
-  - `capability-evaluator.ts`: Scope-aware capability grant evaluator
-- [x] RBAC / ABAC Policy Engine (`packages/tools/src/policy/`):
-  - `policy.types.ts`: `PolicyRule`, `PolicyEffect`, `PolicyContext`
-  - `policy-engine.ts`: DENY-first ordered rule evaluator
-  - `policy-store.interface.ts`: `IPolicyStore` abstraction
-  - `memory-policy-store.ts`: In-memory dev store
-- [x] Filesystem & Network Sandbox (`packages/tools/src/sandbox/`):
-  - `path-jail.ts`: Real-path symlink resolution + prefix enforcement (pre-existing from Phase 3)
-  - `network-allowlist.ts`: SSRF-prevention domain allowlist blocking private IPs, link-local, non-HTTPS
-  - `resource-quota.ts`: Per-agent quota tracker (elapsed ms, output bytes, tool call count)
-- [x] Sandboxed Execution Wrapper (`packages/tools/src/executor/`):
-  - `sandbox-context.ts`: Immutable Zod-validated per-execution security context
-  - `sandbox-executor.ts`: Full 5-layer stack: capability → policy → quota → tool → audit
-- [x] Audit Trail (`packages/tools/src/audit/`):
-  - `audit-event.schema.ts`: `SecurityAuditEvent` Zod schema
-  - `audit-logger.ts`: `AuditLogger` using `@orchestrai/logger` + `MemoryAuditStore`
-  - `audit-store.interface.ts`: `IAuditStore` contract
-- [x] `IToolRegistry` interface added to `registry/tool-registry.types.ts`
-- [x] `@orchestrai/logger` added to `packages/tools` dependencies
-- [x] Monorepo quality gates: `pnpm --filter @orchestrai/tools build`, `pnpm typecheck` (27/27), `pnpm lint` (`--max-warnings=0`) all passing
-- [x] Zero file line-count violations (all files in `packages/tools/src/` strictly < 250 lines)
-- [x] Phase 21 documentation (`docs/phases/phase-21-security.md`)
-
----
-
-## Phase 22 Breakdown (Distributed Consistency)
-
-- [x] Idempotency & Deduplication Engine (`packages/events/src/idempotency/`):
-  - `idempotency-record.schema.ts`: `IdempotencyRecord` Zod schema and `IdempotencyStatus`
-  - `idempotency-store.interface.ts`: `IIdempotencyStore` contract and `AcquireKeyResult`
-  - `memory-idempotency-store.ts`: Thread-safe memory deduplication store with lazy and background TTL sweeps
-  - `redis-idempotency-store.ts`: Distributed Redis key-value store using atomic `SETNX` with `PX` expiration
-- [x] Distributed Mutual Exclusion Locks (`packages/events/src/lock/`):
-  - `lock-options.schema.ts`: `LockOptions` Zod schema validating ttl, retry count, and retry delay
-  - `distributed-lock.interface.ts`: `IDistributedLock` contract and `LockHandle`
-  - `memory-distributed-lock.ts`: In-memory reentrant lock implementation
-  - `redis-distributed-lock.ts`: Distributed Redis lock engine using atomic Lua scripts for release and extension
-- [x] Causal Event Ordering & Vector Clocks (`packages/events/src/ordering/`):
-  - `vector-clock.types.ts`: `VectorClockMap` and `ClockComparison` enum (`EQUAL`, `BEFORE`, `AFTER`, `CONCURRENT`)
-  - `vector-clock.ts`: `VectorClock` class implementing increment, element-wise max merge, and causal precedence checks
-  - `ordered-event.schema.ts`: `OrderedDomainEvent` schema binding domain events to vector clock state
-- [x] Distributed Saga Orchestration with Compensations (`packages/events/src/saga/`):
-  - `saga.types.ts`: `SagaState`, `SagaStep`, `SagaDefinition`, and `SagaResult`
-  - `saga-execution.schema.ts`: `SagaExecutionSnapshot` Zod schema for checkpointing and auditing
-  - `saga-coordinator.ts`: Distributed Saga orchestrator executing forward steps and LIFO backward compensating transactions on failure
-- [x] Exactly-Once Processing Delivery Handler (`packages/events/src/delivery/`):
-  - `deduplicated-handler.ts`: Higher-order function `createDeduplicatedHandler` wrapping domain event handlers with `IIdempotencyStore` checks
-- [x] Package index barrel exports formatted with top-line comments
-- [x] Monorepo quality gates: `pnpm --filter @orchestrai/events build`, `pnpm typecheck` (27/27), `pnpm lint` (`--max-warnings=0`) all passing
-- [x] Zero file line-count violations (all files in `packages/events/src/` strictly < 200 lines) with comprehensive JSDoc
-- [x] Phase 22 documentation (`docs/phases/phase-22-distributed-consistency.md`)
-
----
-
-## Phase 23 Breakdown (Advanced PostgreSQL Optimizations)
-
-- [x] Full-Text Search (FTS) & GIN Indexing (`infrastructure/postgres/migrations/0006_advanced_postgresql_optimizations.sql`):
-  - English `tsvector` generated columns (`search_vector`) on `document_chunks` and `memory_items`
-  - GIN indexes (`idx_document_chunks_fts`, `idx_memory_items_fts`) for keyword queries
-- [x] Composite B-Tree Indexes for Multi-Tenant Scoped Lookups:
-  - `idx_executions_tenant_status`, `idx_messages_conversation_created`, `idx_memory_tenant_type_created`
-- [x] PostgreSQL Advisory Lock Helper Functions:
-  - `orchestrai_try_advisory_lock` and `orchestrai_advisory_unlock` for application session locking
-- [x] Temporal Range Table Partitioning (`outbox_partitioned`):
-  - Partitioned `BY RANGE (created_at)` with automated monthly partition creation procedure `create_outbox_partition`
-- [x] Materialized View Telemetry & Cost Aggregation (`mv_tenant_token_telemetry`):
-  - Multi-tenant token and execution latency precomputations with unique index enabling `REFRESH MATERIALIZED VIEW CONCURRENTLY`
-- [x] Query Handbooks (`infrastructure/postgres/queries/`):
-  - `07_fulltext_vector_hybrid_search.sql`: Sparse BM25 + Dense Vector Reciprocal Rank Fusion (RRF) CTEs
-  - `08_advisory_locks_and_concurrency.sql`: Advisory locks & `SELECT FOR UPDATE SKIP LOCKED` outbox queue polling
-  - `09_explain_analyze_benchmarks.sql`: Query plan profiling handbook (`EXPLAIN (ANALYZE, BUFFERS)`)
-  - `10_partitioning_and_archival.sql`: Monthly table partitioning, detachment, and MV refresh queries
-- [x] Verification Script (`infrastructure/postgres/scripts/verify-postgres-optimizations.ts`):
-  - Automated typescript script validating migration SQL syntax and query handbook completeness
-- [x] Updated directory documentation in `infrastructure/postgres/README.md`
-- [x] Zero file line-count violations (all files < 250 lines) with complete JSDoc
-- [x] Phase 23 documentation (`docs/phases/phase-23-advanced-postgres.md`)
+- **Hard 250-Line Maximum Rule**: 100% of files across all `apps/` and `packages/` are strictly < 250 lines (zero exceptions).
+- **Strict TypeScript**: `pnpm typecheck` passing with **0 errors** across all **32 targets**.
+- **ESLint**: `pnpm lint` passing with **0 warnings**.
+- **No Test Policy**: Zero test cases written during phase implementation until requested.
