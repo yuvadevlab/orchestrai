@@ -129,6 +129,13 @@ export class OllamaAdapter implements ILlmAdapter {
    */
   async invoke(request: LlmRequest): Promise<LlmResponse> {
     const model = request.model ?? this.config.defaultModel;
+    if (!model) {
+      throw new OrchestrAIError(
+        "No model identifier specified for Ollama invocation",
+        "VALIDATION_ERROR",
+        400,
+      );
+    }
 
     try {
       const raw = (await this.client.chat({
@@ -180,6 +187,13 @@ export class OllamaAdapter implements ILlmAdapter {
    */
   async *stream(request: LlmRequest): AsyncIterable<LlmStreamChunk> {
     const model = request.model ?? this.config.defaultModel;
+    if (!model) {
+      throw new OrchestrAIError(
+        "No model identifier specified for Ollama streaming",
+        "VALIDATION_ERROR",
+        400,
+      );
+    }
 
     try {
       const rawStream = (await this.client.chat({

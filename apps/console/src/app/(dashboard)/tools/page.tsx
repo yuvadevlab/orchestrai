@@ -1,19 +1,16 @@
-import React from "react";
-import { PageShell } from "@/components/layout/page-shell";
-import { ToolsPageContent } from "@/features/tools";
-
 /**
- * SSR Page Shell for Tool Capability Registry.
- * Delegating all client interactive state and tool rendering to ToolsPageContent.
+ * @file page.tsx
+ * @description Tool Capability Registry route.
+ * @module apps/console/app/(dashboard)/tools
  */
+
+import React from "react";
+import dynamic from "next/dynamic";
+
+const ToolsPageContent = dynamic(() =>
+  import("@/features/tools").then((m) => ({ default: m.ToolsPageContent })),
+);
+
 export default function ToolsPage(): React.JSX.Element {
-  return (
-    <PageShell
-      title="Tools"
-      breadcrumb="Tools"
-      description="Everything the orchestrator is allowed to reach for, and the safety guardrails attached to each capability."
-    >
-      <ToolsPageContent />
-    </PageShell>
-  );
+  return <ToolsPageContent />;
 }

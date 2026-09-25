@@ -1,11 +1,18 @@
 /**
  * @file apps/gateway/src/controllers/conversation.controller.ts
  * @description HTTP controller mediating conversation and message requests.
+ * @module apps/gateway/controllers
  */
 
 import type { GatewayRequest, GatewayResponse } from "@/routes/http-types";
 import { sendJson, parseQueryParams } from "@/routes/http-helpers";
-import { CreateConversationSchema, AddMessageSchema, MessageQuerySchema } from "@/validation";
+import {
+  CreateConversationSchema,
+  AddMessageSchema,
+  MessageQuerySchema,
+  ConversationQuerySchema,
+  UpdateConversationSchema,
+} from "@/validation";
 import { ConversationService } from "@/services";
 
 /**
@@ -15,12 +22,55 @@ export class ConversationController {
   constructor(private readonly service: ConversationService = new ConversationService()) {}
 
   /**
+   * Lists conversations for the current tenant.
+   */
+  public async listConversations(req: GatewayRequest, res: GatewayResponse): Promise<void> {
+    const query = ConversationQuerySchema.parse(parseQueryParams(req.url));
+    const result = await this.service.listConversations(query, req.context.tenantId);
+    sendJson(res, 200, result);
+  }
+
+  /**
+   * Retrieves a single conversation by ID.
+   */
+  public async getConversation(req: GatewayRequest, res: GatewayResponse): Promise<void> {
+    const conversationId = req.params.id || "";
+    const result = await this.service.getConversation(conversationId, req.context.tenantId);
+    if (!result) {
+      sendJson(res, 404, {
+        error: { code: "NOT_FOUND", message: `Conversation ${conversationId} not found` },
+      });
+      return;
+    }
+    sendJson(res, 200, result);
+  }
+
+  /**
    * Creates a new conversation session.
    */
   public async createConversation(req: GatewayRequest, res: GatewayResponse): Promise<void> {
     const dto = CreateConversationSchema.parse(req.body);
     const result = await this.service.createConversation(dto, req.context.tenantId);
     sendJson(res, 201, result);
+  }
+
+  /**
+   * Updates an existing conversation.
+   */
+  public async updateConversation(req: GatewayRequest, res: GatewayResponse): Promise<void> {
+    const conversationId = req.params.id || "";
+    const dto = UpdateConversationSchema.parse(req.body);
+    const result = await this.service.updateConversation(conversationId, dto, req.context.tenantId);
+    sendJson(res, 200, result);
+  }
+
+  /**
+   * Soft-deletes a conversation.
+   */
+  public async deleteConversation(req: GatewayRequest, res: GatewayResponse): Promise<void> {
+    const conversationId = req.params.id || "";
+    const result = await this.service.deleteConversation(conversationId, req.context.tenantId);
+    sendJson(res, 200, result);
   }
 
   /**

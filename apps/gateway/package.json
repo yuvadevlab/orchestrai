@@ -15,15 +15,22 @@
   },
   "dependencies": {
     "@orchestrai/core": "workspace:*",
+    "@orchestrai/database": "workspace:*",
     "@orchestrai/events": "workspace:*",
+    "@orchestrai/models": "workspace:*",
+    "@orchestrai/prompts": "workspace:*",
     "@orchestrai/queue": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
+    "@orchestrai/tools": "workspace:*",
     "@yuva-devlab/logger": "1.1.0",
     "dotenv": "^16.4.7",
+    "ollama": "^0.6.3",
+    "pg": "^8.23.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^26.6.1",
+    "@types/pg": "^8.23.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   }

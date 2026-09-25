@@ -1,19 +1,25 @@
 "use client";
 
 /**
- * @file use-api-data.ts
- * @description Flexible data fetching hook connecting Console components to Gateway APIs safely without infinite re-render loops.
+ * @file apps/console/src/lib/use-api-data.ts
+ * @description Universal data fetching hook integrating TanStack Query caching, deduping, and error normalization.
  * @module apps/console/lib
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getApiClient } from "./api-client";
+import { formatApiError } from "./error-utils";
 
 export interface UseApiDataOptions<T> {
   /** Async fetch callback taking initialized OrchestrAIClient */
   fetchFn: (client: ReturnType<typeof getApiClient>) => Promise<T>;
   /** Default fallback data when loading or when API returns empty */
   initialData: T;
+  /** Optional explicit cache key */
+  queryKey?: unknown[];
+  /** Optional enabled flag to conditionally trigger data fetching */
+  enabled?: boolean;
 }
 
 export interface UseApiDataResult<T> {
@@ -28,38 +34,39 @@ export interface UseApiDataResult<T> {
 }
 
 /**
- * React hook to fetch live gateway resource data safely without breaking UI layouts or looping on failure.
+ * React hook to fetch live gateway resource data powered by TanStack Query for caching and background synchronization.
  */
-export function useApiData<T>({ fetchFn, initialData }: UseApiDataOptions<T>): UseApiDataResult<T> {
-  const [data, setData] = useState<T>(initialData);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  // Preserve callback & data refs to prevent inline closures from triggering infinite re-render loops
-  const fetchFnRef = useRef(fetchFn);
-  fetchFnRef.current = fetchFn;
-
-  const initialDataRef = useRef(initialData);
-  initialDataRef.current = initialData;
-
-  const loadData = useCallback(async (): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-    try {
+export function useApiData<T>({
+  fetchFn,
+  initialData,
+  queryKey,
+  enabled = true,
+}: UseApiDataOptions<T>): UseApiDataResult<T> {
+  const query = useQuery({
+    queryKey: queryKey || ["gateway-data", fetchFn.toString()],
+    queryFn: async (): Promise<T> => {
       const client = getApiClient();
-      const result = await fetchFnRef.current(client);
-      setData(result ?? initialDataRef.current);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
-      setData(initialDataRef.current);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      const result = await fetchFn(client);
+      return result ?? initialData;
+    },
+    enabled,
+  });
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const refetch = useCallback(async (): Promise<void> => {
+    await query.refetch();
+  }, [query]);
 
-  return { data, isLoading, error, refetch: loadData };
+  // Format error into friendly message while preserving underlying error cause
+  const normalizedError = query.error
+    ? new Error(formatApiError(query.error, "Failed to load data from gateway"), {
+        cause: query.error,
+      })
+    : null;
+
+  return {
+    data: query.data ?? initialData,
+    isLoading: query.isLoading,
+    error: normalizedError,
+    refetch,
+  };
 }

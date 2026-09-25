@@ -15,9 +15,10 @@
  */
 
 import crypto from "node:crypto";
-import { AgentMode, ModelProvider } from "@orchestrai/shared-types";
+import { AgentMode } from "@orchestrai/shared-types";
 import {
   AgentDefinitionSchema,
+  AGENT_EXECUTION_DEFAULTS,
   type AgentDefinition,
   type AgentModelConfig,
 } from "@orchestrai/core";
@@ -33,12 +34,10 @@ export class AgentBuilder {
   private mode: AgentMode = AgentMode.AUTO;
   private systemPrompt = "You are a helpful and precise AI agent.";
   private modelConfig: AgentModelConfig = {
-    provider: ModelProvider.OLLAMA,
-    modelName: "qwen2.5:7b",
-    temperature: 0.7,
+    temperature: AGENT_EXECUTION_DEFAULTS.DEFAULT_TEMPERATURE,
   };
   private enabledTools: string[] = [];
-  private maxSteps = 25;
+  private maxSteps: number = AGENT_EXECUTION_DEFAULTS.DEFAULT_MAX_STEPS;
 
   /**
    * Sets the agent's unique UUID.
@@ -91,11 +90,9 @@ export class AgentBuilder {
   /**
    * Sets the model selection and sampling parameters.
    */
-  public withModel(
-    config: Partial<AgentModelConfig> & { provider: ModelProvider; modelName: string },
-  ): this {
+  public withModel(config: Partial<AgentModelConfig>): this {
     this.modelConfig = {
-      temperature: 0.7,
+      ...this.modelConfig,
       ...config,
     };
     return this;

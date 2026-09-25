@@ -1,23 +1,33 @@
 /**
  * @file apps/gateway/src/services/execution.service.ts
- * @description Domain orchestration service managing agent executions and lifecycle actions.
+ * @description Domain orchestration service managing agent executions, history, and PostgreSQL persistence.
+ * @module apps/gateway/services
  */
 
-import { randomUUID } from "node:crypto";
+import { getPrismaClient, type PrismaClient, type Prisma } from "@orchestrai/database";
 import { ExecutionStatus } from "@orchestrai/shared-types";
 import type { CreateExecutionDto, ExecutionFilterDto, ResumeExecutionDto } from "@/validation";
+import type { GatewayResponse } from "@/routes/http-types";
+import { resolveDbTenantId } from "./tenant-resolver";
+import { liveExecutionManager } from "./live-execution.manager";
+import { toPrismaStatus, toSharedStatus } from "./execution-status.mapper";
+import { ExecutionQueryService } from "./execution-query.service";
 
 export interface ExecutionRecord {
   executionId: string;
   agentId: string;
-  conversationId: string;
+  conversationId?: string | null;
   status: ExecutionStatus;
-  mode: string;
+  mode?: string;
   tenantId: string;
   createdAt: string;
   updatedAt?: string;
   cancelledAt?: string;
   resumedAt?: string;
+  result?: {
+    output?: string;
+    error?: string;
+  };
 }
 
 export interface ExecutionListResult {
@@ -28,91 +38,180 @@ export interface ExecutionListResult {
 }
 
 /**
- * Service encapsulating execution dispatch, cancellation, and retrieval domain operations.
+ * Service encapsulating execution dispatch, streaming, multi-turn history, and PostgreSQL persistence.
  */
 export class ExecutionService {
-  /**
-   * Dispatches a new asynchronous agent execution task.
-   */
+  private readonly queryService = new ExecutionQueryService();
+
+  private get db(): PrismaClient {
+    return getPrismaClient();
+  }
+
   public async createExecution(
     dto: CreateExecutionDto,
     tenantId: string,
   ): Promise<ExecutionRecord> {
-    const executionId = randomUUID();
-    const conversationId = dto.conversationId || randomUUID();
-    const now = new Date().toISOString();
+    const resolvedTenantId = await resolveDbTenantId(tenantId, this.db);
+
+    let targetAgent = await this.db.agent.findFirst({
+      where: { agentId: dto.agentId, tenantId: resolvedTenantId, deletedAt: null },
+    });
+
+    if (!targetAgent) {
+      targetAgent =
+        (await this.db.agent.findFirst({
+          where: { tenantId: resolvedTenantId, deletedAt: null },
+        })) ||
+        (await this.db.agent.create({
+          data: {
+            tenantId: resolvedTenantId,
+            name: "Lead Orchestrator",
+            systemPrompt: "You are the Lead Orchestrator.",
+            modelConfig: { model: "gemma4:31b-cloud" },
+          },
+        }));
+    }
+
+    const validConvId =
+      dto.conversationId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dto.conversationId)
+        ? dto.conversationId
+        : null;
+
+    if (validConvId) {
+      const existingConv = await this.db.conversation.findUnique({
+        where: { conversationId: validConvId },
+      });
+      if (!existingConv) {
+        await this.db.conversation.create({
+          data: {
+            conversationId: validConvId,
+            tenantId: resolvedTenantId,
+            agentId: targetAgent.agentId,
+            title: dto.input
+              ? dto.input.slice(0, 36) + (dto.input.length > 36 ? "..." : "")
+              : "Active Thread",
+          },
+        });
+      }
+    }
+
+    const traceId = `tr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const modelName = typeof dto.variables?.model === "string" ? dto.variables.model : undefined;
+
+    const row = await this.db.execution.create({
+      data: {
+        tenantId: resolvedTenantId,
+        agentId: targetAgent.agentId,
+        conversationId: validConvId,
+        status: "running",
+        traceId,
+        variables: {
+          input: dto.input,
+          model: modelName || "gemma4:31b-cloud",
+          ...(dto.variables || {}),
+        } as Prisma.InputJsonValue,
+      },
+    });
+
+    if (dto.input && validConvId) {
+      await this.db.message.create({
+        data: {
+          executionId: row.executionId,
+          conversationId: validConvId,
+          role: "user",
+          content: dto.input,
+        },
+      });
+    }
+
+    const systemPrompt =
+      typeof dto.variables?.systemPrompt === "string"
+        ? dto.variables.systemPrompt
+        : targetAgent.systemPrompt;
+
+    if (dto.input) {
+      void liveExecutionManager
+        .startExecution(
+          row.executionId,
+          dto.input,
+          modelName,
+          systemPrompt,
+          validConvId || undefined,
+          dto.history,
+        )
+        .then(async () => {
+          const state = liveExecutionManager.getState(row.executionId);
+          if (state) {
+            await this.db.execution.update({
+              where: { executionId: row.executionId },
+              data: {
+                status: toPrismaStatus(state.status),
+                completedAt: state.completedAt ? new Date(state.completedAt) : new Date(),
+              },
+            });
+
+            if (validConvId && state.fullOutput) {
+              await this.db.message.create({
+                data: {
+                  executionId: row.executionId,
+                  conversationId: validConvId,
+                  role: "assistant",
+                  content: state.fullOutput,
+                  metadata: {
+                    ...(state.artifacts?.length ? { artifacts: state.artifacts } : {}),
+                    ...(modelName ? { model: modelName } : {}),
+                  } as unknown as Prisma.InputJsonValue,
+                },
+              });
+
+              await this.db.conversation.update({
+                where: { conversationId: validConvId },
+                data: { updatedAt: new Date() },
+              });
+            }
+          }
+        });
+    }
 
     return {
-      executionId,
-      agentId: dto.agentId,
-      conversationId,
-      status: ExecutionStatus.QUEUED,
-      mode: dto.mode,
-      tenantId,
-      createdAt: now,
-      updatedAt: now,
+      executionId: row.executionId,
+      agentId: row.agentId,
+      conversationId: row.conversationId,
+      status: toSharedStatus(row.status),
+      tenantId: row.tenantId,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
     };
   }
 
-  /**
-   * Queries executions matching tenant and optional filter criteria.
-   */
+  public streamExecution(executionId: string, res: GatewayResponse): void {
+    liveExecutionManager.attachSseStream(executionId, res);
+  }
+
   public async listExecutions(
     filter: ExecutionFilterDto,
-    _tenantId: string,
+    tenantId: string,
   ): Promise<ExecutionListResult> {
-    return {
-      items: [],
-      filter,
-      total: 0,
-      hasMore: false,
-    };
+    return this.queryService.listExecutions(filter, tenantId);
   }
 
-  /**
-   * Retrieves an execution by ID within the tenant scope.
-   */
   public async getExecutionById(executionId: string, tenantId: string): Promise<ExecutionRecord> {
-    const now = new Date().toISOString();
-    return {
-      executionId,
-      agentId: randomUUID(),
-      conversationId: randomUUID(),
-      status: ExecutionStatus.COMPLETED,
-      mode: "auto",
-      tenantId,
-      createdAt: now,
-      updatedAt: now,
-    };
+    return this.queryService.getExecutionById(executionId, tenantId);
   }
 
-  /**
-   * Cancels an active or scheduled execution.
-   */
   public async cancelExecution(
     executionId: string,
-    _tenantId: string,
+    tenantId: string,
   ): Promise<{ executionId: string; status: ExecutionStatus; cancelledAt: string }> {
-    return {
-      executionId,
-      status: ExecutionStatus.CANCELLED,
-      cancelledAt: new Date().toISOString(),
-    };
+    return this.queryService.cancelExecution(executionId, tenantId);
   }
 
-  /**
-   * Resumes a paused execution with optional operator feedback.
-   */
   public async resumeExecution(
     executionId: string,
     dto: ResumeExecutionDto,
-    _tenantId: string,
+    tenantId: string,
   ): Promise<{ executionId: string; status: ExecutionStatus; action: string; resumedAt: string }> {
-    return {
-      executionId,
-      status: ExecutionStatus.RUNNING,
-      action: dto.action,
-      resumedAt: new Date().toISOString(),
-    };
+    return this.queryService.resumeExecution(executionId, dto, tenantId);
   }
 }

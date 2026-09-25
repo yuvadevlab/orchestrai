@@ -5,3 +5,4 @@
  */
 
 export * from "./use-agents";
+export * from "./use-agent-mutations";

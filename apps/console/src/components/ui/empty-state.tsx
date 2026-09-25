@@ -35,12 +35,12 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "border-border bg-card/40 relative flex min-h-55 w-full flex-col items-center justify-center rounded-lg border p-8 text-center backdrop-blur-sm",
+        "border-border bg-card/40 relative flex min-h-55 w-full flex-col items-center justify-center rounded-md border p-8 text-center backdrop-blur-sm",
         className,
       )}
     >
       {/* Icon Badge */}
-      <div className="border-primary/30 bg-primary/10 text-primary mb-3.5 grid size-11 place-items-center rounded-lg border shadow-xs">
+      <div className="border-primary/30 bg-primary/10 text-primary mb-3.5 grid size-11 place-items-center rounded-md border shadow-xs">
         <Icon className="size-5" />
       </div>
 

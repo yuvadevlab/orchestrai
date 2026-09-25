@@ -8,33 +8,31 @@
  */
 export enum AgentMode {
   /** Conversational focus with minimal, passive tool invocation */
-  CHAT = "CHAT",
+  CHAT = "chat",
   /** Deconstructs goals into execution DAGs before tool invocation */
-  PLAN = "PLAN",
+  PLAN = "plan",
   /** Autonomous tool execution loop with active safety limits */
-  ACT = "ACT",
+  ACT = "act",
   /** Adaptive orchestrator that plans, executes, and verifies */
-  AUTO = "AUTO",
+  AUTO = "auto",
 }
 
 /**
  * Lifecycle state machine status of an execution run.
  */
 export enum ExecutionStatus {
-  /** Execution record created but not yet scheduled */
-  CREATED = "CREATED",
-  /** Execution job enqueued in the background queue */
-  QUEUED = "QUEUED",
+  /** Execution job enqueued but not yet dispatched to a worker */
+  QUEUED = "pending",
   /** Actively processing steps on a worker */
-  RUNNING = "RUNNING",
+  RUNNING = "running",
   /** Suspended waiting for human operator approval */
-  WAITING_FOR_APPROVAL = "WAITING_FOR_APPROVAL",
+  WAITING_FOR_APPROVAL = "suspended",
   /** Terminal state: all steps completed successfully */
-  COMPLETED = "COMPLETED",
+  COMPLETED = "completed",
   /** Terminal state: unrecoverable execution failure */
-  FAILED = "FAILED",
+  FAILED = "failed",
   /** Terminal state: explicitly aborted by client or operator */
-  CANCELLED = "CANCELLED",
+  CANCELLED = "cancelled",
 }
 
 /**
@@ -72,13 +70,13 @@ export enum StepStatus {
  */
 export enum ApprovalStatus {
   /** Awaiting human operator response */
-  PENDING = "PENDING",
+  PENDING = "pending",
   /** Cleared by operator to proceed */
-  APPROVED = "APPROVED",
+  APPROVED = "approved",
   /** Rejected by operator */
-  REJECTED = "REJECTED",
+  REJECTED = "rejected",
   /** Timed out without operator interaction */
-  TIMED_OUT = "TIMED_OUT",
+  TIMED_OUT = "timed_out",
 }
 
 /**
@@ -106,13 +104,13 @@ export enum ModelProvider {
  */
 export enum ToolPermissionLevel {
   /** Zero external side-effects; always permitted */
-  READ_ONLY = "READ_ONLY",
+  READ_ONLY = "read_only",
   /** Reversible or sandboxed local modifications */
-  WRITE_SAFE = "WRITE_SAFE",
+  WRITE_SAFE = "write_safe",
   /** External network or non-destructive API updates */
-  SENSITIVE = "SENSITIVE",
+  SENSITIVE = "sensitive",
   /** Destructive actions; unconditionally requires human approval */
-  DANGEROUS = "DANGEROUS",
+  DANGEROUS = "dangerous",
 }
 
 /**

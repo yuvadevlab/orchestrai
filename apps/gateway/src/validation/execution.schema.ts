@@ -10,13 +10,22 @@ import { AgentMode, ExecutionStatus } from "@orchestrai/shared-types";
  * Validates payload for launching a new asynchronous agent execution.
  */
 export const CreateExecutionSchema = z.object({
-  agentId: z.uuid().describe("Target agent ID configured in the workspace"),
+  agentId: z.uuid().optional().describe("Target agent ID configured in the workspace"),
   conversationId: z.uuid().optional().describe("Optional conversation session ID to link"),
   mode: z.enum(AgentMode).optional().default(AgentMode.AUTO).describe("Execution autonomy mode"),
   input: z
     .string()
     .min(1, "Execution input text must not be empty")
     .describe("Initial prompt or task description"),
+  history: z
+    .array(
+      z.object({
+        role: z.string(),
+        content: z.string(),
+      }),
+    )
+    .optional()
+    .describe("Prior conversation history messages for multi-turn context"),
   variables: z
     .record(z.string(), z.unknown())
     .optional()

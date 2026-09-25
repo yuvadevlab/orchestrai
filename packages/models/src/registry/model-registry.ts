@@ -69,23 +69,25 @@ export class ModelRegistry {
    * @returns The registered ModelRegistryEntry
    * @throws {OrchestrAIError} with code NOT_FOUND if the model is not registered
    */
-  resolve(provider: ModelProvider, modelName: string): ModelRegistryEntry {
-    const key = this.buildKey(provider, modelName);
-    const entry = this.entries.get(key);
-
-    // Guard: fail fast with a structured error rather than returning undefined.
-    // Callers can catch NOT_FOUND and surface a useful user-facing message.
-    if (entry === undefined) {
-      throw new OrchestrAIError(
-        `Model "${modelName}" from provider "${provider}" is not registered. ` +
-          `Call registry.register() at startup for all models you intend to use.`,
-        "NOT_FOUND",
-        404,
-        { provider, modelName },
-      );
+  resolve(provider?: ModelProvider, modelName?: string): ModelRegistryEntry {
+    if (provider && modelName) {
+      const key = this.buildKey(provider, modelName);
+      const entry = this.entries.get(key);
+      if (entry) return entry;
     }
 
-    return entry;
+    // Fall back to first registered default adapter if present
+    const first = this.entries.values().next().value as ModelRegistryEntry | undefined;
+    if (first !== undefined) {
+      return first;
+    }
+
+    throw new OrchestrAIError(
+      `No model adapter is registered. Call registry.register() at startup.`,
+      "NOT_FOUND",
+      404,
+      { provider, modelName },
+    );
   }
 
   /**

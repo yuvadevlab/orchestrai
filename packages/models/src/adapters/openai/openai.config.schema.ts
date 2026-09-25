@@ -40,6 +40,9 @@ export const OpenAiConfigSchema = z
       .optional()
       .describe("Optional API base URL override for compatible endpoints"),
 
+    /** Optional default model identifier */
+    defaultModel: z.string().min(1).optional().describe("Fallback model identifier"),
+
     /** OpenAI organization ID for billing/audit — optional for personal accounts */
     organization: z.string().optional().describe("OpenAI organization ID"),
 

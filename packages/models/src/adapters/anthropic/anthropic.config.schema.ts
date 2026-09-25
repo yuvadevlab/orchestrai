@@ -21,6 +21,9 @@ export const AnthropicConfigSchema = z
      */
     apiKey: z.string().min(1).describe("Anthropic API secret key"),
 
+    /** Optional default model identifier */
+    defaultModel: z.string().min(1).optional().describe("Fallback model identifier"),
+
     /**
      * Anthropic API version header. Defaults to the stable production version.
      * Only override this if you need access to a specific beta or preview API.

@@ -91,6 +91,12 @@ export class BashTool implements ITool<BashInput, BashOutput> {
         {
           cwd: workingDir,
           maxBuffer: args.maxOutputBytes * 2,
+          timeout: this.definition.timeoutMs || 60_000,
+          env: {
+            ...process.env,
+            CI: "true",
+            FORCE_COLOR: "0",
+          },
           signal: context.abortSignal,
         },
         (error, stdout, stderr) => {

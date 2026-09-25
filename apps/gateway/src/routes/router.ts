@@ -14,10 +14,62 @@ interface RegisteredRoute {
 }
 
 /**
- * Lightweight Zero-Framework HTTP Router supporting parameterised routes.
+ * Scoped route group bound to a common path prefix.
+ */
+export class RouteGroup {
+  constructor(
+    private readonly router: Router,
+    private readonly prefix: string,
+  ) {}
+
+  private joinPath(path: string): string {
+    const cleanPrefix = this.prefix.endsWith("/") ? this.prefix.slice(0, -1) : this.prefix;
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    return cleanPath === "/" ? cleanPrefix : `${cleanPrefix}${cleanPath}`;
+  }
+
+  public get(path: string, handler: RouteHandler): void {
+    this.router.get(this.joinPath(path), handler);
+  }
+
+  public post(path: string, handler: RouteHandler): void {
+    this.router.post(this.joinPath(path), handler);
+  }
+
+  public put(path: string, handler: RouteHandler): void {
+    this.router.put(this.joinPath(path), handler);
+  }
+
+  public patch(path: string, handler: RouteHandler): void {
+    this.router.patch(this.joinPath(path), handler);
+  }
+
+  public delete(path: string, handler: RouteHandler): void {
+    this.router.delete(this.joinPath(path), handler);
+  }
+
+  public group(prefix: string, callback: (group: RouteGroup) => void): void {
+    const subGroup = new RouteGroup(this.router, this.joinPath(prefix));
+    callback(subGroup);
+  }
+}
+
+/**
+ * Lightweight Zero-Framework HTTP Router supporting parameterised routes and scoped groups.
  */
 export class Router {
   private readonly routes: RegisteredRoute[] = [];
+
+  /**
+   * Registers a scoped route group sharing a common base path prefix.
+   *
+   * @param prefix - Base path prefix (e.g., /api/v1/agents)
+   * @param callback - Route definition closure receiving RouteGroup
+   */
+  public group(prefix: string, callback: (group: RouteGroup) => void): void {
+    const group = new RouteGroup(this, prefix);
+    callback(group);
+  }
 
   /**
    * Registers a route pattern for a specific HTTP method.
@@ -52,6 +104,10 @@ export class Router {
 
   public put(path: string, handler: RouteHandler): void {
     this.register("PUT", path, handler);
+  }
+
+  public patch(path: string, handler: RouteHandler): void {
+    this.register("PATCH", path, handler);
   }
 
   public delete(path: string, handler: RouteHandler): void {

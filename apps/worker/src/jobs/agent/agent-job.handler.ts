@@ -34,7 +34,7 @@ export interface AgentJobExecutionResult {
 export interface AgentJobHandlerDependencies {
   readonly runtime: OrchestrAIRuntime;
   readonly toolRegistry: ToolRegistry;
-  readonly resolveModelAdapter: (provider: ModelProvider, modelName: string) => ILlmAdapter;
+  readonly resolveModelAdapter: (provider?: ModelProvider, modelName?: string) => ILlmAdapter;
   readonly resolveAgentDefinition: (agentId: string, tenantId: string) => Promise<AgentDefinition>;
 }
 
@@ -65,8 +65,8 @@ export async function handleAgentExecutionJob(
 
   // 3. Resolve the configured model adapter
   const modelAdapter = deps.resolveModelAdapter(
-    agent.modelConfig.provider,
-    agent.modelConfig.modelName,
+    agent.modelConfig?.provider,
+    agent.modelConfig?.modelName,
   );
 
   // 4. Assemble runtime node dependencies for the DAG graph

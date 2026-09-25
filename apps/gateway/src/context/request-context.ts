@@ -35,15 +35,18 @@ export interface RequestContext {
 export function createRequestContext(
   req: IncomingMessage,
   tenantHeaderName: string = "x-tenant-id",
+  requestIdHeaderName: string = "x-request-id",
 ): RequestContext {
   // Extract or generate correlation trace ID
-  const rawTraceId = req.headers["x-request-id"] || req.headers["x-correlation-id"];
+  const reqIdKey = requestIdHeaderName.toLowerCase();
+  const rawTraceId =
+    req.headers[reqIdKey] || req.headers["x-request-id"] || req.headers["x-correlation-id"];
   const requestId = typeof rawTraceId === "string" && rawTraceId ? rawTraceId : randomUUID();
 
-  // Extract tenant header if supplied (default partition used for initial development)
+  // Extract tenant header if supplied
   const headerKey = tenantHeaderName.toLowerCase();
   const rawTenantId = req.headers[headerKey];
-  const tenantId = typeof rawTenantId === "string" && rawTenantId ? rawTenantId : "default-tenant";
+  const tenantId = typeof rawTenantId === "string" && rawTenantId ? rawTenantId.trim() : "";
 
   // Determine remote IP from forward headers or socket address
   const forwardedFor = req.headers["x-forwarded-for"];

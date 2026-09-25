@@ -32,13 +32,12 @@ export const OllamaConfigSchema = z
     host: z.string().url().default("http://localhost:11434").describe("Ollama server base URL"),
 
     /**
-     * Default model to use when LlmRequest.model is not specified.
-     * Must be a model you have already pulled via `ollama pull <name>`.
+     * Optional fallback model to use when LlmRequest.model is not specified.
      */
     defaultModel: z
       .string()
       .min(1)
-      .default("qwen2.5:7b")
+      .optional()
       .describe("Fallback model when request omits model field"),
 
     /**

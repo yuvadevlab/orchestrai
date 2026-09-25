@@ -1,0 +1,466 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AgentMode {
+  chat
+  plan
+  act
+  auto
+}
+
+enum ExecutionStatus {
+  pending
+  running
+  suspended
+  completed
+  failed
+  cancelled
+  timed_out
+}
+
+enum MessageRole {
+  system
+  user
+  assistant
+  tool
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
+  timed_out
+}
+
+enum ToolPermissionLevel {
+  read_only
+  write_safe
+  sensitive
+  dangerous
+}
+
+enum OutboxStatus {
+  pending
+  published
+  failed
+}
+
+model Tenant {
+  tenantId      String         @id @default(dbgenerated("gen_random_uuid()")) @map("tenant_id") @db.Uuid
+  name          String         @db.VarChar(120)
+  slug          String         @unique @db.VarChar(64)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  agents        Agent[]
+  conversations Conversation[]
+  executions    Execution[]
+  outboxEvents  Outbox[]
+  memoryItems   MemoryItem[]
+  documents     Document[]
+  users         User[]
+
+  @@map("tenants")
+}
+
+model User {
+  userId       String   @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  name         String?  @db.VarChar(120)
+  role         String   @default("developer") @db.VarChar(32)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  tenant       Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@map("users")
+}
+
+model Agent {
+  agentId       String         @id @default(dbgenerated("gen_random_uuid()")) @map("agent_id") @db.Uuid
+  tenantId      String         @map("tenant_id") @db.Uuid
+  name          String         @db.VarChar(100)
+  description   String?        @db.VarChar(500)
+  mode          AgentMode      @default(auto)
+  systemPrompt  String         @map("system_prompt")
+  modelConfig   Json           @map("model_config")
+  enabledTools  Json           @default("[]") @map("enabled_tools")
+  maxSteps      Int            @default(25) @map("max_steps")
+  metadata      Json           @default("{}")
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz
+  tenant        Tenant         @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  conversations Conversation[]
+  executions    Execution[]
+  memoryItems   MemoryItem[]
+
+  @@map("agents")
+}
+
+model Conversation {
+  conversationId String       @id @default(dbgenerated("gen_random_uuid()")) @map("conversation_id") @db.Uuid
+  tenantId       String       @map("tenant_id") @db.Uuid
+  agentId        String       @map("agent_id") @db.Uuid
+  title          String       @default("New Conversation") @db.VarChar(255)
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz
+  tenant         Tenant       @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  agent          Agent        @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
+  executions     Execution[]
+  messages       Message[]
+  memoryItems    MemoryItem[]
+
+  @@map("conversations")
+}
+
+model Execution {
+  executionId      String          @id @default(dbgenerated("gen_random_uuid()")) @map("execution_id") @db.Uuid
+  tenantId         String          @map("tenant_id") @db.Uuid
+  agentId          String          @map("agent_id") @db.Uuid
+  conversationId   String?         @map("conversation_id") @db.Uuid
+  status           ExecutionStatus @default(pending)
+  currentStepIndex Int             @default(0) @map("current_step_index")
+  idempotencyKey   String?         @unique @map("idempotency_key") @db.VarChar(128)
+  traceId          String          @map("trace_id") @db.VarChar(64)
+  userId           String?         @map("user_id") @db.VarChar(128)
+  timeoutMs        Int             @default(300000) @map("timeout_ms")
+  variables        Json            @default("{}")
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  completedAt      DateTime?       @map("completed_at") @db.Timestamptz
+  tenant           Tenant          @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  agent            Agent           @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
+  conversation     Conversation?   @relation(fields: [conversationId], references: [conversationId], onDelete: SetNull)
+  steps            ExecutionStep[]
+  messages         Message[]
+  toolCalls        ToolCall[]
+  approvals        Approval[]
+  checkpoints      Checkpoint[]
+  outboxEvents     Outbox[]
+
+  @@map("executions")
+}
+
+model ExecutionStep {
+  stepId       String     @id @default(dbgenerated("gen_random_uuid()")) @map("step_id") @db.Uuid
+  executionId  String     @map("execution_id") @db.Uuid
+  stepIndex    Int        @map("step_index")
+  nodeName     String     @map("node_name") @db.VarChar(64)
+  status       String     @db.VarChar(32)
+  inputState   Json       @default("{}") @map("input_state")
+  outputState  Json       @default("{}") @map("output_state")
+  tokensUsed   Int        @default(0) @map("tokens_used")
+  durationMs   Int        @default(0) @map("duration_ms")
+  errorMessage String?    @map("error_message")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  execution    Execution  @relation(fields: [executionId], references: [executionId], onDelete: Cascade)
+  toolCalls    ToolCall[]
+  approvals    Approval[]
+
+  @@unique([executionId, stepIndex], map: "uq_execution_step")
+  @@map("execution_steps")
+}
+
+model Message {
+  messageId      String        @id @default(dbgenerated("gen_random_uuid()")) @map("message_id") @db.Uuid
+  executionId    String        @map("execution_id") @db.Uuid
+  conversationId String?       @map("conversation_id") @db.Uuid
+  role           MessageRole
+  content        Json
+  name           String?       @db.VarChar(120)
+  toolCalls      Json?         @map("tool_calls")
+  toolCallId     String?       @map("tool_call_id") @db.VarChar(64)
+  tokenCount     Int?          @map("token_count")
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  execution      Execution     @relation(fields: [executionId], references: [executionId], onDelete: Cascade)
+  conversation   Conversation? @relation(fields: [conversationId], references: [conversationId], onDelete: SetNull)
+
+  @@map("messages")
+}
+
+model ToolCall {
+  callId          String              @id @default(dbgenerated("gen_random_uuid()")) @map("call_id") @db.Uuid
+  executionId     String              @map("execution_id") @db.Uuid
+  stepId          String?             @map("step_id") @db.Uuid
+  toolName        String              @map("tool_name") @db.VarChar(100)
+  arguments       Json                @default("{}")
+  result          Json?
+  permissionLevel ToolPermissionLevel @default(read_only) @map("permission_level")
+  isError         Boolean             @default(false) @map("is_error")
+  durationMs      Int                 @default(0) @map("duration_ms")
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  execution       Execution           @relation(fields: [executionId], references: [executionId], onDelete: Cascade)
+  step            ExecutionStep?      @relation(fields: [stepId], references: [stepId], onDelete: SetNull)
+
+  @@map("tool_calls")
+}
+
+model Approval {
+  approvalId        String         @id @default(dbgenerated("gen_random_uuid()")) @map("approval_id") @db.Uuid
+  executionId       String         @map("execution_id") @db.Uuid
+  stepId            String?        @map("step_id") @db.Uuid
+  toolName          String         @map("tool_name") @db.VarChar(100)
+  toolArguments     Json           @map("tool_arguments")
+  rationale         String
+  status            ApprovalStatus @default(pending)
+  operatorId        String?        @map("operator_id") @db.VarChar(128)
+  rejectionReason   String?        @map("rejection_reason") @db.VarChar(500)
+  modifiedArguments Json?          @map("modified_arguments")
+  requestedAt       DateTime       @default(now()) @map("requested_at") @db.Timestamptz
+  expiresAt         DateTime       @map("expires_at") @db.Timestamptz
+  decidedAt         DateTime?      @map("decided_at") @db.Timestamptz
+  execution         Execution      @relation(fields: [executionId], references: [executionId], onDelete: Cascade)
+  step              ExecutionStep? @relation(fields: [stepId], references: [stepId], onDelete: SetNull)
+
+  @@map("approvals")
+}
+
+model Checkpoint {
+  checkpointId String    @id @default(dbgenerated("gen_random_uuid()")) @map("checkpoint_id") @db.Uuid
+  executionId  String    @map("execution_id") @db.Uuid
+  stepIndex    Int       @map("step_index")
+  nodeName     String    @map("node_name") @db.VarChar(64)
+  state        Json
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  execution    Execution @relation(fields: [executionId], references: [executionId], onDelete: Cascade)
+
+  @@unique([executionId, stepIndex], map: "uq_checkpoint_step")
+  @@map("checkpoints")
+}
+
+model Outbox {
+  eventId       String       @id @default(dbgenerated("gen_random_uuid()")) @map("event_id") @db.Uuid
+  tenantId      String       @map("tenant_id") @db.Uuid
+  executionId   String       @map("execution_id") @db.Uuid
+  traceId       String       @map("trace_id") @db.VarChar(64)
+  aggregateType String       @default("Execution") @map("aggregate_type") @db.VarChar(64)
+  aggregateId   String       @map("aggregate_id") @db.Uuid
+  eventType     String       @map("event_type") @db.VarChar(64)
+  payload       Json
+  status        OutboxStatus @default(pending)
+  retryCount    Int          @default(0) @map("retry_count")
+  lastError     String?      @map("last_error")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  publishedAt   DateTime?    @map("published_at") @db.Timestamptz
+  tenant        Tenant       @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  execution     Execution    @relation(fields: [executionId], references: [executionId], onDelete: Cascade)
+
+  @@map("outbox")
+}
+
+model MemoryItem {
+  memoryId       String        @id @default(dbgenerated("gen_random_uuid()")) @map("memory_id") @db.Uuid
+  tenantId       String        @map("tenant_id") @db.Uuid
+  agentId        String        @map("agent_id") @db.Uuid
+  conversationId String?       @map("conversation_id") @db.Uuid
+  memoryType     String        @default("EPISODIC") @map("memory_type") @db.VarChar(32)
+  content        String
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  tenant         Tenant        @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  agent          Agent         @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
+  conversation   Conversation? @relation(fields: [conversationId], references: [conversationId], onDelete: SetNull)
+
+  @@map("memory_items")
+}
+
+model Document {
+  documentId String          @id @default(dbgenerated("gen_random_uuid()")) @map("document_id") @db.Uuid
+  tenantId   String          @map("tenant_id") @db.Uuid
+  title      String          @db.VarChar(255)
+  sourceUri  String          @map("source_uri")
+  mimeType   String          @default("text/plain") @map("mime_type") @db.VarChar(64)
+  metadata   Json            @default("{}")
+  createdAt  DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  tenant     Tenant          @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  chunks     DocumentChunk[]
+
+  @@map("documents")
+}
+
+model DocumentChunk {
+  chunkId    String   @id @default(dbgenerated("gen_random_uuid()")) @map("chunk_id") @db.Uuid
+  documentId String   @map("document_id") @db.Uuid
+  chunkIndex Int      @map("chunk_index")
+  content    String
+  tokenCount Int      @default(0) @map("token_count")
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  document   Document @relation(fields: [documentId], references: [documentId], onDelete: Cascade)
+
+  @@unique([documentId, chunkIndex], map: "uq_document_chunk")
+  @@map("document_chunks")
+}
+
+// ---------------------------------------------------------------------------
+// Platform Configuration Models
+// These are platform-scoped (no tenant_id). Admins manage them globally
+// through the /admin Control Plane. All changes apply across all tenants.
+// ---------------------------------------------------------------------------
+
+/**
+ * Enum representing whether a config entity is platform-wide or tenant-specific.
+ * Currently all new platform models are PLATFORM scope. Tenant overrides
+ * can be added in a future migration without altering existing rows.
+ */
+enum PlatformScope {
+  platform
+  tenant
+}
+
+/**
+ * LlmProvider — A registered AI provider (OpenAI, Anthropic, Ollama, etc.)
+ * Admins can add/disable providers without redeploying or re-seeding.
+ */
+model LlmProvider {
+  providerId   String      @id @default(dbgenerated("gen_random_uuid()")) @map("provider_id") @db.Uuid
+  name         String      @db.VarChar(120)
+  slug         String      @unique @db.VarChar(64)
+  providerType String      @map("provider_type") @db.VarChar(64)
+  description  String?     @db.VarChar(500)
+  baseUrl      String?     @map("base_url") @db.VarChar(512)
+  config       Json        @default("{}")
+  isEnabled    Boolean     @default(true) @map("is_enabled")
+  scope        PlatformScope @default(platform)
+  sortOrder    Int         @default(0) @map("sort_order")
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy    String?     @map("created_by") @db.VarChar(128)
+  models       LlmModel[]
+
+  @@map("llm_providers")
+}
+
+/**
+ * LlmModel — A specific model offered by a provider.
+ * Linked to its parent LlmProvider. Admins can add, disable, or reconfigure
+ * models without touching tenant data.
+ */
+model LlmModel {
+  modelId        String      @id @default(dbgenerated("gen_random_uuid()")) @map("model_id") @db.Uuid
+  providerId     String      @map("provider_id") @db.Uuid
+  name           String      @db.VarChar(120)
+  modelIdentifier String     @map("model_identifier") @db.VarChar(120)
+  description    String?     @db.VarChar(500)
+  capabilities   Json        @default("{}")
+  defaultConfig  Json        @default("{}") @map("default_config")
+  contextWindow  Int         @default(8192) @map("context_window")
+  isDefault      Boolean     @default(false) @map("is_default")
+  isEnabled      Boolean     @default(true) @map("is_enabled")
+  scope          PlatformScope @default(platform)
+  sortOrder      Int         @default(0) @map("sort_order")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy      String?     @map("created_by") @db.VarChar(128)
+  provider       LlmProvider @relation(fields: [providerId], references: [providerId], onDelete: Cascade)
+
+  @@unique([providerId, modelIdentifier], map: "uq_provider_model_identifier")
+  @@map("llm_models")
+}
+
+/**
+ * PlatformMode — An implementation mode (Chat, Plan, Act, Auto).
+ * Admins can enable/disable modes or change defaults platform-wide.
+ */
+model PlatformMode {
+  modeId          String    @id @default(dbgenerated("gen_random_uuid()")) @map("mode_id") @db.Uuid
+  slug            String    @unique @db.VarChar(32)
+  name            String    @db.VarChar(80)
+  description     String?   @db.VarChar(500)
+  icon            String?   @db.VarChar(64)
+  isDefault       Boolean   @default(false) @map("is_default")
+  isEnabled       Boolean   @default(true) @map("is_enabled")
+  enforceApproval Boolean   @default(false) @map("enforce_approval")
+  config          Json      @default("{}")
+  sortOrder       Int       @default(0) @map("sort_order")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("platform_modes")
+}
+
+/**
+ * NavItem — A navigation entry managed by platform admins.
+ * Supports role-based visibility so the same nav config drives all tenants.
+ */
+model NavItem {
+  navItemId  String    @id @default(dbgenerated("gen_random_uuid()")) @map("nav_item_id") @db.Uuid
+  label      String    @db.VarChar(80)
+  icon       String?   @db.VarChar(64)
+  href       String    @db.VarChar(255)
+  roles      Json      @default("[]")
+  section    String    @default("main") @db.VarChar(32)
+  isVisible  Boolean   @default(true) @map("is_visible")
+  isEnabled  Boolean   @default(true) @map("is_enabled")
+  sortOrder  Int       @default(0) @map("sort_order")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("nav_items")
+}
+
+/**
+ * PlatformRole — Agent functional roles/domains configured in the database.
+ * Admins can add or modify roles without code deployments.
+ */
+model PlatformRole {
+  roleId      String    @id @default(dbgenerated("gen_random_uuid()")) @map("role_id") @db.Uuid
+  name        String    @db.VarChar(100)
+  slug        String    @unique @db.VarChar(64)
+  description String?   @db.VarChar(500)
+  isEnabled   Boolean   @default(true) @map("is_enabled")
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("platform_roles")
+}
+
+/**
+ * PlatformPermission — Tool execution permission and approval tiers.
+ * Governs autonomy gates directly from database policies.
+ */
+model PlatformPermission {
+  permissionId     String    @id @default(dbgenerated("gen_random_uuid()")) @map("permission_id") @db.Uuid
+  name             String    @db.VarChar(100)
+  level            String    @unique @db.VarChar(64)
+  description      String?   @db.VarChar(500)
+  requiresApproval Boolean   @default(false) @map("requires_approval")
+  sortOrder        Int       @default(0) @map("sort_order")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("platform_permissions")
+}
+
+/**
+ * PlatformTool — Registered execution tools and plugins in database.
+ * Tools are discovered and selected directly from database catalog.
+ */
+model PlatformTool {
+  toolId          String    @id @default(dbgenerated("gen_random_uuid()")) @map("tool_id") @db.Uuid
+  name            String    @db.VarChar(100)
+  slug            String    @unique @db.VarChar(100)
+  category        String    @default("General") @db.VarChar(100)
+  description     String?   @db.VarChar(500)
+  permissionLevel String    @default("read_only") @map("permission_level") @db.VarChar(64)
+  sandbox         String?   @default("read_only") @map("sandbox") @db.VarChar(100)
+  isEnabled       Boolean   @default(true) @map("is_enabled")
+  sortOrder       Int       @default(0) @map("sort_order")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("platform_tools")
+}
+
+

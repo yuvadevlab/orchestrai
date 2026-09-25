@@ -1,24 +1,43 @@
 @import "tailwindcss";
 @source "../**";
-@import "@yuva-devlab/ui/preset.css";
-@import "@yuva-devlab/ui/themes/orchestrai.css";
+@source "../../node_modules/@yuva-devlab/ui";
+@import "@yuva-devlab/tokens/preset.css";
+@import "@yuva-devlab/tokens/themes/orchestrai.css";
+@import "@yuva-devlab/ui/styles.css";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
+/**
+ * App-level font tokens — consumed by the orchestrai theme and Tailwind utilities.
+ * Manrope (body) + Sora (display headings) + JetBrains Mono (code/terminal).
+ * These are loaded via next/font in layout.tsx and injected as CSS variables.
+ *
+ * WHY here and not in the shared theme:
+ *   Font choices are app-specific. The shared UI package intentionally ships no
+ *   @font-face or font-family declarations so apps can own their own typeface.
+ */
 @theme inline {
-  --font-sans: "Manrope", sans-serif;
-  --font-display: "Sora", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: var(--font-sans), "Manrope", sans-serif;
+  --font-display: var(--font-display), "Sora", sans-serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
 }
 
+/**
+ * @layer base — App-level resets only.
+ * Only contains rules specific to OrchestrAI's root layout.
+ * Universal interactive element normalizations and scrollbars are provided by @yuva-devlab/tokens.
+ */
 @layer base {
   * {
     border-color: var(--color-border);
   }
+
   html {
-    background: var(--background);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
   }
+
   body {
     margin: 0;
     background-color: var(--color-background);
@@ -26,130 +45,95 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  button,
-  input,
-  textarea {
-    letter-spacing: 0;
-  }
-  button,
-  a,
-  select,
-  summary,
-  [role="button"],
-  [role="tab"],
-  [type="button"],
-  [type="submit"],
-  [type="reset"] {
-    cursor: pointer;
-  }
-  button:disabled,
-  a[aria-disabled="true"],
-  [aria-disabled="true"],
-  [type="button"]:disabled,
-  [type="submit"]:disabled {
-    cursor: not-allowed;
-  }
-  *:focus {
-    outline: none;
-  }
-  *:focus-visible {
-    outline: 2px solid color-mix(in oklab, var(--primary) 70%, white);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-  ::selection {
-    background: color-mix(in oklab, var(--primary) 28%, transparent);
-  }
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-  /* Breadcrumb separator icon sizing override */
-  li[data-slot="breadcrumb-separator"] svg,
-  [data-slot="breadcrumb-separator"] svg {
-    width: 0.75rem !important;
-    height: 0.75rem !important;
-  }
 }
 
-.execution-grid {
+/* ── OrchestrAI-specific background patterns ────────────────────────────── */
+
+/**
+ * AI World Matrix — hero section immersive grid background.
+ * Uses a radial glow + CSS grid lines + radial vignette mask.
+ * Not in preset.css because it's specific to this product's hero designs.
+ */
+.ai-world-matrix {
   background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: linear-gradient(to bottom, black, transparent 72%);
+    radial-gradient(
+      ellipse 60% 50% at 50% -20%,
+      color-mix(in oklab, var(--primary) 22%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--border) 40%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--border) 40%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    100% 100%,
+    48px 48px,
+    48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 95%);
 }
 
-.topology-grid {
-  background-image: radial-gradient(circle at center, var(--border) 1px, transparent 1px);
-  background-size: 18px 18px;
-  mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
+/* ── OrchestrAI-specific animation utilities ─────────────────────────────── */
+
+/**
+ * Ambient AI drift — slow floating motion for decorative background blobs.
+ * Used on landing/hero sections only, so kept app-local.
+ */
+.animate-ai-drift {
+  animation: ai-drift 12s ease-in-out infinite alternate;
 }
 
-.animate-agent-pulse {
-  animation: agent-pulse 1.8s ease-in-out infinite;
+.animate-ai-drift-slow {
+  animation: ai-drift 18s ease-in-out infinite alternate-reverse;
 }
 
-.animate-signal-travel {
-  animation: signal-travel 1.5s linear infinite;
+.animate-ai-pulse-glow {
+  animation: ai-pulse-glow 4s ease-in-out infinite;
 }
 
-.animate-progress-flow {
-  animation: progress-flow 1.8s ease-in-out infinite;
-}
-
-.runner-enter {
-  animation: runner-enter 260ms ease-out both;
-}
-
-@keyframes agent-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-    transform: scale(0.9);
+@keyframes ai-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
   }
   50% {
-    opacity: 1;
-    transform: scale(1.15);
+    transform: translate3d(25px, -30px, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-20px, 20px, 0) scale(0.95);
   }
 }
 
-@keyframes signal-travel {
-  from {
-    left: 0;
-  }
-  to {
-    left: calc(100% - 0.5rem);
-  }
-}
-
-@keyframes progress-flow {
+@keyframes ai-pulse-glow {
   0%,
   100% {
-    opacity: 0.55;
+    opacity: 0.35;
+    transform: scale(0.98);
   }
   50% {
-    opacity: 1;
+    opacity: 0.65;
+    transform: scale(1.05);
   }
 }
 
-@keyframes runner-enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/**
+ * Constrained modal window — clamps maximum height to 85vh and enforces internal scrolling.
+ */
+.modal-window-85vh {
+  max-height: 85vh;
+  height: 85vh;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-  }
+/**
+ * Scrollable modal body container in flex-column layouts.
+ */
+.modal-scrollable-body {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }

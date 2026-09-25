@@ -1,10 +1,16 @@
-import React from "react";
-import { OverviewPageContent } from "@/features/overview";
-
 /**
- * Overview / Command Center Route.
- * Delegating all client interactive state to OverviewPageContent.
+ * @file page.tsx
+ * @description Root Cowork Studio workspace route.
+ * @module apps/console/app/(dashboard)
  */
-export default function OverviewPage(): React.JSX.Element {
-  return <OverviewPageContent />;
+
+import React from "react";
+import dynamic from "next/dynamic";
+
+const StudioWorkspace = dynamic(() =>
+  import("@/features/studio").then((m) => ({ default: m.StudioWorkspace })),
+);
+
+export default function RootCoworkPage(): React.JSX.Element {
+  return <StudioWorkspace />;
 }

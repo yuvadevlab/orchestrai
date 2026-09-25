@@ -51,13 +51,14 @@
 
 ```text
 orchestrai/
-├── apps/                    # Deployable services
+├── apps/                    # Deployable applications & gateways
+│   ├── console/             # Autonomous Cowork Studio (Next.js 15)
 │   ├── gateway/             # Ingress API (REST, WebSocket, SSE)
-│   ├── worker/              # Background execution engine
-│   ├── realtime/            # Streaming event broker
-│   └── console/             # Operator UI (Next.js / Vite)
-├── packages/                # Reusable domain packages
+│   ├── realtime/            # Streaming event broker & fan-out
+│   └── worker/              # Background task execution engine
+├── packages/                # Reusable domain engines & packages
 │   ├── core/                # Shared contracts, Zod schemas, errors
+│   ├── database/            # Prisma ORM, migrations, connection pool, types
 │   ├── models/              # Model adapters (Ollama, Anthropic, OpenAI)
 │   ├── tools/               # Tool registry, permissions & sandboxing
 │   ├── agent/               # Agent loop, state machine & modes
@@ -68,7 +69,6 @@ orchestrai/
 │   ├── rag/                 # Chunking, vector indexing & retrieval
 │   ├── observability/       # OpenTelemetry, metrics & JSON logging
 │   └── sdk/                 # Client library for integrations
-├── infrastructure/          # Docker compose, DB init, local models
 ├── docs/                    # Architecture, ADRs, learning notes, phase guides
 ├── .agents/                 # AI agent rules, continuity, and skill definitions
 ├── PROGRESS.md              # Live implementation tracker
@@ -81,12 +81,11 @@ orchestrai/
 
 - **Monorepo Engine**: [pnpm](https://pnpm.io/) workspaces + [Turborepo](https://turbo.build/)
 - **Language**: TypeScript (strict mode, NodeNext module resolution)
-- **Local Persistence**: PostgreSQL 16+ with [pgvector](https://github.com/pgvector/pgvector)
-- **Queueing & Pub/Sub**: Redis 7+ with [BullMQ](https://bullmq.io/)
+- **Database & ORM**: PostgreSQL 16+ via [Prisma](https://www.prisma.io/) + pg pool adapter
+- **Queueing & Pub/Sub**: Redis 7+ with [BullMQ](https://bullmq.io/) (with in-memory fallback)
 - **Local AI Models**: [Ollama](https://ollama.com/) (Llama 3, Mistral, Qwen, DeepSeek)
-- **Agent Orchestration**: LangGraph state machine & custom runtime
+- **Agent Orchestration**: Autonomous agent state machine & execution runtime
 - **Validation**: [Zod](https://zod.dev/)
-- **Testing**: [Vitest](https://vitest.dev/)
 
 ---
 
@@ -94,9 +93,9 @@ orchestrai/
 
 ### Prerequisites
 
-- Node.js >= 20 (v24 recommended, see `.nvmrc`)
-- pnpm >= 9 (11.x recommended)
-- Docker Desktop or Docker Engine
+- Node.js >= 20 (v24 recommended)
+- pnpm >= 9 (12.x recommended)
+- PostgreSQL 16 (optional: falls back to local embedded store)
 
 ### Quick Setup
 
@@ -104,13 +103,10 @@ orchestrai/
 # 1. Install dependencies across workspace
 pnpm install
 
-# 2. Start local infrastructure (Postgres, Redis, Ollama)
-docker compose -f infrastructure/docker/docker-compose.yml up -d
+# 2. Run database migrations (or auto-falls back to local store)
+pnpm db:migrate
 
-# 3. Run typecheck across all packages
-pnpm typecheck
-
-# 4. Start development mode
+# 3. Start development servers
 pnpm dev
 ```
 

@@ -80,9 +80,11 @@ function toOpenAiMessages(messages: AIMessage[]): Array<{ role: string; content:
 export class OpenAiAdapter implements ILlmAdapter {
   public readonly provider = ModelProvider.OPENAI;
   private readonly client: OpenAiClientLike;
+  private readonly config: OpenAiConfig;
 
-  private constructor(client: OpenAiClientLike) {
+  private constructor(client: OpenAiClientLike, config: OpenAiConfig) {
     this.client = client;
+    this.config = config;
   }
 
   /**
@@ -119,7 +121,7 @@ export class OpenAiAdapter implements ILlmAdapter {
       maxRetries: config.maxRetries,
     });
 
-    return new OpenAiAdapter(client);
+    return new OpenAiAdapter(client, config);
   }
 
   /**
@@ -130,9 +132,18 @@ export class OpenAiAdapter implements ILlmAdapter {
    * @throws {OrchestrAIError} MODEL_TIMEOUT on API failure
    */
   async invoke(request: LlmRequest): Promise<LlmResponse> {
+    const model = request.model ?? this.config.defaultModel;
+    if (!model) {
+      throw new OrchestrAIError(
+        "No model identifier specified for OpenAI request",
+        "VALIDATION_ERROR",
+        400,
+      );
+    }
+
     try {
       const raw = (await this.client.chat.completions.create({
-        model: request.model,
+        model,
         messages: toOpenAiMessages(request.messages),
         temperature: request.temperature,
         ...(request.maxTokens !== undefined && { max_tokens: request.maxTokens }),
@@ -160,10 +171,10 @@ export class OpenAiAdapter implements ILlmAdapter {
     } catch (err) {
       if (err instanceof OrchestrAIError) throw err;
       throw new OrchestrAIError(
-        `OpenAI invoke failed for model "${request.model}": ${String(err)}`,
+        `OpenAI invoke failed for model "${model}": ${String(err)}`,
         "MODEL_TIMEOUT",
         503,
-        { model: request.model, cause: err },
+        { model, cause: err },
       );
     }
   }
@@ -177,9 +188,18 @@ export class OpenAiAdapter implements ILlmAdapter {
    * @throws {OrchestrAIError} MODEL_TIMEOUT on network failure
    */
   async *stream(request: LlmRequest): AsyncIterable<LlmStreamChunk> {
+    const model = request.model ?? this.config.defaultModel;
+    if (!model) {
+      throw new OrchestrAIError(
+        "No model identifier specified for OpenAI stream",
+        "VALIDATION_ERROR",
+        400,
+      );
+    }
+
     try {
       const rawStream = (await this.client.chat.completions.create({
-        model: request.model,
+        model,
         messages: toOpenAiMessages(request.messages),
         temperature: request.temperature,
         stream: true,

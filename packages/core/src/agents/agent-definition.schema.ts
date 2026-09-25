@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { AgentMode, ModelProvider } from "@orchestrai/shared-types";
 import { AgentIdSchema, TenantIdSchema } from "@/identifiers";
+import { AGENT_EXECUTION_DEFAULTS } from "@/constants";
 import { AgentModeSchema } from "./agent-mode.schema";
 
 /**
@@ -13,12 +14,18 @@ import { AgentModeSchema } from "./agent-mode.schema";
  */
 export const AgentModelConfigSchema = z
   .object({
-    provider: z.nativeEnum(ModelProvider).describe("Target LLM provider engine"),
+    provider: z.enum(ModelProvider).optional().describe("Target LLM provider engine"),
     modelName: z
       .string()
       .min(1)
-      .describe("Specific model identifier (e.g. qwen2.5:7b, claude-3-7-sonnet)"),
-    temperature: z.number().min(0).max(2).default(0.7).describe("Sampling temperature"),
+      .optional()
+      .describe("User-configured model identifier, or dynamically resolved from DB default"),
+    temperature: z
+      .number()
+      .min(0)
+      .max(2)
+      .default(AGENT_EXECUTION_DEFAULTS.DEFAULT_TEMPERATURE)
+      .describe("Sampling temperature"),
     maxTokens: z
       .number()
       .int()
@@ -55,7 +62,7 @@ export const AgentDefinitionSchema = z
       .number()
       .int()
       .positive()
-      .default(25)
+      .default(AGENT_EXECUTION_DEFAULTS.DEFAULT_MAX_STEPS)
       .describe("Maximum allowed loop steps before forced termination"),
     createdAt: z.date().default(() => new Date()),
     updatedAt: z.date().default(() => new Date()),

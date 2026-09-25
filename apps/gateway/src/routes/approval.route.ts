@@ -3,19 +3,21 @@
  * @description REST API routes for human-in-the-loop approval requests and decisions.
  */
 
-import type { Router } from "./router";
+import type { RouteGroup } from "./router";
 import { ApprovalController } from "@/controllers";
 
 /**
- * Registers approval ticket routes onto the gateway router.
+ * Registers approval ticket routes onto the gateway router scoped under /approvals.
  *
- * @param router - Gateway router instance
+ * @param api - Scoped API v1 route group instance
  * @param controller - Approval controller instance
  */
 export function registerApprovalRoutes(
-  router: Router,
+  api: RouteGroup,
   controller: ApprovalController = new ApprovalController(),
 ): void {
-  router.get("/api/v1/approvals", (req, res) => controller.listApprovals(req, res));
-  router.post("/api/v1/approvals/:id/resolve", (req, res) => controller.resolveApproval(req, res));
+  api.group("/approvals", (group) => {
+    group.get("/", (req, res) => controller.listApprovals(req, res));
+    group.post("/:id/resolve", (req, res) => controller.resolveApproval(req, res));
+  });
 }

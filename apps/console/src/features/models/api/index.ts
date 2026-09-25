@@ -5,3 +5,4 @@
  */
 
 export * from "./use-models";
+export * from "./use-model-mutations";

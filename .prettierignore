@@ -6,5 +6,3 @@ out/
 .turbo/
 coverage/
 pnpm-lock.yaml
-ORCHESTRAI-IMPLEMENTATION.md
-ORCHESTRAI-UI-LOVABLE-PROMPT.md

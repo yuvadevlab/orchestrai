@@ -17,11 +17,8 @@ export const ExecutionStatusSchema = z
  * Valid directed state machine transition table.
  */
 const VALID_TRANSITIONS: Readonly<Record<ExecutionStatus, ReadonlySet<ExecutionStatus>>> = {
-  [ExecutionStatus.CREATED]: new Set([
-    ExecutionStatus.QUEUED,
-    ExecutionStatus.RUNNING,
-    ExecutionStatus.CANCELLED,
-  ]),
+  // QUEUED (covers pending/queued state) can run or be cancelled.
+  // Note: CREATED resolves to the same string value as QUEUED so we omit a duplicate key.
   [ExecutionStatus.QUEUED]: new Set([ExecutionStatus.RUNNING, ExecutionStatus.CANCELLED]),
   [ExecutionStatus.RUNNING]: new Set([
     ExecutionStatus.WAITING_FOR_APPROVAL,

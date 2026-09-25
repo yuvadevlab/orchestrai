@@ -2,7 +2,7 @@
 
 /**
  * @file sidebar-nav.tsx
- * @description Sidebar navigation component for OrchestrAI Console.
+ * @description Sidebar navigation component dynamically populated from database API.
  * @module apps/console/components/dashboard
  */
 
@@ -10,17 +10,16 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Layers } from "lucide-react";
-import { Badge } from "@yuva-devlab/ui";
-import { NAV_ITEMS, type NavItem } from "./sidebar-nav-items";
-
-export type { NavItem };
+import { useNavItems } from "@/lib/use-nav";
+import { getNavIcon } from "@/lib/nav-icon-mapper";
 
 /**
  * Sidebar Navigation component for OrchestrAI Console.
- * Displays brand identity and navigable route links with active state highlighting.
+ * Displays brand identity and navigable route links loaded from the backend API.
  */
 export function SidebarNav(): React.JSX.Element {
   const pathname = usePathname();
+  const { data: navItems = [] } = useNavItems();
 
   return (
     <aside className="border-border bg-sidebar flex h-screen w-64 shrink-0 flex-col border-r">
@@ -37,13 +36,13 @@ export function SidebarNav(): React.JSX.Element {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-          const Icon = item.icon;
+          const Icon = getNavIcon(item.icon);
 
           return (
             <Link
-              key={item.href}
+              key={item.navItemId || item.href}
               href={item.href}
               className={`flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-xs font-medium transition-colors ${
                 isActive
@@ -55,15 +54,6 @@ export function SidebarNav(): React.JSX.Element {
                 <Icon className={`size-4 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
                 <span>{item.label}</span>
               </div>
-
-              {item.badge ? (
-                <Badge
-                  variant={isActive ? "default" : "outline"}
-                  className="px-1.5 py-0 font-mono text-[10px]"
-                >
-                  {item.badge}
-                </Badge>
-              ) : null}
             </Link>
           );
         })}

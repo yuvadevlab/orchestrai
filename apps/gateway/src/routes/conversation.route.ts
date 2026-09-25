@@ -1,22 +1,29 @@
 /**
  * @file apps/gateway/src/routes/conversation.route.ts
  * @description REST API routes for multi-turn conversations and message threads.
+ * @module apps/gateway/routes
  */
 
-import type { Router } from "./router";
+import type { RouteGroup } from "./router";
 import { ConversationController } from "@/controllers";
 
 /**
- * Registers conversation and messaging routes onto the gateway router.
+ * Registers conversation and messaging routes onto the gateway router scoped under /conversations.
  *
- * @param router - Gateway router instance
+ * @param api - Scoped API v1 route group instance
  * @param controller - Conversation controller instance
  */
 export function registerConversationRoutes(
-  router: Router,
+  api: RouteGroup,
   controller: ConversationController = new ConversationController(),
 ): void {
-  router.post("/api/v1/conversations", (req, res) => controller.createConversation(req, res));
-  router.get("/api/v1/conversations/:id/messages", (req, res) => controller.getMessages(req, res));
-  router.post("/api/v1/conversations/:id/messages", (req, res) => controller.addMessage(req, res));
+  api.group("/conversations", (group) => {
+    group.get("/", (req, res) => controller.listConversations(req, res));
+    group.post("/", (req, res) => controller.createConversation(req, res));
+    group.get("/:id", (req, res) => controller.getConversation(req, res));
+    group.patch("/:id", (req, res) => controller.updateConversation(req, res));
+    group.delete("/:id", (req, res) => controller.deleteConversation(req, res));
+    group.get("/:id/messages", (req, res) => controller.getMessages(req, res));
+    group.post("/:id/messages", (req, res) => controller.addMessage(req, res));
+  });
 }

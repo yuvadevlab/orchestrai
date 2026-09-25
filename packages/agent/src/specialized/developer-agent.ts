@@ -4,9 +4,10 @@
  * @module @orchestrai/agent/specialized
  */
 
-import { AgentMode, ModelProvider } from "@orchestrai/shared-types";
+import { AgentMode } from "@orchestrai/shared-types";
+import { DEVELOPER_PERSONA_PROMPT } from "@orchestrai/prompts";
 import { AgentBuilder } from "../builder/agent-builder";
-import { AgentDefinition } from "@orchestrai/core";
+import { AgentDefinition, AGENT_EXECUTION_DEFAULTS } from "@orchestrai/core";
 
 /** Configuration options for initializing a DeveloperAgent */
 export interface DeveloperAgentOptions {
@@ -22,21 +23,26 @@ export interface DeveloperAgentOptions {
  * @returns Configured AgentDefinition instance.
  */
 export function createDeveloperAgent(options?: DeveloperAgentOptions): AgentDefinition {
-  return new AgentBuilder()
+  const builder = new AgentBuilder()
     .withName(options?.name ?? "Developer Assistant")
     .withDescription(
       "Specialized software engineering agent performing code refactoring, AST inspection, and sandboxed tests.",
     )
     .withMode(AgentMode.ACT)
-    .withSystemPrompt(
-      "You are a specialized Developer Agent. Your objective is to write clean, type-safe, maintainable code adhering strictly to invariants, sub-250 line file limits, and comprehensive JSDoc documentation.",
-    )
-    .withModel({
-      provider: ModelProvider.ANTHROPIC,
-      modelName: options?.model ?? "claude-3-5-sonnet-20241022",
-      temperature: 0.1,
-    })
+    .withSystemPrompt(DEVELOPER_PERSONA_PROMPT)
     .withTools(["read_file", "write_file", "list_directory", "bash"])
-    .withMaxSteps(options?.maxSteps ?? 30)
-    .build();
+    .withMaxSteps(options?.maxSteps ?? AGENT_EXECUTION_DEFAULTS.DEFAULT_MAX_STEPS);
+
+  if (options?.model) {
+    builder.withModel({
+      modelName: options.model,
+      temperature: AGENT_EXECUTION_DEFAULTS.DETERMINISTIC_TEMPERATURE,
+    });
+  } else {
+    builder.withModel({
+      temperature: AGENT_EXECUTION_DEFAULTS.DETERMINISTIC_TEMPERATURE,
+    });
+  }
+
+  return builder.build();
 }

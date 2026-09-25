@@ -2,38 +2,48 @@
 
 /**
  * @file models-page-content.tsx
- * @description Model Providers and Routing view with EmptyState support and interactive provider configuration.
+ * @description Model Providers & Routing — live catalog of models and providers fetched from the API.
  * @module apps/console/features/models/components
  */
 
 import React, { useState } from "react";
-import { Badge, Button } from "@yuva-devlab/ui";
+import { Button } from "@yuva-devlab/ui";
 import { Plus, Cpu } from "lucide-react";
 import { ModelCard } from "./model-card";
 import { ModelDialog } from "./model-dialog";
-import { useModels } from "@/features/models/api";
+import { useModels, useProviders } from "../api";
 import { EmptyState } from "@/components/ui";
+import { PageShell } from "@/components/layout/page-shell";
 
+/** Model Providers page content displaying live database models. */
 export function ModelsPageContent(): React.JSX.Element {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const { data: models, isLoading, refetch } = useModels();
+  const { data: models = [], isLoading: loadingModels, refetch: refetchModels } = useModels();
+  const {
+    data: providers = [],
+    isLoading: loadingProviders,
+    refetch: refetchProviders,
+  } = useProviders();
+
+  const isLoading = loadingModels || loadingProviders;
+
+  const providerMap = new Map<string, string>();
+  for (const p of providers) {
+    providerMap.set(p.providerId, p.name);
+  }
+
+  const handleRefetch = (): void => {
+    refetchModels();
+    refetchProviders();
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="border-border flex items-center justify-between border-b pb-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-display text-xl font-bold tracking-tight">
-              Model Providers & Routing
-            </h1>
-            <Badge variant="outline" className="font-mono text-xs">
-              {models.length} Providers
-            </Badge>
-          </div>
-          <p className="text-muted-foreground text-xs">
-            Configure LLM endpoints, token limits, fallback cascades, and real-time cost telemetry.
-          </p>
-        </div>
+    <PageShell
+      title="Model Providers & Routing"
+      breadcrumb="Models"
+      stats={`${models.length} models · ${providers.length} providers`}
+      description="Live AI models, context limits, and inference engines available across the workspace."
+      actions={
         <Button
           variant="default"
           size="sm"
@@ -41,45 +51,53 @@ export function ModelsPageContent(): React.JSX.Element {
           className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
         >
           <Plus className="size-3.5" />
-          <span>Add Model</span>
+          <span>Add model</span>
         </Button>
-      </div>
-
+      }
+    >
       {isLoading ? (
-        <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-lg border backdrop-blur">
+        <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
           <span className="text-muted-foreground animate-pulse font-mono text-xs">
-            Loading model providers...
+            Loading live model catalog...
           </span>
         </div>
       ) : models.length === 0 ? (
-        <EmptyState
-          icon={Cpu}
-          title="No Model Providers Configured"
-          description="Configure LLM providers (Ollama, OpenAI, Anthropic) or local model endpoints to enable agent inference."
-          action={
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsModalOpen(true)}
-              className="h-8 cursor-pointer font-mono text-xs"
-            >
-              <Plus className="mr-1.5 size-3.5" /> Configure First Provider
-            </Button>
-          }
-        />
+        <>
+          <EmptyState
+            icon={Cpu}
+            title="No Models Configured"
+            description="No active models registered in the database catalog. Configure a model endpoint to enable agent inference."
+            action={
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsModalOpen(true)}
+                className="h-8 cursor-pointer font-mono text-xs"
+              >
+                <Plus className="mr-1.5 size-3.5" /> Configure First Model
+              </Button>
+            }
+          />
+          <ModelDialog
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={handleRefetch}
+          />
+        </>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {models.map((m) => (
-            <ModelCard key={m.id} model={m} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {models.map((m) => (
+              <ModelCard key={m.modelId} model={m} providerName={providerMap.get(m.providerId)} />
+            ))}
+          </div>
+          <ModelDialog
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={handleRefetch}
+          />
+        </>
       )}
-
-      <ModelDialog
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => refetch()}
-      />
-    </div>
+    </PageShell>
   );
 }

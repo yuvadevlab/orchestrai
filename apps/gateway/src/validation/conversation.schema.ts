@@ -57,3 +57,30 @@ export const MessageQuerySchema = z.object({
 });
 
 export type MessageQueryDto = z.infer<typeof MessageQuerySchema>;
+
+/**
+ * Validates query parameters for listing conversations for the tenant.
+ */
+export const ConversationQuerySchema = z.object({
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .default(50)
+    .describe("Maximum conversations to retrieve"),
+  cursor: z.string().optional().describe("Opaque cursor for pagination"),
+});
+
+export type ConversationQueryDto = z.infer<typeof ConversationQuerySchema>;
+
+/**
+ * Validates payload for modifying an existing conversation.
+ */
+export const UpdateConversationSchema = z.object({
+  title: z.string().min(1).max(200).optional().describe("Updated conversation title"),
+  metadata: z.record(z.string(), z.unknown()).optional().describe("Updated session metadata"),
+});
+
+export type UpdateConversationDto = z.infer<typeof UpdateConversationSchema>;

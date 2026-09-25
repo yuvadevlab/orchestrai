@@ -109,9 +109,11 @@ function toAnthropicMessages(messages: AIMessage[]): {
 export class AnthropicAdapter implements ILlmAdapter {
   public readonly provider = ModelProvider.ANTHROPIC;
   private readonly client: AnthropicClientLike;
+  private readonly config: AnthropicConfig;
 
-  private constructor(client: AnthropicClientLike) {
+  private constructor(client: AnthropicClientLike, config: AnthropicConfig) {
     this.client = client;
+    this.config = config;
   }
 
   /**
@@ -148,7 +150,7 @@ export class AnthropicAdapter implements ILlmAdapter {
       defaultHeaders: { "anthropic-version": config.apiVersion },
     });
 
-    return new AnthropicAdapter(client);
+    return new AnthropicAdapter(client, config);
   }
 
   /**
@@ -159,11 +161,19 @@ export class AnthropicAdapter implements ILlmAdapter {
    * @throws {OrchestrAIError} MODEL_TIMEOUT on API failure
    */
   async invoke(request: LlmRequest): Promise<LlmResponse> {
+    const model = request.model ?? this.config.defaultModel;
+    if (!model) {
+      throw new OrchestrAIError(
+        "No model identifier specified for Anthropic request",
+        "VALIDATION_ERROR",
+        400,
+      );
+    }
     const { system, messages } = toAnthropicMessages(request.messages);
 
     try {
       const raw = (await this.client.messages.create({
-        model: request.model,
+        model,
         // Anthropic requires max_tokens to always be specified — no default in the API
         max_tokens: request.maxTokens ?? 4096,
         temperature: request.temperature,
@@ -191,10 +201,10 @@ export class AnthropicAdapter implements ILlmAdapter {
     } catch (err) {
       if (err instanceof OrchestrAIError) throw err;
       throw new OrchestrAIError(
-        `Anthropic invoke failed for model "${request.model}": ${String(err)}`,
+        `Anthropic invoke failed for model "${model}": ${String(err)}`,
         "MODEL_TIMEOUT",
         503,
-        { model: request.model, cause: err },
+        { model, cause: err },
       );
     }
   }
@@ -207,11 +217,19 @@ export class AnthropicAdapter implements ILlmAdapter {
    * @yields LlmStreamChunk with incremental text delta
    */
   async *stream(request: LlmRequest): AsyncIterable<LlmStreamChunk> {
+    const model = request.model ?? this.config.defaultModel;
+    if (!model) {
+      throw new OrchestrAIError(
+        "No model identifier specified for Anthropic stream",
+        "VALIDATION_ERROR",
+        400,
+      );
+    }
     const { system, messages } = toAnthropicMessages(request.messages);
 
     try {
       const rawStream = (await this.client.messages.create({
-        model: request.model,
+        model,
         max_tokens: request.maxTokens ?? 4096,
         temperature: request.temperature,
         ...(system !== undefined && { system }),

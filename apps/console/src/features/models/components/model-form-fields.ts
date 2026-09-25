@@ -1,28 +1,62 @@
 /**
  * @file model-form-fields.ts
- * @description Form field specifications for the model provider ActionDialog.
+ * @description Form field generator for model creation using live provider options.
  * @module apps/console/features/models/components
  */
 
 import type { FormFieldSpec } from "@/components/ui/action-dialog";
+import type { LlmProvider } from "../types";
 
-export const MODEL_FIELDS: FormFieldSpec[] = [
-  {
-    name: "provider",
-    label: "Provider Name",
-    placeholder: "e.g. Ollama Local / OpenAI / Anthropic",
-    required: true,
-  },
-  {
-    name: "model",
-    label: "Model Identifier",
-    placeholder: "e.g. qwen2.5:7b or gpt-4o",
-    required: true,
-  },
-  {
-    name: "baseUrl",
-    label: "API Base Endpoint URL",
-    placeholder: "e.g. http://localhost:11434/v1",
-  },
-  { name: "apiKey", label: "API Key (if required)", placeholder: "sk-..." },
-];
+/**
+ * Builds form field specifications with available providers.
+ */
+export function buildModelFields(providers: LlmProvider[]): FormFieldSpec[] {
+  return [
+    {
+      name: "providerId",
+      label: "Provider",
+      type: "select",
+      options: providers.map((p) => ({ label: p.name, value: p.providerId })),
+      required: true,
+      colSpan: 1,
+    },
+    {
+      name: "name",
+      label: "Display Name",
+      placeholder: "e.g. Primary Model",
+      required: true,
+      colSpan: 1,
+    },
+    {
+      name: "modelIdentifier",
+      label: "Model Identifier",
+      placeholder: "e.g. model-identifier-tag",
+      required: true,
+      colSpan: 1,
+    },
+    {
+      name: "contextWindow",
+      label: "Context Window (tokens)",
+      placeholder: "32768",
+      colSpan: 1,
+    },
+    {
+      name: "isDefault",
+      label: "Default Engine",
+      type: "select",
+      options: [
+        { value: "false", label: "Standard Catalog Model" },
+        { value: "true", label: "Default AI Engine" },
+      ],
+      defaultValue: "false",
+      colSpan: 2,
+    },
+    {
+      name: "description",
+      label: "Description",
+      placeholder: "Model capabilities and notes...",
+      type: "textarea",
+      colSpan: 2,
+    },
+  ];
+}

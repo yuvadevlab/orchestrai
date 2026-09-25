@@ -2,16 +2,29 @@
 
 /**
  * @file form-dialog.tsx
- * @description Design System FormDialog component for modal forms matching FinAI standards.
+ * @description Design System FormDialog component powered by @yuva-devlab/ui Dialog primitives.
+ * Features accessible focus management, portal mounting, fixed header, scrollable body, and pinned action footer.
  * @module apps/console/components/ui
  */
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@yuva-devlab/ui";
-import { X, Check, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+  Button,
+} from "@yuva-devlab/ui";
+import { Loader2 } from "lucide-react";
 import { FormDialogField, type FormFieldConfig } from "./form-dialog-field";
 
 export type { FormFieldConfig };
+
+/** Supported maximum width constraints for modal presentation. */
+export type FormDialogMaxWidth = "md" | "lg" | "xl" | "2xl";
 
 export interface FormDialogProps {
   isOpen: boolean;
@@ -19,12 +32,14 @@ export interface FormDialogProps {
   description?: string;
   fields: FormFieldConfig[];
   submitText?: string;
+  maxWidth?: FormDialogMaxWidth;
   onClose: () => void;
   onSubmit: (formData: Record<string, string>) => Promise<void> | void;
 }
 
 /**
- * Design System Form Dialog modal component.
+ * Design System Form Dialog modal component using @yuva-devlab/ui Dialog primitives.
+ * Carefully balances scrollable content, fixed action controls, and responsive grid layouts.
  */
 export function FormDialog({
   isOpen,
@@ -32,14 +47,13 @@ export function FormDialog({
   description,
   fields,
   submitText = "Save",
+  maxWidth = "xl",
   onClose,
   onSubmit,
 }: FormDialogProps): React.JSX.Element | null {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,30 +65,26 @@ export function FormDialog({
       });
       setFormData(initial);
       setFieldErrors({});
-      setErrorMsg(null);
-      setSuccessMsg(null);
     }
   }, [isOpen, fields]);
-
-  if (!isOpen) return null;
 
   const handleFieldChange = (name: string, value: string): void => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-    setErrorMsg(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.SubmitEvent): Promise<void> => {
     e.preventDefault();
-    setErrorMsg(null);
     const errors: Record<string, string> = {};
 
+    // Validate required fields
     fields.forEach((f) => {
       if (f.required && !formData[f.name]?.trim()) {
         errors[f.name] = `${f.label} is required.`;
       }
     });
 
+    // Guard: Prevent submit if validation errors exist
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -83,76 +93,44 @@ export function FormDialog({
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
-      setSuccessMsg("Submitted successfully.");
-      setTimeout(() => {
-        setSuccessMsg(null);
-        onClose();
-      }, 1000);
-    } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Failed to process form request.");
+      onClose();
+    } catch {
+      // Action feedback (error/success) is communicated via toast notification
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div
-      className="bg-background/80 fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="border-border bg-card w-full max-w-md space-y-4 rounded-xl border p-6 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="font-display text-base font-bold tracking-tight">{title}</h2>
-            {description ? (
-              <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>
-            ) : null}
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="size-7 cursor-pointer rounded-md"
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size={maxWidth}>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="font-display">{title}</DialogTitle>
+            {description ? <DialogDescription>{description}</DialogDescription> : null}
+          </DialogHeader>
 
-        {errorMsg ? (
-          <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border p-2.5 font-mono text-xs">
-            {errorMsg}
-          </div>
-        ) : null}
+          <DialogBody className="overflow-y-auto px-6 py-4">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
+              {fields.map((field) => (
+                <FormDialogField
+                  key={field.name}
+                  field={field}
+                  value={formData[field.name] ?? ""}
+                  onChange={handleFieldChange}
+                  error={fieldErrors[field.name]}
+                />
+              ))}
+            </div>
+          </DialogBody>
 
-        {successMsg ? (
-          <div className="border-primary/40 bg-primary/10 text-primary flex items-center gap-2 rounded-md border p-2.5 font-mono text-xs">
-            <Check className="size-4" />
-            <span>{successMsg}</span>
-          </div>
-        ) : null}
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {fields.map((field) => (
-            <FormDialogField
-              key={field.name}
-              field={field}
-              value={formData[field.name] ?? ""}
-              onChange={handleFieldChange}
-              error={fieldErrors[field.name]}
-            />
-          ))}
-
-          <div className="border-border flex items-center justify-end gap-2 border-t pt-3">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="h-8 cursor-pointer font-mono text-xs"
+              className="h-8 cursor-pointer text-xs"
             >
               Cancel
             </Button>
@@ -161,7 +139,7 @@ export function FormDialog({
               variant="default"
               size="sm"
               disabled={isSubmitting}
-              className="h-8 cursor-pointer gap-1.5 font-mono text-xs font-medium"
+              className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
             >
               {isSubmitting ? (
                 <>
@@ -172,9 +150,9 @@ export function FormDialog({
                 <span>{submitText}</span>
               )}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

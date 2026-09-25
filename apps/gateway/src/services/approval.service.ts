@@ -5,6 +5,7 @@
 
 import { ApprovalStatus } from "@orchestrai/shared-types";
 import type { ApprovalFilterDto, ResolveApprovalDto } from "@/validation";
+import { permissionPolicyManager, type PermissionScope } from "./permission-policy.manager";
 
 export interface ApprovalRecord {
   approvalId: string;
@@ -29,6 +30,7 @@ export interface ResolvedApprovalResult {
   approvalId: string;
   decision: string;
   decidedBy: string;
+  scope?: string;
   reason?: string;
   modifiedArguments?: Record<string, unknown>;
   decidedAt: string;
@@ -61,10 +63,15 @@ export class ApprovalService {
     dto: ResolveApprovalDto,
     decidedBy: string,
   ): Promise<ResolvedApprovalResult> {
+    const scope: PermissionScope =
+      dto.decision === "REJECTED" ? "deny" : (dto.scope as PermissionScope) || "once";
+    permissionPolicyManager.resolveApproval(approvalId, scope, "default", decidedBy);
+
     return {
       approvalId,
       decision: dto.decision,
       decidedBy,
+      scope: dto.scope,
       reason: dto.reason,
       modifiedArguments: dto.modifiedArguments,
       decidedAt: new Date().toISOString(),
