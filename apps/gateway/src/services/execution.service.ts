@@ -72,17 +72,25 @@ export class ExecutionService {
         }));
     }
 
-    if (dto.conversationId) {
+    const validConvId =
+      dto.conversationId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dto.conversationId)
+        ? dto.conversationId
+        : null;
+
+    if (validConvId) {
       const existingConv = await this.db.conversation.findUnique({
-        where: { conversationId: dto.conversationId },
+        where: { conversationId: validConvId },
       });
       if (!existingConv) {
         await this.db.conversation.create({
           data: {
-            conversationId: dto.conversationId,
+            conversationId: validConvId,
             tenantId: resolvedTenantId,
             agentId: targetAgent.agentId,
-            title: dto.input ? dto.input.slice(0, 36) : "Active Thread",
+            title: dto.input
+              ? dto.input.slice(0, 36) + (dto.input.length > 36 ? "..." : "")
+              : "Active Thread",
           },
         });
       }
@@ -95,7 +103,7 @@ export class ExecutionService {
       data: {
         tenantId: resolvedTenantId,
         agentId: targetAgent.agentId,
-        conversationId: dto.conversationId,
+        conversationId: validConvId,
         status: "running",
         traceId,
         variables: {
@@ -106,11 +114,11 @@ export class ExecutionService {
       },
     });
 
-    if (dto.input && dto.conversationId) {
+    if (dto.input && validConvId) {
       await this.db.message.create({
         data: {
           executionId: row.executionId,
-          conversationId: dto.conversationId,
+          conversationId: validConvId,
           role: "user",
           content: dto.input,
         },
@@ -129,7 +137,7 @@ export class ExecutionService {
           dto.input,
           modelName,
           systemPrompt,
-          dto.conversationId,
+          validConvId || undefined,
           dto.history,
         )
         .then(async () => {
@@ -143,14 +151,23 @@ export class ExecutionService {
               },
             });
 
-            if (dto.conversationId && state.fullOutput) {
+            if (validConvId && state.fullOutput) {
               await this.db.message.create({
                 data: {
                   executionId: row.executionId,
-                  conversationId: dto.conversationId,
+                  conversationId: validConvId,
                   role: "assistant",
                   content: state.fullOutput,
+                  metadata: {
+                    ...(state.artifacts?.length ? { artifacts: state.artifacts } : {}),
+                    ...(modelName ? { model: modelName } : {}),
+                  } as unknown as Prisma.InputJsonValue,
                 },
+              });
+
+              await this.db.conversation.update({
+                where: { conversationId: validConvId },
+                data: { updatedAt: new Date() },
               });
             }
           }

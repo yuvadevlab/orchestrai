@@ -8,8 +8,7 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { Button, Input } from "@yuva-devlab/ui";
-import { toast } from "sonner";
+import { Button, Input, toast } from "@yuva-devlab/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { useSignupMutation } from "../api/use-auth-mutations";
 import { AuthErrorBanner } from "./auth-error-banner";

@@ -1,6 +1,7 @@
 /**
  * @file apps/gateway/src/routes/conversation.route.ts
  * @description REST API routes for multi-turn conversations and message threads.
+ * @module apps/gateway/routes
  */
 
 import type { RouteGroup } from "./router";
@@ -17,7 +18,11 @@ export function registerConversationRoutes(
   controller: ConversationController = new ConversationController(),
 ): void {
   api.group("/conversations", (group) => {
+    group.get("/", (req, res) => controller.listConversations(req, res));
     group.post("/", (req, res) => controller.createConversation(req, res));
+    group.get("/:id", (req, res) => controller.getConversation(req, res));
+    group.patch("/:id", (req, res) => controller.updateConversation(req, res));
+    group.delete("/:id", (req, res) => controller.deleteConversation(req, res));
     group.get("/:id/messages", (req, res) => controller.getMessages(req, res));
     group.post("/:id/messages", (req, res) => controller.addMessage(req, res));
   });

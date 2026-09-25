@@ -7,7 +7,7 @@
  */
 
 import React, { useRef, useEffect } from "react";
-import { ArrowUp, Bot, Cpu, Square } from "lucide-react";
+import { ArrowUp, Bot, Cpu, Sparkles, Square } from "lucide-react";
 import {
   Button,
   Select,
@@ -62,11 +62,11 @@ export function StudioPromptBar({
 }: StudioPromptBarProps): React.JSX.Element {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea height as user types
+  // Auto-resize textarea height as user types while preserving spacious multi-line composer height
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 180)}px`;
+      textareaRef.current.style.height = `${Math.max(84, Math.min(textareaRef.current.scrollHeight, 220))}px`;
     }
   }, [prompt]);
 
@@ -78,6 +78,16 @@ export function StudioPromptBar({
       }
     }
   };
+
+  const availableModes =
+    modes.length > 0
+      ? modes
+      : [
+          { modeId: "auto", slug: "auto", name: "Auto", description: "Autonomous swarm" },
+          { modeId: "chat", slug: "chat", name: "Chat", description: "Direct dialogue" },
+          { modeId: "plan", slug: "plan", name: "Plan", description: "Decompose objective" },
+          { modeId: "act", slug: "act", name: "Act", description: "Execute tools" },
+        ];
 
   return (
     <div className="relative z-20 mx-auto w-full max-w-4xl px-4 pb-4">
@@ -105,16 +115,16 @@ export function StudioPromptBar({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Describe any objective — research, write, build, analyze…"
-          rows={1}
+          rows={3}
           disabled={isRunning}
-          className="placeholder:text-muted-foreground max-h-44 w-full resize-none bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-50"
+          className="placeholder:text-muted-foreground max-h-56 min-h-21 w-full resize-none bg-transparent px-3 py-2 text-sm leading-relaxed outline-none disabled:opacity-50"
         />
 
         {/* Action Controls Bar */}
         <div className="flex flex-wrap items-center gap-2 px-2 pt-1.5">
           {/* Specialist Selector */}
           <Select value={selectedSpecialistId} onValueChange={onSelectSpecialist}>
-            <SelectTrigger className="border-border bg-background h-8 w-auto shrink-0 gap-1.5 px-2.5 text-xs font-medium">
+            <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium">
               <Bot className="text-primary size-3.5 shrink-0" />
               <SelectValue placeholder="Select specialist" />
             </SelectTrigger>
@@ -135,7 +145,7 @@ export function StudioPromptBar({
 
           {/* Live Database Model Selector */}
           <Select value={selectedModel} onValueChange={onSelectModel}>
-            <SelectTrigger className="border-border bg-background hidden h-8 w-auto shrink-0 gap-1.5 px-2.5 font-mono text-[11px] sm:flex">
+            <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium">
               <Cpu className="text-muted-foreground size-3.5 shrink-0" />
               <SelectValue placeholder="Select model engine" />
             </SelectTrigger>
@@ -145,7 +155,7 @@ export function StudioPromptBar({
                   <SelectItem
                     key={m.modelId || m.modelIdentifier}
                     value={m.modelIdentifier || m.name}
-                    className="cursor-pointer font-mono text-xs"
+                    className="cursor-pointer text-xs"
                   >
                     {m.name}
                   </SelectItem>
@@ -158,29 +168,24 @@ export function StudioPromptBar({
             </SelectContent>
           </Select>
 
-          {/* Platform Modes Segmented Toggle (Chat, Plan, Act, Auto) */}
-          {modes.length > 0 && (
-            <div className="border-border bg-background/80 hidden items-center gap-1 rounded-md border p-0.5 text-[11px] md:flex">
-              {modes.map((m) => {
-                const isSelected = mode.toLowerCase() === m.slug.toLowerCase();
-                return (
-                  <button
-                    key={m.modeId || m.slug}
-                    type="button"
-                    onClick={() => onSelectMode(m.slug)}
-                    title={m.description}
-                    className={`cursor-pointer rounded-md px-2 py-0.5 font-medium transition-all ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {m.name}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {/* Platform Mode Selector Dropdown */}
+          <Select value={mode} onValueChange={onSelectMode}>
+            <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium capitalize">
+              <Sparkles className="size-3.5 shrink-0 text-amber-400" />
+              <SelectValue placeholder="Select mode" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border text-foreground text-xs">
+              {availableModes.map((m) => (
+                <SelectItem
+                  key={m.modeId || m.slug}
+                  value={m.slug}
+                  className="cursor-pointer text-xs capitalize"
+                >
+                  {m.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Run / Stop */}
           <div className="ml-auto">
@@ -189,10 +194,10 @@ export function StudioPromptBar({
                 variant="destructive"
                 size="icon"
                 onClick={onStop}
-                className="size-8 rounded-md"
+                className="size-7 rounded-md"
                 aria-label="Stop execution"
               >
-                <Square className="size-3.5 fill-current" />
+                <Square className="size-3 fill-current" />
               </Button>
             ) : (
               <Button
@@ -200,10 +205,10 @@ export function StudioPromptBar({
                 size="icon"
                 onClick={onSubmit}
                 disabled={!prompt.trim()}
-                className="size-8 rounded-md"
+                className="size-7 rounded-md"
                 aria-label="Run"
               >
-                <ArrowUp className="size-4" />
+                <ArrowUp className="size-3.5" />
               </Button>
             )}
           </div>

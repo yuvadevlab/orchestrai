@@ -18,10 +18,26 @@ export interface GlobalErrorProps {
 
 /**
  * Next.js App Router Root Error Boundary component.
- * Integrates client console logger and cybernetic error classifier.
+ * Automatically redirects unauthenticated/missing-tenant errors to /login.
  */
 export default function GlobalError({ error, reset }: GlobalErrorProps): React.JSX.Element {
   useEffect(() => {
+    // If tenant or session is missing, cleanly redirect to login instead of displaying error screen
+    const msg = error.message?.toLowerCase() || "";
+    const isAuthOrTenantError =
+      msg.includes("tenant") ||
+      msg.includes("workspace") ||
+      msg.includes("sign in") ||
+      msg.includes("unauthorized") ||
+      msg.includes("token");
+
+    if (isAuthOrTenantError) {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+      return;
+    }
+
     // Log unexpected frontend runtime crash to browser console
     // eslint-disable-next-line no-console
     console.error("[ConsoleRootErrorBoundary] Root React Error Boundary caught unhandled crash:", {

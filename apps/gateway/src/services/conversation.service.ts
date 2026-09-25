@@ -4,14 +4,27 @@
  * @module apps/gateway/services
  */
 
+import { getPrismaClient, type PrismaClient, type Prisma } from "@orchestrai/database";
+import type {
+  CreateConversationDto,
+  AddMessageDto,
+  MessageQueryDto,
+  ConversationQueryDto,
+  UpdateConversationDto,
+} from "@/validation";
+import { resolveDbTenantId, resolveOrCreateDefaultAgent } from "./tenant-resolver";
 import {
-  getPrismaClient,
-  type PrismaClient,
-  type MessageRole,
-  type Prisma,
-} from "@orchestrai/database";
-import type { CreateConversationDto, AddMessageDto, MessageQueryDto } from "@/validation";
-import { resolveDbTenantId } from "./tenant-resolver";
+  ConversationQueryService,
+  type ConversationListResult,
+  type ConversationWithMessagesRecord,
+  type MessageListResult,
+} from "./conversation-query.service";
+import {
+  ConversationMessageService,
+  type AppendedMessageRecord,
+} from "./conversation-message.service";
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface ConversationRecord {
   conversationId: string;
@@ -22,29 +35,56 @@ export interface ConversationRecord {
   updatedAt: string;
 }
 
-export interface MessageRecord {
-  messageId: string;
-  conversationId: string;
-  role: string;
-  content: string;
-  metadata: Record<string, unknown>;
-  createdAt: string;
-}
-
-export interface MessageListResult {
-  conversationId: string;
-  messages: MessageRecord[];
-  limit: number;
-  total: number;
-  hasMore: boolean;
-}
+export type MessageRecord = AppendedMessageRecord;
 
 /**
- * Service orchestrating conversation sessions and message appending in PostgreSQL.
+ * Service orchestrating conversation sessions and message persistence in PostgreSQL.
  */
 export class ConversationService {
+  private readonly queryService: ConversationQueryService;
+  private readonly messageService: ConversationMessageService;
+
+  constructor(
+    queryService?: ConversationQueryService,
+    messageService?: ConversationMessageService,
+  ) {
+    this.queryService = queryService || new ConversationQueryService();
+    this.messageService = messageService || new ConversationMessageService();
+  }
+
   private get db(): PrismaClient {
     return getPrismaClient();
+  }
+
+  /**
+   * Lists conversations for the tenant.
+   */
+  public async listConversations(
+    query: ConversationQueryDto,
+    tenantId: string,
+  ): Promise<ConversationListResult> {
+    return this.queryService.listConversations(query, tenantId);
+  }
+
+  /**
+   * Retrieves a single conversation session by ID.
+   */
+  public async getConversation(
+    conversationId: string,
+    tenantId: string,
+  ): Promise<ConversationWithMessagesRecord | null> {
+    return this.queryService.getConversationById(conversationId, tenantId);
+  }
+
+  /**
+   * Retrieves messages for a specified conversation from PostgreSQL.
+   */
+  public async getMessages(
+    conversationId: string,
+    query: MessageQueryDto,
+    tenantId: string,
+  ): Promise<MessageListResult> {
+    return this.queryService.getMessages(conversationId, query, tenantId);
   }
 
   /**
@@ -55,27 +95,12 @@ export class ConversationService {
     tenantId: string,
   ): Promise<ConversationRecord> {
     const resolvedTenantId = await resolveDbTenantId(tenantId, this.db);
-
-    // Look for existing active agent or first tenant agent
-    let agent = await this.db.agent.findFirst({
-      where: { tenantId: resolvedTenantId, deletedAt: null },
-    });
-
-    if (!agent) {
-      agent = await this.db.agent.create({
-        data: {
-          tenantId: resolvedTenantId,
-          name: "Supervisor Orchestrator",
-          systemPrompt: "You are the OrchestrAI Supervisor.",
-          modelConfig: { model: "gemma4:31b-cloud" },
-        },
-      });
-    }
+    const agentId = await resolveOrCreateDefaultAgent(resolvedTenantId, this.db);
 
     const row = await this.db.conversation.create({
       data: {
         tenantId: resolvedTenantId,
-        agentId: agent.agentId,
+        agentId,
         title: dto.title || "New Conversation",
         metadata: (dto.metadata as Prisma.InputJsonValue) || {},
       },
@@ -92,39 +117,65 @@ export class ConversationService {
   }
 
   /**
-   * Retrieves messages for a specified conversation from PostgreSQL.
+   * Updates conversation metadata or title.
    */
-  public async getMessages(
+  public async updateConversation(
     conversationId: string,
-    query: MessageQueryDto,
-    _tenantId: string,
-  ): Promise<MessageListResult> {
-    const limit = query.limit || 50;
-    const rows = await this.db.message.findMany({
-      where: { conversationId },
-      orderBy: { createdAt: "asc" },
-      take: limit,
-    });
+    dto: UpdateConversationDto,
+    tenantId: string,
+  ): Promise<ConversationRecord> {
+    if (!UUID_REGEX.test(conversationId)) {
+      throw new Error(`Invalid conversation UUID: ${conversationId}`);
+    }
 
-    const total = await this.db.message.count({
-      where: { conversationId },
+    const resolvedTenantId = await resolveDbTenantId(tenantId, this.db);
+    const row = await this.db.conversation.update({
+      where: {
+        conversationId,
+        tenantId: resolvedTenantId,
+      },
+      data: {
+        ...(dto.title ? { title: dto.title } : {}),
+        ...(dto.metadata ? { metadata: dto.metadata as Prisma.InputJsonValue } : {}),
+        updatedAt: new Date(),
+      },
     });
-
-    const messages: MessageRecord[] = rows.map((m) => ({
-      messageId: m.messageId,
-      conversationId: m.conversationId || conversationId,
-      role: m.role.toLowerCase(),
-      content: typeof m.content === "string" ? m.content : JSON.stringify(m.content),
-      metadata: (m.metadata as Record<string, unknown>) || {},
-      createdAt: m.createdAt.toISOString(),
-    }));
 
     return {
+      conversationId: row.conversationId,
+      title: row.title,
+      tenantId: row.tenantId,
+      metadata: (row.metadata as Record<string, unknown>) || {},
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  /**
+   * Soft-deletes a conversation session.
+   */
+  public async deleteConversation(
+    conversationId: string,
+    tenantId: string,
+  ): Promise<{ success: boolean; conversationId: string }> {
+    if (!UUID_REGEX.test(conversationId)) {
+      throw new Error(`Invalid conversation UUID: ${conversationId}`);
+    }
+
+    const resolvedTenantId = await resolveDbTenantId(tenantId, this.db);
+    await this.db.conversation.update({
+      where: {
+        conversationId,
+        tenantId: resolvedTenantId,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return {
+      success: true,
       conversationId,
-      messages,
-      limit,
-      total,
-      hasMore: total > limit,
     };
   }
 
@@ -136,72 +187,6 @@ export class ConversationService {
     dto: AddMessageDto,
     tenantId: string,
   ): Promise<MessageRecord> {
-    const resolvedTenantId = await resolveDbTenantId(tenantId, this.db);
-
-    // Ensure conversation exists or create draft conversation
-    let conv = await this.db.conversation.findUnique({
-      where: { conversationId },
-    });
-
-    if (!conv) {
-      let agent = await this.db.agent.findFirst({
-        where: { tenantId: resolvedTenantId, deletedAt: null },
-      });
-      if (!agent) {
-        agent = await this.db.agent.create({
-          data: {
-            tenantId: resolvedTenantId,
-            name: "Lead Orchestrator",
-            systemPrompt: "You are the Lead Orchestrator.",
-            modelConfig: { model: "gemma4:31b-cloud" },
-          },
-        });
-      }
-
-      conv = await this.db.conversation.create({
-        data: {
-          conversationId,
-          tenantId: resolvedTenantId,
-          agentId: agent.agentId,
-          title: "Active Session",
-        },
-      });
-    }
-
-    // Ensure dummy execution exists to satisfy foreign key constraint on messages
-    let exec = await this.db.execution.findFirst({
-      where: { conversationId },
-    });
-
-    if (!exec) {
-      exec = await this.db.execution.create({
-        data: {
-          tenantId: resolvedTenantId,
-          agentId: conv.agentId,
-          conversationId,
-          traceId: `tr_${Date.now()}`,
-          status: "completed",
-        },
-      });
-    }
-
-    const row = await this.db.message.create({
-      data: {
-        executionId: exec.executionId,
-        conversationId,
-        role: dto.role.toLowerCase() as MessageRole,
-        content: dto.content,
-        metadata: (dto.metadata as Prisma.InputJsonValue) || {},
-      },
-    });
-
-    return {
-      messageId: row.messageId,
-      conversationId,
-      role: row.role.toLowerCase(),
-      content: typeof row.content === "string" ? row.content : JSON.stringify(row.content),
-      metadata: (row.metadata as Record<string, unknown>) || {},
-      createdAt: row.createdAt.toISOString(),
-    };
+    return this.messageService.addMessage(conversationId, dto, tenantId);
   }
 }

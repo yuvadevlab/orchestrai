@@ -8,8 +8,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Loader2, CheckCircle2 } from "lucide-react";
-import { Button, Input } from "@yuva-devlab/ui";
-import { toast } from "sonner";
+import { Button, Input, toast } from "@yuva-devlab/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { useForgotPasswordMutation } from "../api/use-auth-mutations";
 import type { ForgotPasswordFormValues } from "../types";

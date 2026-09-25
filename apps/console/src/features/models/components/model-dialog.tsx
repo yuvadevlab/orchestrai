@@ -7,7 +7,7 @@
  */
 
 import React from "react";
-import { toast } from "sonner";
+import { toast } from "@yuva-devlab/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { FormDialog } from "@/components/ui";
 import { buildModelFields } from "./model-form-fields";

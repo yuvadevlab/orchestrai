@@ -57,13 +57,13 @@ export function AgentsPageContent(): React.JSX.Element {
     >
       <div className="space-y-5">
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="relative w-full sm:w-72">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-3.5" />
+          <div className="w-full sm:w-72">
             <Input
               value={search}
-              onChange={(e): void => setSearch(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
               placeholder="Search agents by name, model, role..."
-              className="bg-card h-8 pl-8 text-xs"
+              startIcon={<Search className="size-3.5" />}
+              className="bg-card h-8 text-xs"
             />
           </div>
 

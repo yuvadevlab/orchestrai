@@ -8,9 +8,11 @@
 
 import React, { useState } from "react";
 import { ExecutionTable } from "./execution-table";
+import { ExecutionDebugDialog } from "./execution-debug-dialog";
 import { Button, Input } from "@yuva-devlab/ui";
 import { Search, RotateCcw, Play } from "lucide-react";
 import { useExecutions } from "../api";
+import type { ExecutionRun } from "../types";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageShell } from "@/components/layout/page-shell";
 
@@ -21,13 +23,15 @@ import { PageShell } from "@/components/layout/page-shell";
 export function ExecutionsPageContent(): React.JSX.Element {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [selectedDebugExecution, setSelectedDebugExecution] = useState<ExecutionRun | null>(null);
   const { data: executionList, isLoading, refetch } = useExecutions();
 
   const filteredExecutions = executionList.filter((ex) => {
     const matchesSearch =
       ex.id.toLowerCase().includes(search.toLowerCase()) ||
       ex.intent.toLowerCase().includes(search.toLowerCase()) ||
-      ex.primaryAgent.toLowerCase().includes(search.toLowerCase());
+      ex.agentName.toLowerCase().includes(search.toLowerCase()) ||
+      ex.agentModel.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus = statusFilter === "ALL" || ex.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -56,13 +60,13 @@ export function ExecutionsPageContent(): React.JSX.Element {
       <div className="space-y-5">
         {/* Search and Filters */}
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="relative w-full sm:w-72">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-3.5" />
+          <div className="w-full sm:w-72">
             <Input
               value={search}
-              onChange={(e): void => setSearch(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
               placeholder="Search by ID, intent, or agent..."
-              className="bg-card h-8 pl-8 font-sans text-xs"
+              startIcon={<Search className="size-3.5" />}
+              className="bg-card h-8 font-sans text-xs"
             />
           </div>
 
@@ -101,8 +105,18 @@ export function ExecutionsPageContent(): React.JSX.Element {
             description={`No execution traces matched your search query "${search}".`}
           />
         ) : (
-          <ExecutionTable executions={filteredExecutions} />
+          <ExecutionTable
+            executions={filteredExecutions}
+            onSelectDebug={(ex) => setSelectedDebugExecution(ex)}
+          />
         )}
+
+        {/* Forensic Execution Debug Dialog */}
+        <ExecutionDebugDialog
+          execution={selectedDebugExecution}
+          isOpen={Boolean(selectedDebugExecution)}
+          onClose={() => setSelectedDebugExecution(null)}
+        />
       </div>
     </PageShell>
   );

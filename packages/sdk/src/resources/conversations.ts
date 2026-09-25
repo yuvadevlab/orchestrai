@@ -1,6 +1,7 @@
 /**
  * @file packages/sdk/src/resources/conversations.ts
  * @description Conversation resource managing multi-turn sessions and message histories.
+ * @module packages/sdk/resources
  */
 
 import type { Conversation, Message, PaginatedList } from "@/types";
@@ -8,6 +9,11 @@ import { ResourceBase } from "./resource-base";
 import { MessageRole } from "@orchestrai/shared-types";
 
 export interface CreateConversationParams {
+  title?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateConversationParams {
   title?: string;
   metadata?: Record<string, unknown>;
 }
@@ -35,6 +41,15 @@ export class ConversationsResource extends ResourceBase {
   }
 
   /**
+   * Retrieves a single conversation session by ID.
+   */
+  public async get(conversationId: string): Promise<Conversation> {
+    return this.http.request<Conversation>(
+      `/api/v1/conversations/${encodeURIComponent(conversationId)}`,
+    );
+  }
+
+  /**
    * Creates a new conversation session.
    */
   public async create(params: CreateConversationParams = {}): Promise<Conversation> {
@@ -42,6 +57,36 @@ export class ConversationsResource extends ResourceBase {
       method: "POST",
       body: params,
     });
+  }
+
+  /**
+   * Updates an existing conversation session.
+   */
+  public async update(
+    conversationId: string,
+    params: UpdateConversationParams,
+  ): Promise<Conversation> {
+    return this.http.request<Conversation>(
+      `/api/v1/conversations/${encodeURIComponent(conversationId)}`,
+      {
+        method: "PATCH",
+        body: params,
+      },
+    );
+  }
+
+  /**
+   * Soft-deletes a conversation session.
+   */
+  public async delete(
+    conversationId: string,
+  ): Promise<{ success: boolean; conversationId: string }> {
+    return this.http.request<{ success: boolean; conversationId: string }>(
+      `/api/v1/conversations/${encodeURIComponent(conversationId)}`,
+      {
+        method: "DELETE",
+      },
+    );
   }
 
   /**

@@ -40,6 +40,10 @@ export class RouteGroup {
     this.router.put(this.joinPath(path), handler);
   }
 
+  public patch(path: string, handler: RouteHandler): void {
+    this.router.patch(this.joinPath(path), handler);
+  }
+
   public delete(path: string, handler: RouteHandler): void {
     this.router.delete(this.joinPath(path), handler);
   }
@@ -100,6 +104,10 @@ export class Router {
 
   public put(path: string, handler: RouteHandler): void {
     this.register("PUT", path, handler);
+  }
+
+  public patch(path: string, handler: RouteHandler): void {
+    this.register("PATCH", path, handler);
   }
 
   public delete(path: string, handler: RouteHandler): void {

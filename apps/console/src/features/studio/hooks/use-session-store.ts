@@ -2,43 +2,21 @@
 
 /**
  * @file use-session-store.ts
- * @description State hook managing live cowork sessions without phantom default data.
+ * @description State hook managing live cowork sessions with URL routing and database sync.
  * @module apps/console/features/studio/hooks
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { getApiClient } from "@/lib/api-client";
 import type { CoworkMessage, CoworkSession } from "../types";
-
-const SESSIONS_STORAGE_KEY = "orchestrai_cowork_sessions";
-const ACTIVE_SESSION_STORAGE_KEY = "orchestrai_active_session_id";
-
-function generateUUID(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => {
-    const r =
-      typeof crypto !== "undefined"
-        ? crypto.getRandomValues(new Uint8Array(1))[0]
-        : Math.floor(Math.random() * 16);
-    return (+c ^ ((r ?? 0) & (15 >> (+c / 4)))).toString(16);
-  });
-}
-
-function createDraftSession(id?: string): CoworkSession {
-  const sessionId = id || generateUUID();
-  const now = new Date().toISOString();
-  return {
-    id: sessionId,
-    title: "New Thread",
-    createdAt: now,
-    updatedAt: now,
-    specialistId: "",
-    model: "",
-    mode: "auto",
-    messages: [],
-  };
-}
+import {
+  createDraftSession,
+  fetchServerSessionMessages,
+  fetchServerSessions,
+  loadCachedSessions,
+  saveCachedSessions,
+} from "./session-storage";
+import { applyMessageUpdate, applyMetaUpdate, applySessionDelete } from "./session-transitions";
 
 export interface UseSessionStoreResult {
   sessions: CoworkSession[];
@@ -54,57 +32,80 @@ export interface UseSessionStoreResult {
 }
 
 /**
- * Live session manager that only displays and persists sessions with actual message history.
+ * Live session manager connecting Cowork Studio to PostgreSQL and URL-driven routing.
  */
 export function useSessionStore(routeSessionId?: string): UseSessionStoreResult {
-  const [sessions, setSessions] = useState<CoworkSession[]>([]);
-  const [activeSessionId, setActiveSessionIdState] = useState<string>("");
+  const [sessions, setSessions] = useState<CoworkSession[]>(() => loadCachedSessions());
+  const [activeSessionId, setActiveSessionIdState] = useState<string>(() => routeSessionId || "");
   const [draftSession, setDraftSession] = useState<CoworkSession>(() =>
     createDraftSession(routeSessionId),
   );
 
-  // Load only genuine sessions with messages from storage on mount
+  // Synchronize active session with URL route parameter
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SESSIONS_STORAGE_KEY);
-      if (stored) {
-        const parsed: CoworkSession[] = JSON.parse(stored);
-        // Only keep sessions that have real messages
-        const validSessions = Array.isArray(parsed)
-          ? parsed.filter((s) => Array.isArray(s.messages) && s.messages.length > 0)
-          : [];
+    let cancelled = false;
 
-        setSessions(validSessions);
-        // Clean up localStorage to remove ghost 0-msg sessions
-        localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(validSessions));
-
-        if (validSessions.length > 0) {
-          const storedActiveId = localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
-          const initialId = routeSessionId || storedActiveId || validSessions[0]?.id || "";
-          const matching = validSessions.find((s) => s.id === initialId);
-
-          if (matching?.id) {
-            setActiveSessionIdState(matching.id);
-            return;
-          }
-        }
-      }
-    } catch {
-      // Storage parse fallback
+    // Load from local cache for instant UI rendering
+    const cached = loadCachedSessions();
+    if (cached.length > 0) {
+      setSessions(cached);
     }
 
-    const freshDraft = createDraftSession(routeSessionId);
-    setDraftSession(freshDraft);
-    setActiveSessionIdState(freshDraft.id);
+    if (routeSessionId) {
+      // URL has an ID: lock active session to this specific thread
+      setActiveSessionIdState(routeSessionId);
+    } else {
+      // URL has NO ID (root /): always start on a fresh new thread
+      const freshDraft = createDraftSession();
+      setDraftSession(freshDraft);
+      setActiveSessionIdState(freshDraft.id);
+    }
+
+    // Fetch full conversation history from PostgreSQL via Gateway API
+    void fetchServerSessions().then((serverSessions) => {
+      if (cancelled) return;
+
+      if (serverSessions.length > 0) {
+        setSessions(serverSessions);
+        saveCachedSessions(serverSessions);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [routeSessionId]);
+
+  // Load thread messages on demand if active session has no messages loaded
+  useEffect(() => {
+    if (!activeSessionId) return;
+    const targetSession = sessions.find((s) => s.id === activeSessionId);
+    if (!targetSession || targetSession.messages.length === 0) {
+      void fetchServerSessionMessages(activeSessionId).then((messages) => {
+        if (messages.length > 0) {
+          setSessions((prev) => {
+            const exists = prev.some((s) => s.id === activeSessionId);
+            if (exists) {
+              return prev.map((s) => (s.id === activeSessionId ? { ...s, messages } : s));
+            }
+            const fallback: CoworkSession = {
+              id: activeSessionId,
+              title: messages[0]?.content ? messages[0].content.slice(0, 36) : "Thread",
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              specialistId: "",
+              mode: "auto",
+              messages,
+            };
+            return [fallback, ...prev];
+          });
+        }
+      });
+    }
+  }, [activeSessionId, sessions]);
 
   const setActiveSessionId = useCallback((id: string) => {
     setActiveSessionIdState(id);
-    try {
-      localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, id);
-    } catch {
-      // Storage quota exception guard
-    }
   }, []);
 
   const createNewSession = useCallback((): CoworkSession => {
@@ -114,7 +115,6 @@ export function useSessionStore(routeSessionId?: string): UseSessionStoreResult 
     return freshDraft;
   }, []);
 
-  // Compute active session from saved sessions or transient in-memory draft
   const activeSession =
     sessions.find((s) => s.id === activeSessionId) ||
     (draftSession.id === activeSessionId ? draftSession : createDraftSession(activeSessionId));
@@ -122,55 +122,9 @@ export function useSessionStore(routeSessionId?: string): UseSessionStoreResult 
   const updateActiveMessages = useCallback(
     (updater: (prev: CoworkMessage[]) => CoworkMessage[]) => {
       setSessions((prev) => {
-        const existingIndex = prev.findIndex((s) => s.id === activeSessionId);
-        const currentSession =
-          existingIndex >= 0
-            ? prev[existingIndex]
-            : draftSession.id === activeSessionId
-              ? draftSession
-              : null;
-
-        if (!currentSession) return prev;
-
-        const newMessages = updater(currentSession.messages);
-        let newTitle = currentSession.title;
-
-        // Auto-title from initial prompt
-        if (
-          (newTitle === "New Thread" || newTitle === "New Cowork Session") &&
-          newMessages.length > 0
-        ) {
-          const firstUser = newMessages.find((m) => m.role === "user");
-          if (firstUser) {
-            newTitle =
-              firstUser.content.slice(0, 36) + (firstUser.content.length > 36 ? "..." : "");
-          }
-        }
-
-        const updatedSession: CoworkSession = {
-          ...currentSession,
-          title: newTitle,
-          messages: newMessages,
-          updatedAt: new Date().toISOString(),
-        };
-
-        // Only retain and persist sessions that contain messages
-        let nextSessions: CoworkSession[];
-        if (existingIndex >= 0) {
-          nextSessions = prev.map((s, idx) => (idx === existingIndex ? updatedSession : s));
-        } else if (newMessages.length > 0) {
-          nextSessions = [updatedSession, ...prev];
-        } else {
-          nextSessions = prev;
-        }
-
-        const validOnly = nextSessions.filter((s) => s.messages.length > 0);
-        try {
-          localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(validOnly));
-        } catch {
-          // Storage quota guard
-        }
-        return validOnly;
+        const next = applyMessageUpdate(prev, activeSessionId, draftSession, updater);
+        saveCachedSessions(next);
+        return next;
       });
     },
     [activeSessionId, draftSession],
@@ -180,16 +134,24 @@ export function useSessionStore(routeSessionId?: string): UseSessionStoreResult 
     (updates: Partial<Pick<CoworkSession, "title" | "specialistId" | "model" | "mode">>) => {
       setDraftSession((prev) => (prev.id === activeSessionId ? { ...prev, ...updates } : prev));
       setSessions((prev) => {
-        const updated = prev.map((s) =>
-          s.id === activeSessionId ? { ...s, ...updates, updatedAt: new Date().toISOString() } : s,
-        );
-        try {
-          localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(updated));
-        } catch {
-          // Storage quota guard
-        }
-        return updated;
+        const next = applyMetaUpdate(prev, activeSessionId, updates);
+        saveCachedSessions(next);
+        return next;
       });
+
+      try {
+        const client = getApiClient();
+        void client.conversations.update(activeSessionId, {
+          title: updates.title,
+          metadata: {
+            specialistId: updates.specialistId,
+            model: updates.model,
+            mode: updates.mode,
+          },
+        });
+      } catch {
+        // Non-blocking background sync
+      }
     },
     [activeSessionId],
   );
@@ -197,23 +159,25 @@ export function useSessionStore(routeSessionId?: string): UseSessionStoreResult 
   const deleteSession = useCallback(
     (idToDelete: string) => {
       setSessions((prev) => {
-        const remaining = prev.filter((s) => s.id !== idToDelete);
-        try {
-          localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(remaining));
-        } catch {
-          // Storage quota guard
+        const result = applySessionDelete(prev, idToDelete, activeSessionId);
+        saveCachedSessions(result.remaining);
+
+        if (result.nextActiveId) {
+          setActiveSessionIdState(result.nextActiveId);
+        } else if (result.needFreshDraft) {
+          const fresh = createDraftSession();
+          setDraftSession(fresh);
+          setActiveSessionIdState(fresh.id);
         }
-        if (activeSessionId === idToDelete) {
-          if (remaining.length > 0 && remaining[0]?.id) {
-            setActiveSessionIdState(remaining[0].id);
-          } else {
-            const fresh = createDraftSession();
-            setDraftSession(fresh);
-            setActiveSessionIdState(fresh.id);
-          }
-        }
-        return remaining;
+        return result.remaining;
       });
+
+      try {
+        const client = getApiClient();
+        void client.conversations.delete(idToDelete);
+      } catch {
+        // Non-blocking background sync
+      }
     },
     [activeSessionId],
   );

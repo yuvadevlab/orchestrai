@@ -2,27 +2,29 @@
 
 /**
  * @file form-dialog.tsx
- * @description Design System FormDialog component for modal forms matching FinAI standards.
- * Features a fixed header, scrollable body with 2-column responsive grid, and pinned action footer.
+ * @description Design System FormDialog component powered by @yuva-devlab/ui Dialog primitives.
+ * Features accessible focus management, portal mounting, fixed header, scrollable body, and pinned action footer.
  * @module apps/console/components/ui
  */
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@yuva-devlab/ui";
-import { X, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+  Button,
+} from "@yuva-devlab/ui";
+import { Loader2 } from "lucide-react";
 import { FormDialogField, type FormFieldConfig } from "./form-dialog-field";
 
 export type { FormFieldConfig };
 
 /** Supported maximum width constraints for modal presentation. */
 export type FormDialogMaxWidth = "md" | "lg" | "xl" | "2xl";
-
-const MAX_WIDTH_CLASSES: Record<FormDialogMaxWidth, string> = {
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-xl",
-  "2xl": "max-w-2xl",
-};
 
 export interface FormDialogProps {
   isOpen: boolean;
@@ -36,8 +38,8 @@ export interface FormDialogProps {
 }
 
 /**
- * Design System Form Dialog modal component.
- * Carefully balances scrollable content, fixed action controls, and 2-column layouts.
+ * Design System Form Dialog modal component using @yuva-devlab/ui Dialog primitives.
+ * Carefully balances scrollable content, fixed action controls, and responsive grid layouts.
  */
 export function FormDialog({
   isOpen,
@@ -65,8 +67,6 @@ export function FormDialog({
       setFieldErrors({});
     }
   }, [isOpen, fields]);
-
-  if (!isOpen) return null;
 
   const handleFieldChange = (name: string, value: string): void => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -102,39 +102,15 @@ export function FormDialog({
   };
 
   return (
-    <div
-      className="bg-background/80 animate-in fade-in-0 fixed inset-0 z-50 flex items-center justify-center p-3 backdrop-blur-sm sm:p-6"
-      onClick={onClose}
-    >
-      <div
-        className={`border-border bg-card relative flex w-full flex-col ${MAX_WIDTH_CLASSES[maxWidth]} max-h-[min(90vh,760px)] overflow-hidden rounded-md border shadow-2xl`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Pinned Header */}
-        <div className="border-border/70 bg-card flex shrink-0 items-start justify-between border-b px-6 py-4">
-          <div className="pr-4">
-            <h2 className="font-display text-foreground text-base font-bold tracking-tight">
-              {title}
-            </h2>
-            {description ? (
-              <p className="text-muted-foreground mt-0.5 text-xs leading-normal">{description}</p>
-            ) : null}
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="hover:bg-accent text-muted-foreground hover:text-foreground size-7 shrink-0 cursor-pointer rounded-md"
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
-
-        {/* Form with Scrollable Body and Pinned Footer */}
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size={maxWidth}>
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          {/* Scrollable Form Fields Grid */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-4">
+          <DialogHeader>
+            <DialogTitle className="font-display">{title}</DialogTitle>
+            {description ? <DialogDescription>{description}</DialogDescription> : null}
+          </DialogHeader>
+
+          <DialogBody className="overflow-y-auto px-6 py-4">
             <div className="grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
               {fields.map((field) => (
                 <FormDialogField
@@ -146,10 +122,9 @@ export function FormDialog({
                 />
               ))}
             </div>
-          </div>
+          </DialogBody>
 
-          {/* Pinned Action Footer */}
-          <div className="border-border/70 bg-card/95 flex shrink-0 items-center justify-end gap-2.5 border-t px-6 py-3.5 backdrop-blur-xs">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -175,9 +150,9 @@ export function FormDialog({
                 <span>{submitText}</span>
               )}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

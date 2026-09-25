@@ -9,11 +9,25 @@ export interface AgentCardProps {
 
 /**
  * Computes uppercase initials from an agent's name.
+ * Filters out symbols and punctuation (e.g. "Data & Insights Analyst" -> "DI").
+ *
+ * @param name - Display name of the agent.
+ * @returns 2-letter uppercase initials.
  */
 function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2 && parts[0] && parts[1]) {
-    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  // Split on whitespace and filter out standalone symbols (e.g. "&", "-", "/")
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .filter((word) => /^[a-zA-Z0-9]/.test(word));
+
+  // If two or more meaningful words exist, take the first letter of each of the first two words
+  if (words.length >= 2 && words[0] && words[1]) {
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+  // Single-word agent name: take first two characters
+  if (words.length === 1 && words[0]) {
+    return words[0].slice(0, 2).toUpperCase();
   }
   return name.slice(0, 2).toUpperCase();
 }

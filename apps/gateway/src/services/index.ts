@@ -5,6 +5,8 @@
 
 export * from "./execution.service";
 export * from "./conversation.service";
+export * from "./conversation-query.service";
+export * from "./conversation-message.service";
 export * from "./agent.service";
 export * from "./rag.service";
 export * from "./approval.service";

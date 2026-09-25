@@ -14,7 +14,7 @@ import {
   type UseQueryResult,
   type UseMutationResult,
 } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@yuva-devlab/ui";
 import { getApiClient } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import type { ToolDefinition } from "../types";

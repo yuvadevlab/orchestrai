@@ -27,11 +27,10 @@ export function getInitials(name?: string | null, fallback = "OP"): string {
   if (!name || !name.trim()) {
     return fallback;
   }
-
   const clean = name.trim();
   const atIndex = clean.indexOf("@");
   const text = atIndex > -1 ? clean.slice(0, atIndex) : clean;
-  const parts = text.split(/[\s._-]+/).filter((p) => p.length > 0);
+  const parts = text.split(/[\s._-]+/).filter((p) => p.length > 0 && /^[a-zA-Z0-9]/.test(p));
 
   if (parts.length === 0) {
     return fallback;

@@ -19,20 +19,10 @@ import type { Agent } from "@orchestrai/sdk";
 export function useAgents(): UseApiDataResult<AgentDefinition[]> {
   const { tenantId, isLoading: isAuthLoading } = useAuth();
 
-  // Strict Tenancy Invariant: Require a resolved tenant ID; never fallback to a hardcoded string
-  if (!isAuthLoading && !tenantId) {
-    throw new Error(
-      "Active workspace or tenant ID is missing. Please sign in to access your mapped agents.",
-    );
-  }
-
   return useApiData<AgentDefinition[]>({
     fetchFn: async (client): Promise<AgentDefinition[]> => {
-      // Invariant: Tenancy isolation strictly requires a valid tenant ID
       if (!tenantId) {
-        throw new Error(
-          "Active workspace or tenant ID is missing. Please sign in to access your mapped agents.",
-        );
+        return [];
       }
       const response = await client.agents.list();
       const items: Agent[] = response?.items ?? [];

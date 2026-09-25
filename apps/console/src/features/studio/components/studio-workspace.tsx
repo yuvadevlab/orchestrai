@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { StudioHeader } from "./studio-header";
 import { SessionDrawer } from "./session-drawer";
 import { StudioWelcome } from "./studio-welcome";
@@ -31,6 +31,7 @@ export interface StudioWorkspaceProps {
  * Dynamically queries and binds cluster specialist agents from the database.
  */
 export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React.JSX.Element {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlPrompt = searchParams.get("prompt") || "";
 
@@ -124,14 +125,41 @@ export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React
   useEffect(() => {
     if (urlPrompt && !autoRunRef.current) {
       autoRunRef.current = true;
+      if (!routeSessionId) {
+        window.history.replaceState(null, "", `/session/${activeSession.id}`);
+      }
       triggerRun(urlPrompt);
     }
-  }, [urlPrompt, triggerRun]);
+  }, [urlPrompt, triggerRun, routeSessionId, activeSession.id]);
+
+  const handleSelectSession = (id: string): void => {
+    setActiveSessionId(id);
+    router.push(`/session/${id}`);
+  };
+
+  const handleNewSession = (): void => {
+    createNewSession();
+    clearEvents();
+    router.push("/");
+  };
+
+  const handleDeleteSession = (id: string): void => {
+    deleteSession(id);
+    if (id === activeSessionId || id === routeSessionId) {
+      router.push("/");
+    }
+  };
 
   const handleSubmit = (customText?: string): void => {
     const text = (customText ?? prompt).trim();
     if (!text) return;
     setPrompt("");
+
+    // If starting a fresh thread on root route, push ID into browser URL immediately like ChatGPT
+    if (!routeSessionId) {
+      window.history.replaceState(null, "", `/session/${activeSession.id}`);
+    }
+
     triggerRun(text);
   };
 
@@ -153,22 +181,16 @@ export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React
           onClose={() => setDrawerOpen(false)}
           sessions={sessions}
           activeSessionId={activeSessionId}
-          onSelectSession={setActiveSessionId}
-          onNewSession={() => {
-            createNewSession();
-            clearEvents();
-          }}
-          onDeleteSession={deleteSession}
+          onSelectSession={handleSelectSession}
+          onNewSession={handleNewSession}
+          onDeleteSession={handleDeleteSession}
         />
 
         {/* Center: Main Canvas Feed & Prompt Station */}
         <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
           <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
             {activeSession.messages.length === 0 ? (
-              <StudioWelcome
-                onSelectPrompt={(p) => handleSubmit(p)}
-                userFirstName={userFirstName}
-              />
+              <StudioWelcome onSelectPrompt={(p) => setPrompt(p)} userFirstName={userFirstName} />
             ) : (
               <div className="divide-border/20 mx-auto flex w-full max-w-4xl flex-col divide-y">
                 {activeSession.messages.map((m) => (

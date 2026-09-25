@@ -29,7 +29,7 @@ Live progress tracking for the **OrchestrAI** Universal Autonomous AI Agent & Co
 
 ### Milestone 3: Universal Autonomous Cowork Studio (`apps/console`)
 
-- [x] **Threaded Session Engine**: URL route synchronization (`/session/:sessionId`), `localStorage` persistence, and title auto-naming
+- [x] **Threaded Session Engine**: Enterprise PostgreSQL synchronization via Gateway API (`/api/v1/conversations`), optimistic local-storage fallback, URL route sync (`/session/:sessionId`), and auto-naming
 - [x] **Session History Drawer**: In-flow collapsible sidebar with live search, three-dots action menu (`...`), and thread deletion
 - [x] **Studio Workspace Coordinator**: Full multi-agent canvas with real-time SSE stream ingestion
 - [x] **Universal Starter Cards**: 4 multi-domain starters (Research, Writing, Engineering, Analytics)

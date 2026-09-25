@@ -16,6 +16,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@yuva-devlab/ui";
 import {
   getStoredSession,
   apiLogin,
@@ -130,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
     clearSession();
     queryClient.clear();
     setSession(null);
+    toast.success("Signed out successfully");
     router.push("/login");
     router.refresh();
   };

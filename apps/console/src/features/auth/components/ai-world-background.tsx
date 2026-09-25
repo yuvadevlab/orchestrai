@@ -2,33 +2,16 @@
 
 /**
  * @file apps/console/src/features/auth/components/ai-world-background.tsx
- * @description Dynamic Neural Synapse Canvas & Aurora Mesh tailored to the warm lime (#aac064) theme.
+ * @description Dynamic Neural Synapse Canvas & Aurora Mesh tailored to the cyber cyan/teal theme.
  * @module apps/console/features/auth
  */
 
 import React, { useEffect, useRef } from "react";
-
-interface NodePoint {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-  baseRadius: number;
-  color: string;
-  pulseSpeed: number;
-  pulseOffset: number;
-}
-
-/**
- * Neural node color palette harmonious with primary warm lime (#aac064).
- */
-const PALETTE = [
-  "rgba(170, 192, 100, 0.85)", // Warm Lime (#aac064)
-  "rgba(251, 191, 36, 0.85)", // Solar Amber (#fbbf24)
-  "rgba(74, 222, 128, 0.85)", // Cyber Mint (#4ade80)
-  "rgba(217, 249, 157, 0.85)", // Pale Chartreuse (#d9f99d)
-];
+import {
+  type NodePoint,
+  NEURAL_PALETTE,
+  NEURAL_SYNAPSE_COLOR,
+} from "./ai-world-background.constants";
 
 /**
  * Interactive Neural Synapse Canvas animating glowing interconnected AI nodes,
@@ -61,7 +44,7 @@ export function AiWorldBackground(): React.JSX.Element {
         vy: (Math.random() - 0.5) * 0.45,
         radius,
         baseRadius: radius,
-        color: PALETTE[i % PALETTE.length] ?? "rgba(170, 192, 100, 0.85)",
+        color: NEURAL_PALETTE[i % NEURAL_PALETTE.length] ?? NEURAL_PALETTE[0]!,
         pulseSpeed: 0.02 + Math.random() * 0.03,
         pulseOffset: Math.random() * Math.PI * 2,
       });
@@ -94,7 +77,7 @@ export function AiWorldBackground(): React.JSX.Element {
           if (dist < maxDistance) {
             const alpha = (1 - dist / maxDistance) * 0.4;
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(170, 192, 100, ${alpha})`;
+            ctx.strokeStyle = `rgba(${NEURAL_SYNAPSE_COLOR.primary}, ${alpha})`;
             ctx.lineWidth = 1;
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -108,7 +91,7 @@ export function AiWorldBackground(): React.JSX.Element {
               ctx.beginPath();
               ctx.arc(px, py, 1.8, 0, Math.PI * 2);
               ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-              ctx.shadowColor = "rgba(170, 192, 100, 1)";
+              ctx.shadowColor = NEURAL_SYNAPSE_COLOR.pulseGlow;
               ctx.shadowBlur = 8;
               ctx.fill();
               ctx.shadowBlur = 0;
@@ -163,17 +146,17 @@ export function AiWorldBackground(): React.JSX.Element {
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* 1. Deep Vibrant Aurora Nebulas matching staged sizes and blurs */}
+      {/* 1. Deep Vibrant Aurora Nebulas matching the cyber cyan/teal theme */}
       <div className="animate-ai-drift absolute -top-40 left-1/2 -translate-x-1/2">
-        <div className="via-primary/30 h-130 w-195 rounded-full bg-linear-to-tr from-[#aac064]/25 to-amber-500/20 blur-[120px]" />
+        <div className="via-primary/25 h-130 w-195 rounded-full bg-linear-to-tr from-cyan-500/20 to-sky-500/15 blur-[120px]" />
       </div>
 
       <div className="animate-ai-drift-slow absolute -bottom-48 -left-32">
-        <div className="via-primary/20 h-120 w-155 rounded-full bg-linear-to-br from-emerald-600/20 to-amber-600/15 blur-[130px]" />
+        <div className="via-primary/20 h-120 w-155 rounded-full bg-linear-to-br from-teal-600/20 to-blue-600/15 blur-[130px]" />
       </div>
 
       <div className="animate-ai-drift absolute top-1/4 -right-32">
-        <div className="via-primary/20 h-110 w-140 rounded-full bg-linear-to-bl from-amber-500/20 to-lime-400/15 blur-[110px]" />
+        <div className="via-primary/20 h-110 w-140 rounded-full bg-linear-to-bl from-sky-500/20 to-cyan-400/15 blur-[110px]" />
       </div>
 
       {/* 2. Cybernetic Perspective Grid Horizon */}
@@ -189,7 +172,7 @@ export function AiWorldBackground(): React.JSX.Element {
       </div>
 
       <div className="text-muted-foreground/70 absolute right-6 bottom-5 hidden items-center gap-2 font-mono text-[10px] tracking-widest sm:flex">
-        <span className="size-1.5 rounded-full bg-emerald-400" />
+        <span className="size-1.5 rounded-full bg-teal-400" />
         <span>AGENT RUNTIME // READY</span>
       </div>
     </div>

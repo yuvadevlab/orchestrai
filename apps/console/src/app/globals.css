@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @source "../**";
 @source "../../node_modules/@yuva-devlab/ui";
-@import "@yuva-devlab/ui/preset.css";
-@import "@yuva-devlab/ui/themes/orchestrai.css";
+@import "@yuva-devlab/tokens/preset.css";
+@import "@yuva-devlab/tokens/themes/orchestrai.css";
+@import "@yuva-devlab/ui/styles.css";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -24,12 +25,8 @@
 
 /**
  * @layer base — App-level resets only.
- *
- * Component-level normalizations (Switch, Select indicator, Breadcrumb separator)
- * now live in @yuva-devlab/ui/styles.css and are applied automatically via the
- * preset.css import above.
- *
- * Only add rules here that are specific to this app and cannot generalize.
+ * Only contains rules specific to OrchestrAI's root layout.
+ * Universal interactive element normalizations and scrollbars are provided by @yuva-devlab/tokens.
  */
 @layer base {
   * {
@@ -47,31 +44,6 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-  }
-
-  button,
-  a,
-  select,
-  summary,
-  [role="button"],
-  [role="tab"],
-  [type="button"],
-  [type="submit"],
-  [type="reset"] {
-    cursor: pointer;
-  }
-
-  button:disabled,
-  a[aria-disabled="true"],
-  [aria-disabled="true"],
-  [type="button"]:disabled,
-  [type="submit"]:disabled {
-    cursor: not-allowed;
-  }
-
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
   }
 }
 
@@ -146,4 +118,22 @@
     opacity: 0.65;
     transform: scale(1.05);
   }
+}
+
+/**
+ * Constrained modal window — clamps maximum height to 85vh and enforces internal scrolling.
+ */
+.modal-window-85vh {
+  max-height: 85vh;
+  height: 85vh;
+}
+
+/**
+ * Scrollable modal body container in flex-column layouts.
+ */
+.modal-scrollable-body {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
