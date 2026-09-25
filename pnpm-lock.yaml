@@ -527,10 +527,10 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@prisma/adapter-pg':
-        specifier: ^7.8.0
+        specifier: ^7.10.0
         version: 7.10.0
       '@prisma/client':
-        specifier: ^7.8.0
+        specifier: ^7.10.0
         version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3))(typescript@6.0.3)
       '@yuva-devlab/logger':
         specifier: 1.1.0
@@ -542,7 +542,7 @@ importers:
         specifier: ^8.23.0
         version: 8.23.0
       prisma:
-        specifier: ^7.8.0
+        specifier: ^7.10.0
         version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
     devDependencies:
       '@types/node':

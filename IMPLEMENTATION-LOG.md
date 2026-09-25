@@ -233,3 +233,19 @@ Chronological log of architecture, engineering decisions, and completed mileston
 - `pnpm typecheck`: **32/32 targets passing, 0 errors**.
 - Pre-commit hooks (ESLint + Prettier): **0 warnings, 0 errors**.
 - All files strictly under 250-line limit.
+
+---
+
+## Session: 2026-09-25 — Fix CI Pipeline Prisma Client Generation & Database Typecheck
+
+### 1. Root Cause
+
+- In CI (`.github/workflows/ci.yml`), `pnpm typecheck` was run right after `pnpm install --frozen-lockfile` without generating the Prisma client.
+- In Prisma 7, `@prisma/client` does not automatically run `prisma generate` during install, leaving `@prisma/client` without generated types and causing `@orchestrai/database#typecheck` to fail with exit code 2 (`error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'`).
+
+### 2. Resolution
+
+- **CI Workflow**: Added `🗄️ Generate Prisma Client` (`pnpm db:generate`) step in `.github/workflows/ci.yml` before lint, typecheck, and build steps.
+- **Database Scripts**: Updated `packages/database/package.json` to generate Prisma client prior to `typecheck` and `build`. Aligned Prisma dependencies to `^7.10.0`.
+- **Install Automation**: Added `"postinstall": "pnpm db:generate"` to root `package.json` and added `"@prisma/client": true` to `allowBuilds` in `pnpm-workspace.yaml`.
+- **Quality Gates**: All 32 turbo typecheck tasks passed with 0 errors, 21 packages built cleanly, and ESLint / Prettier passed with 0 warnings.
