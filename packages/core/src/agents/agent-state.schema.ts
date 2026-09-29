@@ -38,7 +38,6 @@ export const AgentStateSchema = z
       .default({})
       .describe("Ephemeral key-value state variables passed between graph nodes"),
     pendingApprovalId: z
-      .string()
       .uuid()
       .optional()
       .describe("UUID of active human-in-the-loop approval request blocking execution"),

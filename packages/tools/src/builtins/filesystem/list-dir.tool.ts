@@ -102,8 +102,10 @@ export class ListDirectoryTool implements ITool<ListDirectoryInput, ListDirector
     args: ListDirectoryInput,
     context: ToolExecutionContext,
   ): Promise<ListDirectoryOutput> {
-    const root = context.workspaceRoot ?? process.cwd();
-    const safeDir = sanitizePath(args.path, root);
+    const roots =
+      context.allowedRoots ?? (context.workspaceRoot ? [context.workspaceRoot] : [process.cwd()]);
+    const primaryRoot = roots[0] ?? process.cwd();
+    const safeDir = sanitizePath(args.path, roots);
 
     const collected: DirectoryListingEntry[] = [];
     let isTruncated = false;
@@ -123,7 +125,7 @@ export class ListDirectoryTool implements ITool<ListDirectoryInput, ListDirector
         }
 
         const fullPath = path.join(dir, item.name);
-        const relPath = path.relative(root, fullPath);
+        const relPath = path.relative(primaryRoot, fullPath);
         const isDir = item.isDirectory();
 
         let sizeBytes: number | undefined;
@@ -153,7 +155,7 @@ export class ListDirectoryTool implements ITool<ListDirectoryInput, ListDirector
     await scan(safeDir);
 
     return {
-      directory: path.relative(root, safeDir) || ".",
+      directory: path.relative(primaryRoot, safeDir) || ".",
       entries: collected,
       totalCount: collected.length,
       isTruncated,

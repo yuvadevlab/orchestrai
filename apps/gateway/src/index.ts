@@ -23,6 +23,10 @@ import {
   registerPlatformRoleRoutes,
   registerPlatformPermissionRoutes,
   registerPlatformToolRoutes,
+  registerEvalRoutes,
+  registerMemoryRoutes,
+  registerTraceRoutes,
+  registerResourceAccessRoutes,
 } from "@/routes";
 import { GatewayServer, registerProcessLifecycle } from "@/server";
 
@@ -67,6 +71,10 @@ export async function bootstrap(): Promise<GatewayServer> {
     registerPlatformRoleRoutes(api);
     registerPlatformPermissionRoutes(api);
     registerPlatformToolRoutes(api);
+    registerEvalRoutes(api);
+    registerMemoryRoutes(api);
+    registerTraceRoutes(api);
+    registerResourceAccessRoutes(api);
   });
 
   const server = new GatewayServer(config, router);

@@ -8,6 +8,11 @@ import { getOrCreatePool } from "./pool";
 import type { DatabaseHealthStatus } from "./types";
 
 /**
+ * Standard lightweight ping query verifying database connectivity.
+ */
+export const HEALTH_PING_SQL = "SELECT 1 AS ping";
+
+/**
  * Executes a round-trip connectivity probe (`SELECT 1`) to verify database health and pool stats.
  *
  * @returns DatabaseHealthStatus object containing latency and pool metrics
@@ -18,7 +23,7 @@ export async function checkDatabaseHealth(): Promise<DatabaseHealthStatus> {
   try {
     const pool = getOrCreatePool();
     // Execute low-overhead ping query
-    await pool.query("SELECT 1 AS ping");
+    await pool.query(HEALTH_PING_SQL);
     const latencyMs = Date.now() - startTime;
 
     return {

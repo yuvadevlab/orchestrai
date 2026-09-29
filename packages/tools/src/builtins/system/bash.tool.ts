@@ -85,7 +85,7 @@ export class BashTool implements ITool<BashInput, BashOutput> {
     const root = context.workspaceRoot ?? process.cwd();
     const workingDir = args.cwd ? sanitizePath(args.cwd, root) : root;
 
-    return new Promise((resolve, reject) => {
+    return new Promise<BashOutput>((resolve) => {
       const child = exec(
         args.command,
         {
@@ -110,19 +110,17 @@ export class BashTool implements ITool<BashInput, BashOutput> {
           const trimmedOut = outStr.slice(0, args.maxOutputBytes);
           const trimmedErr = errStr.slice(0, args.maxOutputBytes);
 
-          // If child process returned a non-zero exit code or error
-          if (error && typeof error.code === "number") {
+          // If child process returned an error or non-zero exit code (including timeout)
+          if (error) {
+            const isTimeout = Boolean(error.killed || error.signal === "SIGTERM");
+            const timeoutDesc = `Command timed out after ${this.definition.timeoutMs || 60000}ms.`;
+            const errorMsg = isTimeout ? timeoutDesc : error.message;
             resolve({
               stdout: trimmedOut,
-              stderr: trimmedErr || error.message,
-              exitCode: error.code,
+              stderr: trimmedErr ? `${trimmedErr}\n${errorMsg}` : errorMsg,
+              exitCode: typeof error.code === "number" ? error.code : 124,
               isTruncated,
             });
-            return;
-          }
-
-          if (error) {
-            reject(error);
             return;
           }
 

@@ -94,87 +94,117 @@ export class NavItemService {
   }
 
   /**
-   * Seeds the default navigation set when the table is completely empty.
-   * Guard: checks row count — never overwrites existing nav items.
+   * Seeds the default navigation items if not already present.
    */
   private async seedIfEmpty(): Promise<void> {
-    const count = await this.db.navItem.count();
-    if (count > 0) return;
+    const defaultItems = [
+      {
+        label: "CoWork Studio",
+        icon: "Sparkles",
+        href: "/",
+        roles: [],
+        section: "main",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 0,
+      },
+      {
+        label: "Agents",
+        icon: "Bot",
+        href: "/agents",
+        roles: [],
+        section: "main",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 1,
+      },
+      {
+        label: "Models",
+        icon: "Cpu",
+        href: "/models",
+        roles: [],
+        section: "main",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 2,
+      },
+      {
+        label: "Executions",
+        icon: "Play",
+        href: "/executions",
+        roles: [],
+        section: "main",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 3,
+      },
+      {
+        label: "Tools",
+        icon: "Wrench",
+        href: "/tools",
+        roles: [],
+        section: "main",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 4,
+      },
+      {
+        label: "Knowledge",
+        icon: "BookOpen",
+        href: "/knowledge",
+        roles: [],
+        section: "main",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 5,
+      },
+      {
+        label: "Memory",
+        icon: "Brain",
+        href: "/memory",
+        roles: [],
+        section: "main",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 6,
+      },
+      {
+        label: "Evaluations",
+        icon: "BarChart2",
+        href: "/evaluations",
+        roles: [],
+        section: "main",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 7,
+      },
+      {
+        label: "Settings",
+        icon: "Settings",
+        href: "/settings",
+        roles: [],
+        section: "bottom",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 0,
+      },
+      {
+        label: "Admin",
+        icon: "Shield",
+        href: "/admin",
+        roles: ["admin", "super_admin"],
+        section: "bottom",
+        isVisible: true,
+        isEnabled: true,
+        sortOrder: 1,
+      },
+    ];
 
-    await this.db.navItem.createMany({
-      data: [
-        {
-          label: "Studio",
-          icon: "Sparkles",
-          href: "/",
-          roles: [],
-          section: "main",
-          isVisible: true,
-          isEnabled: true,
-          sortOrder: 0,
-        },
-        {
-          label: "Agents",
-          icon: "Bot",
-          href: "/agents",
-          roles: [],
-          section: "main",
-          isVisible: true,
-          isEnabled: true,
-          sortOrder: 1,
-        },
-        {
-          label: "Models",
-          icon: "Cpu",
-          href: "/models",
-          roles: [],
-          section: "main",
-          isVisible: true,
-          isEnabled: true,
-          sortOrder: 2,
-        },
-        {
-          label: "Executions",
-          icon: "Play",
-          href: "/executions",
-          roles: [],
-          section: "main",
-          isVisible: true,
-          isEnabled: true,
-          sortOrder: 3,
-        },
-        {
-          label: "Tools",
-          icon: "Wrench",
-          href: "/tools",
-          roles: [],
-          section: "main",
-          isVisible: true,
-          isEnabled: true,
-          sortOrder: 4,
-        },
-        {
-          label: "Settings",
-          icon: "Settings",
-          href: "/settings",
-          roles: [],
-          section: "bottom",
-          isVisible: true,
-          isEnabled: true,
-          sortOrder: 0,
-        },
-        {
-          label: "Admin",
-          icon: "Shield",
-          href: "/admin",
-          /* Admin section is role-restricted to admin and super_admin */
-          roles: ["admin", "super_admin"],
-          section: "bottom",
-          isVisible: true,
-          isEnabled: true,
-          sortOrder: 1,
-        },
-      ],
-    });
+    for (const item of defaultItems) {
+      const existing = await this.db.navItem.findFirst({ where: { href: item.href } });
+      if (!existing) {
+        await this.db.navItem.create({ data: item });
+      }
+    }
   }
 }

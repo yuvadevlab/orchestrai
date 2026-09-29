@@ -3,9 +3,9 @@
  * @description Domain service for managing human-in-the-loop approval tickets and resolution.
  */
 
-import { ApprovalStatus } from "@orchestrai/shared-types";
+import { ApprovalStatus, ApprovalDecisionVerdict, PermissionScope } from "@orchestrai/shared-types";
 import type { ApprovalFilterDto, ResolveApprovalDto } from "@/validation";
-import { permissionPolicyManager, type PermissionScope } from "./permission-policy.manager";
+import { permissionPolicyManager } from "./permission-policy.manager";
 
 export interface ApprovalRecord {
   approvalId: string;
@@ -28,9 +28,9 @@ export interface ApprovalListResult {
 
 export interface ResolvedApprovalResult {
   approvalId: string;
-  decision: string;
+  decision: ApprovalDecisionVerdict;
   decidedBy: string;
-  scope?: string;
+  scope?: PermissionScope;
   reason?: string;
   modifiedArguments?: Record<string, unknown>;
   decidedAt: string;
@@ -47,10 +47,23 @@ export class ApprovalService {
     filter: ApprovalFilterDto,
     _tenantId: string,
   ): Promise<ApprovalListResult> {
+    const pending = permissionPolicyManager.getPendingApprovals();
+    const items: ApprovalRecord[] = pending.map((req) => ({
+      approvalId: req.id,
+      executionId: req.executionId,
+      stepId: "step-1",
+      toolName: req.tool,
+      toolArguments: { target: req.target },
+      rationale: req.reason,
+      status: ApprovalStatus.PENDING,
+      requestedAt: req.createdAt,
+      expiresAt: new Date(Date.now() + 300000).toISOString(),
+    }));
+
     return {
-      items: [],
+      items,
       filter,
-      total: 0,
+      total: items.length,
       hasMore: false,
     };
   }
@@ -64,7 +77,9 @@ export class ApprovalService {
     decidedBy: string,
   ): Promise<ResolvedApprovalResult> {
     const scope: PermissionScope =
-      dto.decision === "REJECTED" ? "deny" : (dto.scope as PermissionScope) || "once";
+      dto.decision === ApprovalDecisionVerdict.REJECTED
+        ? PermissionScope.DENY
+        : dto.scope || PermissionScope.ONCE;
     permissionPolicyManager.resolveApproval(approvalId, scope, "default", decidedBy);
 
     return {

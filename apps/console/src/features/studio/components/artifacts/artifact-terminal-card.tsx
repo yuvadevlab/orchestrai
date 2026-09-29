@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { Check, CheckCircle2, Copy, Terminal } from "lucide-react";
+import { Check, CheckCircle2, ChevronDown, ChevronRight, Copy, Terminal } from "lucide-react";
 import { Badge, Button } from "@yuva-devlab/ui";
 import type { CoworkArtifact } from "../../types";
 
@@ -16,10 +16,11 @@ export interface ArtifactTerminalCardProps {
 }
 
 /**
- * Renders a dark terminal execution box.
+ * Renders a dark terminal execution box (default collapsed).
  */
 export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleCopy = (): void => {
     navigator.clipboard.writeText(artifact.content);
@@ -28,15 +29,27 @@ export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): R
   };
 
   return (
-    <div className="border-border/80 my-3 overflow-hidden rounded-md border shadow-sm">
+    <div className="border-border/80 my-2 overflow-hidden rounded-md border shadow-sm">
       {/* Terminal Title Bar */}
-      <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-2 font-mono text-xs text-zinc-300">
-        <div className="flex items-center gap-2">
-          <Terminal className="size-3.5 text-amber-400" />
-          <span className="font-semibold text-zinc-100">{artifact.title}</span>
-        </div>
+      <div
+        className={`flex items-center justify-between bg-zinc-900 px-3.5 py-2 font-mono text-xs text-zinc-300 ${
+          isExpanded ? "border-b border-zinc-800" : ""
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="flex min-w-0 items-center gap-2 text-left transition-colors hover:text-zinc-100"
+        >
+          <Terminal className="size-3.5 shrink-0 text-amber-400" />
+          <span className="truncate font-semibold text-zinc-100">{artifact.title}</span>
+          <span className="ml-1 flex items-center gap-0.5 text-[10px] text-zinc-400">
+            <span>{isExpanded ? "Hide" : "Show"}</span>
+            {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+          </span>
+        </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Badge
             variant="outline"
             className="border-primary/30 text-primary px-1.5 py-0 font-mono text-[10px]"
@@ -58,13 +71,15 @@ export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): R
       </div>
 
       {/* Terminal Console Output */}
-      <div className="overflow-x-auto bg-zinc-950 p-4 font-mono text-xs leading-relaxed text-zinc-200">
-        <div className="mb-2 flex items-center gap-1.5 text-zinc-500">
-          <span className="text-amber-400">$</span>
-          <span>{artifact.filePath || artifact.title}</span>
+      {isExpanded && (
+        <div className="overflow-x-auto bg-zinc-950 p-4 font-mono text-xs leading-relaxed text-zinc-200">
+          <div className="mb-2 flex items-center gap-1.5 text-zinc-500">
+            <span className="text-amber-400">$</span>
+            <span>{artifact.filePath || artifact.title}</span>
+          </div>
+          <pre className="whitespace-pre-wrap">{artifact.content}</pre>
         </div>
-        <pre className="whitespace-pre-wrap">{artifact.content}</pre>
-      </div>
+      )}
     </div>
   );
 }

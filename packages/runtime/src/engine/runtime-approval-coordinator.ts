@@ -4,7 +4,7 @@
  */
 
 import crypto from "node:crypto";
-import { MessageRole } from "@orchestrai/shared-types";
+import { MessageRole, ApprovalDecisionVerdict } from "@orchestrai/shared-types";
 import { AIMessageSchema, OrchestrAIError, type AIMessage } from "@orchestrai/core";
 import type { IPersistentCheckpointer } from "@/checkpoint";
 import {
@@ -143,7 +143,7 @@ export async function resolveApprovalRun(
   const decisionEngine = new ApprovalDecisionEngine(approvalStorage);
   const ticket = await decisionEngine.resolve(approvalId, resolution);
 
-  if (resolution.decision === "CANCELLED") {
+  if (resolution.decision === ApprovalDecisionVerdict.CANCELLED) {
     const state = await cancelApprovalRun(checkpointer, ticket.executionId, resolution.reason);
     return { ticket, state };
   }
@@ -151,7 +151,7 @@ export async function resolveApprovalRun(
   const state = await resumeApprovalRun(
     checkpointer,
     ticket.executionId,
-    resolution.decision === "APPROVED",
+    resolution.decision === ApprovalDecisionVerdict.APPROVED,
     resolvedDeps,
     ticket.modifiedArguments,
   );

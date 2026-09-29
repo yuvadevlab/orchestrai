@@ -20,7 +20,7 @@ import { Capability } from "./capability.types";
  */
 export const CapabilityGrantSchema = z.object({
   /** The atomic capability being granted */
-  capability: z.nativeEnum(Capability),
+  capability: z.enum(Capability),
 
   /**
    * For FILE_READ / FILE_WRITE: restrict to this path prefix within the jail.

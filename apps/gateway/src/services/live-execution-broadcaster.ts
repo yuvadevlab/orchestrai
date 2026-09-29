@@ -5,7 +5,7 @@
  */
 
 import { EventEmitter } from "node:events";
-import { ExecutionStatus } from "@orchestrai/shared-types";
+import { ExecutionStatus, SseStreamEvent } from "@orchestrai/shared-types";
 import type { GatewayResponse } from "@/routes/http-types";
 import type { ToolArtifact } from "./autonomous-agent-runner";
 import type { ApprovalRequest } from "./permission-policy.manager";
@@ -40,67 +40,78 @@ export function attachExecutionSseStream(
   // Replay buffered artifacts, approval requests, and text chunks
   if (state?.artifacts.length) {
     for (const artifact of state.artifacts) {
-      res.write(`event: artifact\ndata: ${JSON.stringify(artifact)}\n\n`);
+      res.write(`event: ${SseStreamEvent.ARTIFACT}\ndata: ${JSON.stringify(artifact)}\n\n`);
     }
   }
   if (state?.pendingApproval) {
-    res.write(`event: approval_request\ndata: ${JSON.stringify(state.pendingApproval)}\n\n`);
+    res.write(
+      `event: ${SseStreamEvent.APPROVAL_REQUEST}\ndata: ${JSON.stringify(state.pendingApproval)}\n\n`,
+    );
   }
   if (state?.chunks.length) {
     for (const chunk of state.chunks) {
-      res.write(`event: message\ndata: ${JSON.stringify(chunk)}\n\n`);
+      res.write(`event: ${SseStreamEvent.MESSAGE}\ndata: ${JSON.stringify(chunk)}\n\n`);
     }
   }
 
   // Handle already-terminal state
   if (state?.status === ExecutionStatus.COMPLETED) {
-    res.write(`event: done\ndata: "[DONE]"\n\n`);
+    res.write(`event: ${SseStreamEvent.DONE}\ndata: "[DONE]"\n\n`);
     res.end();
     return;
   }
   if (state?.status === ExecutionStatus.FAILED) {
-    res.write(`event: error\ndata: ${JSON.stringify(state.error)}\n\n`);
+    res.write(`event: ${SseStreamEvent.ERROR}\ndata: ${JSON.stringify(state.error)}\n\n`);
     res.end();
     return;
   }
 
   const chunkHandler = (delta: string): void => {
-    res.write(`event: message\ndata: ${JSON.stringify(delta)}\n\n`);
+    res.write(`event: ${SseStreamEvent.MESSAGE}\ndata: ${JSON.stringify(delta)}\n\n`);
   };
   const artifactHandler = (art: ToolArtifact): void => {
-    res.write(`event: artifact\ndata: ${JSON.stringify(art)}\n\n`);
+    res.write(`event: ${SseStreamEvent.ARTIFACT}\ndata: ${JSON.stringify(art)}\n\n`);
   };
   const toolCallHandler = (tc: unknown): void => {
-    res.write(`event: tool_call\ndata: ${JSON.stringify(tc)}\n\n`);
+    res.write(`event: ${SseStreamEvent.TOOL_CALL}\ndata: ${JSON.stringify(tc)}\n\n`);
   };
   const approvalHandler = (req: ApprovalRequest): void => {
-    res.write(`event: approval_request\ndata: ${JSON.stringify(req)}\n\n`);
+    res.write(`event: ${SseStreamEvent.APPROVAL_REQUEST}\ndata: ${JSON.stringify(req)}\n\n`);
   };
   const doneHandler = (): void => {
-    res.write(`event: done\ndata: "[DONE]"\n\n`);
+    res.write(`event: ${SseStreamEvent.DONE}\ndata: "[DONE]"\n\n`);
     cleanup();
     res.end();
   };
   const errorHandler = (err: string): void => {
-    res.write(`event: error\ndata: ${JSON.stringify(err)}\n\n`);
+    res.write(`event: ${SseStreamEvent.ERROR}\ndata: ${JSON.stringify(err)}\n\n`);
     cleanup();
     res.end();
   };
 
+  const keepaliveTimer = setInterval(() => {
+    try {
+      res.write(": ping\n\n");
+    } catch {
+      clearInterval(keepaliveTimer);
+    }
+  }, 15000);
+
   const cleanup = (): void => {
-    emitter.off(`chunk:${executionId}`, chunkHandler);
-    emitter.off(`artifact:${executionId}`, artifactHandler);
-    emitter.off(`tool_call:${executionId}`, toolCallHandler);
-    emitter.off(`approval_request:${executionId}`, approvalHandler);
-    emitter.off(`done:${executionId}`, doneHandler);
-    emitter.off(`error:${executionId}`, errorHandler);
+    clearInterval(keepaliveTimer);
+    emitter.off(`${SseStreamEvent.CHUNK}:${executionId}`, chunkHandler);
+    emitter.off(`${SseStreamEvent.ARTIFACT}:${executionId}`, artifactHandler);
+    emitter.off(`${SseStreamEvent.TOOL_CALL}:${executionId}`, toolCallHandler);
+    emitter.off(`${SseStreamEvent.APPROVAL_REQUEST}:${executionId}`, approvalHandler);
+    emitter.off(`${SseStreamEvent.DONE}:${executionId}`, doneHandler);
+    emitter.off(`${SseStreamEvent.ERROR}:${executionId}`, errorHandler);
   };
 
-  emitter.on(`chunk:${executionId}`, chunkHandler);
-  emitter.on(`artifact:${executionId}`, artifactHandler);
-  emitter.on(`tool_call:${executionId}`, toolCallHandler);
-  emitter.on(`approval_request:${executionId}`, approvalHandler);
-  emitter.on(`done:${executionId}`, doneHandler);
-  emitter.on(`error:${executionId}`, errorHandler);
+  emitter.on(`${SseStreamEvent.CHUNK}:${executionId}`, chunkHandler);
+  emitter.on(`${SseStreamEvent.ARTIFACT}:${executionId}`, artifactHandler);
+  emitter.on(`${SseStreamEvent.TOOL_CALL}:${executionId}`, toolCallHandler);
+  emitter.on(`${SseStreamEvent.APPROVAL_REQUEST}:${executionId}`, approvalHandler);
+  emitter.on(`${SseStreamEvent.DONE}:${executionId}`, doneHandler);
+  emitter.on(`${SseStreamEvent.ERROR}:${executionId}`, errorHandler);
   res.on("close", cleanup);
 }

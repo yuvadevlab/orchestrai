@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { Check, Code2, Copy } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Code2, Copy } from "lucide-react";
 import { Badge, Button } from "@yuva-devlab/ui";
 import type { CoworkArtifact } from "../../types";
 
@@ -16,10 +16,11 @@ export interface ArtifactCodeCardProps {
 }
 
 /**
- * Renders a syntax-styled code or diff artifact.
+ * Renders a syntax-styled code or diff artifact (default collapsed).
  */
 export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const lines = artifact.content.split("\n");
   const language = artifact.language || artifact.filePath?.split(".").pop() || "typescript";
@@ -31,10 +32,18 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
   };
 
   return (
-    <div className="border-border/80 bg-card/70 my-3 overflow-hidden rounded-md border shadow-sm">
+    <div className="border-border/80 bg-card/70 my-2 overflow-hidden rounded-md border shadow-sm">
       {/* Code Header */}
-      <div className="border-border/60 bg-muted/30 flex items-center justify-between border-b px-4 py-2.5 font-mono text-xs">
-        <div className="flex items-center gap-2 overflow-hidden">
+      <div
+        className={`bg-muted/30 flex items-center justify-between px-3.5 py-2 font-mono text-xs ${
+          isExpanded ? "border-border/60 border-b" : ""
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="flex min-w-0 items-center gap-2 overflow-hidden text-left transition-opacity hover:opacity-80"
+        >
           <Code2 className="text-primary size-4 shrink-0" />
           <span className="text-foreground truncate font-semibold">{artifact.title}</span>
           {artifact.filePath && (
@@ -42,7 +51,11 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
               {artifact.filePath}
             </span>
           )}
-        </div>
+          <span className="text-muted-foreground ml-1 flex items-center gap-0.5 text-[10px]">
+            <span>{isExpanded ? "Hide" : "Show"}</span>
+            {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+          </span>
+        </button>
 
         <div className="flex shrink-0 items-center gap-2">
           <Badge variant="outline" className="px-1.5 py-0 font-mono text-[10px] uppercase">
@@ -57,9 +70,11 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
       </div>
 
       {/* Code Body */}
-      <div className="bg-background/60 text-foreground overflow-x-auto p-4 font-mono text-xs leading-relaxed">
-        <pre className="whitespace-pre-wrap">{artifact.content}</pre>
-      </div>
+      {isExpanded && (
+        <div className="bg-background/60 text-foreground overflow-x-auto p-4 font-mono text-xs leading-relaxed">
+          <pre className="whitespace-pre-wrap">{artifact.content}</pre>
+        </div>
+      )}
     </div>
   );
 }

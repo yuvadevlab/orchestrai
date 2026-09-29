@@ -2,7 +2,7 @@
 
 /**
  * @file studio-message-item.tsx
- * @description Single conversation message entry with user bubble, thinking, artifacts, permission gates, and markdown response.
+ * @description Single conversation message entry with interleaved chronological segments (thinking, artifacts, clearances, text).
  * @module apps/console/features/studio/components
  */
 
@@ -12,27 +12,22 @@ import { Button, Badge } from "@yuva-devlab/ui";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { StudioThinkingBlock } from "./studio-thinking-block";
 import { StudioPlanCard } from "./studio-plan-card";
-import { StudioPermissionCard } from "./studio-permission-card";
+import { CoworkMessageRole, MessageSegmentType } from "@orchestrai/shared-types";
 import { ArtifactRenderer } from "./artifacts";
+import { ApprovalDecisionChip } from "./approval-decision-chip";
 import type { CoworkMessage } from "../types";
 
 export interface StudioMessageItemProps {
   message: CoworkMessage;
-  onResolveApproval?: (
-    approvalId: string,
-    scope: "once" | "session" | "permanent" | "deny",
-  ) => Promise<void>;
 }
 
 /**
  * Renders an individual user query or agent cowork response.
+ * Interleaves reasoning, tool artifacts, permission decisions, and text in true chronological order.
  */
-export function StudioMessageItem({
-  message,
-  onResolveApproval,
-}: StudioMessageItemProps): React.JSX.Element {
+export function StudioMessageItem({ message }: StudioMessageItemProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
-  const isUser = message.role === "user";
+  const isUser = message.role === CoworkMessageRole.USER;
 
   const handleCopy = (): void => {
     if (!message.content) return;
@@ -60,13 +55,13 @@ export function StudioMessageItem({
   return (
     <div className="flex w-full flex-col gap-2 py-3">
       {/* Agent Header Metadata */}
-      <div className="flex items-center justify-between font-mono text-xs">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="bg-primary/10 text-primary grid size-6 place-items-center rounded-md">
+          <div className="bg-primary/10 text-primary grid size-6 place-items-center rounded-sm">
             <Bot className="size-3.5" />
           </div>
-          <span className="text-foreground font-semibold">
-            {message.specialistName || "Lead Orchestrator"}
+          <span className="text-foreground text-xs font-semibold">
+            {message.specialistName || "Autonomous Specialist"}
           </span>
           {message.model && (
             <Badge
@@ -96,43 +91,81 @@ export function StudioMessageItem({
 
       {/* Main Agent Response Body */}
       <div className="border-border/60 bg-card/40 rounded-md border p-4 shadow-xs">
-        {/* Thinking Accordion */}
-        {message.thinking && (
-          <StudioThinkingBlock
-            text={message.thinking.text}
-            durationSeconds={message.thinking.durationSeconds}
-            initiallyCollapsed={message.thinking.collapsed}
-          />
+        {message.segments && message.segments.length > 0 ? (
+          // Interleaved chronological timeline of thinking, plans, artifacts, clearances, and text
+          message.segments.map((seg) => {
+            switch (seg.type) {
+              case MessageSegmentType.THINKING:
+                return (
+                  <StudioThinkingBlock
+                    key={seg.id}
+                    text={seg.text}
+                    durationSeconds={seg.durationSeconds}
+                    initiallyCollapsed={seg.collapsed}
+                  />
+                );
+              case MessageSegmentType.PLAN:
+                return <StudioPlanCard key={seg.id} steps={seg.steps} />;
+              case MessageSegmentType.ARTIFACT:
+                return (
+                  <div key={seg.id} className="my-2">
+                    <ArtifactRenderer artifact={seg.artifact} />
+                  </div>
+                );
+              case MessageSegmentType.APPROVAL: {
+                // Once resolved, show the permanent inline decision chip in this exact chronological position
+                if (seg.request.resolvedScope) {
+                  return <ApprovalDecisionChip key={seg.id} request={seg.request} />;
+                }
+                // When pending clearance, interactive authorization takes over the prompt input bar below
+                return null;
+              }
+              case MessageSegmentType.TEXT:
+                return (
+                  <div key={seg.id} className="mt-2">
+                    <MarkdownRenderer content={seg.content} />
+                  </div>
+                );
+              default:
+                return null;
+            }
+          })
+        ) : (
+          // Fallback for legacy messages lacking segments
+          <>
+            {message.thinking && (
+              <StudioThinkingBlock
+                text={message.thinking.text}
+                durationSeconds={message.thinking.durationSeconds}
+                initiallyCollapsed={message.thinking.collapsed}
+              />
+            )}
+            {message.plan && message.plan.length > 0 && <StudioPlanCard steps={message.plan} />}
+            {message.artifacts && message.artifacts.length > 0 && (
+              <div className="my-2 space-y-2">
+                {message.artifacts.map((artifact) => (
+                  <ArtifactRenderer key={artifact.id} artifact={artifact} />
+                ))}
+              </div>
+            )}
+            {message.approvalRequest?.resolvedScope && (
+              <ApprovalDecisionChip request={message.approvalRequest} />
+            )}
+            {message.content && (
+              <div className="mt-2">
+                <MarkdownRenderer content={message.content} />
+              </div>
+            )}
+          </>
         )}
 
-        {/* Structured Execution Plan */}
-        {message.plan && message.plan.length > 0 && <StudioPlanCard steps={message.plan} />}
-
-        {/* Purpose-Built Multi-Domain Artifacts */}
-        {message.artifacts && message.artifacts.length > 0 && (
-          <div className="my-2 space-y-2">
-            {message.artifacts.map((artifact) => (
-              <ArtifactRenderer key={artifact.id} artifact={artifact} />
-            ))}
-          </div>
-        )}
-
-        {/* Human-in-the-Loop Clearance Gate */}
-        {message.approvalRequest && onResolveApproval && (
-          <StudioPermissionCard request={message.approvalRequest} onResolve={onResolveApproval} />
-        )}
-
-        {/* Streaming or Completed Markdown Response */}
-        {message.content ? (
-          <div className="mt-2">
-            <MarkdownRenderer content={message.content} />
-          </div>
-        ) : message.isStreaming ? (
+        {/* Streaming synthesizing indicator */}
+        {message.isStreaming && (!message.content || message.content.length === 0) && (
           <div className="text-muted-foreground flex items-center gap-2 py-2 font-mono text-xs">
             <Sparkles className="text-primary size-3.5 animate-spin" />
             <span>Agent synthesizing and generating outputs...</span>
           </div>
-        ) : null}
+        )}
 
         {/* Footer Diagnostics */}
         {(message.tokensIn || message.tokensOut) && (

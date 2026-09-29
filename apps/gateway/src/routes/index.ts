@@ -20,3 +20,7 @@ export * from "./nav-item.route";
 export * from "./platform-role.route";
 export * from "./platform-permission.route";
 export * from "./platform-tool.route";
+export * from "./eval.route";
+export * from "./memory.route";
+export * from "./trace.route";
+export * from "./resource-access.route";

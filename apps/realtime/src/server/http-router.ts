@@ -17,14 +17,20 @@ interface RouterDeps {
 }
 
 /**
+/**
  * Handles CORS preflight (OPTIONS) requests with the allowed method headers.
  */
-function handleOptions(res: ServerResponse, corsOrigin: string): void {
+function handleOptions(req: IncomingMessage, res: ServerResponse, corsOrigin: string): void {
+  const requestedHeaders = req.headers["access-control-request-headers"];
   res.writeHead(204, {
     "Access-Control-Allow-Origin": corsOrigin,
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers":
+      requestedHeaders ||
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-Key, X-Tenant-ID, x-tenant-id, X-Request-ID, Idempotency-Key, Last-Event-ID, Cache-Control",
+    "Access-Control-Allow-Credentials": "true",
     "Access-Control-Max-Age": "86400",
+    Vary: "Origin",
   });
   res.end();
 }
@@ -87,13 +93,25 @@ export function createHttpRouter(deps: RouterDeps) {
     }
 
     const { url = "/", method = "GET" } = req;
-    const origin = req.headers.origin ?? "*";
-    const corsOrigin = deps.corsOrigins.includes(origin) ? origin : (deps.corsOrigins[0] ?? "*");
+    const requestOrigin = req.headers.origin;
+    let corsOrigin = "*";
+    if (requestOrigin) {
+      if (
+        deps.corsOrigins.includes(requestOrigin) ||
+        deps.corsOrigins.includes("*") ||
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(requestOrigin)
+      ) {
+        corsOrigin = requestOrigin;
+      } else {
+        corsOrigin = deps.corsOrigins[0] ?? "*";
+      }
+    }
+
     const pathname = url.split("?")[0] ?? "/";
 
     // Handle preflight immediately to unblock browser cross-origin requests
     if (method === "OPTIONS") {
-      handleOptions(res, corsOrigin);
+      handleOptions(req, res, corsOrigin);
       return;
     }
 
@@ -124,6 +142,17 @@ export function createHttpRouter(deps: RouterDeps) {
       const executionId = execStreamMatch[1] ?? "";
       handleExecutionSseStream(req, res, executionId, deps);
       return;
+    }
+
+    // Match /api/v1/stream?executionId=... for SDK compatibility
+    if (pathname === "/api/v1/stream") {
+      const queryIdx = url.indexOf("?");
+      const params = new URLSearchParams(queryIdx >= 0 ? url.slice(queryIdx) : "");
+      const executionId = params.get("executionId") || "";
+      if (executionId) {
+        handleExecutionSseStream(req, res, executionId, deps);
+        return;
+      }
     }
 
     handleNotFound(res);

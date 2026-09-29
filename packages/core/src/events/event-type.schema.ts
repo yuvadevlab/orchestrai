@@ -10,5 +10,5 @@ import { DomainEventType } from "@orchestrai/shared-types";
  * Enumeration of all domain lifecycle events backed by DomainEventType enum.
  */
 export const DomainEventTypeSchema = z
-  .nativeEnum(DomainEventType)
+  .enum(DomainEventType)
   .describe("Type identifier for platform domain lifecycle events");

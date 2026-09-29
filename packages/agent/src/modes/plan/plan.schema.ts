@@ -25,7 +25,7 @@ export enum PlanStepStatus {
  * Zod schema for PlanStepStatus enum.
  */
 export const PlanStepStatusSchema = z
-  .nativeEnum(PlanStepStatus)
+  .enum(PlanStepStatus)
   .describe("Lifecycle status of an individual execution plan step");
 
 /**
@@ -82,7 +82,7 @@ export enum PlanOverallStatus {
  * Zod schema for PlanOverallStatus enum.
  */
 export const PlanOverallStatusSchema = z
-  .nativeEnum(PlanOverallStatus)
+  .enum(PlanOverallStatus)
   .describe("High-level lifecycle status of the entire plan");
 
 /**
@@ -105,8 +105,8 @@ export const PlanSchema = z
       .positive()
       .optional()
       .describe("Estimated number of tool calls or iterations needed"),
-    createdAt: z.string().datetime().describe("ISO 8601 creation timestamp"),
-    updatedAt: z.string().datetime().describe("ISO 8601 last modification timestamp"),
+    createdAt: z.iso.datetime().describe("ISO 8601 creation timestamp"),
+    updatedAt: z.iso.datetime().describe("ISO 8601 last modification timestamp"),
   })
   .strict();
 

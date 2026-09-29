@@ -10,9 +10,9 @@ import { ValidationError, OrchestrAIError } from "@orchestrai/core";
  * Payload contract for evaluation suite jobs.
  */
 export const EvaluationJobPayloadSchema = z.object({
-  evalRunId: z.string().uuid().describe("Evaluation session run UUID"),
-  agentId: z.string().uuid().describe("Target agent UUID"),
-  tenantId: z.string().uuid().describe("Owning tenant UUID"),
+  evalRunId: z.uuid().describe("Evaluation session run UUID"),
+  agentId: z.uuid().describe("Target agent UUID"),
+  tenantId: z.uuid().describe("Owning tenant UUID"),
   datasetId: z.string().min(1).describe("Benchmark test dataset identifier"),
   metrics: z.array(z.string()).default(["accuracy", "latency", "cost"]),
 });

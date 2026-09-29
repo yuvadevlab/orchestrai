@@ -61,7 +61,7 @@ export const ExecutionCancelledPayloadSchema = z.object({
 export const StepStartedPayloadSchema = z.object({
   executionId: ExecutionIdSchema,
   stepIndex: StepIndexSchema,
-  stepType: z.nativeEnum(StepType),
+  stepType: z.enum(StepType),
   nodeName: z.string().min(1),
 });
 
@@ -85,7 +85,7 @@ export const ToolCompletedPayloadSchema = z.object({
   executionId: ExecutionIdSchema,
   callId: UuidSchema,
   toolName: ToolNameSchema,
-  status: z.nativeEnum(ToolResultStatus),
+  status: z.enum(ToolResultStatus),
   durationMs: z.number().int().nonnegative(),
   output: z.unknown().optional(),
   error: z.string().optional(),

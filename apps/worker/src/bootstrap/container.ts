@@ -100,6 +100,8 @@ export async function createWorkerContainer(config: WorkerConfig): Promise<Worke
     return {
       agentId: agentId as AgentId,
       tenantId: tenantId as TenantId,
+      scope: "platform",
+      capabilities: [],
       name: `Agent-${agentId}`,
       description: "Asynchronous task agent",
       mode: AgentMode.ACT,

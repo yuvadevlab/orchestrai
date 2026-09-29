@@ -7,8 +7,11 @@
 import React from "react";
 import {
   Activity,
+  BarChart2,
+  BookOpen,
   Bot,
   Box,
+  Brain,
   Cpu,
   Database,
   FileCode,
@@ -51,6 +54,9 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FileCode,
   Folder,
   MessageSquare,
+  BookOpen,
+  Brain,
+  BarChart2,
   Users,
   Wand2,
   Zap,

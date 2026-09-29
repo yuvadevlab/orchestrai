@@ -10,7 +10,7 @@ import { MemoryType } from "@orchestrai/shared-types";
  * Zod schema validating a supported categorical memory type.
  */
 export const MemoryTypeSchema = z
-  .nativeEnum(MemoryType)
+  .enum(MemoryType)
   .describe("Categorical classification of memory items dictating retention and retrieval rules");
 
 /**

@@ -17,7 +17,9 @@ export function registerRagRoutes(
   controller: RagController = new RagController(),
 ): void {
   api.group("/rag", (group) => {
+    group.get("/documents", (req, res) => controller.listDocuments(req, res));
     group.post("/documents", (req, res) => controller.ingestDocument(req, res));
+    group.delete("/documents/:id", (req, res) => controller.deleteDocument(req, res));
     group.post("/query", (req, res) => controller.query(req, res));
   });
 }

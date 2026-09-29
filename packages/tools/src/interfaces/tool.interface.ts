@@ -38,6 +38,11 @@ export interface ToolExecutionContext {
   readonly workspaceRoot?: string;
 
   /**
+   * List of all authorized root directories (primary workspace + operator-cleared paths).
+   */
+  readonly allowedRoots?: readonly string[];
+
+  /**
    * Cooperative cancellation signal passed from the runner or timeout timer.
    * Long-running tools should check `signal.aborted` or pass it to fetch/fs.
    */

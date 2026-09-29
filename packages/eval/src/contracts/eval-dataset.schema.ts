@@ -5,10 +5,11 @@
  */
 
 import { z } from "zod";
+import { UuidSchema } from "@orchestrai/core";
 
 /** Evaluation test item schema */
 export const EvaluationItemSchema = z.object({
-  id: z.string().uuid(),
+  id: UuidSchema,
   prompt: z.string().min(1),
   expectedTools: z.array(z.string()).default([]),
   expectedOutputSubstring: z.string().optional(),

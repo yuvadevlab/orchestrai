@@ -3,7 +3,13 @@
  * @description Strongly-typed response models, envelopes, and DTOs returned by the SDK.
  */
 
-import { ExecutionStatus, MessageRole, AgentMode } from "@orchestrai/shared-types";
+import {
+  ExecutionStatus,
+  MessageRole,
+  AgentMode,
+  ApprovalStatus,
+  ApprovalDecisionVerdict,
+} from "@orchestrai/shared-types";
 
 /**
  * Standard API error payload returned by OrchestrAI services.
@@ -126,7 +132,7 @@ export interface ApprovalRequest {
   toolName?: string;
   toolArguments?: Record<string, unknown>;
   rationale?: string;
-  status: string;
+  status: ApprovalStatus;
   requestedAt?: string;
   expiresAt?: string;
 }
@@ -136,7 +142,7 @@ export interface ApprovalRequest {
  */
 export interface ApprovalDecisionResult {
   approvalId: string;
-  decision: string;
+  decision: ApprovalDecisionVerdict;
   decidedBy: string;
   reason?: string;
   modifiedArguments?: Record<string, unknown>;

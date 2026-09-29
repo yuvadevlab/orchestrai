@@ -4,6 +4,81 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 ---
 
+## Session: 2026-09-29 — Sticky Live Clearance Bar, Inline Decision Audit Log, Enum Normalization & Query Extraction
+
+### 1. User Feedback & UX Improvements
+
+- **Problem**: When the agent streams output and pauses for clearance or tool logs, prompts were buried in the message body requiring the user to constantly scroll up and down. Additionally, once an operator clicked a clearance button (Allow Once, This Chat, Always, Deny), there was no permanent inline audit trail of the decision.
+- **Solution**:
+  - Anchored `StudioLiveActivityBar` stickily at the bottom between the message scroll viewport and the command station.
+  - Extracted `StudioLiveClearanceCard` for interactive clearance decisions at the user's focal point.
+  - Suppressed the permission card in the message body during active streaming to eliminate duplicates.
+  - Stamped `resolvedScope` and `resolvedAt` onto `StudioApprovalRequest` upon resolution.
+  - Rendered a compact `ApprovalDecisionChip` in the message thread providing a permanent, scannable inline audit log (`Cleared (session) · <target> · 03:52 PM`).
+  - Decomposed `StudioWorkspace` into `useStudioWorkspaceState` and `use-studio-workspace-state.types.ts` to maintain hard < 250 LOC rule.
+
+### 2. Interleaved Chronological Message Segments Timeline
+
+- **Problem**: When an agent executed multiple tools across turns (e.g. read `package.json` $\rightarrow$ generate analysis $\rightarrow$ ask clearance for `pnpm-workspace.yaml` $\rightarrow$ read `pnpm-workspace.yaml` $\rightarrow$ generate second analysis), all tool artifact cards and decision chips were stacked at the top of the message body, above the text from turn 1.
+- **Solution**:
+  - Introduced `MessageSegment` in `types.ts` representing discrete chronological steps: `thinking`, `plan`, `artifact`, `approval`, and `text`.
+  - Added `segments?: MessageSegment[]` to `CoworkMessage`.
+  - Implemented immutable `message-segment-utils.ts` and `execution-stream-consumer.ts` to append chunks and events into `segments` in exact arrival sequence.
+  - Updated `StudioMessageItem` to iterate and render `message.segments` sequentially so tools, decisions, and markdown responses are interleaved chronologically.
+
+### 3. Domain Enums Normalization & Query Consolidation
+
+- Replaced bare union literals and raw strings with canonical shared enums across packages: `PermissionScope`, `ApprovalDecision`, `CoworkMode`, `PlanStepStatus`, `ArtifactType`, `CoworkMessageRole`, `SseStreamEvent`, `MessageSegmentType`.
+- Unified SSE wire protocol event emissions and listeners (`SseStreamEvent.CHUNK`, `SseStreamEvent.MESSAGE`, `SseStreamEvent.ARTIFACT`, `SseStreamEvent.APPROVAL_REQUEST`, `SseStreamEvent.TOOL_CALL`, `SseStreamEvent.DONE`, `SseStreamEvent.ERROR`) across Gateway (`live-turn-executor.ts`, `live-execution.manager.ts`, `live-execution-broadcaster.ts`, `tool-approval-invoker.ts`) and Console (`execution-stream-consumer.ts`).
+- Standardized message segment discriminator logic (`MessageSegmentType.THINKING`, `MessageSegmentType.PLAN`, `MessageSegmentType.ARTIFACT`, `MessageSegmentType.APPROVAL`, `MessageSegmentType.TEXT`) across `types.ts`, `message-segment-utils.ts`, and `studio-message-item.tsx`.
+- Moved raw SQL queries into dedicated query files (`packages/runtime/src/hitl/storage/postgres-approval-queries.ts`, `packages/runtime/src/checkpoint/postgres-checkpoint-queries.ts`, `packages/database/src/query.ts`).
+- Fixed `@orchestrai/database` re-export for `PermissionScopeType`.
+
+### 4. Quality Gates
+
+- **Line Invariant**: 100% of files strictly under 250 lines.
+- **TypeScript**: `pnpm typecheck` passed with 0 errors across 37 targets.
+- **ESLint**: `pnpm lint` passed with 0 warnings (`--max-warnings=0`).
+
+---
+
+## Session: 2026-09-29 — Multi-Turn HITL Clearance Resolution & SSE Heartbeat Continuity
+
+### 1. Root Cause Analysis of "Stuck on Clearance Granted" in Multi-Turn Tool Loops
+
+- **Symptom**: User prompted agent to inspect `package.json` and `pnpm-workspace.yaml` in sibling `finai` repo. `package.json` read fine. For `pnpm-workspace.yaml`, clearance card appeared, user granted clearance (`once`), but Studio remained stuck with a spinning stop button and no stream.
+- **Root Causes Discovered**:
+  1. **React State Desynchronization**: In `studio-message-item.tsx`, `<StudioPermissionCard request={message.approvalRequest} ... />` lacked a unique `key`. When the approval request changed between turns, React re-rendered the existing component whose internal `resolvedScope` state remained `"once"` from the previous turn, hiding the action buttons and freezing the UI in a resolved badge state.
+  2. **SDK Scope Loss**: `useResolveApproval.ts` called `client.approvals.resolve(approvalId, { decision, reason })` without passing `scope`. The SDK resource interface `ResolveApprovalParams` also omitted `scope`. The Gateway consequently defaulted `scope` to `"once"`, preventing session-wide (`scope: "session"`) or permanent grants from persisting.
+  3. **Session ID Desynchronization**: In `PermissionPolicyManager.createApprovalRequest`, `sessionId` was not captured on `ApprovalRequest`, causing session-scoped grants in `resolveApproval` to be keyed under `executionId` instead of `conversationId`, leading subsequent `checkPermission` calls in the turn loop to fail lookups.
+  4. **SSE Idle Timeout During Approval Pauses**: HTTP proxies and browsers closed idle SSE streams when users paused on approval prompts. No keepalive bytes were emitted during the wait.
+  5. **Confusing LLM Prompt Injection**: `read_file` tool output contained `[NOTE: Belongs to "${repo}". If targeting another project (e.g. "finai"), use "../<project>/..."]`, which confused the LLM into making duplicate file read requests in turn 3.
+
+### 2. Engineering Changes Made
+
+- **Console (`apps/console`)**:
+  - `studio-message-item.tsx`: Added `key={message.approvalRequest.id}` to `StudioPermissionCard` to guarantee clean remounts for every approval request ticket.
+  - `use-resolve-approval.ts`: Passed `scope` through in the mutation payload to `client.approvals.resolve`.
+  - `use-agent-runner.ts`: Propagated clearance resolution errors rather than silently swallowing them.
+- **SDK (`packages/sdk`)**:
+  - `approvals.ts`: Added optional `scope: "once" | "session" | "permanent" | "deny"` to `ResolveApprovalParams`.
+- **Gateway (`apps/gateway`)**:
+  - `permission-types.ts`: Added `sessionId?: string` to `ApprovalRequest`.
+  - `permission-policy.manager.ts`: Accepted `sessionId` in `createApprovalRequest`, implemented `getPendingApprovals()`, and applied session grants across `[sessionId, pending.request.sessionId, pending.request.executionId, "default"]`.
+  - `tool-approval-invoker.ts`: Passed `sessionId` to `createApprovalRequest`, and preserved primary `workspaceRoot` as base directory in `executeWorkspaceTool`.
+  - `approval.service.ts`: Implemented `listApprovals` returning in-memory pending approvals from `permissionPolicyManager.getPendingApprovals()`.
+  - `live-execution-broadcaster.ts`: Added 15-second keepalive heartbeat ping (`: ping\n\n`) to `attachExecutionSseStream` with automatic timer cleanup.
+  - `autonomous-agent-runner.ts`: Simplified `read_file` header to `[File: ... (Path: ...)]` to prevent confusing the LLM into making duplicate reads.
+  - `resource-access-logger.ts`: Resolved `execution.agentId` when `params.agentId` is an execution ID to satisfy database foreign key integrity.
+
+### 3. Quality Gates
+
+- **Line Invariant**: All 11 modified files strictly under 250 lines (range: 49 to 244 lines).
+- **TypeScript**: `pnpm typecheck` passed with 0 errors across 37 targets.
+- **Linting**: `pnpm lint` passed with 0 warnings (`--max-warnings=0`).
+
+---
+
 ## Session: 2026-09-23 — Universal Autonomous Cowork Platform & Zero-Docker Architecture
 
 ### 1. Universal Cowork Studio Redesign (`apps/console`)
@@ -249,3 +324,404 @@ Chronological log of architecture, engineering decisions, and completed mileston
 - **Database Scripts**: Updated `packages/database/package.json` to generate Prisma client prior to `typecheck` and `build`. Aligned Prisma dependencies to `^7.10.0`.
 - **Install Automation**: Added `"postinstall": "pnpm db:generate"` to root `package.json` and added `"@prisma/client": true` to `allowBuilds` in `pnpm-workspace.yaml`.
 - **Quality Gates**: All 32 turbo typecheck tasks passed with 0 errors, 21 packages built cleanly, and ESLint / Prettier passed with 0 warnings.
+
+---
+
+## Session: 2026-09-26 — System-Wide Access, Multi-Root Sandboxing & Sensitive File Protection (Milestone 10)
+
+### 1. Architectural Motivation
+
+- Previously, tool operations (`read_file`, `write_file`, `list_dir`, `bash`) were strictly jailed inside `workspaceRoot`. Any attempt to access external paths or user repositories threw a hard `POLICY_VIOLATION` exception.
+- Furthermore, accessing sensitive credentials (`.env`, `~/.ssh/id_rsa`, AWS tokens) had no dedicated classifier, risking accidental exposure.
+
+### 2. Implementation Details
+
+- **Threat & Credential Classification (`packages/tools/src/security/sensitive-path.detector.ts`)**:
+  - Implemented `classifyPathSensitivity` detecting critical credentials (`~/.ssh`, `~/.aws`, `~/.gnupg`, `~/.config/gcloud`, `~/.kube`, `id_rsa`, `*.pem`, `*.key`) and secrets (`.env`, `.npmrc`, `credentials.json`).
+  - Implemented `expandUserHome` for expanding `~` paths to the operator's home directory.
+- **Multi-Root Dynamic Sanitizer (`packages/tools/src/security/path-sanitizer.ts`)**:
+  - Upgraded `sanitizePath` to accept `allowedRoots: string | readonly string[]`, verifying canonical path containment across all approved boundaries (`workspaceRoot` + session grants + permanent grants).
+- **Tool Execution Context (`packages/tools/src/interfaces/tool.interface.ts`)**:
+  - Extended `ToolExecutionContext` with `allowedRoots?: readonly string[]` and updated filesystem tools (`read_file`, `write_file`, `list_dir`).
+- **HITL Permission Manager (`apps/gateway/src/services/permission-policy.manager.ts`)**:
+  - Extracted type definitions to `permission-types.ts` to strictly maintain the 250-line rule.
+  - Intercepts sensitive files (even inside the workspace) and external system directories, generating interactive approval requests with risk ratings.
+- **Studio Interactive Clearance UI (`apps/console/src/features/studio/components/studio-permission-card.tsx`)**:
+  - Styled high-risk requests with rose/red alert styling, "Protected File" badge, and clear danger explanations.
+- **System-Wide Prompt Awareness (`packages/prompts/src/system/autonomous-tools.prompt.ts`)**:
+  - Directed autonomous agents to formulate tool calls for external system paths and inform operators that clearance dialogs will be triggered.
+
+### 3. Quality Gate Compliance
+
+- All 32/32 monorepo typecheck targets passed (`pnpm typecheck`).
+- ESLint passed with 0 warnings (`pnpm lint`).
+- 100% of modified files strictly comply with the 250-line rule.
+
+---
+
+## Session: 2026-09-26 — Distributed Enterprise Architecture End-to-End Implementation
+
+### 1. Architectural Scope & Problem Statement
+
+- OrchestrAI had built out 17 packages (`@orchestrai/*`) and 4 apps (`console`, `gateway`, `realtime`, `worker`), but several components (BullMQ background queues, Redis Pub/Sub, RAG pipelines, episodic memory, telemetry tracing, benchmark eval) were operating in isolation or using stub implementations.
+- The objective was to connect all components end-to-end into a distributed, Google/Anthropic-grade architecture while adhering to zero-Docker local execution (native Redis 6379, Postgres 5432) and strict quality invariants.
+
+### 2. Implementation Deliverables
+
+- **Realtime Redis Pub/Sub Event Backbone**:
+  - `apps/gateway/src/services/live-execution-redis-publisher.ts`: Broadcasts live LLM generation deltas, tool executions, artifacts, and approval requests to Redis channel `orchestrai:realtime:execution:<executionId>`.
+  - `apps/realtime`: Listens to Redis Pub/Sub patterns and fans out Server-Sent Events (SSE) and WebSockets to connected Console and SDK listeners.
+- **BullMQ Background Worker Offloading**:
+  - `apps/gateway/src/services/agent-execution-queue.producer.ts`: Enqueues asynchronous agent tasks via `AgentExecutionProducer` into BullMQ.
+  - `apps/gateway/src/services/execution.service.ts`: Routes `async`/`background` mode requests to BullMQ queues while streaming live requests interactively.
+  - `apps/worker`: Daemon runs `AgentExecutionWorker` polling BullMQ with `OrchestrAIRuntime` DAG execution.
+- **Production RAG Pipeline Integration (`@orchestrai/rag`)**:
+  - `apps/gateway/src/services/rag.service.ts`: Replaced mock stubs with real `RagPipeline` orchestrating chunking, dual Ollama/Mock embedding providers, and vector retrieval.
+  - `packages/tools/src/builtins/search/knowledge-search.tool.ts`: Added built-in `knowledge_search` tool allowing autonomous agents to query ingested knowledge bases.
+  - Wired into `apps/gateway/src/services/autonomous-agent-runner.ts` and `autonomous-tools.prompt.ts`.
+- **Episodic Cross-Session Memory (`@orchestrai/memory`)**:
+  - `apps/gateway/src/services/memory.service.ts`: Created unified enterprise memory service.
+  - `apps/gateway/src/services/live-turn-executor.ts`: Automatically recalls prior memories before turn loops and records completed execution episodes for continuous learning.
+- **OpenTelemetry Observability & Resilience (`@orchestrai/observability` & `@orchestrai/resilience`)**:
+  - `apps/gateway/src/services/live-turn-executor.ts`: Records execution and turn spans using `getTracer()`.
+- **Agent Capability Evaluation (`@orchestrai/eval`)**:
+  - `apps/gateway/src/services/eval.service.ts`: Pre-configured evaluation suite scoring model tool-calling accuracy.
+  - `apps/gateway/src/controllers/eval.controller.ts` & `apps/gateway/src/routes/eval.route.ts`: Exposes `/api/v1/eval/datasets` and `/api/v1/eval/run`.
+
+### 3. Invariant & Quality Gate Verification
+
+- **Hard 250-Line Maximum Rule**: 100% of files across all `apps/` and `packages/` are strictly < 250 lines. Decomposed `live-execution.manager.ts` (92 lines), `live-turn-executor.ts` (208 lines), and `live-message-history.ts` (66 lines).
+- **Strict TypeScript**: `pnpm typecheck` passed with **0 errors across all 37 targets**.
+- **Zero ESLint Warnings**: `pnpm lint` passed with **0 warnings** (`--max-warnings=0`).
+
+---
+
+## Session: 2026-09-26 — Phase 13: Knowledge, Memory, Evaluations Hubs & ChatGPT-Style File Attachment
+
+### 1. Architectural Scope & Problem Statement
+
+- User requested "both" directions:
+  1. The 3 missing product hubs in Console:
+     - `/knowledge`: RAG Knowledge Base management, document catalogue, hybrid query tester.
+     - `/memory`: Cross-session memory viewer, episodic reflections timeline, learned facts with importance scores.
+     - `/evaluations`: Benchmark evaluation runner, dataset selection, accuracy gauge, latency breakdown.
+  2. Studio chat input bar ChatGPT-style `+` button: On click, opens file upload UI, indexes document directly into RAG backend (`POST /api/v1/rag/documents`), and displays an attached document chip above the composer.
+  3. Feature enhancements:
+     - Observability waterfall in `/executions/[executionId]` rendering OpenTelemetry spans.
+     - Dynamic database seeding and navigation items for new hubs.
+
+### 2. Implementation Deliverables
+
+- **ChatGPT-Style File Attachment (`apps/console/src/features/studio/components/`)**:
+  - `studio-file-attachment.tsx`: Created `+` button trigger and `StudioAttachedFilesList` badge pills with auto-ingestion into `POST /api/v1/rag/documents`.
+  - `studio-prompt-bar.tsx` & `studio-prompt-bar-selectors.tsx`: Integrated file upload trigger and attached file chips while decomposing selectors into a dedicated sub-component to strictly respect the 250-line rule (both files < 200 lines).
+- **RAG Knowledge Base Hub (`apps/console/src/features/knowledge/` & `/knowledge`)**:
+  - `types.ts`, `api/knowledge.api.ts`: React Query hooks for document CRUD and live hybrid vector search testing.
+  - `components/knowledge-upload-dialog.tsx`: FormDialog for ingesting text/markdown/json documents.
+  - `components/knowledge-query-tester.tsx`: Interactive hybrid vector search playground with similarity score meters.
+  - `components/knowledge-documents-table.tsx`: Table listing indexed documents with deletion capability.
+  - `components/knowledge-page-content.tsx` & `apps/console/src/app/(dashboard)/knowledge/page.tsx`: Main route page.
+  - `apps/gateway/src/services/rag.service.ts`: Added `listDocuments` and `deleteDocument` methods.
+- **Cross-Session Agent Memory Hub (`apps/console/src/features/memory/` & `/memory`)**:
+  - `types.ts`, `api/memory.api.ts`: React Query hooks for memory listing, fact creation, searching, and deletion.
+  - `components/memory-create-dialog.tsx`: Modal for recording persistent facts and user preferences.
+  - `components/memory-search-tester.tsx`: Semantic recall testing matching runtime agent prompt synthesis.
+  - `components/memory-items-list.tsx`: List of memories with importance meters, memory types, and deletion controls.
+  - `components/memory-page-content.tsx` & `apps/console/src/app/(dashboard)/memory/page.tsx`: Main route page.
+  - `apps/gateway/src/controllers/memory.controller.ts`: Added `create` endpoint (`POST /api/v1/memory`).
+- **Capability Evaluations Hub (`apps/console/src/features/evaluations/` & `/evaluations`)**:
+  - `types.ts`, `api/evaluations.api.ts`: Hooks for dataset retrieval and running model benchmarks.
+  - `components/evaluations-runner-card.tsx`: Model benchmark execution launcher.
+  - `components/evaluations-results-display.tsx`: Scorecard with accuracy gauge, passed items count, and mean latency.
+  - `components/evaluations-datasets-list.tsx`: Dataset catalogue displaying test cases and expected tool assertions.
+  - `components/evaluations-page-content.tsx` & `apps/console/src/app/(dashboard)/evaluations/page.tsx`: Main route page.
+- **OpenTelemetry Distributed Tracing Waterfall (`apps/console/src/features/executions/`)**:
+  - `api/use-execution-trace.ts`: Hook querying `GET /api/v1/traces/:executionId`.
+  - `components/execution-trace-waterfall.tsx`: Visual timeline waterfall calculating relative span start offsets, duration widths, status pills, and expandable attribute inspectors.
+  - Embedded into `execution-detail-page-content.tsx`.
+- **Navigation Seeding & Icon Mapping**:
+  - `nav-item.service.ts`: Added idempotent database seeding for `Knowledge`, `Memory`, and `Evaluations`.
+  - `nav-icon-mapper.ts`: Mapped `BookOpen`, `Brain`, and `BarChart2`.
+
+### 3. Invariant & Quality Gate Verification
+
+- **Hard 250-Line Maximum Rule**: 100% of files across all `apps/` and `packages/` are strictly < 250 lines (all newly created components are < 200 lines).
+- **Strict TypeScript**: `pnpm typecheck` passed with **0 errors across all 37 targets**.
+- **Zero ESLint Warnings**: `pnpm lint` passed with **0 warnings** (`--max-warnings=0`).
+- **Zero Ad-Hoc Theme Colors**: 100% semantic CSS theme tokens (`text-warning`, `border-border`, `bg-card`, `text-primary`). Zero hardcoded colors.
+- **Testing Policy Adherence**: Zero test cases or Storybook stories implemented during feature delivery.
+
+---
+
+## Session: 2026-09-26 — API Hook Standardization, Shared Enums, Single-Toolbar Redesign & RFC UUID Compliance
+
+### 1. Architectural Scope & Problem Statement
+
+- User feedback identified:
+  1. Direct API calls in `.tsx` components: Calling routes directly in components violated project conventions. Replaced with modular `use-*.ts` hook files under `features/<feature>/api/`.
+  2. UI layout flaw in Knowledge & Memory hubs: Nested duplicate search bars (tester box with search bar stacked directly on top of the document filter toolbar).
+  3. Broken search icon and padding: Manual `relative`/`absolute` icon placement overlapped input text; needed to match the canonical `/agents` layout with `startIcon={<Search className="size-3.5" />}`.
+  4. Hardcoded non-UUID formats: `"d1a10001-0000-0000-0000-000000000001"` in `eval.service.ts` violated RFC 4122 v4 UUID specification and failed Zod `.uuid()` validation.
+  5. String comparison normalization: Shared string literals replaced with typed enumerations in `@orchestrai/shared-types`.
+
+### 2. Implementation Deliverables
+
+- **Single-Toolbar UI Standard (Aligned with `/agents`)**:
+  - `KnowledgePageContent` & `MemoryPageContent`: Purged inline tester boxes and eliminated duplicate nested search bars.
+  - Implemented the canonical single toolbar row: Left side contains `<div className="w-full sm:w-72"><Input startIcon={<Search className="size-3.5" />} className="bg-card h-8 text-xs" /></div>`; right side contains rounded-full category filter pills.
+  - Converted testing functionality into dedicated modal dialogs:
+    - `apps/console/src/features/knowledge/components/knowledge-query-dialog.tsx`: Triggered by "Test query" action button.
+    - `apps/console/src/features/memory/components/memory-recall-dialog.tsx`: Triggered by "Test recall" action button.
+  - Deleted obsolete inline tester components (`knowledge-query-tester.tsx`, `memory-search-tester.tsx`).
+- **RFC 4122 UUID Standard Compliance**:
+  - `apps/gateway/src/services/eval.service.ts`: Replaced hardcoded non-UUID strings (`"d1a10001-..."`, `"eval-msg"`) with standard `randomUUID()` from `node:crypto`.
+  - Validated built-in datasets with `EvaluationDatasetSchema.parse(...)` to guarantee runtime schema adherence.
+- **Shared Enum Modularization**:
+  - Decomposed `packages/shared-types/src/enums.ts` (previously 210 lines) into focused sub-modules:
+    - `enums/core.enums.ts`: Core lifecycle enums (`AgentMode`, `ExecutionStatus`, `StepType`, etc.).
+    - `enums/hub.enums.ts`: Hub enums (`MemoryType`, `DocumentUploadStatus`, `TraceSpanStatus`, `DocumentMimeType`, `BenchmarkDatasetName`, `EpisodeOutcome`).
+    - `enums/security.enums.ts`: Security enums (`PermissionScope`, `ApprovalRiskLevel`).
+    - `enums/studio.enums.ts`: Studio enums (`ArtifactType`, `ArtifactStatus`, `PlanStepStatus`).
+  - Updated `apps/gateway/src/services/permission-types.ts`, `apps/gateway/src/services/approval.service.ts`, `apps/gateway/src/services/live-turn-executor.ts`, and `apps/console/src/features/studio/types.ts` to consume canonical enums instead of raw strings.
+- **Modular API Hooks**:
+  - Decomposed monolithic API files into dedicated single-purpose hooks under `features/<feature>/api/` (`use-upload-document.ts`, `use-ingest-document.ts`, `use-knowledge-documents.ts`, `use-delete-document.ts`, `use-query-knowledge.ts`, `use-memories.ts`, `use-create-memory.ts`, `use-delete-memory.ts`, `use-search-memories.ts`, `use-evaluation-datasets.ts`, `use-run-benchmark.ts`).
+
+### 3. Invariant & Quality Gate Verification
+
+- **Hard 250-Line Maximum Rule**: 100% of files across all `apps/` and `packages/` are strictly < 250 lines (all files < 210 lines).
+- **Strict TypeScript**: `pnpm typecheck` passed with **0 errors across all 37 targets**.
+- **Zero ESLint Warnings**: `pnpm lint` passed with **0 warnings** (`--max-warnings=0`).
+
+---
+
+## Session: 2026-09-26 — Real-Time Cross-Origin SSE Streaming & W3C Token Parser Compliance
+
+### 1. Architectural Scope & Problem Statement
+
+- User encountered:
+  1. Failed SSE stream connection: `http://localhost:4002/api/v1/stream?executionId=...` failing with `Referrer policy strict-origin-when-cross-origin` in the browser.
+  2. Non-streaming fallback behavior: Tokens did not stream incrementally into the UI, appearing all at once after a delay ("just come in instant").
+
+### 2. Root Cause Analysis
+
+1. **CORS Preflight Header Rejection**:
+   - The browser at `http://localhost:3001` dispatched a cross-origin `fetch` to `http://localhost:4002/api/v1/stream`. The SDK client attached `X-Tenant-ID`.
+   - Browser initiated a CORS preflight `OPTIONS` request. `apps/realtime/src/server/http-router.ts` previously only allowed `Authorization, Content-Type, Accept` in `Access-Control-Allow-Headers`, omitting `X-Tenant-ID`.
+   - Browser aborted the request on CORS preflight rejection (`(failed)` / `strict-origin-when-cross-origin`).
+2. **Instant Polling Fallback**:
+   - In `apps/console/src/features/studio/hooks/use-agent-runner.ts`, when `handle.stream()` threw due to the CORS rejection, the catch block fell back to `handle.wait(1500, 30000)`, polling the Gateway until completion and dumping the full final output into message content simultaneously.
+3. **Whitespace Token Stripping**:
+   - In `packages/sdk/src/streaming/sse-parser.ts`, `rawValue.trim()` aggressively stripped leading and trailing spaces from incoming SSE lines, turning standalone whitespace tokens (e.g. `" "`) into empty strings and collapsing inter-word spacing.
+4. **Indefinite Stream Keep-Alive**:
+   - `apps/realtime` did not call `res.end()` on completion (`done`/`error`), leaving connections held open by keepalive pings.
+   - `use-agent-runner.ts` lacked an explicit `break;` on completion signals (`done` event or `[DONE]` token).
+
+### 3. Implementation Deliverables
+
+- **Realtime Server CORS Preflight & Transport Optimization**:
+  - `apps/realtime/src/server/http-router.ts`:
+    - Updated `handleOptions` to reflect requested headers or provide comprehensive default CORS headers: `Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-Key, X-Tenant-ID, x-tenant-id, X-Request-ID, Idempotency-Key, Last-Event-ID, Cache-Control`.
+    - Added `Access-Control-Allow-Credentials: true` and dynamic origin matching for all development localhost/127.0.0.1 ports.
+  - `apps/realtime/src/sse/sse-channel.ts` & `sse-handler.ts`:
+    - Configured explicit `res.flushHeaders()`, `res.socket?.setNoDelay(true)` to bypass Nagle's algorithm and flush SSE chunks immediately to the network.
+    - Added `if (eventName === "done" || eventName === "error") res.end()` to cleanly close the response stream when execution concludes.
+- **W3C Standard Compliance in SDK SSE Parser**:
+  - `packages/sdk/src/streaming/sse-parser.ts`:
+    - Replaced `rawValue.trim()` with standard W3C single-space strip (`if (rawValue.startsWith(" ")) rawValue = rawValue.slice(1)`).
+    - Preserved whitespace and newline tokens essential for markdown and text formatting.
+- **Studio Stream Termination & Approval Hook Modularization**:
+  - `apps/console/src/features/studio/hooks/use-agent-runner.ts`:
+    - Added immediate loop termination `if (sse.event === "done" || sse.data === "[DONE]") break;`.
+    - Extracted approval resolution mutation into `apps/console/src/features/studio/api/use-resolve-approval.ts` per modular API hook architecture guidelines.
+    - Brought `use-agent-runner.ts` line count down from 252 to 227 lines (< 250 line limit).
+
+### 4. Quality Verification
+
+- **Real-Time Stream Verification**:
+  - Tested `OPTIONS /api/v1/stream` via `curl` with `Origin: http://localhost:3001` and `Access-Control-Request-Headers: x-tenant-id,authorization,content-type` -> returns `204 No Content` with complete CORS headers.
+  - Tested `GET /api/v1/stream?executionId=test-exec-123` via `curl` -> connects instantly with `200 OK`, `Content-Type: text/event-stream`, and initial handshake event.
+- **Strict TypeScript & ESLint**:
+  - `pnpm typecheck` passed with **0 errors across all 37 targets**.
+  - `pnpm lint` passed with **0 warnings** (`--max-warnings=0`).
+
+---
+
+## Session: 2026-09-26 — Default-Collapsed Tool Artifacts & Process Execution Safety
+
+### 1. Architectural Scope & Problem Statement
+
+- User feedback identified:
+  1. Execution hang during search commands: When commands like `grep -r` traversed heavy directories like `node_modules`, executions timed out or hung without clear progress or graceful recovery.
+  2. Uncollapsed tool calls cluttering chat: By default, tool call artifacts (Terminal outputs, Code blocks, Documents, Search citations) were rendered in full expansion, displaying hundreds of lines of raw JSON, terminal dumps, and file contents.
+
+### 2. Implementation Deliverables
+
+- **Default-Collapsed Artifact Cards**:
+  - `apps/console/src/features/studio/components/artifacts/artifact-terminal-card.tsx`: Added `isExpanded` state (default `false`), interactive header button with `Terminal` icon, title, `exit 0` badge, copy action, and "Show"/"Hide" chevron toggle.
+  - `apps/console/src/features/studio/components/artifacts/artifact-code-card.tsx`: Added `isExpanded` state (default `false`), header button with `Code2` icon, title, path, language/lines badge, copy button, and expand toggle.
+  - `apps/console/src/features/studio/components/artifacts/artifact-document-card.tsx`: Added `isExpanded` state (default `false`), header button with `FileText` icon, title, word count, download/copy actions, and expand toggle.
+  - `apps/console/src/features/studio/components/artifacts/artifact-search-card.tsx`: Added `isExpanded` state (default `false`), header button with `Search` icon, title, source count badge, and expand toggle.
+- **Safe Process Termination & Timeout Handling**:
+  - `packages/tools/src/builtins/system/bash.tool.ts`: Hardened execution callback to handle timeouts and signal terminations gracefully. Returns standard POSIX exit code 124 on timeout instead of unhandled promise rejection.
+- **Autonomous Prompt Search Guidance**:
+  - `packages/prompts/src/system/autonomous-tools.prompt.ts`: Instructed agents to always exclude `node_modules` and `.git` during shell searches and to look in sibling directories (`../<project-name>`) when searching for external projects or repositories like `finai`.
+
+### 3. Invariant & Quality Gate Verification
+
+- **Hard 250-Line Maximum Rule**: All updated files strictly under 140 lines.
+- **Strict TypeScript**: `pnpm typecheck` passed with **0 errors across all 37 targets**.
+- **Zero ESLint Warnings**: `pnpm lint` passed with **0 warnings** (`--max-warnings=0`).
+
+---
+
+## Session: 2026-09-26 — Multi-Repository Trust Boundaries & Provenance-Guarded Anti-Hallucination
+
+### 1. Architectural Scope & Problem Statement
+
+- User encountered:
+  1. The AI was sometimes asking for permission and sometimes not.
+  2. Even though the user asked for files from external projects (e.g. `finai/package.json`), the AI read `package.json` from the active repository (`orchestrai`) without requesting clearance and hallucinated that it was the `finai` project.
+
+### 2. Root Cause Analysis
+
+1. **Bare Relative Path Ambiguity**:
+   - The agent was not informed of its active repository identity (`orchestrai`).
+   - When the user requested "Access finai package.json", the agent blindly emitted `{"tool": "read_file", "args": {"path": "package.json"}}` based on prompt template examples.
+   - Because `"package.json"` was resolved relative to `workspaceRoot` (`orchestrai`), it fell inside the trusted root; `checkPermission` marked it `allowed: true` and skipped HITL clearance.
+2. **Missing Workspace & Sibling Awareness in System Prompt**:
+   - The system prompt did not inform the model of the active repository name or that sibling projects (such as `finai`, `devlab-shared`, etc.) live in the parent directory (`../<repo>`).
+3. **Missing Tool Output Provenance**:
+   - `read_file` only returned raw file content, giving the LLM no feedback on which directory on disk was actually read, causing it to assume the output matched the user's intended project.
+4. **Candidate Path Resolution Limitation**:
+   - If the agent passed `path: "finai/package.json"`, it attempted to resolve inside `orchestrai/finai/` (which did not exist) rather than recognizing `finai` as a sibling project in `../finai/`.
+
+### 3. Implementation Deliverables
+
+- **Active Workspace & Sibling Project Discovery**:
+  - `apps/gateway/src/services/live-message-history.ts`:
+    - Added `getWorkspaceContext()` to dynamically inject the active repository name (`orchestrai`), path, and all discovered sibling repositories (`finai`, `devlab-shared`, etc.) into the system prompt.
+    - Explicitly instructed the model that external projects require `../<project>/<file>` or `<project>/<file>` paths and will pause for operator clearance.
+- **Smart Sibling Project Candidate Resolution**:
+  - `packages/tools/src/security/path-sanitizer.ts` & `apps/gateway/src/services/permission-policy.manager.ts`:
+    - When a candidate path does not exist in `workspaceRoot`, checks whether it targets a sibling directory in `path.dirname(workspaceRoot)`.
+    - If it matches a sibling project (e.g. `finai/package.json`), resolves it to `../finai/package.json`.
+    - Because the path is outside `workspaceRoot`, `checkPermission` marks `allowed: false` and triggers the interactive HITL clearance card (`StudioPermissionCard`).
+- **Filesystem Provenance Headers in Tool Execution**:
+  - `packages/tools/src/builtins/filesystem/read-file.tool.ts`: Added `resolvedPath` to `ReadFileOutput`.
+  - `apps/gateway/src/services/autonomous-agent-runner.ts`: Prepended explicit provenance headers to `read_file` output showing the workspace origin, absolute path, and a note cautioning the model if the file belongs to `orchestrai` while searching for an external project.
+- **Modular Grant Storage**:
+  - `apps/gateway/src/services/permission-storage.ts`: Extracted `applyGrant()` helper to reduce lines in `permission-policy.manager.ts` (keeping both files < 235 lines).
+
+### 4. Quality Verification
+
+- **Strict TypeScript & ESLint**:
+  - `pnpm typecheck` passed with **0 errors across all 37 targets**.
+  - `pnpm lint` passed with **0 warnings** (`--max-warnings=0`).
+- **250-Line Maximum Rule**:
+  - All touched files strictly < 245 lines (`permission-policy.manager.ts`: 232 lines, `autonomous-agent-runner.ts`: 244 lines).
+
+---
+
+## Session: 2026-09-29 — System-Wide AI Agent Data Model & Universal Access Architecture (Phase 14)
+
+### 1. Architectural Scope & Problem Statement
+
+- **Objective**: Design and implement the database model and access control architecture for a universal, system-wide AI agent platform (ChatGPT/Astra style).
+- **Invariants Enforced**:
+  - Agents are platform/system-level entities (`PlatformScope @default(platform)`), not primarily scoped to a repository, project, or application.
+  - Generic Resource Registry with canonical URIs (`file://`, `repo://`, `db://`, `api://`, `service://`, `tenant://`) enabling any current or future resource type without bespoke tables.
+  - Capabilities abstraction (`capabilities` & `capability_tools`) grouping concrete execution tools under human-intelligible functional permission domains.
+  - Strict User Authority Chain: agents never self-authorize. All unauthorized resource access requests generate persistent `permission_requests` and require explicit operator approval resulting in `access_grants`.
+  - Immutable Security Audit Trail: `resource_access_logs` recording every tool invocation, target URI, permission evaluation, and operator clearance decision.
+  - Zero `any` types across all packages and services.
+  - Hard 250-line rule: all created and refactored files strictly decomposed under 200 lines.
+
+### 2. Core Implementation Deliverables
+
+- **Database Schema Extensions (`packages/database/prisma/schema.prisma`)**:
+  - Added enums: `ResourceType`, `PermissionLevel`, `PermissionScopeType`, `RequestStatus`, `GrantStatus`.
+  - Added models: `Resource`, `Capability`, `CapabilityTool`, `AgentCapability`, `PermissionRequest`, `AccessGrant`, `ResourceAccessLog`.
+  - Updated `Agent`: made `tenantId` optional (`String?`), added `scope PlatformScope @default(platform)`, relations to `capabilities`, `grants`, `requests`, `accessLogs`.
+  - Updated `Conversation`: added `userId String? @map("user_id") @db.Uuid` and relations.
+  - Added `packages/database/src/seed-capabilities.ts` providing `seedDefaultCapabilities` utility with 6 core capability blueprints.
+- **Shared Types & Domain Contracts (`packages/shared-types`, `@orchestrai/core`)**:
+  - `packages/shared-types/src/enums/resource.enums.ts`: `ResourceType` enum.
+  - `packages/shared-types/src/enums/security.enums.ts`: `PermissionLevel`, `RequestStatus`, `GrantStatus`.
+  - `packages/core/src/agents/capability.schema.ts`: `CapabilityDefinitionSchema`, `AgentCapabilityBindingSchema`.
+  - `packages/core/src/agents/resource.schema.ts`: `CanonicalUriSchema`, `ResourceDefinitionSchema`, `isResourceContained()`.
+  - `packages/core/src/agents/access-grant.schema.ts`: `PermissionRequestSchema`, `AccessGrantSchema`, `ResourceAccessLogSchema`.
+  - `packages/core/src/identifiers/id.schema.ts`: Branded IDs `ResourceId`, `CapabilityId`, `GrantId`, `PermissionRequestId`.
+- **Gateway Access Control & Services (`apps/gateway`)**:
+  - `apps/gateway/src/services/resource-registry.service.ts`: Canonicalizes tool targets into standard URIs and indexes resources.
+  - `apps/gateway/src/services/db-grant.service.ts`: Queries active grants, resolves requests, and revokes grants.
+  - `apps/gateway/src/services/resource-access-logger.ts`: Asynchronously records immutable audit trails.
+  - `apps/gateway/src/services/permission-evaluator.ts`: Extracted pure tool and path checking logic.
+  - `apps/gateway/src/services/permission-policy.manager.ts`: Decomposed down to 155 lines.
+  - `apps/gateway/src/services/tool-approval-invoker.ts`: Safety gate interceptor and audit logger (97 lines).
+  - `apps/gateway/src/services/resource-access.service.ts`: Service for querying resources, grants, requests, and capabilities.
+  - `apps/gateway/src/controllers/resource-access.controller.ts`: REST endpoints with zero `any` types.
+  - `apps/gateway/src/routes/resource-access.route.ts`: Routes on `/resources`, `/capabilities`, `/grants`, `/approval-requests`.
+
+### 3. Quality Verification & Metrics
+
+- **Strict TypeScript & Zero Any**:
+  - `pnpm typecheck` passed with **0 errors across all 37 targets**.
+  - Verified zero occurrences of `: any` or `as any` in all modified and new files.
+- **ESLint Quality Gate**:
+  - `pnpm lint` passed with **0 warnings** (`--max-warnings=0`).
+- **File Length Invariant**:
+  - All 16 newly created or modified files are strictly < 200 lines (well under the 250-line limit).
+
+### 4. Post-Clearance Execution & Concurrent Session Sync Fixes
+
+- **Atomic Conversation Upsert**:
+  - Converted `updateConversation` in `apps/gateway/src/services/conversation.service.ts` to use native atomic `prisma.conversation.upsert()`.
+  - Completely eliminated `conversations_pkey` duplicate key violations under concurrent client updates on page load.
+- **Post-Clearance Execution Jail Fix**:
+  - Fixed `permission-evaluator.ts` and `tool-approval-invoker.ts` to guarantee that single-turn clearances (`once`) and session clearances expand `effectiveRoots` with the cleared project root (`findNearestProjectRoot(resolved)`), directory, and canonical target.
+  - Updated `executeWorkspaceTool` in `autonomous-agent-runner.ts` to ensure `roots` always includes `targetRoot` and all cleared roots.
+  - Eliminated the issue where `read_file` threw `Access denied: outside authorized directories` immediately after operator granted clearance.
+
+---
+
+### 5. Shared Enum Standardization & Zod Deprecation Modernization
+
+- **Enum Standardization (`PermissionScope`, `ApprovalDecisionVerdict`, `ApprovalRiskLevel`)**:
+  - Standardized `PermissionScope` (`ONCE = "once"`, `SESSION = "session"`, `PERMANENT = "permanent"`, `DENY = "deny"`).
+  - Standardized `ApprovalDecisionVerdict` (`APPROVED = "approved"`, `REJECTED = "rejected"`, `CANCELLED = "cancelled"`) with lower snake case string values.
+  - Replaced raw string literals across switches, conditionals, and defaults with `Enum.Value` references across `apps/gateway`, `apps/console`, `packages/sdk`, `packages/runtime`, `packages/tools`, `packages/core`.
+- **Zod 4 Deprecation Modernization**:
+  - Eliminated all occurrences of `z.nativeEnum()` in favor of canonical `z.enum(EnumObject)`.
+  - Eliminated all occurrences of `z.string().uuid()` across all packages and services in favor of top-level `z.uuid()`.
+  - Upgraded `@orchestrai/grpc` and `@orchestrai/eval` dependencies to `"zod": "^4.6.5"`.
+- **Strict Invariants Maintained**:
+  - All modified files remain strictly below the 250-line maximum rule (Prime Invariant 1).
+  - Maintained zero `any` types and zero test cases implemented during phase implementation.
+
+---
+
+### 6. SQL Query Centralization & Canonical Domain Enums
+
+- **Raw SQL Query Centralization**:
+  - Extracted raw SQL queries from [`postgres-approval-storage.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/runtime/src/hitl/storage/postgres-approval-storage.ts) into dedicated [`postgres-approval-queries.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/runtime/src/hitl/storage/postgres-approval-queries.ts) (`APPROVAL_SQL_QUERIES`: `CREATE_TICKET`, `GET_TICKET_BY_ID`, `LIST_PENDING`, `RESOLVE_TICKET`, `EXPIRE_STALE_TICKETS`).
+  - Extracted raw SQL queries from [`postgres-checkpointer.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/runtime/src/checkpoint/postgres-checkpointer.ts) into dedicated [`postgres-checkpoint-queries.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/runtime/src/checkpoint/postgres-checkpoint-queries.ts) (`CHECKPOINT_SQL_QUERIES`: `UPSERT_CHECKPOINT`, `LOAD_LATEST`, `LOAD_BY_ID`, `LIST_BY_EXECUTION`, `DELETE_AFTER_STEP`, `PRUNE_CHECKPOINTS`).
+  - Extracted database ping query `HEALTH_PING_SQL` in [`packages/database/src/health.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/database/src/health.ts).
+  - Extracted `TRANSACTION_SQL` (`BEGIN`, `COMMIT`, `ROLLBACK`) across [`packages/database/src/query.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/database/src/query.ts) and [`apps/gateway/src/db/pool.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/apps/gateway/src/db/pool.ts).
+- **Loose String Unions Standardized to Canonical Enums**:
+  - `CoworkMode`: `CHAT`, `PLAN`, `ACT`, `AUTO`, `AUTONOMOUS`, `RESEARCH`, `PLAN_EXECUTE`, `DIRECT` in [`studio.enums.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/shared-types/src/enums/studio.enums.ts).
+  - `StudioEventType`: `THINK`, `PLAN`, `SEARCH`, `WEB`, `FILE`, `DATABASE`, `DELEGATE`, `MODEL`, `TOOL`, `APPROVAL`, `RAG`, `CODE`.
+  - `PlanStepStatus`: `PENDING`, `RUNNING`, `COMPLETED`, `FAILED`.
+  - `ArtifactType`: `DOCUMENT`, `CODE`, `TERMINAL`, `SEARCH`, `DATA`.
+  - `ArtifactStatus`: `RUNNING`, `SUCCESS`, `ERROR`.
+  - `CoworkMessageRole`: `USER`, `AGENT`, `SYSTEM`.
+  - `AgentStatus` & `ExecutionStatus`: Enforced in console types and components (`ExecutionStatus.COMPLETED`, `AgentStatus.IDLE`, etc.).
+  - `ModelStatus`: `ONLINE`, `DEGRADED`, `OFFLINE` in `apps/console/src/features/models/types.ts`.
+  - Updated all switch statements, conditionals, and default assignments across `apps/console` and `apps/gateway` to reference `Enum.Value`.
+- **Compilation & IDE Diagnostic Resolution**:
+  - Fixed `permission-evaluator.ts:103` risk level assignment via canonical `ApprovalRiskLevel`.
+  - Fixed `permission-policy.manager.ts` value import for `PermissionScope`.
+  - Fixed schema imports in `eval-dataset.schema.ts` and `execution-service.ts` to source branded types directly from `@orchestrai/core`.
+  - Regenerated package distribution declarations for `@orchestrai/database` and `@orchestrai/queue`.
+  - Monorepo typecheck: **37 of 37 targets successful (0 errors)**.
+  - Monorepo linter: **0 warnings (`--max-warnings=0`)**.
+  - All files strictly adhere to the < 250-line rule (Prime Invariant 1).

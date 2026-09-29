@@ -10,7 +10,6 @@ import { z } from "zod";
  * Standard UUID string format schema used for primary entity identifiers.
  */
 export const UuidSchema = z
-  .string()
   .uuid({ message: "Identifier must be a valid UUIDv4" })
   .describe("Standard RFC 4122 UUIDv4 identifier");
 
@@ -90,3 +89,35 @@ export const TenantIdSchema = z
  * Inferred TypeScript type for TenantId.
  */
 export type TenantId = z.infer<typeof TenantIdSchema>;
+
+/**
+ * Branded Resource identifier schema.
+ */
+export const ResourceIdSchema = UuidSchema.brand<"ResourceId">().describe(
+  "Unique identifier for a registered system resource",
+);
+export type ResourceId = z.infer<typeof ResourceIdSchema>;
+
+/**
+ * Branded Capability identifier schema.
+ */
+export const CapabilityIdSchema = UuidSchema.brand<"CapabilityId">().describe(
+  "Unique identifier for an agent capability definition",
+);
+export type CapabilityId = z.infer<typeof CapabilityIdSchema>;
+
+/**
+ * Branded Access Grant identifier schema.
+ */
+export const GrantIdSchema = UuidSchema.brand<"GrantId">().describe(
+  "Unique identifier for an active access grant token",
+);
+export type GrantId = z.infer<typeof GrantIdSchema>;
+
+/**
+ * Branded Permission Request identifier schema.
+ */
+export const PermissionRequestIdSchema = UuidSchema.brand<"PermissionRequestId">().describe(
+  "Unique identifier for an access clearance request",
+);
+export type PermissionRequestId = z.infer<typeof PermissionRequestIdSchema>;

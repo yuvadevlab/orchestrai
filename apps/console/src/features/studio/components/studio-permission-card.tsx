@@ -9,14 +9,12 @@
 import React, { useState } from "react";
 import { ShieldAlert, Check, X, ShieldCheck, Clock, CheckCheck } from "lucide-react";
 import { Button, Badge } from "@yuva-devlab/ui";
+import { PermissionScope, ApprovalRiskLevel } from "@orchestrai/shared-types";
 import type { StudioApprovalRequest } from "../types";
 
 export interface StudioPermissionCardProps {
   request: StudioApprovalRequest;
-  onResolve: (
-    approvalId: string,
-    scope: "once" | "session" | "permanent" | "deny",
-  ) => Promise<void>;
+  onResolve: (approvalId: string, scope: PermissionScope) => Promise<void>;
 }
 
 /**
@@ -27,9 +25,9 @@ export function StudioPermissionCard({
   onResolve,
 }: StudioPermissionCardProps): React.JSX.Element {
   const [submittingScope, setSubmittingScope] = useState<string | null>(null);
-  const [resolvedScope, setResolvedScope] = useState<string | null>(null);
+  const [resolvedScope, setResolvedScope] = useState<PermissionScope | null>(null);
 
-  const handleAction = async (scope: "once" | "session" | "permanent" | "deny"): Promise<void> => {
+  const handleAction = async (scope: PermissionScope): Promise<void> => {
     setSubmittingScope(scope);
     try {
       await onResolve(request.id, scope);
@@ -40,7 +38,7 @@ export function StudioPermissionCard({
   };
 
   if (resolvedScope) {
-    const isDeny = resolvedScope === "deny";
+    const isDeny = resolvedScope === PermissionScope.DENY;
     return (
       <div className="border-border/40 bg-muted/20 text-muted-foreground my-1.5 inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[11px]">
         {isDeny ? (
@@ -59,25 +57,44 @@ export function StudioPermissionCard({
     );
   }
 
+  const isCritical = request.isSensitive || request.riskLevel === ApprovalRiskLevel.CRITICAL;
+
   return (
-    <div className="my-3 rounded-md border border-amber-500/40 bg-amber-500/5 p-4 shadow-sm">
+    <div
+      className={`my-3 rounded-md border p-4 shadow-sm ${
+        isCritical ? "border-destructive/40 bg-destructive/5" : "border-warning/40 bg-warning/5"
+      }`}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="grid size-7 place-items-center rounded-md bg-amber-500/20 text-amber-600">
+          <div
+            className={`grid size-7 place-items-center rounded-md ${
+              isCritical ? "bg-destructive/15 text-destructive" : "bg-warning/15 text-warning"
+            }`}
+          >
             <ShieldAlert className="size-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="text-foreground text-sm font-semibold">
-                Security Clearance Required
+                {isCritical ? "Sensitive Clearance Required" : "Security Clearance Required"}
               </span>
               <Badge
                 variant="outline"
-                className="border-amber-500/40 font-mono text-[10px] text-amber-600"
+                className={`font-mono text-[10px] ${
+                  isCritical
+                    ? "border-destructive/40 text-destructive font-semibold"
+                    : "border-warning/40 text-warning"
+                }`}
               >
                 {request.tool}
               </Badge>
+              {isCritical && (
+                <Badge variant="destructive" className="text-[10px] font-semibold uppercase">
+                  Protected File
+                </Badge>
+              )}
             </div>
             <p className="text-muted-foreground mt-0.5 text-xs">{request.reason}</p>
           </div>
@@ -100,7 +117,7 @@ export function StudioPermissionCard({
           variant="outline"
           size="sm"
           disabled={submittingScope !== null}
-          onClick={() => handleAction("once")}
+          onClick={() => handleAction(PermissionScope.ONCE)}
           className="h-7 gap-1.5 text-xs"
         >
           <Clock className="size-3" />
@@ -111,7 +128,7 @@ export function StudioPermissionCard({
           variant="outline"
           size="sm"
           disabled={submittingScope !== null}
-          onClick={() => handleAction("session")}
+          onClick={() => handleAction(PermissionScope.SESSION)}
           className="border-primary/40 hover:bg-primary/10 h-7 gap-1.5 text-xs"
         >
           <ShieldCheck className="text-primary size-3" />
@@ -122,7 +139,7 @@ export function StudioPermissionCard({
           variant="default"
           size="sm"
           disabled={submittingScope !== null}
-          onClick={() => handleAction("permanent")}
+          onClick={() => handleAction(PermissionScope.PERMANENT)}
           className="h-7 gap-1.5 text-xs"
         >
           <CheckCheck className="size-3" />
@@ -133,7 +150,7 @@ export function StudioPermissionCard({
           variant="ghost"
           size="sm"
           disabled={submittingScope !== null}
-          onClick={() => handleAction("deny")}
+          onClick={() => handleAction(PermissionScope.DENY)}
           className="text-destructive hover:bg-destructive/10 ml-auto h-7 gap-1.5 text-xs"
         >
           <X className="size-3" />

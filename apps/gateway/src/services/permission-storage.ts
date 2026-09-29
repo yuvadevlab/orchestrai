@@ -6,6 +6,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { PermissionScope } from "@orchestrai/shared-types";
 
 /**
  * Finds the nearest project root (e.g. containing package.json or .git) for an external path.
@@ -63,5 +64,37 @@ export function savePermanentPermissions(configPath: string, grants: Set<string>
     );
   } catch {
     // Filesystem restricted
+  }
+}
+
+/**
+ * Applies a permission grant (once, session, or permanent) to active permission sets.
+ */
+export function applyGrant(
+  scope: PermissionScope,
+  isBash: boolean,
+  target: string,
+  prefix: string,
+  targetSessions: string[],
+  onceGrants: Set<string>,
+  sessionGrants: Map<string, Set<string>>,
+  permanentGrants: Set<string>,
+  configPath: string,
+): void {
+  if (scope === PermissionScope.ONCE) {
+    if (isBash) onceGrants.add("tool:bash");
+    onceGrants.add(target);
+  } else if (scope === PermissionScope.SESSION) {
+    const grantKey = isBash ? "tool:bash" : prefix;
+    for (const s of targetSessions) {
+      if (!sessionGrants.has(s)) sessionGrants.set(s, new Set());
+      sessionGrants.get(s)?.add(grantKey);
+      if (isBash) sessionGrants.get(s)?.add(target);
+    }
+  } else if (scope === PermissionScope.PERMANENT) {
+    const grantKey = isBash ? "tool:bash" : prefix;
+    permanentGrants.add(grantKey);
+    if (isBash) permanentGrants.add(target);
+    savePermanentPermissions(configPath, permanentGrants);
   }
 }

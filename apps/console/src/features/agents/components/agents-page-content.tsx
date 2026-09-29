@@ -12,6 +12,7 @@ import { AgentDialog } from "./agent-dialog";
 import { Input, Button } from "@yuva-devlab/ui";
 import { Plus, Search, Bot } from "lucide-react";
 import { useAgents } from "../api";
+import { AgentStatus } from "../types";
 import { EmptyState } from "@/components/ui";
 import { PageShell } from "@/components/layout/page-shell";
 
@@ -21,7 +22,7 @@ export function AgentsPageContent(): React.JSX.Element {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { data: agentList, isLoading, error, refetch } = useAgents();
 
-  const activeCount = agentList.filter((a) => a.status === "ACTIVE").length;
+  const activeCount = agentList.filter((a) => a.status === AgentStatus.ACTIVE).length;
 
   // Dynamically extract domains/roles from registered agents
   const domains = ["All", ...Array.from(new Set(agentList.map((a) => a.role).filter(Boolean)))];

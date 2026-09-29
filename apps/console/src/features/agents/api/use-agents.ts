@@ -8,7 +8,7 @@
 
 import { useApiData, type UseApiDataResult } from "@/lib/use-api-data";
 import { useAuth } from "@/lib/auth";
-import type { AgentDefinition } from "../types";
+import { AgentStatus, type AgentDefinition } from "../types";
 import type { Agent } from "@orchestrai/sdk";
 
 /**
@@ -52,7 +52,7 @@ export function useAgents(): UseApiDataResult<AgentDefinition[]> {
           name: a.name || "Agent Entity",
           role,
           model: modelName,
-          status: "IDLE",
+          status: AgentStatus.IDLE,
           tools: a.enabledTools || [],
           description: a.description || a.systemPrompt || "Registered cluster agent",
           totalExecutions: 0,

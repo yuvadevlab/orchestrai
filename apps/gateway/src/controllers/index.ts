@@ -17,3 +17,7 @@ export * from "./nav-item.controller";
 export * from "./platform-role.controller";
 export * from "./platform-permission.controller";
 export * from "./platform-tool.controller";
+export * from "./eval.controller";
+export * from "./memory.controller";
+export * from "./trace.controller";
+export * from "./resource-access.controller";

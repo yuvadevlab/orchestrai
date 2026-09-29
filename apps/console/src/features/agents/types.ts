@@ -1,7 +1,12 @@
 /**
  * Agent execution status state.
  */
-export type AgentStatus = "ACTIVE" | "IDLE" | "PAUSED" | "DRAINING";
+export enum AgentStatus {
+  ACTIVE = "active",
+  IDLE = "idle",
+  PAUSED = "paused",
+  DRAINING = "draining",
+}
 
 /**
  * Autonomous agent entity definition.

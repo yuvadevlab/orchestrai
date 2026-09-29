@@ -10,7 +10,7 @@ import { AgentMode } from "@orchestrai/shared-types";
  * Supported execution modes for an agent backed by canonical AgentMode enum.
  */
 export const AgentModeSchema = z
-  .nativeEnum(AgentMode)
+  .enum(AgentMode)
   .describe("Operating mode governing agent autonomy and execution strategy");
 
 /**

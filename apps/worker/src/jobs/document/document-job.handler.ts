@@ -10,8 +10,8 @@ import { ValidationError, OrchestrAIError } from "@orchestrai/core";
  * Payload contract for document indexing and chunking jobs.
  */
 export const DocumentJobPayloadSchema = z.object({
-  documentId: z.string().uuid().describe("Unique document identifier"),
-  tenantId: z.string().uuid().describe("Owning tenant UUID"),
+  documentId: z.uuid().describe("Unique document identifier"),
+  tenantId: z.uuid().describe("Owning tenant UUID"),
   sourceUri: z.string().min(1).describe("Storage URI or local file path"),
   mimeType: z.string().default("text/plain").describe("MIME content type"),
   chunkSize: z.number().int().positive().default(1000).describe("Target characters per chunk"),

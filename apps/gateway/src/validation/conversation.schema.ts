@@ -30,7 +30,7 @@ export type CreateConversationDto = z.infer<typeof CreateConversationSchema>;
  * Validates payload for appending a message to an active conversation.
  */
 export const AddMessageSchema = z.object({
-  role: z.nativeEnum(MessageRole).default(MessageRole.USER).describe("Message author role"),
+  role: z.enum(MessageRole).default(MessageRole.USER).describe("Message author role"),
   content: z.string().min(1, "Message content cannot be empty").describe("Textual message payload"),
   metadata: z
     .record(z.string(), z.unknown())

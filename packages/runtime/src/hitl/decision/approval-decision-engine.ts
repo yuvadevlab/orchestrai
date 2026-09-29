@@ -6,6 +6,7 @@
 import { OrchestrAIError } from "@orchestrai/core";
 import {
   ApprovalResolutionInputSchema,
+  ApprovalDecisionVerdict,
   type ApprovalResolutionInput,
   type ApprovalTicket,
   type IApprovalStorage,
@@ -78,7 +79,7 @@ export class ApprovalDecisionEngine {
     reason = "Operator cancelled execution at approval gate",
   ): Promise<ApprovalTicket> {
     return this.resolve(approvalId, {
-      decision: "CANCELLED",
+      decision: ApprovalDecisionVerdict.CANCELLED,
       operatorId,
       reason,
     });

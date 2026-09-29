@@ -31,7 +31,7 @@ export const SecurityAuditEventSchema = z.object({
   /** Human-readable reason for the decision (rule ID, quota message, etc.) */
   reason: z.string(),
   /** ISO 8601 timestamp of when the decision was made */
-  timestamp: z.string().datetime().optional(),
+  timestamp: z.iso.datetime().optional(),
   /** Optional W3C trace ID for distributed tracing correlation */
   traceId: z.string().optional(),
 });

@@ -7,16 +7,13 @@
  */
 
 import { useCallback, useState } from "react";
+import { PermissionScope, CoworkMessageRole } from "@orchestrai/shared-types";
 import { getApiClient } from "@/lib/api-client";
-import { getStoredSession } from "@/lib/auth";
 import { formatApiError } from "@/lib/error-utils";
-import type {
-  CoworkArtifact,
-  CoworkMessage,
-  SpecialistPersona,
-  StudioApprovalRequest,
-  StudioEvent,
-} from "../types";
+import { useResolveApproval } from "../api";
+import type { CoworkMessage, SpecialistPersona, StudioEvent } from "../types";
+import { createInitialAgentSegments, appendTextSegment } from "./message-segment-utils";
+import { consumeExecutionStream } from "./execution-stream-consumer";
 
 export interface UseAgentRunnerOptions {
   activeSpecialist?: SpecialistPersona;
@@ -31,10 +28,7 @@ export interface UseAgentRunnerResult {
   events: StudioEvent[];
   activeExecutionId: string;
   triggerRun: (promptText: string) => Promise<void>;
-  resolveApproval: (
-    approvalId: string,
-    scope: "once" | "session" | "permanent" | "deny",
-  ) => Promise<void>;
+  resolveApproval: (approvalId: string, scope: PermissionScope) => Promise<void>;
   stopExecution: () => void;
   clearEvents: () => void;
 }
@@ -52,41 +46,13 @@ export function useAgentRunner({
   const [isRunning, setIsRunning] = useState(false);
   const [events, setEvents] = useState<StudioEvent[]>([]);
   const [activeExecutionId, setActiveExecutionId] = useState("");
+  const resolveMutation = useResolveApproval();
 
   const resolveApproval = useCallback(
-    async (approvalId: string, scope: "once" | "session" | "permanent" | "deny"): Promise<void> => {
-      try {
-        const session = getStoredSession();
-        const tenantId = session?.user?.tenantId;
-        if (!tenantId) {
-          throw new Error("Active workspace or tenant ID is missing");
-        }
-        const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:4001";
-        const apiKey = process.env.NEXT_PUBLIC_GATEWAY_API_KEY || "dev-key-for-local-testing";
-        const token = session?.token;
-
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-          "x-tenant-id": tenantId,
-          "x-api-key": apiKey,
-        };
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-
-        await fetch(`${GATEWAY_URL}/api/v1/approvals/${approvalId}/resolve`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            decision: scope === "deny" ? "REJECTED" : "APPROVED",
-            scope,
-          }),
-        });
-      } catch {
-        // Non-fatal if fetch encounters transient network error
-      }
+    async (approvalId: string, scope: PermissionScope): Promise<void> => {
+      await resolveMutation.mutateAsync({ approvalId, scope });
     },
-    [],
+    [resolveMutation],
   );
 
   const triggerRun = useCallback(
@@ -106,16 +72,18 @@ export function useAgentRunner({
       const history = (existingMessages || [])
         .filter((m) => m.content && !m.isStreaming)
         .map((m) => ({
-          role: m.role === "agent" ? "assistant" : m.role,
+          role: m.role === CoworkMessageRole.AGENT ? "assistant" : m.role,
           content: m.content,
         }));
 
+      const thinkingText = `Analyzing: "${text.slice(0, 60)}${text.length > 60 ? "..." : ""}"\nSynthesizing response and executing capabilities...`;
+
       onUpdateMessages((prev) => [
         ...prev,
-        { id: userMsgId, role: "user", content: text, timestamp: now() },
+        { id: userMsgId, role: CoworkMessageRole.USER, content: text, timestamp: now() },
         {
           id: agentMsgId,
-          role: "agent",
+          role: CoworkMessageRole.AGENT,
           content: "",
           timestamp: now(),
           specialistName: activeSpecialist.name,
@@ -123,10 +91,11 @@ export function useAgentRunner({
           isStreaming: true,
           artifacts: [],
           thinking: {
-            text: `Analyzing: "${text.slice(0, 60)}${text.length > 60 ? "..." : ""}"\nSynthesizing response and executing capabilities...`,
+            text: thinkingText,
             durationSeconds: 1.2,
             collapsed: false,
           },
+          segments: createInitialAgentSegments(agentMsgId, thinkingText, 1.2),
         },
       ]);
 
@@ -156,53 +125,17 @@ export function useAgentRunner({
 
         try {
           const streamIterator = await handle.stream();
-          for await (const sse of streamIterator) {
-            if (sse.event === "artifact") {
-              try {
-                const art: CoworkArtifact =
-                  typeof sse.data === "string" ? JSON.parse(sse.data) : sse.data;
-                onUpdateMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === agentMsgId ? { ...m, artifacts: [...(m.artifacts || []), art] } : m,
-                  ),
-                );
-              } catch {
-                /* parse ignore */
-              }
-              continue;
-            }
-
-            if (sse.event === "approval_request") {
-              try {
-                const req: StudioApprovalRequest =
-                  typeof sse.data === "string" ? JSON.parse(sse.data) : sse.data;
-                onUpdateMessages((prev) =>
-                  prev.map((m) => (m.id === agentMsgId ? { ...m, approvalRequest: req } : m)),
-                );
-              } catch {
-                /* parse ignore */
-              }
-              continue;
-            }
-
-            if (sse.event !== "done" && sse.data !== "[DONE]" && typeof sse.data === "string") {
-              onUpdateMessages((prev) =>
-                prev.map((m) =>
-                  m.id === agentMsgId ? { ...m, content: m.content + sse.data } : m,
-                ),
-              );
-            }
-          }
-
-          onUpdateMessages((prev) =>
-            prev.map((m) =>
-              m.id === agentMsgId ? { ...m, isStreaming: false, executionId: handle.id } : m,
-            ),
-          );
+          await consumeExecutionStream({
+            streamIterator,
+            agentMsgId,
+            executionId: handle.id,
+            onUpdateMessages,
+          });
         } catch {
           const finalRecord = await handle.wait(1500, 30000);
-          const fallbackOutput = (finalRecord as unknown as { result?: { output?: string } })
-            ?.result?.output;
+          const fallbackOutput = (finalRecord as { result?: { output?: string } })?.result?.output;
+          const fallbackText =
+            fallbackOutput || `Task completed under run ${finalRecord.executionId}.`;
           onUpdateMessages((prev) =>
             prev.map((m) =>
               m.id === agentMsgId
@@ -210,10 +143,8 @@ export function useAgentRunner({
                     ...m,
                     isStreaming: false,
                     executionId: finalRecord.executionId,
-                    content:
-                      m.content ||
-                      fallbackOutput ||
-                      `Task completed under run ${finalRecord.executionId}.`,
+                    content: m.content || fallbackText,
+                    segments: m.content ? m.segments : appendTextSegment(m.segments, fallbackText),
                   }
                 : m,
             ),
@@ -224,7 +155,12 @@ export function useAgentRunner({
         onUpdateMessages((prev) =>
           prev.map((m) =>
             m.id === agentMsgId
-              ? { ...m, isStreaming: false, content: m.content || `*${errMsg}*` }
+              ? {
+                  ...m,
+                  isStreaming: false,
+                  content: m.content || `*${errMsg}*`,
+                  segments: m.content ? m.segments : appendTextSegment(m.segments, `*${errMsg}*`),
+                }
               : m,
           ),
         );
@@ -232,7 +168,7 @@ export function useAgentRunner({
         setIsRunning(false);
       }
     },
-    [activeSpecialist, selectedModel, onUpdateMessages],
+    [activeSpecialist, selectedModel, existingMessages, onUpdateMessages, activeSessionId],
   );
 
   return {

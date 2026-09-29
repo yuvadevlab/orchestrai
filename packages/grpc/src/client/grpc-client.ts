@@ -10,6 +10,7 @@ import type {
   GrpcExecutionResponse,
 } from "../contracts/execution-service";
 import { ExecutionStatus } from "@orchestrai/shared-types";
+import { ExecutionIdSchema } from "@orchestrai/core";
 
 /**
  * gRPC Client transport managing binary inter-service RPC invocations.
@@ -37,7 +38,7 @@ export class GrpcClient implements IGrpcExecutionService {
    */
   public async getExecutionStatus(executionId: string): Promise<GrpcExecutionResponse> {
     return {
-      executionId,
+      executionId: ExecutionIdSchema.parse(executionId),
       status: ExecutionStatus.COMPLETED,
       currentStepIndex: 5,
       completedAt: new Date().toISOString(),

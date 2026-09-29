@@ -24,7 +24,7 @@ export const IdempotencyRecordSchema = z.object({
   /**
    * Execution or payload identifier associated with this request.
    */
-  executionId: z.string().uuid(),
+  executionId: z.uuid(),
 
   /**
    * Current lifecycle status of the operation.
@@ -49,12 +49,12 @@ export const IdempotencyRecordSchema = z.object({
   /**
    * ISO 8601 creation timestamp.
    */
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 
   /**
    * ISO 8601 last update timestamp.
    */
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export type IdempotencyRecord = z.infer<typeof IdempotencyRecordSchema>;

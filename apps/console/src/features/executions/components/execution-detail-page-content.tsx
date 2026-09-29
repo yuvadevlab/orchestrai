@@ -13,6 +13,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Play } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
 
+import { ExecutionTraceWaterfall } from "./execution-trace-waterfall";
+
 /** A label–value definition list row used in the execution metadata panel. */
 function Row({
   label,
@@ -80,6 +82,8 @@ export function ExecutionDetailPageContent({
                 <Row label="Tokens Billed" value={execution.tokensUsed.toLocaleString()} mono />
               </div>
             </Panel>
+
+            <ExecutionTraceWaterfall executionId={executionId} />
           </div>
 
           {/* Sidebar Column */}

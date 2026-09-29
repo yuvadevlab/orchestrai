@@ -11,7 +11,7 @@ import { ToolCallIdSchema } from "@/identifiers";
  * Execution outcome status of a tool invocation backed by ToolResultStatus enum.
  */
 export const ToolResultStatusSchema = z
-  .nativeEnum(ToolResultStatus)
+  .enum(ToolResultStatus)
   .describe("Outcome status of the tool execution");
 
 /**

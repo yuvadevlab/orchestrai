@@ -9,7 +9,7 @@ import { SagaState } from "./saga.types";
 /**
  * Zod schema validating a Saga state enum value.
  */
-export const SagaStateSchema = z.nativeEnum(SagaState);
+export const SagaStateSchema = z.enum(SagaState);
 
 /**
  * Schema validating a Saga execution snapshot for persistence and audit log.
@@ -18,7 +18,7 @@ export const SagaExecutionSnapshotSchema = z.object({
   /**
    * Unique execution ID of this saga instance.
    */
-  sagaId: z.string().uuid(),
+  sagaId: z.uuid(),
 
   /**
    * Name of the saga workflow.
@@ -53,12 +53,12 @@ export const SagaExecutionSnapshotSchema = z.object({
   /**
    * Timestamp when saga started.
    */
-  startedAt: z.string().datetime(),
+  startedAt: z.iso.datetime(),
 
   /**
    * Timestamp when saga finished or failed.
    */
-  finishedAt: z.string().datetime().optional(),
+  finishedAt: z.iso.datetime().optional(),
 });
 
 export type SagaExecutionSnapshot = z.infer<typeof SagaExecutionSnapshotSchema>;

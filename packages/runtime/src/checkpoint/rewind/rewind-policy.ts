@@ -25,11 +25,11 @@ export const RewindOptionsSchema = z.object({
   /** Step index to rewind back to (mutually exclusive with checkpointId) */
   targetStepIndex: z.number().int().nonnegative().optional(),
   /** Unique UUID of the specific checkpoint to restore */
-  targetCheckpointId: z.string().uuid().optional(),
+  targetCheckpointId: z.uuid().optional(),
   /** Rewind behavior policy (defaults to PRUNE_SUBSEQUENT) */
   policy: RewindPolicyTypeSchema.default("PRUNE_SUBSEQUENT"),
   /** Custom execution UUID for the branch fork run when using BRANCH_FORK */
-  forkExecutionId: z.string().uuid().optional(),
+  forkExecutionId: z.uuid().optional(),
 });
 
 export type RewindOptions = z.infer<typeof RewindOptionsSchema>;

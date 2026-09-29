@@ -6,3 +6,4 @@
 export * from "./filesystem";
 export * from "./network";
 export * from "./system";
+export * from "./search";

@@ -11,7 +11,7 @@ import { ExecutionIdSchema } from "@/identifiers";
  * Functional discriminator for realtime streaming chunks backed by StreamChunkType enum.
  */
 export const StreamChunkTypeSchema = z
-  .nativeEnum(StreamChunkType)
+  .enum(StreamChunkType)
   .describe("Category of delta payload contained in this stream chunk");
 
 /**

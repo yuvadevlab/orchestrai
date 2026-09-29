@@ -5,12 +5,12 @@
  */
 
 import { z } from "zod";
-import { ExecutionStatus } from "@orchestrai/shared-types";
+import { ExecutionIdSchema, AgentIdSchema, ExecutionStatusSchema } from "@orchestrai/core";
 
 /** gRPC Execution Request payload schema */
 export const GrpcExecutionRequestSchema = z.object({
-  executionId: z.string().uuid(),
-  agentId: z.string().uuid(),
+  executionId: ExecutionIdSchema,
+  agentId: AgentIdSchema,
   inputPrompt: z.string().min(1),
   traceId: z.string(),
 });
@@ -18,8 +18,8 @@ export type GrpcExecutionRequest = z.infer<typeof GrpcExecutionRequestSchema>;
 
 /** gRPC Execution Response payload schema */
 export const GrpcExecutionResponseSchema = z.object({
-  executionId: z.string().uuid(),
-  status: z.nativeEnum(ExecutionStatus),
+  executionId: ExecutionIdSchema,
+  status: ExecutionStatusSchema,
   currentStepIndex: z.number().int().nonnegative(),
   completedAt: z.string().optional(),
 });

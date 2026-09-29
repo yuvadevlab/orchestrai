@@ -16,7 +16,7 @@ import { resolveDbTenantId } from "./tenant-resolver";
 
 export interface AgentRecord {
   agentId: string;
-  tenantId: string;
+  tenantId?: string | null;
   name: string;
   description?: string | null;
   mode: string;

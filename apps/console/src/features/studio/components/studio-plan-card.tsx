@@ -8,6 +8,7 @@
 
 import React from "react";
 import { CheckCircle2, Circle, ListTodo, Loader2 } from "lucide-react";
+import { PlanStepStatus } from "@orchestrai/shared-types";
 import type { PlanStep } from "../types";
 
 export interface StudioPlanCardProps {
@@ -20,7 +21,7 @@ export interface StudioPlanCardProps {
 export function StudioPlanCard({ steps }: StudioPlanCardProps): React.JSX.Element {
   if (!steps || steps.length === 0) return <></>;
 
-  const completedCount = steps.filter((s) => s.status === "completed").length;
+  const completedCount = steps.filter((s) => s.status === PlanStepStatus.COMPLETED).length;
   const progressPercent = Math.round((completedCount / steps.length) * 100);
 
   return (
@@ -44,8 +45,8 @@ export function StudioPlanCard({ steps }: StudioPlanCardProps): React.JSX.Elemen
 
       <div className="space-y-1.5 font-mono text-xs">
         {steps.map((step, idx) => {
-          const isDone = step.status === "completed";
-          const isRunning = step.status === "running";
+          const isDone = step.status === PlanStepStatus.COMPLETED;
+          const isRunning = step.status === PlanStepStatus.RUNNING;
 
           return (
             <div

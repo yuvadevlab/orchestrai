@@ -62,7 +62,11 @@ export async function* parseSseStream(
         if (colonIndex === -1) continue;
 
         const field = line.slice(0, colonIndex).trim();
-        const rawValue = line.slice(colonIndex + 1).trim();
+        let rawValue = line.slice(colonIndex + 1);
+        // Per W3C SSE specification: strip only a single leading space if present
+        if (rawValue.startsWith(" ")) {
+          rawValue = rawValue.slice(1);
+        }
 
         if (field === "event") {
           currentEvent = rawValue;

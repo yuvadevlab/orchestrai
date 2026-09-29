@@ -13,4 +13,6 @@ export * from "./artifacts";
 export * from "./studio-message-item";
 export * from "./studio-prompt-bar";
 export * from "./studio-inspector-rail";
+export * from "./studio-live-clearance-card";
+export * from "./approval-decision-chip";
 export * from "./studio-workspace";

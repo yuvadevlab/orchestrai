@@ -5,3 +5,4 @@
 
 export * from "./path-sanitizer";
 export * from "./permission-evaluator";
+export * from "./sensitive-path.detector";

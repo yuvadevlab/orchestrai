@@ -46,6 +46,7 @@ export type ReadFileInput = z.infer<typeof ReadFileInputSchema>;
  */
 export interface ReadFileOutput {
   readonly content: string;
+  readonly resolvedPath: string;
   readonly totalLines: number;
   readonly returnedLines: number;
   readonly byteSize: number;
@@ -90,8 +91,9 @@ export class ReadFileTool implements ITool<ReadFileInput, ReadFileOutput> {
    * Reads the target file content with sandbox verification and optional line slicing.
    */
   async execute(args: ReadFileInput, context: ToolExecutionContext): Promise<ReadFileOutput> {
-    const root = context.workspaceRoot ?? process.cwd();
-    const safePath = sanitizePath(args.path, root);
+    const roots =
+      context.allowedRoots ?? (context.workspaceRoot ? [context.workspaceRoot] : [process.cwd()]);
+    const safePath = sanitizePath(args.path, roots);
 
     const raw = await fs.readFile(safePath, "utf8");
     const lines = raw.split(/\r?\n/);
@@ -111,6 +113,7 @@ export class ReadFileTool implements ITool<ReadFileInput, ReadFileOutput> {
 
     return {
       content,
+      resolvedPath: safePath,
       totalLines,
       returnedLines: sliced.length,
       byteSize,

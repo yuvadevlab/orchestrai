@@ -15,7 +15,7 @@ export interface StudioInspectorRailProps {
   events: StudioEvent[];
   isRunning: boolean;
   onClose?: () => void;
-  activeExecutionId?: string;
+  activeExecutionId?: string | null;
 }
 
 /**
