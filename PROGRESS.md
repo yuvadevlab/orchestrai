@@ -258,16 +258,16 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] Scaffold Zustand Tri-Tier store slices (`session-slice`, `canvas-slice`, `execution-slice`, `clearance-slice`)
 - [x] Replace synchronous 5MB `localStorage` with asynchronous IndexedDB storage engine (`idb-keyval` / Dexie)
 
-### [ ] Phase 6: Dual-Pane Workspace Canvas & Virtualized Chat (`apps/console`)
+### [x] Phase 6: Dual-Pane Workspace Canvas & Virtualized Chat (`apps/console`)
 
-- [ ] Re-architect `StudioWorkspace` into responsive dual-pane layout (Left: Conversational Feed | Right: Interactive Canvas)
-- [ ] Build Interactive Canvas views:
-  - 💻 Code Editor with syntax highlighting, line numbers, folding, and one-click copy
-  - 🌐 Sandboxed HTML/React Preview with isolated `iframe` (`sandbox="allow-scripts"`)
-  - 🔄 Visual Diff Viewer with side-by-side green/red change highlights
-  - ⚡ ANSI Terminal Emulator for CLI/Docker command output
-- [ ] Virtualize message feed with `@tanstack/react-virtual`
-- [ ] Implement intent-aware scroll pinning (unpin on user scroll up + `New output streaming below ↓` pill)
+- [x] Re-architect `StudioWorkspace` into responsive dual-pane layout (Left: Conversational Feed | Right: Interactive Canvas)
+- [x] Build Interactive Canvas views (100% semantic CSS theme variables):
+  - 💻 Code Editor with syntax highlighting, line numbers, folding, and one-click copy (`CanvasCodeView`)
+  - 🌐 Sandboxed HTML/React Preview with isolated `iframe` (`sandbox="allow-scripts"`, `CanvasPreviewView`)
+  - 🔄 Visual Diff Viewer with side-by-side theme highlights (`CanvasDiffView`)
+  - ⚡ ANSI Terminal Emulator for CLI/Docker command output (`CanvasTerminalView`)
+- [x] Virtualize message feed with `@tanstack/react-virtual` (`VirtualizedMessageFeed`)
+- [x] Implement intent-aware scroll pinning (unpin on user scroll up + `New output streaming below ↓` pill)
 
 ### [ ] Phase 7: Screen Consolidation & Operator Cockpits (`apps/console`)
 

@@ -4,6 +4,38 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 ---
 
+## Session: 2026-09-29 (Continued) — Phase 6 Complete: Dual-Pane Workspace Canvas & Virtualized Chat
+
+### Phase 6 Completion Summary
+
+#### Dual-Pane Workspace Canvas Architecture (`apps/console/src/features/studio/components/canvas/`)
+
+- **Interactive Multi-View Canvas Pane (`CanvasPane`)**:
+  - Implemented responsive dual-pane split in `StudioWorkspace` (Left: Conversational Feed | Right: Interactive Canvas).
+  - Mode switcher supporting 4 interactive views:
+    - 💻 **`CanvasCodeView`**: Full syntax styling, line numbers, editable/read-only toggling, one-click clipboard copying.
+    - 🌐 **`CanvasPreviewView`**: Isolated sandboxed HTML/React rendering (`<iframe sandbox="allow-scripts">`), external window pop-out, and hot reload.
+    - 🔄 **`CanvasDiffView`**: Visual side-by-side diff comparing original vs modified artifact code with semantic theme highlights.
+    - ⚡ **`CanvasTerminalView`**: Real-time ANSI terminal emulator for CLI and Docker commands with auto-scroll and clear actions.
+- **Strict Semantic CSS Tokens**:
+  - 100% adherence to theme variables (`text-primary`, `text-destructive`, `bg-card`, `bg-muted/40`, `text-foreground`, `text-muted-foreground`, `border-border/40`). Zero ad-hoc colors or raw text-rose/emerald classes.
+
+#### Virtualized Message Feed with Intent-Aware Scroll Pinning (`VirtualizedMessageFeed`)
+
+- **`@tanstack/react-virtual` Integration**:
+  - Virtualizes long message streams to eliminate DOM node bloat during extensive autonomous turns.
+- **Intent-Aware Scroll Pinning**:
+  - Automatically pins scroll viewport to bottom during high-throughput token streaming.
+  - Detects explicit user scroll-up (> 100px from bottom) to unpin auto-scroll, allowing uninterrupted reading of earlier message history.
+  - Renders floating interactive pill (`New output streaming below ↓`) when new content arrives while unpinned; clicking smoothly scrolls to bottom and re-pins.
+
+#### Quality Invariants & Validation
+
+- **Hard 250-Line Rule**: 100% of files in `canvas/` and `VirtualizedMessageFeed` are strictly < 150 lines (highest LOC is 144).
+- **TypeScript**: `pnpm --filter @orchestrai/console typecheck` passed with 0 errors.
+
+---
+
 ## Session: 2026-09-29 (Continued) — Phase 5 Complete: Console 120 FPS Stream Engine & State Modernization
 
 ### Phase 5 Completion Summary
