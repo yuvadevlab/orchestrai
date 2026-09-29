@@ -37,16 +37,27 @@ export const useConsoleStore = create<ConsoleStoreState>()(
     {
       name: "orchestrai-console-store",
       storage: createJSONStorage(() => indexedDbStorage),
-      // Only persist durable state across page reloads (sessions, canvas draft, tickets)
+      // Only persist durable conversation state across page reloads.
+      // Canvas artifact and open state are ephemeral UI — they must NOT persist
+      // because a stale activeArtifact would bleed into new sessions on next load.
       partialize: (state) => ({
         activeSessionId: state.activeSessionId,
         messages: state.messages,
-        draftCode: state.draftCode,
-        isCanvasOpen: state.isCanvasOpen,
-        canvasMode: state.canvasMode,
-        activeArtifact: state.activeArtifact,
         resolvedHistory: state.resolvedHistory,
       }),
+      /**
+       * One-time migration on rehydration: forcibly clear any stale canvas state
+       * that was persisted by older versions of this store before `activeArtifact`
+       * and `isCanvasOpen` were removed from `partialize`.
+       * Without this, a stale artifact written in a prior session would open the
+       * canvas immediately on the next page load.
+       */
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.setActiveArtifact(null);
+          state.setCanvasOpen(false);
+        }
+      },
     },
   ),
 );

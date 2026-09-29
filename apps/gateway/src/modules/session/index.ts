@@ -3,6 +3,10 @@
  * @description Session (conversation) module barrel.
  * @module apps/gateway/modules/session
  */
-export { registerConversationRoutes } from "./session.route";
-export { ConversationController } from "./session.controller";
-export { ConversationService } from "./session.service";
+export { registerConversationRoutes } from "./controllers/session.route";
+export { ConversationController } from "./controllers/session.controller";
+export { ConversationService } from "./services/session.service";
+export { ConversationQueryService } from "./services/session-query.service";
+export { ConversationMessageService } from "./services/session-message.service";
+export { PostgresSessionRepository } from "./repositories/session.repository";
+export * from "./commands/session.handlers";

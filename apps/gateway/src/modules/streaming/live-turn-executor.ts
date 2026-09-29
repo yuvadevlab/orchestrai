@@ -13,7 +13,11 @@ import {
   SseStreamEvent,
 } from "@orchestrai/shared-types";
 import { StatusCode } from "@orchestrai/observability";
-import { extractToolCall, formatToolArtifact } from "@/modules/streaming/autonomous-agent-runner";
+import {
+  extractToolCall,
+  formatToolArtifact,
+  coerceWorkspaceTool,
+} from "@/modules/streaming/autonomous-agent-runner";
 import { memoryService } from "@/modules/memory/memory.service";
 import { traceService } from "@/modules/trace/trace.service";
 import type { ExecutionStreamState } from "@/modules/streaming/live-execution-broadcaster";
@@ -79,10 +83,19 @@ export async function executeAutonomousTurns(
 
       turnSpan.end();
 
-      const toolCall = extractToolCall(turnOutput);
-      if (!toolCall) break;
+      const rawToolCall = extractToolCall(turnOutput);
+      if (!rawToolCall) break;
 
-      toolsCalled.add(toolCall.tool);
+      // Coerce the untrusted model-output string to a canonical WorkspaceTool enum.
+      // Unknown tools are skipped rather than dispatched — prevents silent runtime errors.
+      const canonicalTool = coerceWorkspaceTool(rawToolCall.tool);
+      if (!canonicalTool) {
+        callbacks.emitEvent(SseStreamEvent.ERROR, `Unknown tool: ${rawToolCall.tool}`);
+        break;
+      }
+
+      const toolCall = { tool: canonicalTool, args: rawToolCall.args };
+      toolsCalled.add(canonicalTool);
       callbacks.emitEvent(SseStreamEvent.TOOL_CALL, toolCall);
 
       const toolResult = await handleToolInvocationWithApproval(
@@ -93,7 +106,7 @@ export async function executeAutonomousTurns(
         callbacks.emitEvent,
       );
 
-      const artifact = formatToolArtifact(toolCall.tool, toolCall.args, toolResult);
+      const artifact = formatToolArtifact(canonicalTool, toolCall.args, toolResult);
       state.artifacts.push(artifact);
       callbacks.emitEvent(SseStreamEvent.ARTIFACT, artifact);
 
@@ -113,7 +126,7 @@ export async function executeAutonomousTurns(
       history.push({
         id: randomUUID(),
         role: MessageRole.USER,
-        content: `[Tool Result for "${toolCall.tool}"]:\n${feedback}\n\nPlease proceed.`,
+        content: `[Tool Result for "${canonicalTool}"]:\n${feedback}\n\nPlease proceed.`,
         metadata: {},
         createdAt: new Date(),
       });

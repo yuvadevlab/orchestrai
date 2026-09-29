@@ -31,10 +31,8 @@ export class NavItemService {
 
   /**
    * Returns all nav items ordered by section then sort_order.
-   * Triggers first-boot seeding if the table is empty.
    */
   public async listNavItems(): Promise<NavItem[]> {
-    await this.seedIfEmpty();
     return this.db.navItem.findMany({
       orderBy: [{ section: "asc" }, { sortOrder: "asc" }],
     });
@@ -91,120 +89,5 @@ export class NavItemService {
    */
   public async deleteNavItem(navItemId: string): Promise<void> {
     await this.db.navItem.delete({ where: { navItemId } });
-  }
-
-  /**
-   * Seeds the default navigation items if not already present.
-   */
-  private async seedIfEmpty(): Promise<void> {
-    const defaultItems = [
-      {
-        label: "CoWork Studio",
-        icon: "Sparkles",
-        href: "/",
-        roles: [],
-        section: "main",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 0,
-      },
-      {
-        label: "Agents",
-        icon: "Bot",
-        href: "/agents",
-        roles: [],
-        section: "main",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 1,
-      },
-      {
-        label: "Models",
-        icon: "Cpu",
-        href: "/models",
-        roles: [],
-        section: "main",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 2,
-      },
-      {
-        label: "Executions",
-        icon: "Play",
-        href: "/executions",
-        roles: [],
-        section: "main",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 3,
-      },
-      {
-        label: "Tools",
-        icon: "Wrench",
-        href: "/tools",
-        roles: [],
-        section: "main",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 4,
-      },
-      {
-        label: "Knowledge",
-        icon: "BookOpen",
-        href: "/knowledge",
-        roles: [],
-        section: "main",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 5,
-      },
-      {
-        label: "Memory",
-        icon: "Brain",
-        href: "/memory",
-        roles: [],
-        section: "main",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 6,
-      },
-      {
-        label: "Evaluations",
-        icon: "BarChart2",
-        href: "/evaluations",
-        roles: [],
-        section: "main",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 7,
-      },
-      {
-        label: "Settings",
-        icon: "Settings",
-        href: "/settings",
-        roles: [],
-        section: "bottom",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 0,
-      },
-      {
-        label: "Admin",
-        icon: "Shield",
-        href: "/admin",
-        roles: ["admin", "super_admin"],
-        section: "bottom",
-        isVisible: true,
-        isEnabled: true,
-        sortOrder: 1,
-      },
-    ];
-
-    for (const item of defaultItems) {
-      const existing = await this.db.navItem.findFirst({ where: { href: item.href } });
-      if (!existing) {
-        await this.db.navItem.create({ data: item });
-      }
-    }
   }
 }

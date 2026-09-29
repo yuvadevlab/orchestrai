@@ -7,7 +7,7 @@
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { GatewayRequest, GatewayResponse } from "@/routes";
 import type { GatewayConfig } from "@/config";
-import { AuthService } from "@/modules/auth/auth.service";
+import { AuthService } from "@/modules/auth";
 
 const logger = loggerWithConfig(new Logger("AuthMiddleware"));
 

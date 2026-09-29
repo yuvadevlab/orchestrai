@@ -5,7 +5,7 @@
 
 import { ApprovalStatus, ApprovalDecisionVerdict, PermissionScope } from "@orchestrai/shared-types";
 import type { ApprovalFilterDto, ResolveApprovalDto } from "@/validation";
-import { permissionPolicyManager } from "@/modules/permission/permission-policy.manager";
+import { permissionPolicyManager } from "@/modules/permission";
 
 export interface ApprovalRecord {
   approvalId: string;

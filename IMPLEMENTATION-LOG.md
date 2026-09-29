@@ -1026,3 +1026,55 @@ Chronological log of architecture, engineering decisions, and completed mileston
   - Monorepo typecheck: **37 of 37 targets successful (0 errors)**.
   - Monorepo linter: **0 warnings (`--max-warnings=0`)**.
   - All files strictly adhere to the < 250-line rule (Prime Invariant 1).
+
+---
+
+## Session: 2026-09-29 — Phase 7 Screen Consolidation, Operator Cockpits & Phase 8 Monorepo Hardening
+
+### 1. Phase 7: Screen Consolidation & Operator Cockpits (`apps/console`)
+
+- **Redundant Route Purge**:
+  - Configured permanent redirects in `apps/console/next.config.ts` from `/console` to `/`, `/knowledge` to `/context?tab=knowledge`, and `/memory` to `/context?tab=memory`.
+  - Replaced legacy `/console/page.tsx` with server-side `redirect("/")`.
+- **Upgraded `/executions`**:
+  - Implemented `DagVisualizer` (`dag-visualizer.tsx`) with interactive node zoom, latency/token badges, dependency links, and step inspector.
+  - Implemented `CheckpointReplayer` (`checkpoint-replayer.tsx`) with timeline scrubber, auto-play stepping, variable snapshot inspector, and "Fork Here" time-travel replay.
+  - Mounted in `ExecutionDetailPageContent`.
+- **Upgraded `/models`**:
+  - Implemented `CostLatencyCockpit` (`cost-latency-cockpit.tsx`) displaying P50/P95/P99 latency percentiles, input/output token rates, monthly spend vs caps, and routing strategies.
+  - Mounted dual-tab switcher ("Model Catalog" vs "Cost & Latency Cockpit") in `ModelsPageContent`.
+- **Consolidated `/context` Hub**:
+  - Created `apps/console/src/app/(dashboard)/context/page.tsx` and `features/context/context-hub-page-content.tsx` seamlessly unifying RAG document indexing and episodic/semantic memory recall.
+- **Elevated `/evaluations`**:
+  - Built `RubricGradingCard` (`rubric-grading-card.tsx`) with qualitative scoring criteria (Reasoning Fidelity, Tool Compliance, Groundedness, Safety) and instant grading calculations.
+- **Global Slide-out HITL Security Clearance Drawer**:
+  - Built `ClearanceDrawer` (`clearance-drawer.tsx`) subscribing to `clearance-slice` with blast-radius inspection, keyboard shortcuts (`Cmd+Enter` approve, `Esc` deny), and mounted globally in `DashboardLayout`.
+
+### 2. Phase 8: Monorepo Hardening & Clean Modular Co-location
+
+- **250-Line Maximum Rule Verification**:
+  - Audited 100% of `.ts` and `.tsx` files across `apps/*` and `packages/*`.
+  - Decomposed `anthropic.adapter.ts` into `anthropic.messages.ts` (193 LOC).
+  - Decomposed `postgres-session.repository.ts` into `session-query.runner.ts` (217 LOC).
+  - Decomposed `autonomous-agent-runner.ts` into `workspace-tool-executor.ts` (129 LOC).
+  - Decomposed `settings-page-content.tsx` into `settings-api-keys-card.tsx` (224 LOC).
+  - Every single file across the entire monorepo is now <= 229 LOC (0 files exceed 250 LOC).
+- **Strict Feature-First Modular Co-location**:
+  - Moved Prisma repositories into their respective domain modules:
+    - `modules/session/session.repository.ts`
+    - `modules/execution/execution.repository.ts`
+    - `modules/agent/agent.repository.ts`
+  - Moved cross-cutting messaging adapters into `apps/gateway/src/infra/`.
+  - Purged legacy horizontal slice folders `controllers/`, `services/`, and `repositories/`.
+- **Quality Gates & Clean DOMA Modular Organization**:
+  - Reorganized complex domain modules (`auth/`, `execution/`, `session/`, `agent/`, `platform/`, `permission/`) into clean sub-layers (`controllers/`, `services/`, `repositories/` or `storage/`) exposed through a single public `index.ts` facade.
+  - Eliminated all default values and hardcoded fallback arrays:
+    - Removed `DEFAULT_NAV_ITEMS` fallback array from `apps/console/src/lib/use-nav.ts`.
+    - Purged static `sidebar-nav-items.ts` and `product-nav-items.ts`.
+    - Removed `seedIfEmpty` and all hardcoded default menu items from `apps/gateway/src/modules/nav/nav-item.service.ts`.
+    - Removed `seedIfEmpty` and all hardcoded default execution modes from `apps/gateway/src/modules/platform/services/platform-mode.service.ts`.
+    - Handled empty navigation items state gracefully in `apps/console/src/components/dashboard/sidebar-nav.tsx`.
+    - All navigation items and platform entities are now 100% dynamically database-driven.
+  - Monorepo typecheck: **43 of 43 targets passing with 0 errors**.
+  - Monorepo 250-line rule: **0 files > 250 LOC** (maximum file length is 229 LOC).
+  - 100% semantic CSS theme variables used; zero hardcoded strings.

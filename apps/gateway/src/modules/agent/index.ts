@@ -3,6 +3,7 @@
  * @description Agent module barrel.
  * @module apps/gateway/modules/agent
  */
-export { registerAgentRoutes } from "./agent.route";
-export { AgentController } from "./agent.controller";
-export { AgentService } from "./agent.service";
+export { registerAgentRoutes } from "./controllers/agent.route";
+export { AgentController } from "./controllers/agent.controller";
+export { AgentService } from "./services/agent.service";
+export { PostgresAgentRepository } from "./repositories/agent.repository";

@@ -15,85 +15,16 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
-import { ModelProvider, MessageRole, OrchestrAIError } from "@orchestrai/core";
-import type { AIMessage } from "@orchestrai/core";
+import { ModelProvider, OrchestrAIError } from "@orchestrai/core";
 import type { ILlmAdapter, LlmRequest, LlmResponse, LlmStreamChunk } from "@/interfaces";
 import type { AnthropicConfig } from "./anthropic.config.schema";
 
-/** Minimal structural type for the @anthropic-ai/sdk client */
-interface AnthropicClientLike {
-  messages: {
-    create(params: {
-      model: string;
-      max_tokens: number;
-      system?: string;
-      messages: Array<{ role: "user" | "assistant"; content: string }>;
-      temperature?: number;
-      stream?: boolean;
-    }): Promise<AnthropicMessage | AsyncIterable<AnthropicStreamEvent>>;
-  };
-}
-
-interface AnthropicMessage {
-  content: Array<{ type: string; text?: string }>;
-  stop_reason: string | null;
-  usage: { input_tokens: number; output_tokens: number };
-}
-
-interface AnthropicStreamEvent {
-  type: string;
-  delta?: { type: string; text?: string };
-  message?: { usage?: { input_tokens: number; output_tokens: number } };
-}
-
-// ─── Message conversion helper ────────────────────────────────────────────────
-
-/**
- * Splits OrchestrAI ChatMessage[] into Anthropic's expected format:
- *   - `system`: concatenated text from all system-role messages
- *   - `messages`: only user + assistant turns, as flat `{ role, content }` objects
- *
- * Why concatenate multiple system messages?
- * OrchestrAI's internal pipeline may prepend multiple system context blocks
- * (agent persona, tool descriptions, safety instructions). Anthropic accepts
- * only ONE system string, so we join them with double newlines.
- *
- * @param messages - Full OrchestrAI message history
- * @returns Split system string and filtered message array
- */
-function toAnthropicMessages(messages: AIMessage[]): {
-  system: string | undefined;
-  messages: Array<{ role: "user" | "assistant"; content: string }>;
-} {
-  const systemParts: string[] = [];
-  const conversationMessages: Array<{ role: "user" | "assistant"; content: string }> = [];
-
-  for (const msg of messages) {
-    // Handle the AIMessage.content union: string or ContentBlock[]
-    const textContent =
-      typeof msg.content === "string"
-        ? msg.content
-        : msg.content
-            .filter((b): b is { type: "text"; text: string } => b.type === "text")
-            .map((b) => b.text)
-            .join("");
-
-    if (msg.role === MessageRole.SYSTEM) {
-      // Collect system messages separately — Anthropic hoists them to top-level
-      systemParts.push(textContent);
-    } else if (msg.role === MessageRole.USER || msg.role === MessageRole.ASSISTANT) {
-      // Only user/assistant roles are valid in Anthropic's messages[]
-      conversationMessages.push({ role: msg.role as "user" | "assistant", content: textContent });
-    }
-    // Tool role messages are omitted here — handled at a higher abstraction layer
-  }
-
-  return {
-    // Return undefined if no system messages, so the field is omitted entirely
-    system: systemParts.length > 0 ? systemParts.join("\n\n") : undefined,
-    messages: conversationMessages,
-  };
-}
+import type {
+  AnthropicClientLike,
+  AnthropicMessage,
+  AnthropicStreamEvent,
+} from "./anthropic.messages";
+import { toAnthropicMessages } from "./anthropic.messages";
 
 // ─── Adapter Implementation ───────────────────────────────────────────────────
 

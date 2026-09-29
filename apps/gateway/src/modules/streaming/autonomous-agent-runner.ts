@@ -1,37 +1,19 @@
 /**
  * @file apps/gateway/src/services/autonomous-agent-runner.ts
  * @description Autonomous tool-calling executor providing filesystem access, planning, and bash tools.
+ * All tool name comparisons use `WorkspaceTool` enum — never bare string literals.
  * @module apps/gateway/services
  */
 
-import {
-  ReadFileTool,
-  WriteFileTool,
-  ListDirectoryTool,
-  BashTool,
-  KnowledgeSearchTool,
-} from "@orchestrai/tools";
-import { buildAutonomousSystemPrompt } from "@orchestrai/prompts";
-import { ArtifactType, ArtifactStatus } from "@orchestrai/shared-types";
 import { randomUUID } from "node:crypto";
-import fs from "node:fs";
 import path from "node:path";
-import { ragService } from "@/modules/rag/rag.service";
+import { buildAutonomousSystemPrompt } from "@orchestrai/prompts";
+import { ArtifactType, ArtifactStatus, WorkspaceTool } from "@orchestrai/shared-types";
+import { resolveMonorepoRoot, executeWorkspaceTool } from "./workspace-tool-executor";
 
-export { buildAutonomousSystemPrompt };
+export { buildAutonomousSystemPrompt, resolveMonorepoRoot, executeWorkspaceTool };
 
-const readFile = new ReadFileTool();
-const writeFile = new WriteFileTool();
-const listDir = new ListDirectoryTool();
-const bash = new BashTool();
-const knowledgeSearch = new KnowledgeSearchTool(async (query, limit, minScore) => {
-  const res = await ragService.query(
-    { query, limit: limit ?? 5, minScore: minScore ?? 0.3, alpha: 0.5 },
-    "default",
-  );
-  return res.chunks;
-});
-
+/** Visual artifact metadata derived from a single tool execution result. */
 export interface ToolArtifact {
   id: string;
   type: ArtifactType;
@@ -44,101 +26,10 @@ export interface ToolArtifact {
 }
 
 /**
- * Traverses upward from starting directory to discover monorepo workspace root containing pnpm-workspace.yaml.
- */
-export function resolveMonorepoRoot(startDir: string = process.cwd()): string {
-  if (process.env.WORKSPACE_ROOT) {
-    return path.resolve(process.env.WORKSPACE_ROOT);
-  }
-  let current = path.resolve(startDir);
-  while (current !== path.dirname(current)) {
-    if (fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) {
-      return current;
-    }
-    current = path.dirname(current);
-  }
-  return path.resolve(startDir);
-}
-
-/**
- * Executes a single tool by name with provided arguments within workspace sandbox.
- */
-export async function executeWorkspaceTool(
-  toolName: string,
-  args: Record<string, unknown>,
-  workspaceRoot: string = resolveMonorepoRoot(),
-  allowedRoots?: readonly string[],
-): Promise<{ output: unknown; isError: boolean }> {
-  const targetRoot = workspaceRoot || resolveMonorepoRoot();
-  const roots = Array.from(new Set([...(allowedRoots || []), targetRoot]));
-  const context = {
-    workspaceRoot: targetRoot,
-    allowedRoots: roots,
-    tenantId: "default",
-    executionId: randomUUID(),
-  };
-
-  try {
-    switch (toolName) {
-      case "read_file": {
-        const filePath = String(args.path || "");
-        const startLine = typeof args.startLine === "number" ? args.startLine : undefined;
-        const lineCount = typeof args.lineCount === "number" ? args.lineCount : undefined;
-        const res = await readFile.execute({ path: filePath, startLine, lineCount }, context);
-        const repo = path.basename(context.workspaceRoot || "");
-        const isCurrent = res.resolvedPath.startsWith(context.workspaceRoot || "");
-        const header = isCurrent
-          ? `[File: "${filePath}" (Workspace: "${repo}", path: ${res.resolvedPath})]`
-          : `[File: "${filePath}" (External Project, path: ${res.resolvedPath})]`;
-        return { output: `${header}\n\n${res.content}`, isError: false };
-      }
-      case "write_file": {
-        const filePath = String(args.path || "");
-        const content = String(args.content || "");
-        const res = await writeFile.execute(
-          { path: filePath, content, createDirectories: true },
-          context,
-        );
-        return { output: res, isError: false };
-      }
-      case "list_dir": {
-        const dirPath = String(args.path || ".");
-        const res = await listDir.execute(
-          { path: dirPath, recursive: false, maxEntries: 100 },
-          context,
-        );
-        return { output: res, isError: false };
-      }
-      case "bash": {
-        const command = String(args.command || "");
-        const cwdArg = typeof args.cwd === "string" ? args.cwd : undefined;
-        const res = await bash.execute({ command, cwd: cwdArg, maxOutputBytes: 50000 }, context);
-        const outputText =
-          (res.stdout || "").trim() ||
-          (res.stderr || "").trim() ||
-          (res.exitCode === 0
-            ? "Command executed successfully with exit code 0."
-            : `Command failed with exit code ${res.exitCode}.`);
-        return { output: outputText, isError: res.exitCode !== 0 };
-      }
-      case "knowledge_search": {
-        const query = String(args.query || "");
-        const limit = typeof args.limit === "number" ? args.limit : 5;
-        const minScore = typeof args.minScore === "number" ? args.minScore : 0.3;
-        const res = await knowledgeSearch.execute({ query, limit, minScore }, context);
-        return { output: res.contextText, isError: false };
-      }
-      default:
-        return { output: `Unknown tool: ${toolName}`, isError: true };
-    }
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return { output: msg, isError: true };
-  }
-}
-
-/**
  * Extracts and parses any ```tool_call blocks from generated model text.
+ *
+ * @param text - Raw model-generated text that may contain a fenced tool_call block
+ * @returns Parsed tool name and args, or null if no valid block found
  */
 export function extractToolCall(
   text: string,
@@ -152,13 +43,16 @@ export function extractToolCall(
       return { tool: parsed.tool, args: parsed.args };
     }
   } catch {
-    // Malformed JSON block ignored
+    // Malformed JSON block — silently ignore
   }
   return null;
 }
 
 /**
- * Helper to detect code language extension from file path.
+ * Detects the syntax-highlight language identifier from a file path extension.
+ *
+ * @param filePath - Absolute or relative path to a file
+ * @returns Language string for Monaco / Prism rendering
  */
 function detectLanguage(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
@@ -174,10 +68,16 @@ function detectLanguage(filePath: string): string {
 }
 
 /**
- * Creates visual artifact metadata from tool execution result.
+ * Creates visual artifact metadata from a tool execution result.
+ * Determines ArtifactType from WorkspaceTool enum — never raw string comparison.
+ *
+ * @param tool - The canonical WorkspaceTool value that was invoked
+ * @param args - Arguments the tool was called with
+ * @param result - Raw tool execution output and error flag
+ * @returns Structured ToolArtifact ready for SSE emission
  */
 export function formatToolArtifact(
-  tool: string,
+  tool: WorkspaceTool,
   args: Record<string, unknown>,
   result: { output: unknown; isError: boolean },
 ): ToolArtifact {
@@ -187,7 +87,7 @@ export function formatToolArtifact(
       ? JSON.stringify(result.output, null, 2)
       : String(result.output);
 
-  if (tool === "read_file") {
+  if (tool === WorkspaceTool.READ_FILE) {
     const filePath = String(args.path || "file");
     return {
       id: randomUUID(),
@@ -200,7 +100,7 @@ export function formatToolArtifact(
     };
   }
 
-  if (tool === "write_file") {
+  if (tool === WorkspaceTool.WRITE_FILE) {
     const filePath = String(args.path || "file");
     return {
       id: randomUUID(),
@@ -213,7 +113,7 @@ export function formatToolArtifact(
     };
   }
 
-  if (tool === "bash") {
+  if (tool === WorkspaceTool.BASH) {
     const cmd = String(args.command || "command");
     return {
       id: randomUUID(),
@@ -224,7 +124,7 @@ export function formatToolArtifact(
     };
   }
 
-  if (tool === "knowledge_search") {
+  if (tool === WorkspaceTool.KNOWLEDGE_SEARCH) {
     const q = String(args.query || "Search");
     return {
       id: randomUUID(),
@@ -235,6 +135,7 @@ export function formatToolArtifact(
     };
   }
 
+  // LIST_DIR and any future tools fall through to DOCUMENT
   return {
     id: randomUUID(),
     type: ArtifactType.DOCUMENT,
@@ -242,4 +143,19 @@ export function formatToolArtifact(
     content: contentStr,
     status,
   };
+}
+
+/**
+ * Coerces a raw string from model output into a typed `WorkspaceTool` enum member.
+ * Returns null if the string does not match any known tool — caller should skip the dispatch.
+ *
+ * @param raw - Untrusted string from parsed model JSON (e.g. "read_file")
+ * @returns Canonical WorkspaceTool or null if unrecognised
+ */
+export function coerceWorkspaceTool(raw: string): WorkspaceTool | null {
+  /** Validates raw string is a valid WorkspaceTool value without Object.values allocation on hot path. */
+  if (Object.values(WorkspaceTool).includes(raw as WorkspaceTool)) {
+    return raw as WorkspaceTool;
+  }
+  return null;
 }

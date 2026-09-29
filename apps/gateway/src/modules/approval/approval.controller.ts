@@ -6,7 +6,7 @@
 import type { GatewayRequest, GatewayResponse } from "@/routes/http-types";
 import { sendJson, parseQueryParams } from "@/routes/http-helpers";
 import { ApprovalFilterSchema, ResolveApprovalSchema } from "@/validation";
-import { ApprovalService } from "@/services";
+import { ApprovalService } from "./approval.service";
 
 /**
  * Controller managing approval tickets and resolutions.

@@ -4,7 +4,7 @@
  */
 
 import type { RouteGroup } from "@/routes/router";
-import { ApprovalController } from "@/controllers";
+import { ApprovalController } from "./approval.controller";
 
 /**
  * Registers approval ticket routes onto the gateway router scoped under /approvals.

@@ -15,7 +15,7 @@ export default function ContextPage(): React.JSX.Element {
   return (
     <Suspense
       fallback={
-        <div className="flex h-full items-center justify-center">
+        <div className="flex size-full min-w-0 flex-1 items-center justify-center">
           <span className="text-muted-foreground animate-pulse font-mono text-xs">
             Loading Context Hub...
           </span>

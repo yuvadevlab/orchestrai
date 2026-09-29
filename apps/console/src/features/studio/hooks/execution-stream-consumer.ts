@@ -4,7 +4,8 @@
  * @module apps/console/features/studio/hooks
  */
 
-import { SseStreamEvent } from "@orchestrai/shared-types";
+import { SseStreamEvent, ArtifactType } from "@orchestrai/shared-types";
+import { useConsoleStore } from "@/lib/stores";
 import type { CoworkArtifact, CoworkMessage, StudioApprovalRequest } from "../types";
 import {
   appendArtifactSegment,
@@ -49,6 +50,20 @@ export async function consumeExecutionStream({
               : m,
           ),
         );
+        // Automatically open the right-side Canvas pane and display the artifact
+        useConsoleStore.getState().setActiveArtifact({
+          id: art.id,
+          title: art.title,
+          language: art.language || "typescript",
+          code: art.content,
+        });
+        if (art.type === ArtifactType.TERMINAL) {
+          useConsoleStore.getState().setCanvasMode("terminal");
+        } else if (art.language === "html" || art.filePath?.endsWith(".html")) {
+          useConsoleStore.getState().setCanvasMode("preview");
+        } else {
+          useConsoleStore.getState().setCanvasMode("code");
+        }
       } catch {
         /* Ignore malformed artifact JSON */
       }

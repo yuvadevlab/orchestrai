@@ -7,8 +7,17 @@
  */
 
 import React, { useState } from "react";
-import { Check, CheckCircle2, ChevronDown, ChevronRight, Copy, Terminal } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  Terminal,
+  PanelRightOpen,
+} from "lucide-react";
 import { Badge, Button } from "@yuva-devlab/ui";
+import { useConsoleStore } from "@/lib/stores";
 import type { CoworkArtifact } from "../../types";
 
 export interface ArtifactTerminalCardProps {
@@ -21,11 +30,24 @@ export interface ArtifactTerminalCardProps {
 export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const setActiveArtifact = useConsoleStore((s) => s.setActiveArtifact);
+  const setCanvasMode = useConsoleStore((s) => s.setCanvasMode);
 
   const handleCopy = (): void => {
     navigator.clipboard.writeText(artifact.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenInCanvas = (e: React.MouseEvent): void => {
+    e.stopPropagation();
+    setCanvasMode("terminal");
+    setActiveArtifact({
+      id: artifact.id,
+      title: artifact.title,
+      code: artifact.content,
+      terminalLogs: artifact.content.split("\n"),
+    });
   };
 
   return (
@@ -57,6 +79,17 @@ export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): R
             <CheckCircle2 className="mr-1 size-3" />
             exit 0
           </Badge>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenInCanvas}
+            className="h-6 cursor-pointer gap-1 border-zinc-700 bg-zinc-800/80 px-2 text-[10px] text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
+            title="Open in Right-Side Canvas"
+          >
+            <PanelRightOpen className="size-3 text-amber-400" />
+            <span className="hidden sm:inline">Canvas</span>
+          </Button>
 
           <Button
             variant="ghost"

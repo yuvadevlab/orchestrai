@@ -36,9 +36,9 @@ export function ContextHubPageContent(): React.JSX.Element {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="flex size-full min-w-0 flex-1 flex-col overflow-hidden">
       {/* Sub-header Navigation Rail */}
-      <div className="border-border/60 bg-card/40 flex items-center justify-between border-b px-6 py-2.5 backdrop-blur">
+      <div className="border-border/60 bg-card/40 flex w-full shrink-0 items-center justify-between border-b px-6 py-2.5 backdrop-blur">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <Layers className="text-primary size-4" />
@@ -75,7 +75,7 @@ export function ContextHubPageContent(): React.JSX.Element {
       </div>
 
       {/* Active Tab View */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden">
         {activeTab === "knowledge" ? <KnowledgePageContent /> : <MemoryPageContent />}
       </div>
     </div>

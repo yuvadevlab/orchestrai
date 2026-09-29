@@ -4,7 +4,7 @@
  */
 
 import type { RouteGroup } from "@/routes/router";
-import { RagController } from "@/controllers";
+import { RagController } from "./rag.controller";
 
 /**
  * Registers RAG ingestion and retrieval routes onto the gateway router scoped under /rag.

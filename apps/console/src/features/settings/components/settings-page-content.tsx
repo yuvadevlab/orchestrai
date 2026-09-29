@@ -23,6 +23,7 @@ import {
 import { PageShell } from "@/components/layout/page-shell";
 import { useAuth } from "@/lib/auth";
 import { useAgents } from "@/features/agents/api";
+import { SettingsApiKeysCard } from "./settings-api-keys-card";
 
 interface SettingsCardProps {
   title: string;
@@ -133,28 +134,7 @@ export function SettingsPageContent(): React.JSX.Element {
         </SettingsSectionCard>
 
         {/* API Keys & Integration Tokens */}
-        <SettingsSectionCard
-          title="API Keys & Integration Tokens"
-          description="Bring your own provider keys for custom inference quotas and private routing."
-        >
-          <div className="space-y-3">
-            {Object.keys(apiKeys).map((p) => (
-              <div
-                key={p}
-                className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3"
-              >
-                <Label className="text-muted-foreground w-28 text-xs">{p}</Label>
-                <Input
-                  type="password"
-                  placeholder="sk-••••••••"
-                  value={apiKeys[p]}
-                  onChange={(e) => handleKeyChange(p, e.target.value)}
-                  className="bg-background h-8 flex-1 font-mono text-xs"
-                />
-              </div>
-            ))}
-          </div>
-        </SettingsSectionCard>
+        <SettingsApiKeysCard apiKeys={apiKeys} onKeyChange={handleKeyChange} />
 
         {/* Preferences */}
         <SettingsSectionCard

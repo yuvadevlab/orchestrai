@@ -4,7 +4,7 @@
  */
 
 import type { Router } from "@/routes/router";
-import { HealthController } from "@/controllers";
+import { HealthController } from "./health.controller";
 
 /**
  * Registers health check endpoints onto the router.

@@ -7,8 +7,8 @@ import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { loadGatewayConfig } from "@/config";
 
 const logger = loggerWithConfig(new Logger("Gateway"));
+import { Router } from "@/routes";
 import {
-  Router,
   registerHealthRoutes,
   registerExecutionRoutes,
   registerConversationRoutes,
@@ -27,7 +27,7 @@ import {
   registerMemoryRoutes,
   registerTraceRoutes,
   registerResourceAccessRoutes,
-} from "@/routes";
+} from "@/modules";
 import { GatewayServer, registerProcessLifecycle } from "@/server";
 
 // Re-export all internal modules for test harnesses and downstream programmatic consumption
@@ -35,8 +35,8 @@ export * from "./config";
 export * from "./context";
 export * from "./middleware";
 export * from "./validation";
-export * from "./services";
-export * from "./controllers";
+export * from "./modules";
+export * from "./infra";
 export * from "./routes";
 export * from "./server";
 

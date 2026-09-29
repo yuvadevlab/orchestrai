@@ -5,14 +5,21 @@
  */
 
 import path from "node:path";
-import { ExecutionStatus, PermissionLevel, SseStreamEvent } from "@orchestrai/shared-types";
+import {
+  ExecutionStatus,
+  PermissionLevel,
+  SseStreamEvent,
+  WorkspaceTool,
+} from "@orchestrai/shared-types";
 import {
   executeWorkspaceTool,
   resolveMonorepoRoot,
 } from "@/modules/streaming/autonomous-agent-runner";
-import { permissionPolicyManager } from "@/modules/permission/permission-policy.manager";
-import { resourceRegistryService } from "@/modules/permission/resource-registry.service";
-import { resourceAccessLogger } from "@/modules/permission/resource-access-logger";
+import {
+  permissionPolicyManager,
+  resourceRegistryService,
+  resourceAccessLogger,
+} from "@/modules/permission";
 import type { ExecutionStreamState } from "@/modules/streaming/live-execution-broadcaster";
 
 /**
@@ -28,7 +35,7 @@ import type { ExecutionStreamState } from "@/modules/streaming/live-execution-br
 export async function handleToolInvocationWithApproval(
   executionId: string,
   sessionId: string,
-  toolCall: { tool: string; args: Record<string, unknown> },
+  toolCall: { tool: WorkspaceTool; args: Record<string, unknown> },
   state: ExecutionStreamState,
   emitEvent: (event: string, data: unknown) => void,
 ): Promise<{ output: unknown; isError: boolean }> {
@@ -49,7 +56,8 @@ export async function handleToolInvocationWithApproval(
       resourceUri: canonical.uri,
       toolSlug: toolCall.tool,
       action: "execute",
-      permissionLevel: toolCall.tool === "bash" ? PermissionLevel.EXECUTE : PermissionLevel.READ,
+      permissionLevel:
+        toolCall.tool === WorkspaceTool.BASH ? PermissionLevel.EXECUTE : PermissionLevel.READ,
       decision: "allowed",
     });
 
@@ -88,7 +96,8 @@ export async function handleToolInvocationWithApproval(
       resourceUri: canonical.uri,
       toolSlug: toolCall.tool,
       action: "execute",
-      permissionLevel: toolCall.tool === "bash" ? PermissionLevel.EXECUTE : PermissionLevel.READ,
+      permissionLevel:
+        toolCall.tool === WorkspaceTool.BASH ? PermissionLevel.EXECUTE : PermissionLevel.READ,
       decision: "denied",
       reason: `Denied by user for: ${perm.target}`,
     });

@@ -58,7 +58,7 @@ export function KnowledgeQueryDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent size="xl">
+      <DialogContent size="lg">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <div className="bg-primary/10 text-primary grid size-7 place-items-center rounded-md">

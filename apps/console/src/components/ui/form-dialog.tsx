@@ -33,6 +33,7 @@ export interface FormDialogProps {
   fields: FormFieldConfig[];
   submitText?: string;
   maxWidth?: FormDialogMaxWidth;
+  columns?: 1 | 2;
   onClose: () => void;
   onSubmit: (formData: Record<string, string>) => Promise<void> | void;
 }
@@ -48,6 +49,7 @@ export function FormDialog({
   fields,
   submitText = "Save",
   maxWidth = "xl",
+  columns = 2,
   onClose,
   onSubmit,
 }: FormDialogProps): React.JSX.Element | null {
@@ -111,11 +113,17 @@ export function FormDialog({
           </DialogHeader>
 
           <DialogBody className="overflow-y-auto px-6 py-4">
-            <div className="grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
+            <div
+              className={
+                columns === 1
+                  ? "grid grid-cols-1 gap-y-3.5"
+                  : "grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2"
+              }
+            >
               {fields.map((field) => (
                 <FormDialogField
                   key={field.name}
-                  field={field}
+                  field={columns === 1 ? { ...field, colSpan: 1 } : field}
                   value={formData[field.name] ?? ""}
                   onChange={handleFieldChange}
                   error={fieldErrors[field.name]}

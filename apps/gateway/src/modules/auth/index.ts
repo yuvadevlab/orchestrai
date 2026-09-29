@@ -3,7 +3,7 @@
  * @description Auth module barrel — exports route registration and all auth services.
  * @module apps/gateway/modules/auth
  */
-export { registerAuthRoutes } from "./auth.route";
-export { AuthController } from "./auth.controller";
-export { AuthService } from "./auth.service";
-export { issueSessionToken, resolveUserByToken } from "./token.service";
+export { registerAuthRoutes } from "./controllers/auth.route";
+export { AuthController } from "./controllers/auth.controller";
+export { AuthService } from "./services/auth.service";
+export { issueSessionToken, resolveUserByToken } from "./services/token.service";

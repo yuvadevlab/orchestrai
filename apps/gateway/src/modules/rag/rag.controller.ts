@@ -6,7 +6,7 @@
 import type { GatewayRequest, GatewayResponse } from "@/routes/http-types";
 import { sendJson } from "@/routes/http-helpers";
 import { IngestDocumentSchema, QueryRagSchema } from "@/validation";
-import { RagService, ragService } from "@/services";
+import { RagService, ragService } from "./rag.service";
 
 /**
  * Controller managing RAG endpoints.

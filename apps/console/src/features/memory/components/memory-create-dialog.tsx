@@ -73,6 +73,8 @@ export function MemoryCreateDialog({
       description="Inject persistent knowledge and user preferences remembered across all sessions."
       fields={MEMORY_FIELDS}
       submitText="Save Memory"
+      maxWidth="md"
+      columns={1}
       onClose={onClose}
       onSubmit={handleSubmit}
     />
