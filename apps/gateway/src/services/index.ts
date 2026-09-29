@@ -1,22 +1,24 @@
 /**
  * @file apps/gateway/src/services/index.ts
- * @description Central barrel export for all gateway domain services.
+ * @description Backward-compatible barrel re-exporting all domain services from their new feature module locations.
+ * This file will be removed once all internal imports are updated to reference modules directly.
+ * @module apps/gateway/services
+ * @deprecated Use direct module imports (e.g. `@/modules/execution/execution.service`) instead.
  */
 
-export * from "./execution.service";
-export * from "./conversation.service";
-export * from "./conversation-query.service";
-export * from "./conversation-message.service";
-export * from "./agent.service";
-export * from "./rag.service";
-export * from "./memory.service";
-export * from "./approval.service";
-export * from "./auth.service";
-/* Platform configuration — split into focused domain services */
-export * from "./llm-provider.service";
-export * from "./llm-model.service";
-export * from "./platform-mode.service";
-export * from "./nav-item.service";
-export * from "./platform-role.service";
-export * from "./platform-permission.service";
-export * from "./platform-tool.service";
+export * from "@/modules/execution/execution.service";
+export * from "@/modules/session/session.service";
+export * from "@/modules/session/session-query.service";
+export * from "@/modules/session/session-message.service";
+export * from "@/modules/agent/agent.service";
+export * from "@/modules/rag/rag.service";
+export * from "@/modules/memory/memory.service";
+export * from "@/modules/approval/approval.service";
+export * from "@/modules/auth/auth.service";
+export * from "@/modules/platform/llm-provider.service";
+export * from "@/modules/platform/llm-model.service";
+export * from "@/modules/platform/platform-mode.service";
+export * from "@/modules/nav/nav-item.service";
+export * from "@/modules/platform/platform-role.service";
+export * from "@/modules/platform/platform-permission.service";
+export * from "@/modules/platform/platform-tool.service";

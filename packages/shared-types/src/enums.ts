@@ -8,4 +8,6 @@ export * from "./enums/hub.enums";
 export * from "./enums/resource.enums";
 export * from "./enums/security.enums";
 export * from "./enums/studio.enums";
+export * from "./enums/sse.enums";
+export * from "./enums/cqrs.enums";
 export type { ErrorCode } from "./error-codes";

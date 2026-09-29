@@ -4,6 +4,104 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 ---
 
+## Session: 2026-09-29 (Continued) — Phase 1 Complete: Logging, JSDoc & Feature-Module Reorganization
+
+### Phase 1 Completion Summary
+
+#### Log-Rich Repository & Service Coverage
+
+- **`PostgresExecutionRepository`**: Full structured log coverage — every method entry (`findById`, `create`, `updateStatus`, `list`, `cancel`), success paths, branch conditions (terminal state detection, tenant scoping), and all error boundaries wrapped in `try/catch` with `logger.error`.
+- **`PostgresSessionRepository`**: Full log coverage — session creation, message append with FK stub execution warning, delete graceful degradation, list pagination debug output.
+- **`ExecutionService`**: Full log coverage — execution dispatch entry, agent fallback path, repository port persistence confirmation, async queue dispatch vs live SSE branch, live SSE completion state persistence, unhandled rejection `.catch()` with `logger.error`.
+- **Entity Mappers**: `execution-entity.mapper.ts` and `session-entity.mapper.ts` — comprehensive JSDoc, single-responsibility, < 100 LOC each.
+
+#### Feature-Module Reorganization (`apps/gateway/src/modules/`)
+
+- **Problem**: 43 flat service files + 22 route files + 19 controller files with no domain locality.
+- **Solution**: Migrated into 13 feature modules under `src/modules/<domain>/`:
+  - `auth/` — login, signup, token, crypto, password-reset
+  - `execution/` — execution service, query service, status mapper, CQRS command handlers
+  - `session/` — conversation threads + messages (3 services merged under session naming)
+  - `agent/` — agent CRUD
+  - `streaming/` — live SSE manager, turn executor, broadcaster, redis publisher, message history, autonomous runner, queue producer
+  - `approval/` — HITL clearance service + resolve-approval command handler
+  - `permission/` — resource access, RBAC, policy manager, DB grants, evaluator, registry
+  - `platform/` — LLM models, providers, roles, tools, modes
+  - `memory/` — memory CRUD
+  - `rag/` — RAG ingestion + search
+  - `eval/` — prompt evaluation
+  - `nav/` — dynamic nav items
+  - `trace/` — execution trace
+  - `health/` — health probe routes
+- **Migration**: `cp` + `sed` batch import path rewrites; all `@/services/`, `@/routes/`, `@/controllers/` aliases updated to `@/modules/<domain>/`. Backward-compatible barrel files left in `services/index.ts`, `controllers/index.ts`, `commands/index.ts`.
+- **Legacy Purging**: Removed 70+ obsolete flat files from `apps/gateway/src/services/`, `apps/gateway/src/controllers/`, `apps/gateway/src/routes/`, and `apps/gateway/src/commands/`.
+- **Hard 250-Line Rule Decomposition**:
+  - Extracted `apps/gateway/src/repositories/session-message-store.ts` (< 115 LOC) from `PostgresSessionRepository` (now 217 LOC).
+  - Extracted `apps/gateway/src/modules/execution/execution-dispatcher.ts` (< 190 LOC) from `ExecutionService` (now 187 LOC).
+  - 100% of files in `apps/gateway` are now strictly < 250 LOC (max 245 LOC).
+- **Validation**:
+  - `pnpm --filter @orchestrai/gateway typecheck` → **0 errors** ✅
+  - Monorepo `pnpm typecheck` across all 37 targets → **0 errors** ✅
+  - Monorepo `pnpm lint --max-warnings=0` → **0 errors, 0 warnings** ✅
+
+---
+
+## Session: 2026-09-29 — Grand Unified Architecture Blueprint (Backend Hexagonal Decoupling & Frontend Dual-Pane Canvas)
+
+### 1. Unified Architectural Synthesis
+
+- Conducted deep architectural review from the perspective of Principal Systems and Product Architects at Google (DeepMind/Vertex), OpenAI (Platform/Canvas), and Anthropic (Claude Console/Artifacts).
+- Unified backend service decoupling (`apps/orchestrator` for compiled DAG runtime, `apps/admin` for control plane, `apps/gateway` as thin ingress) and frontend modernization (`apps/console` dual-pane interactive canvas, 120 FPS RAF stream buffer, Zustand+IndexedDB tri-tier state).
+- Mapped all 8 backend patterns (Ports & Adapters, CQRS Command/Query buses, Thin Shell inversion, `apps/orchestrator`, `packages/model-router`, `packages/billing`, `packages/semantic-cache`, `apps/admin`) and 6 frontend pillars (120 FPS stream engine, Tri-Tier state, Dual-Pane canvas, Virtualized chat feed, HITL clearance cockpit, Route Group consolidation) into a synchronized 8-phase execution roadmap.
+
+### 2. Comprehensive Tracking & Session Continuity
+
+- Produced definitive master plan: `master-architecture-plan.md` guaranteeing zero omissions from previous audits.
+- Embedded complete 8-phase milestone checklist into `PROGRESS.md` (`Phase 0` through `Phase 8`) with explicit deliverables and tracking checkboxes to ensure seamless resumption across sessions or AI agents.
+- Confirmed strict compliance with workspace invariants: 250-line rule, detailed JSDoc, explanatory inline comments, and zero test policy during feature implementation.
+
+### 3. Completed Phase 0: Shared Domain Contracts, Ports & Enum Normalization
+
+- **Strict Enum Typing & Zero Hardcoded Strings**:
+  - Created `SseMessageRole`, `SseToolCallStatus`, `SseDoneStatus` in `@orchestrai/shared-types/enums/sse.enums.ts`.
+  - Created `ExecutionCommandType`, `ApprovalCommandType`, `SessionCommandType`, `QueueBackoffType` in `@orchestrai/shared-types/enums/cqrs.enums.ts`.
+  - Replaced all string literals in SSE payloads (`SseMessagePayload`, `SseToolCallPayload`, `SseDonePayload`), CQRS commands, and queue backoff configs with canonical enum keys.
+- **Hexagonal Storage Ports (`@orchestrai/core/src/ports/`)**:
+  - `IExecutionRepository` (`execution-repository.port.ts`)
+  - `ISessionRepository` (`session-repository.port.ts`)
+  - `IAgentRepository` (`agent-repository.port.ts`)
+  - `IEventPublisher` (`event-publisher.port.ts`)
+  - `IQueueProducer` (`queue-producer.port.ts`)
+- **CQRS Command Pipeline (`@orchestrai/core/src/cqrs/`)**:
+  - `ICommand`, `ICommandHandler`, `ICommandBus` (`command-bus.port.ts`)
+  - `CreateExecutionCommand`, `CancelExecutionCommand` (`execution.commands.ts`)
+  - `ResolveApprovalCommand` (`approval.commands.ts`)
+  - `CreateSessionCommand`, `AppendMessageCommand`, `DeleteSessionCommand` (`session.commands.ts`)
+- **SDK Resources (`@orchestrai/sdk/src/resources/`)**:
+  - Mounted `AdminResource` (`admin.ts`) for operator control plane queries and budget metrics.
+  - Mounted `RealtimeResource` (`realtime.ts`) for typed SSE streaming subscriptions (`subscribeToExecution`).
+  - Added `adminUrl` configuration option to `OrchestrAIClientOptions`.
+- **Quality Invariants**: Every single new file strictly < 110 LOC (hard 250-line rule passed). Comprehensive JSDoc on every symbol.
+
+### 4. Progress on Phase 1: Gateway Hexagonal Decoupling & CQRS Handlers
+
+- **Prisma Repository Adapters (`apps/gateway/src/repositories/`)**:
+  - Built `PostgresExecutionRepository` implementing `IExecutionRepository`.
+  - Built `PostgresSessionRepository` implementing `ISessionRepository`.
+  - Built `PostgresAgentRepository` implementing `IAgentRepository`.
+  - Built `RedisEventPublisherAdapter` implementing `IEventPublisher`.
+  - Built `BullMQQueueProducerAdapter` implementing `IQueueProducer`.
+- **CQRS Command Handlers (`apps/gateway/src/commands/`)**:
+  - `CreateExecutionCommandHandler` (`create-execution.handler.ts`)
+  - `CancelExecutionCommandHandler` (`cancel-execution.handler.ts`)
+  - `ResolveApprovalCommandHandler` (`resolve-approval.handler.ts`)
+  - `CreateSessionCommandHandler`, `AppendMessageCommandHandler`, `DeleteSessionCommandHandler` (`session.handlers.ts`)
+- **ExecutionService Decoupling**:
+  - Injected `IExecutionRepository`, `IQueueProducer`, and `IEventPublisher` ports into `ExecutionService`.
+  - Replaced direct Prisma calls with port methods, reducing LOC from 230 down to 198 lines (< 250-line rule verified).
+
+---
+
 ## Session: 2026-09-29 — Sticky Live Clearance Bar, Inline Decision Audit Log, Enum Normalization & Query Extraction
 
 ### 1. User Feedback & UX Improvements

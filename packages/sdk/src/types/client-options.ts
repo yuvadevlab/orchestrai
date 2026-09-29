@@ -22,6 +22,12 @@ export interface OrchestrAIClientOptions {
   realtimeUrl?: string;
 
   /**
+   * Root URL of the OrchestrAI Admin Control Plane API.
+   * @default "http://localhost:4003"
+   */
+  adminUrl?: string;
+
+  /**
    * Multi-tenant partition identifier.
    */
   tenantId?: string;

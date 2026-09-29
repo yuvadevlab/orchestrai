@@ -14,6 +14,8 @@ import {
   WorkflowsResource,
   ToolsResource,
   ModelsResource,
+  AdminResource,
+  RealtimeResource,
 } from "./resources";
 
 /**
@@ -47,6 +49,12 @@ export class OrchestrAIClient {
   /** Model provider endpoints and routing configurations */
   public readonly models: ModelsResource;
 
+  /** Control Plane management resource for platform models, providers, and budgets */
+  public readonly admin: AdminResource;
+
+  /** Dedicated persistent streaming connection to Realtime SSE/WS broker */
+  public readonly realtime: RealtimeResource;
+
   constructor(options: OrchestrAIClientOptions = {}) {
     this.http = new HttpClient(options);
     this.agents = new AgentsResource(this.http, options);
@@ -57,5 +65,7 @@ export class OrchestrAIClient {
     this.workflows = new WorkflowsResource(this.http, options);
     this.tools = new ToolsResource(this.http, options);
     this.models = new ModelsResource(this.http, options);
+    this.admin = new AdminResource(this.http, options);
+    this.realtime = new RealtimeResource(this.http, options);
   }
 }

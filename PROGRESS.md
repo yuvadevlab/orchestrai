@@ -202,3 +202,83 @@ Live progress tracking for the **OrchestrAI** Universal Autonomous AI Agent & Co
 - **ESLint**: `pnpm lint` passing with **0 warnings** (`--max-warnings=0`).
 - **Design Tokens**: 100% semantic CSS theme tokens (`text-warning`, `border-border`, `bg-card`). Zero ad-hoc colors.
 - **No Test Policy**: Zero test cases written during phase implementation until requested.
+
+---
+
+## 3. Next Architecture Transformation: Grand Unified Roadmap (Backend & Frontend)
+
+Master architecture specification documented in [`master-architecture-plan.md`](file:///Users/yuvarajpattabi/.gemini/antigravity-ide/brain/8214e84f-c233-4f28-8c2d-354e1c57bf3f/master-architecture-plan.md).
+
+### [x] Phase 0: Shared Domain Contracts & Ports (`@orchestrai/core`, `@orchestrai/shared-types`, `@orchestrai/sdk`)
+
+- [x] Define repository interface ports in `@orchestrai/core`: `IExecutionRepository`, `ISessionRepository`, `IAgentRepository`, `IEventPublisher`, `IQueueProducer`
+- [x] Normalize SSE event payload schemas and HITL clearance DTOs in `@orchestrai/shared-types` with zero hardcoded string literals (canonical `SseMessageRole`, `SseToolCallStatus`, `SseDoneStatus`, `ApprovalDecisionVerdict`, `PermissionScope`, `RequestStatus` enums)
+- [x] Define CQRS command contracts in `@orchestrai/core`: `CreateExecutionCommand`, `CancelExecutionCommand`, `ResolveApprovalCommand`, `CreateSessionCommand`, `ICommandBus` with `ExecutionCommandType`, `ApprovalCommandType`, and `SessionCommandType` enums
+- [x] Update `@orchestrai/sdk` client interfaces with typed `AdminResource` (control plane) and `RealtimeResource` (typed SSE streaming)
+
+### [x] Phase 1: Gateway Hexagonal Decoupling, CQRS Refactor & Feature-Module Reorganization (`apps/gateway`)
+
+- [x] Implement Prisma repository adapters in `apps/gateway` implementing `@orchestrai/core` ports (`PostgresExecutionRepository`, `PostgresSessionRepository`, `PostgresAgentRepository`, `RedisEventPublisherAdapter`, `BullMQQueueProducerAdapter`)
+- [x] Extract dedicated domain entity mappers: `execution-entity.mapper.ts`, `session-entity.mapper.ts` — each < 100 lines, JSDoc-rich
+- [x] Structure `apps/gateway` with CQRS command handlers (`CreateExecutionCommandHandler`, `CancelExecutionCommandHandler`, `ResolveApprovalCommandHandler`, `CreateSessionCommandHandler`)
+- [x] Strip direct Prisma calls out of Gateway services; inject repository interfaces at bootstrap in `ExecutionService`
+- [x] Full log-rich coverage on all repository adapters and services — every method entry, branch, error, and success path emits structured logs via `@yuva-devlab/logger`
+- [x] **Feature-module reorganization**: Migrated 43 flat `services/`, 22 `routes/`, and 19 `controllers/` files into 13 feature modules under `src/modules/<domain>/` (auth, execution, session, agent, streaming, approval, permission, platform, memory, rag, eval, nav, trace, health)
+- [x] All module `index.ts` barrel files created; backward-compatible re-exports in legacy `services/index.ts`, `controllers/index.ts`, `commands/index.ts`
+- [x] Zero TypeScript errors (`pnpm typecheck` clean) after full reorganization
+
+### [ ] Phase 2: Extract Dedicated Execution Orchestrator (`apps/orchestrator`)
+
+- [ ] Scaffold `apps/orchestrator` as a standalone data-plane microservice
+- [ ] Migrate `live-turn-executor`, `OrchestrAIRuntime` DAG engine, and Postgres checkpointer from Gateway to Orchestrator
+- [ ] Implement execution state machine (`PENDING` → `RUNNING` → `TOOL_CALL` → `AWAITING_APPROVAL` → `COMPLETED`)
+- [ ] Expose gRPC service (`ExecutionService`) using `packages/grpc` contracts; Gateway delegates to Orchestrator via gRPC
+- [ ] Publish step events and token deltas to Redis Pub/Sub channels
+
+### [ ] Phase 3: Extract Control Plane Service (`apps/admin`)
+
+- [ ] Scaffold `apps/admin` as a dedicated control-plane microservice
+- [ ] Migrate all operator endpoints (`/platform/*`, providers, models, roles, tools, tenants, budgets) from Gateway to Admin
+- [ ] Implement separate operator JWT verification isolating admin traffic from user execution traffic
+
+### [ ] Phase 4: Intelligence Packages & Realtime Streaming Pipeline
+
+- [ ] Build `packages/model-router`: dynamic provider routing, fallback cascades, latency P95/P99 tracking, and cost estimation
+- [ ] Build `packages/billing`: token counting, append-only cost ledger per tenant, usage aggregation, and budget enforcers
+- [ ] Build `packages/semantic-cache`: vector similarity search (>0.97 similarity) using `packages/rag` embeddings
+- [ ] Configure `apps/realtime` as a dedicated SSE/WebSocket broker subscribing to Redis channels and fanning out to clients
+- [ ] Configure `apps/worker` for heavy BullMQ async task processing (sandboxed Docker tools, batch evaluations)
+
+### [ ] Phase 5: Console 120 FPS Stream Engine & State Modernization (`apps/console`)
+
+- [ ] Implement `RafStreamBuffer` in `apps/console/src/lib/streaming/` with 16ms `requestAnimationFrame` coalescing
+- [ ] Implement incremental Markdown AST parser with frozen completed block cache to eliminate $O(N^2)$ re-parsing
+- [ ] Scaffold Zustand Tri-Tier store slices (`session-slice`, `canvas-slice`, `execution-slice`, `clearance-slice`)
+- [ ] Replace synchronous 5MB `localStorage` with asynchronous IndexedDB storage engine (`idb-keyval` / Dexie)
+
+### [ ] Phase 6: Dual-Pane Workspace Canvas & Virtualized Chat (`apps/console`)
+
+- [ ] Re-architect `StudioWorkspace` into responsive dual-pane layout (Left: Conversational Feed | Right: Interactive Canvas)
+- [ ] Build Interactive Canvas views:
+  - 💻 Code Editor with syntax highlighting, line numbers, folding, and one-click copy
+  - 🌐 Sandboxed HTML/React Preview with isolated `iframe` (`sandbox="allow-scripts"`)
+  - 🔄 Visual Diff Viewer with side-by-side green/red change highlights
+  - ⚡ ANSI Terminal Emulator for CLI/Docker command output
+- [ ] Virtualize message feed with `@tanstack/react-virtual`
+- [ ] Implement intent-aware scroll pinning (unpin on user scroll up + `New output streaming below ↓` pill)
+
+### [ ] Phase 7: Screen Consolidation & Operator Cockpits (`apps/console`)
+
+- [ ] Delete redundant duplicate `app/(dashboard)/console` route; redirect permanently to `/`
+- [ ] Upgrade `/executions` to interactive DAG Execution Visualizer & Checkpoint Replayer
+- [ ] Upgrade `/models` to Model Gateway & Cost/Latency Cockpit (talking to `apps/admin`)
+- [ ] Consolidate `/knowledge` and `/memory` into unified `/context` hub
+- [ ] Elevate `/evaluations` in navigation for prompt rubric grading and benchmark suites
+- [ ] Implement global slide-out HITL Security Clearance Drawer with blast-radius preview and keyboard shortcuts
+
+### [ ] Phase 8: Monorepo Hardening & Quality Gates
+
+- [ ] Verify 250-line rule across 100% of monorepo files (decompose any file approaching 200 lines)
+- [ ] Comprehensive JSDoc on every exported symbol; explanatory comments on every conditional/guard
+- [ ] Monorepo typecheck validation (`pnpm typecheck`) with 0 errors
+- [ ] Monorepo ESLint validation (`pnpm lint`) with 0 warnings (`--max-warnings=0`)

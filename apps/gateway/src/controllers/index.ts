@@ -1,23 +1,25 @@
 /**
  * @file apps/gateway/src/controllers/index.ts
- * @description Central barrel export for all gateway HTTP controllers.
+ * @description Backward-compatible barrel re-exporting all HTTP controllers from their new feature module locations.
+ * @module apps/gateway/controllers
+ * @deprecated Use direct module imports (e.g. `@/modules/execution/execution.controller`) instead.
  */
 
-export * from "./health.controller";
-export * from "./execution.controller";
-export * from "./conversation.controller";
-export * from "./agent.controller";
-export * from "./rag.controller";
-export * from "./approval.controller";
-export * from "./auth.controller";
-export * from "./llm-provider.controller";
-export * from "./llm-model.controller";
-export * from "./platform-mode.controller";
-export * from "./nav-item.controller";
-export * from "./platform-role.controller";
-export * from "./platform-permission.controller";
-export * from "./platform-tool.controller";
-export * from "./eval.controller";
-export * from "./memory.controller";
-export * from "./trace.controller";
-export * from "./resource-access.controller";
+export * from "@/modules/health/health.controller";
+export * from "@/modules/execution/execution.controller";
+export * from "@/modules/session/session.controller";
+export * from "@/modules/agent/agent.controller";
+export * from "@/modules/rag/rag.controller";
+export * from "@/modules/approval/approval.controller";
+export * from "@/modules/auth/auth.controller";
+export * from "@/modules/platform/llm-provider.controller";
+export * from "@/modules/platform/llm-model.controller";
+export * from "@/modules/platform/platform-mode.controller";
+export * from "@/modules/nav/nav-item.controller";
+export * from "@/modules/platform/platform-role.controller";
+export * from "@/modules/platform/platform-permission.controller";
+export * from "@/modules/platform/platform-tool.controller";
+export * from "@/modules/eval/eval.controller";
+export * from "@/modules/memory/memory.controller";
+export * from "@/modules/trace/trace.controller";
+export * from "@/modules/permission/resource-access.controller";
