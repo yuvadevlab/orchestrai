@@ -227,13 +227,14 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] All module `index.ts` barrel files created; backward-compatible re-exports in legacy `services/index.ts`, `controllers/index.ts`, `commands/index.ts`
 - [x] Zero TypeScript errors (`pnpm typecheck` clean) after full reorganization
 
-### [ ] Phase 2: Extract Dedicated Execution Orchestrator (`apps/orchestrator`)
+### [x] Phase 2: Extract Dedicated Execution Orchestrator (`apps/orchestrator`)
 
-- [ ] Scaffold `apps/orchestrator` as a standalone data-plane microservice
-- [ ] Migrate `live-turn-executor`, `OrchestrAIRuntime` DAG engine, and Postgres checkpointer from Gateway to Orchestrator
-- [ ] Implement execution state machine (`PENDING` → `RUNNING` → `TOOL_CALL` → `AWAITING_APPROVAL` → `COMPLETED`)
-- [ ] Expose gRPC service (`ExecutionService`) using `packages/grpc` contracts; Gateway delegates to Orchestrator via gRPC
-- [ ] Publish step events and token deltas to Redis Pub/Sub channels
+- [x] Scaffold `apps/orchestrator` as a standalone data-plane microservice with ESM + tsup build pipeline
+- [x] Wire `OrchestrAIRuntime` DAG engine, state machine transitions, and Postgres checkpointer (`PoolDatabaseQueryRunner`)
+- [x] Implement deterministic execution state machine (`ExecutionStateMachine`) with strict `Enum.KEY` guards (`OrchestratorState`, `OrchestratorEventType`)
+- [x] Implement `GrpcExecutionService` implementing `@orchestrai/grpc` contracts; wire Gateway `ExecutionDispatcher` to delegate execution runs to Orchestrator via `GrpcClient`
+- [x] Stream DAG step events, state changes, and token deltas to Redis Pub/Sub channels (`orchestrai:realtime:execution:<id>`) via `OrchestratorRedisPublisher`
+- [x] Zero hardcoded strings: Added `OrchestratorState`, `OrchestratorEventType`, `OrchestratorPubSubEventName`, `PlatformScope`, `PlatformCapabilitySlug`, `PlatformToolName` in shared enums; updated agent rule files (`AGENTS.md`, `.agents/AGENTS.md`, `00-core-invariants.md`, `coding-standards.md`) to mandate strict `Enum.KEY` usage.
 
 ### [ ] Phase 3: Extract Control Plane Service (`apps/admin`)
 

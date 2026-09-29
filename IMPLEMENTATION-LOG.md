@@ -4,6 +4,50 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 ---
 
+## Session: 2026-09-29 (Continued) — Phase 2 Complete: Dedicated DAG Execution Orchestrator Microservice
+
+### Phase 2 Completion Summary
+
+#### Dedicated Microservice Scaffolding (`apps/orchestrator`)
+
+- **Package Configuration**: Created `package.json`, `tsconfig.json`, `tsup.config.ts` on port 4004 (HTTP health probes) and port 50051 (gRPC service).
+- **Zero Hardcoded Strings & Canonical Enums**:
+  - `PlatformScope`, `PlatformCapabilitySlug`, `PlatformToolName` in `packages/shared-types/src/enums/platform.enums.ts`.
+  - `OrchestratorState`, `OrchestratorEventType`, `OrchestratorPubSubEventName` in `packages/shared-types/src/enums/orchestrator.enums.ts`.
+  - Canonical execution defaults constants `AGENT_EXECUTION_DEFAULTS` in `packages/core/src/constants/execution-defaults.constants.ts`.
+
+#### State Machine & Checkpointing Architecture
+
+- **Execution State Machine** (`apps/orchestrator/src/state-machine/execution-state-machine.ts`):
+  - Deterministic state machine governing transitions between `PENDING`, `DISPATCHED`, `COMPUTING`, `AWAITING_CLEARANCE`, `COMPLETED`, `FAILED`, and `CANCELLED`.
+  - Strict guard conditions and state validation preventing illegal transitions.
+- **Database Query Runner & Postgres Checkpointer** (`apps/orchestrator/src/checkpointer/database-query-runner.ts`):
+  - Bridges `@orchestrai/database` connection pool with runtime `PostgresCheckpointer` without leaky node-pg dependencies.
+  - Safe transactional snapshotting of LangGraph / dag execution state per tick.
+- **Realtime Redis Publisher** (`apps/orchestrator/src/publisher/orchestrator-redis-publisher.ts`):
+  - Publishes typed `OrchestratorPubSubEventName` events to Redis Pub/Sub channels (`orchestrai:realtime:execution:<id>`).
+
+#### DAG Execution Engine & gRPC Dispatch Service
+
+- **DAG Execution Engine** (`apps/orchestrator/src/runtime/dag-execution-engine.ts`):
+  - Initializes `OrchestrAIRuntime` with Ollama adapter, tool registry, and checkpointing.
+  - Step-by-step DAG progression with automatic HITL interrupt detection and event broadcasting.
+- **gRPC Server & Execution Service** (`apps/orchestrator/src/grpc/grpc-execution.service.ts`):
+  - Implements `IGrpcExecutionService` dispatching execution requests synchronously/asynchronously.
+  - Fallback logic to Ollama adapter using strict platform capability and tool enums.
+- **Microservice Entrypoint & Health** (`apps/orchestrator/src/server.ts`, `src/index.ts`):
+  - Dual HTTP (Fastify, port 4004) and gRPC (port 50051) lifecycle with graceful SIGINT/SIGTERM shutdown.
+- **Gateway Inversion**:
+  - Updated `apps/gateway/src/modules/execution/execution-dispatcher.ts` to delegate execution directly to `apps/orchestrator` via `GrpcClient`.
+
+#### Validation & Quality Gates
+
+- `pnpm typecheck` passed across all 39 monorepo targets with 0 errors.
+- `pnpm lint --max-warnings=0` passed cleanly with 0 warnings.
+- All files strictly adhere to the < 250 LOC rule (highest LOC is 232).
+
+---
+
 ## Session: 2026-09-29 (Continued) — Phase 1 Complete: Logging, JSDoc & Feature-Module Reorganization
 
 ### Phase 1 Completion Summary

@@ -7,7 +7,13 @@
 
 import { type PrismaClient, type Prisma, type Agent } from "@orchestrai/database";
 import { QUEUE_NAMES } from "@orchestrai/shared-types";
-import type { IExecutionRepository, IQueueProducer } from "@orchestrai/core";
+import {
+  ExecutionIdSchema,
+  AgentIdSchema,
+  type IExecutionRepository,
+  type IQueueProducer,
+} from "@orchestrai/core";
+import { GrpcClient } from "@orchestrai/grpc";
 import type { CreateExecutionDto } from "@/validation";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { liveExecutionManager } from "@/modules/streaming/live-execution.manager";
@@ -101,6 +107,20 @@ export class ExecutionDispatcher {
     systemPrompt?: string,
   ): void {
     if (!dto.input) return;
+
+    if (dto.variables?.orchestrator === true || process.env.USE_ORCHESTRATOR_SERVICE === "true") {
+      logger.info("Delegating execution run to Orchestrator microservice via gRPC", {
+        executionId,
+      });
+      const grpcClient = new GrpcClient(process.env.ORCHESTRATOR_GRPC_HOST || "localhost:50051");
+      void grpcClient.dispatchExecution({
+        executionId: ExecutionIdSchema.parse(executionId),
+        agentId: AgentIdSchema.parse(targetAgent.agentId),
+        inputPrompt: dto.input,
+        traceId: `tr_${Date.now()}`,
+      });
+      return;
+    }
 
     const isAsyncQueue = dto.variables?.async === true || dto.variables?.background === true;
 

@@ -28,6 +28,12 @@
 - **Null Safety**: Avoid non-null assertions (`!`). Use optional chaining (`?.`) and nullish coalescing (`??`).
 - **Index Access**: With `noUncheckedIndexedAccess`, always check if indexed array or object elements exist before accessing properties.
 
+## 4. Zero Hardcoded Strings & Strict Enum Usage
+
+- **Never Use Hardcoded String Literals**: Domain statuses, event types, roles, modes, scopes, clearance levels, and CQRS commands must NEVER be bare strings (e.g. `"running"`, `"user"`, `"pending"`).
+- **Always Reference `Enum.KEY`**: Every status check or assignment must use the shared enum key from `@orchestrai/shared-types` or `@orchestrai/core` (e.g. `ExecutionStatus.RUNNING`, `MessageRole.USER`, `ApprovalStatus.PENDING`).
+- **Type-Safe Payloads**: Define all event types and state transitions using discriminated unions with canonical enum keys.
+
 ## 4. Validation & Schemas
 
 - Every external boundary (HTTP request body, query params, WebSocket frame, queue job, environment variable) MUST be validated with Zod.

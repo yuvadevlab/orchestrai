@@ -59,7 +59,16 @@ Core Contracts (@orchestrai/core)
 
 ---
 
-## 5. Phase Implementation Testing Policy (Strict)
+## 5. Zero Hardcoded Strings & Strict Enum Usage Invariant
+
+- **Zero Raw String Literals for Domain Entities**: NO raw hardcoded string literals or magic values may be stored, dispatched, or compared for domain entities, statuses, roles, event types, modes, scopes, commands, or state transitions.
+- **Shared Canonical Enums**: ALL domain statuses, roles, modes, event names, and error codes MUST be defined as canonical TypeScript enums in `@orchestrai/shared-types` (or `@orchestrai/core`).
+- **Always Check with `Enum.KEY`**: When checking, matching, or branching on any value, agents MUST use `Enum.KEY` (e.g., `status === ExecutionStatus.COMPLETED`, `event.type === OrchestratorEventType.START`, `role === MessageRole.USER`). Never use raw string comparisons like `status === "completed"` or `"user"`.
+- **Zod Schemas Bound to Enums**: All validation schemas must use `z.nativeEnum(MyEnum)` or `z.enum([...])` sourced directly from canonical enum keys.
+
+---
+
+## 6. Phase Implementation Testing Policy (Strict)
 
 - While implementing roadmap phases, **DO NOT** write or implement test cases (unit tests, e2e tests, integration tests) or Storybook stories unless explicitly instructed by the user.
 - Focus effort and code strictly on production code: domain logic, state machines, Zod contracts, database schemas, API routes, event handlers, and polished UI screens.
@@ -67,7 +76,7 @@ Core Contracts (@orchestrai/core)
 
 ---
 
-## 6. Universal Verification Checklist
+## 7. Universal Verification Checklist
 
 Before completing any task, verify:
 
