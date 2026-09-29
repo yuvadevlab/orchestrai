@@ -7,6 +7,30 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@yuva-devlab/ui", "@yuva-devlab/tokens"],
+  async redirects() {
+    return [
+      {
+        source: "/console",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/console/:path*",
+        destination: "/:path*",
+        permanent: true,
+      },
+      {
+        source: "/knowledge",
+        destination: "/context?tab=knowledge",
+        permanent: true,
+      },
+      {
+        source: "/memory",
+        destination: "/context?tab=memory",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

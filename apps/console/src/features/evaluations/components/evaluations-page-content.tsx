@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui";
 import { useEvaluationDatasets } from "../api";
 import { EvaluationsRunnerCard } from "./evaluations-runner-card";
 import { EvaluationsDatasetsList } from "./evaluations-datasets-list";
+import { RubricGradingCard } from "./rubric-grading-card";
 
 /**
  * Capability evaluations and model benchmark suite dashboard.
@@ -49,6 +50,9 @@ export function EvaluationsPageContent(): React.JSX.Element {
         <div className="space-y-6">
           {/* Benchmark Runner Station */}
           <EvaluationsRunnerCard datasets={datasets} />
+
+          {/* Qualitative Prompt Rubric Engine */}
+          <RubricGradingCard />
 
           {/* Registered Benchmark Datasets */}
           <div className="space-y-3">

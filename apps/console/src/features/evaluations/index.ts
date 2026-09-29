@@ -10,3 +10,4 @@ export * from "./components/evaluations-page-content";
 export * from "./components/evaluations-runner-card";
 export * from "./components/evaluations-results-display";
 export * from "./components/evaluations-datasets-list";
+export * from "./components/rubric-grading-card";

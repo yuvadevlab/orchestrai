@@ -1,16 +1,14 @@
 /**
- * @file page.tsx
- * @description Cowork Studio console route.
+ * @file apps/console/src/app/(dashboard)/console/page.tsx
+ * @description Redundant console route redirected to workspace root.
  * @module apps/console/app/(dashboard)/console
  */
 
-import React from "react";
-import dynamic from "next/dynamic";
+import { redirect } from "next/navigation";
 
-const StudioWorkspace = dynamic(() =>
-  import("@/features/studio").then((m) => ({ default: m.StudioWorkspace })),
-);
-
-export default function ConsolePage(): React.JSX.Element {
-  return <StudioWorkspace />;
+/**
+ * Server-side redirect from legacy /console route to primary studio workspace /.
+ */
+export default function ConsoleRedirect(): never {
+  redirect("/");
 }

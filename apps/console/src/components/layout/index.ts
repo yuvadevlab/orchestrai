@@ -7,3 +7,4 @@
 export * from "./page-header";
 export * from "./page-shell";
 export * from "./product-nav";
+export * from "./clearance-drawer";

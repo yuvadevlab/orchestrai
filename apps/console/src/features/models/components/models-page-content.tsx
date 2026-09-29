@@ -11,6 +11,7 @@ import { Button } from "@yuva-devlab/ui";
 import { Plus, Cpu } from "lucide-react";
 import { ModelCard } from "./model-card";
 import { ModelDialog } from "./model-dialog";
+import { CostLatencyCockpit } from "./cost-latency-cockpit";
 import { useModels, useProviders } from "../api";
 import { EmptyState } from "@/components/ui";
 import { PageShell } from "@/components/layout/page-shell";
@@ -37,6 +38,8 @@ export function ModelsPageContent(): React.JSX.Element {
     refetchProviders();
   };
 
+  const [activeTab, setActiveTab] = useState<"catalog" | "telemetry">("catalog");
+
   return (
     <PageShell
       title="Model Providers & Routing"
@@ -44,18 +47,46 @@ export function ModelsPageContent(): React.JSX.Element {
       stats={`${models.length} models · ${providers.length} providers`}
       description="Live AI models, context limits, and inference engines available across the workspace."
       actions={
-        <Button
-          variant="default"
-          size="sm"
-          onClick={() => setIsModalOpen(true)}
-          className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
-        >
-          <Plus className="size-3.5" />
-          <span>Add model</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="bg-muted/30 border-border/60 flex rounded border p-0.5">
+            <button
+              type="button"
+              onClick={() => setActiveTab("catalog")}
+              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                activeTab === "catalog"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Model Catalog
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("telemetry")}
+              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                activeTab === "telemetry"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Cost & Latency Cockpit
+            </button>
+          </div>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setIsModalOpen(true)}
+            className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+          >
+            <Plus className="size-3.5" />
+            <span>Add model</span>
+          </Button>
+        </div>
       }
     >
-      {isLoading ? (
+      {activeTab === "telemetry" ? (
+        <CostLatencyCockpit />
+      ) : isLoading ? (
         <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
           <span className="text-muted-foreground animate-pulse font-mono text-xs">
             Loading live model catalog...

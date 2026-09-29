@@ -4,15 +4,17 @@
  * @module apps/console/components/layout
  */
 
-import { Activity, Bot, Cpu, Network, Wrench } from "lucide-react";
+import { Activity, BarChart2, Bot, Cpu, Layers, Network, Wrench } from "lucide-react";
 
 /**
- * 5 streamlined primary navigation hubs for the OrchestrAI Console.
+ * 7 streamlined primary navigation hubs for the OrchestrAI Console.
  */
 export const NAV_ITEMS = [
   { href: "/", label: "Swarm Studio", icon: Network },
   { href: "/agents", label: "Agents", icon: Bot },
+  { href: "/context", label: "Context Hub", icon: Layers },
   { href: "/tools", label: "Tools", icon: Wrench },
   { href: "/executions", label: "Executions", icon: Activity },
-  { href: "/models", label: "Models", icon: Cpu },
+  { href: "/models", label: "Models & Routing", icon: Cpu },
+  { href: "/evaluations", label: "Evaluations", icon: BarChart2 },
 ] as const;
