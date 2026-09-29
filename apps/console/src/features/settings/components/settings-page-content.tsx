@@ -7,7 +7,19 @@
  */
 
 import React, { useState } from "react";
-import { Button, Input, Label, Switch, useTheme, toast } from "@yuva-devlab/ui";
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+  useTheme,
+  toast,
+} from "@yuva-devlab/ui";
 import { PageShell } from "@/components/layout/page-shell";
 import { useAuth } from "@/lib/auth";
 import { useAgents } from "@/features/agents/api";
@@ -181,18 +193,24 @@ export function SettingsPageContent(): React.JSX.Element {
                   Primary agent targeted when starting new prompts.
                 </p>
               </div>
-              <select
-                value={selectedAgent}
-                onChange={(e) => setSelectedAgent(e.target.value)}
-                className="border-border bg-background text-foreground h-8 rounded-md border px-2.5 py-1 text-xs"
+              <Select
+                value={selectedAgent || "__auto"}
+                onValueChange={(v) => setSelectedAgent(v === "__auto" ? "" : v)}
               >
-                <option value="">Auto-route (Supervisor)</option>
-                {agents.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="border-border bg-background h-8 w-48 text-xs font-medium">
+                  <SelectValue placeholder="Auto-route (Supervisor)" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border text-foreground text-xs">
+                  <SelectItem value="__auto" className="cursor-pointer text-xs">
+                    Auto-route (Supervisor)
+                  </SelectItem>
+                  {agents.map((a) => (
+                    <SelectItem key={a.id} value={a.id} className="cursor-pointer text-xs">
+                      {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Notifications Toggle */}

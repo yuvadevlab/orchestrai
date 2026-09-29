@@ -11,14 +11,14 @@ import { ExecutionIdSchema, StepIdSchema } from "@/identifiers";
  * Functional category of an individual execution step backed by StepType enum.
  */
 export const StepTypeSchema = z
-  .nativeEnum(StepType)
+  .enum(StepType)
   .describe("Category of action performed during this step");
 
 /**
  * Lifecycle outcome of a step backed by StepStatus enum.
  */
 export const StepStatusSchema = z
-  .nativeEnum(StepStatus)
+  .enum(StepStatus)
   .describe("Processing state of an individual step");
 
 /**

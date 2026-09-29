@@ -10,7 +10,7 @@ import { ModelProvider } from "@orchestrai/shared-types";
  * Recognized LLM runtime provider engines backed by ModelProvider enum.
  */
 export const ModelProviderSchema = z
-  .nativeEnum(ModelProvider)
+  .enum(ModelProvider)
   .describe("Underlying AI model provider backend");
 
 /**

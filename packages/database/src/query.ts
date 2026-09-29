@@ -37,6 +37,15 @@ export async function executeQuery<T extends QueryResultRow = QueryResultRow>(
 }
 
 /**
+ * Standard PostgreSQL transaction control statements.
+ */
+export const TRANSACTION_SQL = {
+  BEGIN: "BEGIN",
+  COMMIT: "COMMIT",
+  ROLLBACK: "ROLLBACK",
+} as const;
+
+/**
  * Executes an operation within an isolated PostgreSQL transaction with automatic rollback on error.
  *
  * @param transactionCallback - Async function executing operations with dedicated client
@@ -50,14 +59,14 @@ export async function runInTransaction<T>(
 
   try {
     // Begin transaction boundary
-    await client.query("BEGIN");
+    await client.query(TRANSACTION_SQL.BEGIN);
     const result = await transactionCallback(client);
     // Commit transaction if callback completes without exception
-    await client.query("COMMIT");
+    await client.query(TRANSACTION_SQL.COMMIT);
     return result;
   } catch (error) {
     // Roll back transaction on any failure to preserve consistency
-    await client.query("ROLLBACK");
+    await client.query(TRANSACTION_SQL.ROLLBACK);
     logger.error("[DatabaseQuery] Transaction aborted and rolled back", {
       error: error instanceof Error ? error.message : String(error),
     });

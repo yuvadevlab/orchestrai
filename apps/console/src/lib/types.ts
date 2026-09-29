@@ -3,10 +3,17 @@
  * Sourced and refined from the high-density agent platform specification.
  */
 
+import { StudioEventType, CoworkMessageRole } from "@orchestrai/shared-types";
+
 /**
  * Operational state of an individual orchestrated agent.
  */
-export type AgentStatus = "active" | "idle" | "paused" | "error";
+export enum AgentStatus {
+  ACTIVE = "active",
+  IDLE = "idle",
+  PAUSED = "paused",
+  ERROR = "error",
+}
 
 /**
  * Comprehensive profile of an autonomous specialist or supervisor agent.
@@ -34,7 +41,13 @@ export interface Agent {
 /**
  * Lifecycle execution state for an agent task run.
  */
-export type ExecutionStatus = "running" | "completed" | "failed" | "waiting" | "cancelled";
+export enum ExecutionStatus {
+  RUNNING = "running",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  WAITING = "waiting",
+  CANCELLED = "cancelled",
+}
 
 /**
  * Replayable execution session record.
@@ -63,19 +76,7 @@ export interface ExecutionStep {
   id: string;
   label: string;
   agent: string;
-  type:
-    | "think"
-    | "plan"
-    | "search"
-    | "web"
-    | "file"
-    | "database"
-    | "delegate"
-    | "model"
-    | "tool"
-    | "approval"
-    | "rag"
-    | "code";
+  type: StudioEventType;
   duration: string;
   status: "done" | "failed" | "waiting";
   input: string;
@@ -93,7 +94,7 @@ export interface Conversation {
   lastMessage: string;
   lastActivity: string;
   status: "active" | "archived" | "waiting";
-  messages: { id: string; role: "user" | "agent"; body: string; at: string }[];
+  messages: { id: string; role: CoworkMessageRole; body: string; at: string }[];
 }
 
 /**

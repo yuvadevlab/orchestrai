@@ -4,15 +4,20 @@
  */
 
 import { z } from "zod";
-import { ApprovalStatus } from "@orchestrai/shared-types";
+import { ApprovalStatus, ApprovalDecisionVerdict } from "@orchestrai/shared-types";
 import { ExecutionIdSchema, StepIdSchema, UuidSchema } from "@/identifiers";
 
 /**
  * Status of a human approval requirement backed by ApprovalStatus enum.
  */
-export const ApprovalStatusSchema = z
-  .nativeEnum(ApprovalStatus)
-  .describe("State of an approval request");
+export const ApprovalStatusSchema = z.enum(ApprovalStatus).describe("State of an approval request");
+
+/**
+ * Operator verdict on an approval request backed by ApprovalDecisionVerdict enum.
+ */
+export const ApprovalDecisionVerdictSchema = z
+  .enum(ApprovalDecisionVerdict)
+  .describe("Operator decision verdict");
 
 /**
  * Interactive approval request emitted when an agent requires authorization for a high-risk action.
@@ -43,7 +48,12 @@ export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
 export const ApprovalDecisionSchema = z
   .object({
     approvalId: UuidSchema,
-    decision: z.enum(["APPROVED", "REJECTED"]).describe("Operator verdict"),
+    decision: z
+      .preprocess(
+        (val) => (typeof val === "string" ? val.toLowerCase() : val),
+        ApprovalDecisionVerdictSchema,
+      )
+      .describe("Operator verdict"),
     decidedBy: z.string().min(1).describe("Identity or username of the approving operator"),
     reason: z.string().max(500).optional().describe("Optional feedback or rejection reason"),
     modifiedArguments: z

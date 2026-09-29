@@ -7,9 +7,9 @@
  */
 
 import { useApiData, type UseApiDataResult } from "@/lib/use-api-data";
-import { useAuth } from "@/lib/auth";
-import type { ExecutionRun, ExecutionStatus, ExecutionStepTrace } from "../types";
+import { ExecutionStatus, type ExecutionRun, type ExecutionStepTrace } from "../types";
 import type { Agent, Execution } from "@orchestrai/sdk";
+import { useAuth } from "@/lib/auth-context";
 
 /**
  * Converts an ISO date string into a friendly relative human duration (e.g. '2m ago').
@@ -91,16 +91,17 @@ export function useExecutions(): UseApiDataResult<ExecutionRun[]> {
       }
 
       return items.map((ex: Execution): ExecutionRun => {
-        const rawStatus = String(ex.status || "COMPLETED").toUpperCase();
+        // Normalize to lowercase to match ExecutionStatus enum string values
+        const rawStatus = String(ex.status || ExecutionStatus.COMPLETED).toLowerCase();
         const status: ExecutionStatus =
-          rawStatus === "COMPLETED" ||
-          rawStatus === "RUNNING" ||
-          rawStatus === "FAILED" ||
-          rawStatus === "PAUSED" ||
-          rawStatus === "CANCELLED" ||
-          rawStatus === "QUEUED"
+          rawStatus === ExecutionStatus.COMPLETED ||
+          rawStatus === ExecutionStatus.RUNNING ||
+          rawStatus === ExecutionStatus.FAILED ||
+          rawStatus === ExecutionStatus.PAUSED ||
+          rawStatus === ExecutionStatus.CANCELLED ||
+          rawStatus === ExecutionStatus.QUEUED
             ? (rawStatus as ExecutionStatus)
-            : "COMPLETED";
+            : ExecutionStatus.COMPLETED;
 
         const raw = ex as unknown as Record<string, unknown>;
         const agentMeta = ex.agentId ? agentMap.get(ex.agentId) : undefined;

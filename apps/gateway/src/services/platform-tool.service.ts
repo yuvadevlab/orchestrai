@@ -6,6 +6,7 @@
  */
 
 import { getPrismaClient, type PrismaClient, type PlatformTool } from "@orchestrai/database";
+import { ToolPermissionLevel } from "@orchestrai/shared-types";
 
 /** DTO for registering or updating an execution tool. */
 export interface UpsertToolDto {
@@ -48,8 +49,8 @@ export class PlatformToolService {
         slug: dto.slug,
         category: dto.category || "General",
         description: dto.description,
-        permissionLevel: dto.permissionLevel || "read_only",
-        sandbox: dto.sandbox || "read_only",
+        permissionLevel: dto.permissionLevel || ToolPermissionLevel.READ_ONLY,
+        sandbox: dto.sandbox || ToolPermissionLevel.READ_ONLY,
         isEnabled: dto.isEnabled ?? true,
         sortOrder: dto.sortOrder ?? 0,
       },

@@ -44,7 +44,13 @@ export type AgentModelConfig = z.infer<typeof AgentModelConfigSchema>;
 export const AgentDefinitionSchema = z
   .object({
     agentId: AgentIdSchema,
-    tenantId: TenantIdSchema,
+    tenantId: TenantIdSchema.optional()
+      .nullable()
+      .describe("Tenant owner, or null for platform-wide agents"),
+    scope: z
+      .enum(["platform", "tenant"])
+      .default("platform")
+      .describe("System-wide platform agent vs tenant scoped"),
     name: z.string().min(1).max(100).describe("Human-readable display name for the agent"),
     description: z
       .string()
@@ -54,6 +60,10 @@ export const AgentDefinitionSchema = z
     mode: AgentModeSchema.default(AgentMode.AUTO),
     systemPrompt: z.string().min(1).describe("Foundational persona and system prompt instructions"),
     modelConfig: AgentModelConfigSchema,
+    capabilities: z
+      .array(z.string())
+      .default([])
+      .describe("List of authorized capability slugs for this agent"),
     enabledTools: z
       .array(z.string())
       .default([])

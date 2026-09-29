@@ -9,6 +9,8 @@ import { getStoredSession } from "./auth";
 
 /** Gateway base URL configured from environment variable or default local port 4001 */
 const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:4001";
+/** Streaming Realtime broker URL configured from environment or default local port 4002 */
+const REALTIME_URL = process.env.NEXT_PUBLIC_REALTIME_URL || "http://localhost:4002";
 
 /** Cached client instance keyed by active token + tenant */
 let clientInstance: OrchestrAIClient | null = null;
@@ -30,7 +32,7 @@ export function getApiClient(): OrchestrAIClient {
     currentTokenKey = tokenKey;
     clientInstance = createOrchestrAIClient({
       baseUrl: GATEWAY_URL,
-      realtimeUrl: GATEWAY_URL,
+      realtimeUrl: REALTIME_URL,
       apiKey: token ? undefined : process.env.NEXT_PUBLIC_GATEWAY_API_KEY,
       token: token || undefined,
       tenantId,

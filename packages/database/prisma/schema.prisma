@@ -56,13 +56,17 @@ model Tenant {
   slug          String         @unique @db.VarChar(64)
   createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  agents        Agent[]
-  conversations Conversation[]
-  executions    Execution[]
-  outboxEvents  Outbox[]
-  memoryItems   MemoryItem[]
-  documents     Document[]
-  users         User[]
+  agents             Agent[]
+  conversations      Conversation[]
+  executions         Execution[]
+  outboxEvents       Outbox[]
+  memoryItems        MemoryItem[]
+  documents          Document[]
+  users              User[]
+  resources          Resource[]
+  permissionRequests PermissionRequest[]
+  accessGrants       AccessGrant[]
+  accessLogs         ResourceAccessLog[]
 
   @@map("tenants")
 }
@@ -76,47 +80,64 @@ model User {
   role         String   @default("developer") @db.VarChar(32)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  tenant       Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  tenant             Tenant              @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  conversations      Conversation[]
+  userRequests       PermissionRequest[] @relation("UserPermissionRequests")
+  decidedRequests    PermissionRequest[] @relation("DecidedPermissionRequests")
+  userGrants         AccessGrant[]       @relation("UserGrants")
+  authorizedGrants   AccessGrant[]       @relation("AuthorizedGrants")
+  revokedGrants      AccessGrant[]       @relation("RevokedGrants")
+  resourceAccessLogs ResourceAccessLog[]
 
   @@map("users")
 }
 
 model Agent {
-  agentId       String         @id @default(dbgenerated("gen_random_uuid()")) @map("agent_id") @db.Uuid
-  tenantId      String         @map("tenant_id") @db.Uuid
-  name          String         @db.VarChar(100)
-  description   String?        @db.VarChar(500)
-  mode          AgentMode      @default(auto)
-  systemPrompt  String         @map("system_prompt")
-  modelConfig   Json           @map("model_config")
-  enabledTools  Json           @default("[]") @map("enabled_tools")
-  maxSteps      Int            @default(25) @map("max_steps")
-  metadata      Json           @default("{}")
-  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz
-  tenant        Tenant         @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  conversations Conversation[]
-  executions    Execution[]
-  memoryItems   MemoryItem[]
+  agentId            String              @id @default(dbgenerated("gen_random_uuid()")) @map("agent_id") @db.Uuid
+  tenantId           String?             @map("tenant_id") @db.Uuid
+  scope              PlatformScope       @default(platform)
+  name               String              @db.VarChar(100)
+  description        String?             @db.VarChar(500)
+  mode               AgentMode           @default(auto)
+  systemPrompt       String              @map("system_prompt")
+  modelConfig        Json                @map("model_config")
+  enabledTools       Json                @default("[]") @map("enabled_tools")
+  maxSteps           Int                 @default(25) @map("max_steps")
+  metadata           Json                @default("{}")
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz
+  tenant             Tenant?             @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  capabilities       AgentCapability[]
+  conversations      Conversation[]
+  executions         Execution[]
+  memoryItems        MemoryItem[]
+  grants             AccessGrant[]
+  requests           PermissionRequest[]
+  accessLogs         ResourceAccessLog[]
 
   @@map("agents")
 }
 
 model Conversation {
-  conversationId String       @id @default(dbgenerated("gen_random_uuid()")) @map("conversation_id") @db.Uuid
-  tenantId       String       @map("tenant_id") @db.Uuid
-  agentId        String       @map("agent_id") @db.Uuid
-  title          String       @default("New Conversation") @db.VarChar(255)
-  metadata       Json         @default("{}")
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz
-  tenant         Tenant       @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  agent          Agent        @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
-  executions     Execution[]
-  messages       Message[]
-  memoryItems    MemoryItem[]
+  conversationId     String              @id @default(dbgenerated("gen_random_uuid()")) @map("conversation_id") @db.Uuid
+  tenantId           String              @map("tenant_id") @db.Uuid
+  agentId            String              @map("agent_id") @db.Uuid
+  userId             String?             @map("user_id") @db.Uuid
+  title              String              @default("New Conversation") @db.VarChar(255)
+  metadata           Json                @default("{}")
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz
+  tenant             Tenant              @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  agent              Agent               @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
+  user               User?               @relation(fields: [userId], references: [userId], onDelete: SetNull)
+  executions         Execution[]
+  messages           Message[]
+  memoryItems        MemoryItem[]
+  requests           PermissionRequest[]
+  grants             AccessGrant[]
+  accessLogs         ResourceAccessLog[]
 
   @@map("conversations")
 }
@@ -457,10 +478,261 @@ model PlatformTool {
   sandbox         String?   @default("read_only") @map("sandbox") @db.VarChar(100)
   isEnabled       Boolean   @default(true) @map("is_enabled")
   sortOrder       Int       @default(0) @map("sort_order")
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  capabilities    CapabilityTool[]
+  requests        PermissionRequest[]
+  grants          AccessGrant[]
 
   @@map("platform_tools")
 }
+
+// ---------------------------------------------------------------------------
+// System-Wide Agent & Resource Access Control Architecture
+// ---------------------------------------------------------------------------
+
+enum ResourceType {
+  file
+  directory
+  repository
+  project
+  database
+  table
+  api
+  document
+  application
+  integration
+  cloud_resource
+  internal_service
+  user
+  tenant
+}
+
+enum PermissionLevel {
+  read
+  write
+  execute
+  admin
+}
+
+enum PermissionScopeType {
+  once
+  session
+  permanent
+}
+
+enum RequestStatus {
+  pending
+  approved
+  rejected
+  expired
+  revoked
+}
+
+enum GrantStatus {
+  active
+  expired
+  revoked
+}
+
+/**
+ * Generic Resource Registry — Canonical identities and metadata for all platform resources.
+ */
+model Resource {
+  resourceId   String              @id @default(dbgenerated("gen_random_uuid()")) @map("resource_id") @db.Uuid
+  tenantId     String?             @map("tenant_id") @db.Uuid
+  type         ResourceType
+  name         String              @db.VarChar(255)
+  canonicalUri String              @unique @map("canonical_uri") @db.VarChar(1024)
+  externalId   String?             @map("external_id") @db.VarChar(255)
+  description  String?             @db.VarChar(500)
+  metadata     Json                @default("{}")
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  tenant       Tenant?             @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  grants       AccessGrant[]
+  requests     PermissionRequest[]
+  accessLogs   ResourceAccessLog[]
+
+  @@index([tenantId, type], map: "ix_resources_tenant_type")
+  @@index([canonicalUri], map: "ix_resources_uri")
+  @@map("resources")
+}
+
+/**
+ * Capability — Coarse functional domain grouping one or more tools.
+ */
+model Capability {
+  capabilityId String              @id @default(dbgenerated("gen_random_uuid()")) @map("capability_id") @db.Uuid
+  name         String              @db.VarChar(100)
+  slug         String              @unique @db.VarChar(64)
+  description  String?             @db.VarChar(500)
+  category     String              @default("General") @db.VarChar(64)
+  scope        PlatformScope       @default(platform)
+  isEnabled    Boolean             @default(true) @map("is_enabled")
+  sortOrder    Int                 @default(0) @map("sort_order")
+  metadata     Json                @default("{}")
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  tools        CapabilityTool[]
+  agents       AgentCapability[]
+  requests     PermissionRequest[]
+  grants       AccessGrant[]
+
+  @@map("capabilities")
+}
+
+/**
+ * CapabilityTool — Join table mapping capabilities to platform tools.
+ */
+model CapabilityTool {
+  capabilityId String       @map("capability_id") @db.Uuid
+  toolId       String       @map("tool_id") @db.Uuid
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  capability   Capability   @relation(fields: [capabilityId], references: [capabilityId], onDelete: Cascade)
+  tool         PlatformTool @relation(fields: [toolId], references: [toolId], onDelete: Cascade)
+
+  @@id([capabilityId, toolId])
+  @@map("capability_tools")
+}
+
+/**
+ * AgentCapability — Join table associating system-wide agents with capabilities.
+ */
+model AgentCapability {
+  agentId      String     @map("agent_id") @db.Uuid
+  capabilityId String     @map("capability_id") @db.Uuid
+  isDefault    Boolean    @default(true) @map("is_default")
+  config       Json       @default("{}")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+
+  agent        Agent      @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
+  capability   Capability @relation(fields: [capabilityId], references: [capabilityId], onDelete: Cascade)
+
+  @@id([agentId, capabilityId])
+  @@map("agent_capabilities")
+}
+
+/**
+ * PermissionRequest — Persistent clearance requests awaiting human approval.
+ */
+model PermissionRequest {
+  requestId       String              @id @default(dbgenerated("gen_random_uuid()")) @map("request_id") @db.Uuid
+  agentId         String              @map("agent_id") @db.Uuid
+  userId          String              @map("user_id") @db.Uuid
+  tenantId        String?             @map("tenant_id") @db.Uuid
+  conversationId  String?             @map("conversation_id") @db.Uuid
+  executionId     String?             @map("execution_id") @db.Uuid
+  resourceId      String?             @map("resource_id") @db.Uuid
+  resourceUri     String              @map("resource_uri") @db.VarChar(1024)
+  capabilityId    String?             @map("capability_id") @db.Uuid
+  toolId          String?             @map("tool_id") @db.Uuid
+  toolSlug        String?             @map("tool_slug") @db.VarChar(100)
+  requestedLevel  PermissionLevel     @default(read) @map("requested_level")
+  scopeType       PermissionScopeType @default(session) @map("scope_type")
+  reason          String              @db.VarChar(1024)
+  riskLevel       String              @default("caution") @map("risk_level") @db.VarChar(32)
+  status          RequestStatus       @default(pending)
+  decidedBy       String?             @map("decided_by") @db.Uuid
+  decidedAt       DateTime?           @map("decided_at") @db.Timestamptz
+  expiresAt       DateTime?           @map("expires_at") @db.Timestamptz
+  metadata        Json                @default("{}")
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  agent           Agent               @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
+  user            User                @relation("UserPermissionRequests", fields: [userId], references: [userId], onDelete: Cascade)
+  decider         User?               @relation("DecidedPermissionRequests", fields: [decidedBy], references: [userId], onDelete: SetNull)
+  tenant          Tenant?             @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  conversation    Conversation?       @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+  resource        Resource?           @relation(fields: [resourceId], references: [resourceId], onDelete: SetNull)
+  capability      Capability?         @relation(fields: [capabilityId], references: [capabilityId], onDelete: SetNull)
+  tool            PlatformTool?       @relation(fields: [toolId], references: [toolId], onDelete: SetNull)
+  resultingGrant  AccessGrant?
+
+  @@index([status, userId], map: "ix_perm_req_status_user")
+  @@index([executionId], map: "ix_perm_req_execution")
+  @@map("permission_requests")
+}
+
+/**
+ * AccessGrant — Active authorization clearance for an agent to access a resource.
+ */
+model AccessGrant {
+  grantId         String              @id @default(dbgenerated("gen_random_uuid()")) @map("grant_id") @db.Uuid
+  requestId       String?             @unique @map("request_id") @db.Uuid
+  agentId         String?             @map("agent_id") @db.Uuid
+  userId          String              @map("user_id") @db.Uuid
+  tenantId        String?             @map("tenant_id") @db.Uuid
+  conversationId  String?             @map("conversation_id") @db.Uuid
+  resourceId      String?             @map("resource_id") @db.Uuid
+  resourceUri     String              @map("resource_uri") @db.VarChar(1024)
+  capabilityId    String?             @map("capability_id") @db.Uuid
+  toolId          String?             @map("tool_id") @db.Uuid
+  permissionLevel PermissionLevel     @default(read) @map("permission_level")
+  scopeType       PermissionScopeType @default(session) @map("scope_type")
+  status          GrantStatus         @default(active)
+  grantedBy       String              @map("granted_by") @db.Uuid
+  revokedBy       String?             @map("revoked_by") @db.Uuid
+  revokedAt       DateTime?           @map("revoked_at") @db.Timestamptz
+  expiresAt       DateTime?           @map("expires_at") @db.Timestamptz
+  metadata        Json                @default("{}")
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  request         PermissionRequest?  @relation(fields: [requestId], references: [requestId], onDelete: SetNull)
+  agent           Agent?              @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
+  user            User                @relation("UserGrants", fields: [userId], references: [userId], onDelete: Cascade)
+  granter         User                @relation("AuthorizedGrants", fields: [grantedBy], references: [userId], onDelete: Cascade)
+  revoker         User?               @relation("RevokedGrants", fields: [revokedBy], references: [userId], onDelete: SetNull)
+  tenant          Tenant?             @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  conversation    Conversation?       @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+  resource        Resource?           @relation(fields: [resourceId], references: [resourceId], onDelete: SetNull)
+  capability      Capability?         @relation(fields: [capabilityId], references: [capabilityId], onDelete: SetNull)
+  tool            PlatformTool?       @relation(fields: [toolId], references: [toolId], onDelete: SetNull)
+  accessLogs      ResourceAccessLog[]
+
+  @@index([agentId, resourceUri, status], map: "ix_grant_agent_uri_status")
+  @@index([conversationId, status], map: "ix_grant_session_status")
+  @@map("access_grants")
+}
+
+/**
+ * ResourceAccessLog — Immutable audit trail of evaluated agent operations and resource accesses.
+ */
+model ResourceAccessLog {
+  logId           String          @id @default(dbgenerated("gen_random_uuid()")) @map("log_id") @db.Uuid
+  agentId         String          @map("agent_id") @db.Uuid
+  userId          String?         @map("user_id") @db.Uuid
+  tenantId        String?         @map("tenant_id") @db.Uuid
+  conversationId  String?         @map("conversation_id") @db.Uuid
+  executionId     String?         @map("execution_id") @db.Uuid
+  toolCallId      String?         @map("tool_call_id") @db.VarChar(64)
+  resourceId      String?         @map("resource_id") @db.Uuid
+  resourceUri     String          @map("resource_uri") @db.VarChar(1024)
+  toolSlug        String          @map("tool_slug") @db.VarChar(100)
+  action          String          @db.VarChar(64)
+  permissionLevel PermissionLevel @map("permission_level")
+  grantId         String?         @map("grant_id") @db.Uuid
+  decision        String          @db.VarChar(32)
+  reason          String?         @db.VarChar(500)
+  metadata        Json            @default("{}")
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  agent           Agent           @relation(fields: [agentId], references: [agentId], onDelete: Cascade)
+  user            User?           @relation(fields: [userId], references: [userId], onDelete: SetNull)
+  tenant          Tenant?         @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  conversation    Conversation?   @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+  resource        Resource?       @relation(fields: [resourceId], references: [resourceId], onDelete: SetNull)
+  grant           AccessGrant?    @relation(fields: [grantId], references: [grantId], onDelete: SetNull)
+
+  @@index([resourceUri, createdAt], map: "ix_access_log_uri")
+  @@index([executionId], map: "ix_access_log_execution")
+  @@map("resource_access_logs")
+}
+
 
 

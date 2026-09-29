@@ -4,7 +4,7 @@
  * @module apps/console/features/studio/hooks
  */
 
-import type { CoworkMessage, CoworkSession } from "../types";
+import { CoworkMessageRole, type CoworkMessage, type CoworkSession } from "../types";
 
 /**
  * Computes updated sessions list when messages in the active session change.
@@ -30,7 +30,7 @@ export function applyMessageUpdate(
 
   // Derive title from initial user prompt
   if ((newTitle === "New Thread" || newTitle === "New Cowork Session") && newMessages.length > 0) {
-    const firstUser = newMessages.find((m) => m.role === "user");
+    const firstUser = newMessages.find((m) => m.role === CoworkMessageRole.USER);
     if (firstUser) {
       newTitle = firstUser.content.slice(0, 36) + (firstUser.content.length > 36 ? "..." : "");
     }

@@ -7,43 +7,19 @@
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { resolveMonorepoRoot } from "./autonomous-agent-runner";
-import {
-  findNearestProjectRoot,
-  loadPermanentPermissions,
-  savePermanentPermissions,
-} from "./permission-storage";
+import { applyGrant, loadPermanentPermissions } from "./permission-storage";
+import { evaluateToolPermission } from "./permission-evaluator";
+import { resourceRegistryService } from "./resource-registry.service";
+import { resourceAccessLogger } from "./resource-access-logger";
+import { PermissionLevel, ApprovalRiskLevel, PermissionScope } from "@orchestrai/shared-types";
+import type {
+  ApprovalDecision,
+  ApprovalRequest,
+  PendingApproval,
+  PermissionCheckResult,
+} from "./permission-types";
 
-export type PermissionScope = "once" | "session" | "permanent" | "deny";
-
-export interface PermissionCheckResult {
-  allowed: boolean;
-  target?: string;
-  reason?: string;
-  suggestedPrefix?: string;
-  effectiveRoot?: string;
-}
-
-export interface ApprovalRequest {
-  id: string;
-  executionId: string;
-  tool: string;
-  target: string;
-  reason: string;
-  suggestedPrefix?: string;
-  createdAt: string;
-}
-
-export interface ApprovalDecision {
-  scope: PermissionScope;
-  granted: boolean;
-  decidedBy?: string;
-}
-
-interface PendingApproval {
-  request: ApprovalRequest;
-  resolve: (decision: ApprovalDecision) => void;
-  reject: (err: Error) => void;
-}
+export * from "./permission-types";
 
 /**
  * Multi-Workspace Trust Engine managing repository trust lists, session capability grants, and HITL promises.
@@ -62,7 +38,7 @@ class PermissionPolicyManager {
   }
 
   /**
-   * Checks whether a tool operation is permitted under active trust grants.
+   * Checks whether a tool operation is permitted under active trust grants and security policies.
    */
   public checkPermission(
     toolName: string,
@@ -70,107 +46,42 @@ class PermissionPolicyManager {
     sessionId: string = "default",
   ): PermissionCheckResult {
     const workspaceRoot = resolveMonorepoRoot();
-
-    if (toolName === "bash") {
-      const commandStr = String(args.command || "command");
-      const sessionSet = this.sessionGrants.get(sessionId);
-      const isAllowed =
-        this.onceGrants.has("tool:bash") ||
-        this.onceGrants.has(commandStr) ||
-        Boolean(sessionSet?.has("tool:bash")) ||
-        Boolean(sessionSet?.has(commandStr)) ||
-        this.permanentGrants.has("tool:bash") ||
-        this.permanentGrants.has(commandStr);
-
-      if (this.onceGrants.has("tool:bash")) this.onceGrants.delete("tool:bash");
-      if (this.onceGrants.has(commandStr)) this.onceGrants.delete(commandStr);
-
-      let effectiveRoot = workspaceRoot;
-      for (const perm of this.permanentGrants) {
-        if (commandStr.includes(perm)) {
-          effectiveRoot = perm;
-          break;
-        }
-      }
-      if (sessionSet && effectiveRoot === workspaceRoot) {
-        for (const sess of sessionSet) {
-          if (commandStr.includes(sess)) {
-            effectiveRoot = sess;
-            break;
-          }
-        }
-      }
-
-      if (!isAllowed) {
-        return {
-          allowed: false,
-          target: commandStr,
-          reason: "Shell command execution requires operator clearance.",
-          suggestedPrefix: effectiveRoot,
-        };
-      }
-      return { allowed: true, effectiveRoot };
-    }
-
-    const targetPath = String(args.path || "");
-    if (!targetPath) return { allowed: true, effectiveRoot: workspaceRoot };
-
-    const resolved = path.isAbsolute(targetPath)
-      ? path.resolve(targetPath)
-      : path.resolve(workspaceRoot, targetPath);
-
-    // 1. Primary workspace containment
-    if (resolved.startsWith(workspaceRoot)) {
-      return { allowed: true, effectiveRoot: workspaceRoot };
-    }
-
-    // 2. Single-turn temporary clearance
-    if (this.onceGrants.has(resolved)) {
-      this.onceGrants.delete(resolved);
-      return { allowed: true, effectiveRoot: findNearestProjectRoot(resolved) };
-    }
-
-    // 3. Permanent trusted workspace roots
-    for (const perm of this.permanentGrants) {
-      if (resolved.startsWith(perm)) {
-        return { allowed: true, effectiveRoot: perm };
-      }
-    }
-
-    // 4. Session trusted workspace roots
     const sessionSet = this.sessionGrants.get(sessionId);
-    if (sessionSet) {
-      for (const sess of sessionSet) {
-        if (resolved.startsWith(sess)) {
-          return { allowed: true, effectiveRoot: sess };
-        }
-      }
-    }
 
-    const suggestedPrefix = findNearestProjectRoot(resolved);
-    return {
-      allowed: false,
-      target: resolved,
-      suggestedPrefix,
-      reason: `Path is outside trusted workspaces. Nearest project: ${path.basename(suggestedPrefix)}`,
-    };
+    return evaluateToolPermission({
+      toolName,
+      args,
+      workspaceRoot,
+      onceGrants: this.onceGrants,
+      sessionSet,
+      permanentGrants: this.permanentGrants,
+    });
   }
 
+  /**
+   * Creates a pending human-in-the-loop approval request for an unauthorized resource action.
+   */
   public createApprovalRequest(
     executionId: string,
     tool: string,
     target: string,
     reason: string,
     suggestedPrefix?: string,
+    isSensitive?: boolean,
+    riskLevel?: ApprovalRiskLevel,
+    sessionId?: string,
   ): { request: ApprovalRequest; promise: Promise<ApprovalDecision> } {
     const id = randomUUID();
     const request: ApprovalRequest = {
       id,
       executionId,
+      sessionId,
       tool,
       target,
       reason,
       suggestedPrefix,
+      isSensitive,
+      riskLevel,
       createdAt: new Date().toISOString(),
     };
 
@@ -181,6 +92,16 @@ class PermissionPolicyManager {
     return { request, promise };
   }
 
+  /**
+   * Retrieves all pending approval requests.
+   */
+  public getPendingApprovals(): ApprovalRequest[] {
+    return Array.from(this.pendingApprovals.values()).map((p) => p.request);
+  }
+
+  /**
+   * Resolves a pending human-in-the-loop clearance request and updates in-memory and database grants.
+   */
   public resolveApproval(
     approvalId: string,
     scope: PermissionScope,
@@ -190,41 +111,55 @@ class PermissionPolicyManager {
     const pending = this.pendingApprovals.get(approvalId);
     if (!pending) return false;
 
-    const granted = scope !== "deny";
+    const granted = scope !== PermissionScope.DENY;
     const target = pending.request.target;
     const prefix = pending.request.suggestedPrefix || target;
     const isBash = pending.request.tool === "bash";
 
-    const targetSession = sessionId !== "default" ? sessionId : pending.request.executionId;
+    const sessionKeys = Array.from(
+      new Set(
+        [sessionId, pending.request.sessionId, pending.request.executionId, "default"].filter(
+          (s): s is string => typeof s === "string" && s.length > 0,
+        ),
+      ),
+    );
+
     if (granted) {
-      if (isBash) {
-        if (scope === "once") {
-          this.onceGrants.add("tool:bash");
-          this.onceGrants.add(target);
-        } else if (scope === "session") {
-          for (const s of [sessionId, targetSession, pending.request.executionId]) {
-            if (!this.sessionGrants.has(s)) this.sessionGrants.set(s, new Set());
-            this.sessionGrants.get(s)?.add("tool:bash");
-            this.sessionGrants.get(s)?.add(target);
-          }
-        } else if (scope === "permanent") {
-          this.permanentGrants.add("tool:bash");
-          this.permanentGrants.add(target);
-          savePermanentPermissions(this.configPath, this.permanentGrants);
-        }
-      } else {
-        if (scope === "once") {
-          this.onceGrants.add(target);
-        } else if (scope === "session") {
-          for (const s of [sessionId, targetSession, pending.request.executionId]) {
-            if (!this.sessionGrants.has(s)) this.sessionGrants.set(s, new Set());
-            this.sessionGrants.get(s)?.add(prefix);
-          }
-        } else if (scope === "permanent") {
-          this.permanentGrants.add(prefix);
-          savePermanentPermissions(this.configPath, this.permanentGrants);
-        }
-      }
+      applyGrant(
+        scope,
+        isBash,
+        target,
+        prefix,
+        sessionKeys,
+        this.onceGrants,
+        this.sessionGrants,
+        this.permanentGrants,
+        this.configPath,
+      );
+
+      // Asynchronously mirror grant in database registry and resource logs
+      const workspaceRoot = resolveMonorepoRoot();
+      const canonical = resourceRegistryService.canonicalizeTarget(
+        target,
+        pending.request.tool,
+        workspaceRoot,
+      );
+      void resourceRegistryService.getOrCreateResource(
+        canonical.uri,
+        canonical.type,
+        canonical.name,
+      );
+      void resourceAccessLogger.logAccess({
+        agentId: pending.request.executionId,
+        conversationId: pending.request.sessionId || sessionId,
+        executionId: pending.request.executionId,
+        resourceUri: canonical.uri,
+        toolSlug: pending.request.tool,
+        action: "approval_decision",
+        permissionLevel: isBash ? PermissionLevel.EXECUTE : PermissionLevel.READ,
+        decision: "allowed",
+        reason: `Granted via HITL with scope: ${scope}`,
+      });
     }
 
     pending.resolve({ scope, granted, decidedBy });

@@ -15,7 +15,7 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
-import { ModelProvider, OrchestrAIError } from "@orchestrai/core";
+import { ModelProvider, MessageRole, OrchestrAIError } from "@orchestrai/core";
 import type { AIMessage } from "@orchestrai/core";
 import type { ILlmAdapter, LlmRequest, LlmResponse, LlmStreamChunk } from "@/interfaces";
 import type { AnthropicConfig } from "./anthropic.config.schema";
@@ -78,12 +78,12 @@ function toAnthropicMessages(messages: AIMessage[]): {
             .map((b) => b.text)
             .join("");
 
-    if (msg.role === "system") {
+    if (msg.role === MessageRole.SYSTEM) {
       // Collect system messages separately — Anthropic hoists them to top-level
       systemParts.push(textContent);
-    } else if (msg.role === "user" || msg.role === "assistant") {
+    } else if (msg.role === MessageRole.USER || msg.role === MessageRole.ASSISTANT) {
       // Only user/assistant roles are valid in Anthropic's messages[]
-      conversationMessages.push({ role: msg.role, content: textContent });
+      conversationMessages.push({ role: msg.role as "user" | "assistant", content: textContent });
     }
     // Tool role messages are omitted here — handled at a higher abstraction layer
   }

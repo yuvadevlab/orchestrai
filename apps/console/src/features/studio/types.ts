@@ -4,9 +4,33 @@
  * @module apps/console/features/studio
  */
 
-/** Cowork operating mode. */
-export type CoworkMode =
-  "chat" | "plan" | "act" | "auto" | "autonomous" | "research" | "plan_execute" | "direct" | string;
+import {
+  PermissionScope,
+  ApprovalRiskLevel,
+  ArtifactType,
+  ArtifactStatus,
+  PlanStepStatus,
+  ApprovalStatus,
+  CoworkMode,
+  StudioEventType,
+  CoworkMessageRole,
+  SseStreamEvent,
+  MessageSegmentType,
+} from "@orchestrai/shared-types";
+
+export {
+  PermissionScope,
+  ApprovalRiskLevel,
+  ArtifactType,
+  ArtifactStatus,
+  PlanStepStatus,
+  ApprovalStatus,
+  CoworkMode,
+  StudioEventType,
+  CoworkMessageRole,
+  SseStreamEvent,
+  MessageSegmentType,
+};
 
 /** Specialist Persona definition. */
 export interface SpecialistPersona {
@@ -23,20 +47,20 @@ export interface SpecialistPersona {
 export interface PlanStep {
   id: string;
   title: string;
-  status: "pending" | "running" | "completed" | "failed";
+  status: PlanStepStatus;
   detail?: string;
 }
 
 /** Rich multi-domain artifact types. */
 export interface CoworkArtifact {
   id: string;
-  type: "document" | "code" | "terminal" | "search" | "data";
+  type: ArtifactType;
   title: string;
   content: string;
   filePath?: string;
   language?: string;
   metadata?: Record<string, unknown>;
-  status: "running" | "success" | "error";
+  status: ArtifactStatus;
   durationMs?: number;
 }
 
@@ -48,13 +72,52 @@ export interface StudioApprovalRequest {
   target: string;
   reason: string;
   suggestedPrefix?: string;
-  status?: "pending" | "approved" | "rejected";
+  isSensitive?: boolean;
+  riskLevel?: ApprovalRiskLevel;
+  status?: ApprovalStatus;
+  /**
+   * Set after the operator makes a decision via the live activity bar.
+   * Drives the inline decision log chip in the message thread.
+   */
+  resolvedScope?: PermissionScope;
+  /** ISO timestamp of when the decision was made */
+  resolvedAt?: string;
 }
+
+/** Sequential, chronologically ordered segment within an agent message turn. */
+export type MessageSegment =
+  | {
+      id: string;
+      type: MessageSegmentType.THINKING;
+      text: string;
+      durationSeconds?: number;
+      collapsed?: boolean;
+    }
+  | {
+      id: string;
+      type: MessageSegmentType.PLAN;
+      steps: PlanStep[];
+    }
+  | {
+      id: string;
+      type: MessageSegmentType.ARTIFACT;
+      artifact: CoworkArtifact;
+    }
+  | {
+      id: string;
+      type: MessageSegmentType.APPROVAL;
+      request: StudioApprovalRequest;
+    }
+  | {
+      id: string;
+      type: MessageSegmentType.TEXT;
+      content: string;
+    };
 
 /** Chat/Execution message in a cowork session. */
 export interface CoworkMessage {
   id: string;
-  role: "user" | "agent" | "system";
+  role: CoworkMessageRole;
   content: string;
   timestamp: string;
   specialistName?: string;
@@ -68,6 +131,8 @@ export interface CoworkMessage {
   plan?: PlanStep[];
   artifacts?: CoworkArtifact[];
   approvalRequest?: StudioApprovalRequest;
+  /** Chronologically ordered parts (thinking, artifacts, approvals, text) */
+  segments?: MessageSegment[];
   tokensIn?: number;
   tokensOut?: number;
   isStreaming?: boolean;
@@ -92,5 +157,5 @@ export interface StudioEvent {
   title: string;
   detail: string;
   meta: string;
-  type: "think" | "plan" | "search" | "web" | "file" | "database" | "delegate" | "model";
+  type: StudioEventType;
 }

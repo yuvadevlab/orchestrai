@@ -5,11 +5,12 @@
  */
 
 import { getPrismaClient, type PrismaClient, type Prisma } from "@orchestrai/database";
-import { ExecutionStatus } from "@orchestrai/shared-types";
+import { ExecutionStatus, MessageRole } from "@orchestrai/shared-types";
 import type { CreateExecutionDto, ExecutionFilterDto, ResumeExecutionDto } from "@/validation";
 import type { GatewayResponse } from "@/routes/http-types";
 import { resolveDbTenantId } from "./tenant-resolver";
 import { liveExecutionManager } from "./live-execution.manager";
+import { agentQueueProducerManager } from "./agent-execution-queue.producer";
 import { toPrismaStatus, toSharedStatus } from "./execution-status.mapper";
 import { ExecutionQueryService } from "./execution-query.service";
 
@@ -119,7 +120,7 @@ export class ExecutionService {
         data: {
           executionId: row.executionId,
           conversationId: validConvId,
-          role: "user",
+          role: MessageRole.USER,
           content: dto.input,
         },
       });
@@ -131,47 +132,58 @@ export class ExecutionService {
         : targetAgent.systemPrompt;
 
     if (dto.input) {
-      void liveExecutionManager
-        .startExecution(
-          row.executionId,
-          dto.input,
-          modelName,
-          systemPrompt,
-          validConvId || undefined,
-          dto.history,
-        )
-        .then(async () => {
-          const state = liveExecutionManager.getState(row.executionId);
-          if (state) {
-            await this.db.execution.update({
-              where: { executionId: row.executionId },
-              data: {
-                status: toPrismaStatus(state.status),
-                completedAt: state.completedAt ? new Date(state.completedAt) : new Date(),
-              },
-            });
-
-            if (validConvId && state.fullOutput) {
-              await this.db.message.create({
+      const isAsyncQueue = dto.variables?.async === true || dto.variables?.background === true;
+      if (isAsyncQueue) {
+        void agentQueueProducerManager.enqueueExecution({
+          executionId: row.executionId,
+          agentId: targetAgent.agentId,
+          tenantId: resolvedTenantId,
+          inputPrompt: dto.input,
+          variables: dto.variables,
+        });
+      } else {
+        void liveExecutionManager
+          .startExecution(
+            row.executionId,
+            dto.input,
+            modelName,
+            systemPrompt,
+            validConvId || undefined,
+            dto.history,
+          )
+          .then(async () => {
+            const state = liveExecutionManager.getState(row.executionId);
+            if (state) {
+              await this.db.execution.update({
+                where: { executionId: row.executionId },
                 data: {
-                  executionId: row.executionId,
-                  conversationId: validConvId,
-                  role: "assistant",
-                  content: state.fullOutput,
-                  metadata: {
-                    ...(state.artifacts?.length ? { artifacts: state.artifacts } : {}),
-                    ...(modelName ? { model: modelName } : {}),
-                  } as unknown as Prisma.InputJsonValue,
+                  status: toPrismaStatus(state.status),
+                  completedAt: state.completedAt ? new Date(state.completedAt) : new Date(),
                 },
               });
 
-              await this.db.conversation.update({
-                where: { conversationId: validConvId },
-                data: { updatedAt: new Date() },
-              });
+              if (validConvId && state.fullOutput) {
+                await this.db.message.create({
+                  data: {
+                    executionId: row.executionId,
+                    conversationId: validConvId,
+                    role: MessageRole.ASSISTANT,
+                    content: state.fullOutput,
+                    metadata: {
+                      ...(state.artifacts?.length ? { artifacts: state.artifacts } : {}),
+                      ...(modelName ? { model: modelName } : {}),
+                    } as unknown as Prisma.InputJsonValue,
+                  },
+                });
+
+                await this.db.conversation.update({
+                  where: { conversationId: validConvId },
+                  data: { updatedAt: new Date() },
+                });
+              }
             }
-          }
-        });
+          });
+      }
     }
 
     return {

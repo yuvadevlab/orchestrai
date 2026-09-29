@@ -11,6 +11,7 @@ import { ArtifactDocumentCard } from "./artifact-document-card";
 import { ArtifactCodeCard } from "./artifact-code-card";
 import { ArtifactTerminalCard } from "./artifact-terminal-card";
 import { ArtifactSearchCard } from "./artifact-search-card";
+import { ArtifactType } from "@orchestrai/shared-types";
 import type { CoworkArtifact } from "../../types";
 
 export interface ArtifactRendererProps {
@@ -22,13 +23,13 @@ export interface ArtifactRendererProps {
  */
 export function ArtifactRenderer({ artifact }: ArtifactRendererProps): React.JSX.Element {
   switch (artifact.type) {
-    case "document":
+    case ArtifactType.DOCUMENT:
       return <ArtifactDocumentCard artifact={artifact} />;
-    case "code":
+    case ArtifactType.CODE:
       return <ArtifactCodeCard artifact={artifact} />;
-    case "terminal":
+    case ArtifactType.TERMINAL:
       return <ArtifactTerminalCard artifact={artifact} />;
-    case "search":
+    case ArtifactType.SEARCH:
       return <ArtifactSearchCard artifact={artifact} />;
     default:
       return <ArtifactDocumentCard artifact={artifact} />;

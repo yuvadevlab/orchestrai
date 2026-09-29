@@ -17,9 +17,13 @@ export function configureSseHeaders(res: ServerResponse, corsOrigin = "*"): void
     "Cache-Control": "no-cache, no-transform",
     Connection: "keep-alive",
     "Access-Control-Allow-Origin": corsOrigin,
-    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+    "Access-Control-Allow-Headers":
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-Key, X-Tenant-ID, x-tenant-id, X-Request-ID, Idempotency-Key, Last-Event-ID, Cache-Control",
+    "Access-Control-Allow-Credentials": "true",
     "X-Accel-Buffering": "no",
+    Vary: "Origin",
   });
+  res.flushHeaders();
 }
 
 /**

@@ -57,7 +57,7 @@ export function loadRealtimeConfig(
     nodeEnv: env.NODE_ENV ?? "development",
     redisUrl: env.REDIS_URL ?? "redis://localhost:6379",
     corsOrigins: env.CORS_ORIGINS ?? "http://localhost:3001,http://localhost:3000",
-    jwtSecret: env.JWT_SECRET,
+    jwtSecret: env.JWT_SECRET || "dev-jwt-secret-orchestrai-realtime",
     heartbeatIntervalMs: env.HEARTBEAT_INTERVAL_MS ?? 30_000,
     clientTimeoutMs: env.CLIENT_TIMEOUT_MS ?? 60_000,
     maxConnections: env.MAX_CONNECTIONS ?? 10_000,

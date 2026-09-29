@@ -12,7 +12,7 @@ import { ExecutionDebugDialog } from "./execution-debug-dialog";
 import { Button, Input } from "@yuva-devlab/ui";
 import { Search, RotateCcw, Play } from "lucide-react";
 import { useExecutions } from "../api";
-import type { ExecutionRun } from "../types";
+import { ExecutionStatus, type ExecutionRun } from "../types";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageShell } from "@/components/layout/page-shell";
 
@@ -71,7 +71,12 @@ export function ExecutionsPageContent(): React.JSX.Element {
           </div>
 
           <div className="flex items-center gap-1.5 self-start sm:self-auto">
-            {["ALL", "COMPLETED", "RUNNING", "FAILED"].map((s) => (
+            {[
+              "ALL",
+              ExecutionStatus.COMPLETED,
+              ExecutionStatus.RUNNING,
+              ExecutionStatus.FAILED,
+            ].map((s) => (
               <Button
                 key={s}
                 variant={statusFilter === s ? "default" : "outline"}

@@ -6,23 +6,27 @@
  * @module apps/console/features/studio/components
  */
 
-import React, { useRef, useEffect } from "react";
-import { ArrowUp, Bot, Cpu, Sparkles, Square } from "lucide-react";
+import React, { useRef, useEffect, useState } from "react";
+import { ArrowUp, Square } from "lucide-react";
+import { Button } from "@yuva-devlab/ui";
+import type { SpecialistPersona, StudioApprovalRequest } from "../types";
 import {
-  Button,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@yuva-devlab/ui";
-import type { SpecialistPersona } from "../types";
-import type { LlmModelRecord, PlatformModeRecord } from "@orchestrai/shared-types";
+  PermissionScope,
+  type LlmModelRecord,
+  type PlatformModeRecord,
+} from "@orchestrai/shared-types";
+import {
+  StudioFileAttachment,
+  StudioAttachedFilesList,
+  type AttachedFile,
+} from "./studio-file-attachment";
+import { StudioPromptBarSelectors } from "./studio-prompt-bar-selectors";
+import { StudioLiveClearanceCard } from "./studio-live-clearance-card";
 
 export interface StudioPromptBarProps {
   prompt: string;
   onChange: (val: string) => void;
-  onSubmit: () => void;
+  onSubmit: (overridePrompt?: string) => void;
   onStop: () => void;
   isRunning: boolean;
   /** Specialist personas for the in-composer selector. */
@@ -38,10 +42,16 @@ export interface StudioPromptBarProps {
   mode: string;
   onSelectMode: (mode: string) => void;
   suggestions?: readonly string[];
+  /** Pending clearance ticket to prompt user for authorization */
+  pendingApproval?: StudioApprovalRequest | null;
+  /** Handler to resolve pending authorization */
+  onResolveApproval?: (approvalId: string, scope: PermissionScope) => Promise<void>;
+  /** Callback after resolution to update the message audit log in the stream */
+  onApprovalResolved?: (approvalId: string, scope: PermissionScope, resolvedAt: string) => void;
 }
 
 /**
- * Floating bottom command station for the Cowork Studio.
+ * Floating bottom command station for the Cowork Studio with ChatGPT-style file attachments.
  */
 export function StudioPromptBar({
   prompt,
@@ -59,10 +69,14 @@ export function StudioPromptBar({
   mode,
   onSelectMode,
   suggestions = [],
+  pendingApproval,
+  onResolveApproval,
+  onApprovalResolved,
 }: StudioPromptBarProps): React.JSX.Element {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
 
-  // Auto-resize textarea height as user types while preserving spacious multi-line composer height
+  // Auto-resize textarea height as user types
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -70,150 +84,139 @@ export function StudioPromptBar({
     }
   }, [prompt]);
 
+  const handleFileUploaded = (file: AttachedFile): void => {
+    setAttachedFiles((prev) => {
+      const idx = prev.findIndex((f) => f.id === file.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = file;
+        return next;
+      }
+      return [...prev, file];
+    });
+  };
+
+  const handleFileRemoved = (id: string): void => {
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const handleDispatch = (): void => {
+    if (!prompt.trim() && attachedFiles.length === 0) return;
+    let finalPrompt = prompt.trim();
+    const indexed = attachedFiles.filter((f) => f.status === "indexed");
+    if (indexed.length > 0) {
+      const docRefs = indexed
+        .map((f) => `[Referenced document indexed in Knowledge: "${f.name}"]`)
+        .join("\n");
+      finalPrompt = finalPrompt ? `${finalPrompt}\n\n${docRefs}` : docRefs;
+    }
+    setAttachedFiles([]);
+    onSubmit(finalPrompt);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!isRunning && prompt.trim()) {
-        onSubmit();
+      if (!isRunning && (prompt.trim() || attachedFiles.length > 0)) {
+        handleDispatch();
       }
     }
   };
 
-  const availableModes =
-    modes.length > 0
-      ? modes
-      : [
-          { modeId: "auto", slug: "auto", name: "Auto", description: "Autonomous swarm" },
-          { modeId: "chat", slug: "chat", name: "Chat", description: "Direct dialogue" },
-          { modeId: "plan", slug: "plan", name: "Plan", description: "Decompose objective" },
-          { modeId: "act", slug: "act", name: "Act", description: "Execute tools" },
-        ];
-
   return (
     <div className="relative z-20 mx-auto w-full max-w-4xl px-4 pb-4">
-      {/* Quick Suggestion Pills (if provided dynamically) */}
-      {!isRunning && suggestions && suggestions.length > 0 && (
-        <div className="mb-2 flex flex-wrap items-center gap-1.5 overflow-x-auto py-1">
-          {suggestions.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => onChange(s)}
-              className="border-border/60 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground rounded-full border px-2.5 py-1 font-mono text-[11px] transition-colors"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Floating Prompt Container */}
-      <div className="border-border bg-card/85 relative rounded-md border p-2 shadow-lg backdrop-blur-md">
-        <textarea
-          ref={textareaRef}
-          value={prompt}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Describe any objective — research, write, build, analyze…"
-          rows={3}
-          disabled={isRunning}
-          className="placeholder:text-muted-foreground max-h-56 min-h-21 w-full resize-none bg-transparent px-3 py-2 text-sm leading-relaxed outline-none disabled:opacity-50"
+      {/*
+       * When human authorization is required, the prompt container is taken over
+       * by the clearance action card (matching Claude Cowork, Copilot, and Antigravity).
+       * Disappears immediately upon decision; decision notes render in the chat stream.
+       */}
+      {pendingApproval && onResolveApproval ? (
+        <StudioLiveClearanceCard
+          pendingApproval={pendingApproval}
+          onResolve={onResolveApproval}
+          onResolved={onApprovalResolved}
         />
-
-        {/* Action Controls Bar */}
-        <div className="flex flex-wrap items-center gap-2 px-2 pt-1.5">
-          {/* Specialist Selector */}
-          <Select value={selectedSpecialistId} onValueChange={onSelectSpecialist}>
-            <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium">
-              <Bot className="text-primary size-3.5 shrink-0" />
-              <SelectValue placeholder="Select specialist" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border text-foreground text-xs">
-              {specialists && specialists.length > 0 ? (
-                specialists.map((sp) => (
-                  <SelectItem key={sp.id} value={sp.id} className="cursor-pointer text-xs">
-                    {sp.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="loading" disabled className="text-muted-foreground text-xs">
-                  Loading agents...
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-
-          {/* Live Database Model Selector */}
-          <Select value={selectedModel} onValueChange={onSelectModel}>
-            <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium">
-              <Cpu className="text-muted-foreground size-3.5 shrink-0" />
-              <SelectValue placeholder="Select model engine" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border text-foreground text-xs">
-              {models && models.length > 0 ? (
-                models.map((m) => (
-                  <SelectItem
-                    key={m.modelId || m.modelIdentifier}
-                    value={m.modelIdentifier || m.name}
-                    className="cursor-pointer text-xs"
-                  >
-                    {m.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="loading" disabled className="text-muted-foreground text-xs">
-                  Loading models...
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-
-          {/* Platform Mode Selector Dropdown */}
-          <Select value={mode} onValueChange={onSelectMode}>
-            <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium capitalize">
-              <Sparkles className="size-3.5 shrink-0 text-amber-400" />
-              <SelectValue placeholder="Select mode" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border text-foreground text-xs">
-              {availableModes.map((m) => (
-                <SelectItem
-                  key={m.modeId || m.slug}
-                  value={m.slug}
-                  className="cursor-pointer text-xs capitalize"
+      ) : (
+        <>
+          {/* Quick Suggestion Pills */}
+          {!isRunning && suggestions && suggestions.length > 0 && (
+            <div className="mb-2 flex flex-wrap items-center gap-1.5 overflow-x-auto py-1">
+              {suggestions.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => onChange(s)}
+                  className="border-border/60 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground rounded-full border px-2.5 py-1 font-mono text-[11px] transition-colors"
                 >
-                  {m.name}
-                </SelectItem>
+                  {s}
+                </button>
               ))}
-            </SelectContent>
-          </Select>
+            </div>
+          )}
 
-          {/* Run / Stop */}
-          <div className="ml-auto">
-            {isRunning ? (
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={onStop}
-                className="size-7 rounded-md"
-                aria-label="Stop execution"
-              >
-                <Square className="size-3 fill-current" />
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                size="icon"
-                onClick={onSubmit}
-                disabled={!prompt.trim()}
-                className="size-7 rounded-md"
-                aria-label="Run"
-              >
-                <ArrowUp className="size-3.5" />
-              </Button>
-            )}
+          {/* Uploaded Documents Pills */}
+          <StudioAttachedFilesList files={attachedFiles} onRemove={handleFileRemoved} />
+
+          {/* Floating Prompt Container */}
+          <div className="border-border bg-card/85 relative rounded-md border p-2 shadow-lg backdrop-blur-md">
+            <textarea
+              ref={textareaRef}
+              value={prompt}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe any objective — research, write, build, analyze…"
+              rows={3}
+              disabled={isRunning}
+              className="placeholder:text-muted-foreground max-h-56 min-h-21 w-full resize-none bg-transparent px-3 py-2 text-sm leading-relaxed outline-none disabled:opacity-50"
+            />
+
+            {/* Action Controls Bar */}
+            <div className="flex flex-wrap items-center gap-2 px-2 pt-1.5">
+              {/* ChatGPT-style '+' file upload trigger */}
+              <StudioFileAttachment onFileUploaded={handleFileUploaded} disabled={isRunning} />
+
+              {/* Persona, Model, and Mode Selectors */}
+              <StudioPromptBarSelectors
+                specialists={specialists}
+                selectedSpecialistId={selectedSpecialistId}
+                onSelectSpecialist={onSelectSpecialist}
+                models={models}
+                selectedModel={selectedModel}
+                onSelectModel={onSelectModel}
+                modes={modes}
+                mode={mode}
+                onSelectMode={onSelectMode}
+              />
+
+              {/* Run / Stop */}
+              <div className="ml-auto">
+                {isRunning ? (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={onStop}
+                    className="size-7 rounded-md"
+                    aria-label="Stop execution"
+                  >
+                    <Square className="size-3 fill-current" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="icon"
+                    onClick={handleDispatch}
+                    disabled={!prompt.trim() && attachedFiles.length === 0}
+                    className="size-7 rounded-md"
+                    aria-label="Run"
+                  >
+                    <ArrowUp className="size-3.5" />
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

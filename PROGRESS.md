@@ -113,9 +113,92 @@ Live progress tracking for the **OrchestrAI** Universal Autonomous AI Agent & Co
 
 ---
 
+### Milestone 10: System-Wide Access, Multi-Root Sandboxing & Sensitive File Protection
+
+- [x] **Sensitive Path & Threat Classifier (`classifyPathSensitivity`)**: Pattern detection for critical credentials (`~/.ssh`, `~/.aws`, `~/.gnupg`, `~/.config/gcloud`, `~/.kube`, `id_rsa`), secrets (`.env`, `.env.*`), and protected system paths (`/etc`, `/System`).
+- [x] **Dynamic Multi-Root Path Sanitizer (`sanitizePath`)**: Upgraded path jail allowing multiple approved roots (`workspaceRoot` + session grants + permanent grants) and home directory tilde (`~`) expansion.
+- [x] **Tool Execution Context Multi-Root Support**: Added `allowedRoots` to `ToolExecutionContext` across `read_file`, `write_file`, and `list_dir`.
+- [x] **Interactive High-Risk Clearance UI (`StudioPermissionCard`)**: Semantic warning tokens and specialized confirmation banners when agents attempt to access sensitive credentials or keys.
+- [x] **System-Wide Prompt Awareness (`AUTONOMOUS_TOOLS_SYSTEM_PROMPT`)**: Prompt instructions allowing the agent to explore external directories on the machine with interactive operator clearance.
+
+### Phase 11 — The Distributed Real-Time Backbone & BullMQ Queue Dispatch
+
+- [x] **Redis Pub/Sub Event Streaming**: Gateway publishes live LLM tokens, tool calls, and approval events to `orchestrai:realtime:execution:<id>`.
+- [x] **Realtime SSE & WebSocket Broadcast**: `apps/realtime` subscribes to Redis Pub/Sub channels and fans out SSE streams directly to subscribers.
+- [x] **BullMQ Background Execution Producer**: `apps/gateway` enqueues background/async execution workloads via `AgentExecutionProducer` to BullMQ.
+- [x] **Worker Daemon Ready**: `apps/worker` runs `AgentExecutionWorker` polling Redis queues with `OrchestrAIRuntime` DAG execution.
+
+### Phase 13 — Knowledge, Memory, Evaluations Hubs & ChatGPT-Style File Attachment
+
+- [x] **ChatGPT-Style File Attachment (`+` Button)**: Floating bottom composer in Studio features a `+` button trigger, local file selection, automatic background ingestion into RAG vector storage (`POST /api/v1/rag/documents`), and interactive document chips with removal capability.
+- [x] **RAG Knowledge Base Hub (`/knowledge`)**: Full document registry, multi-format upload modal, and live hybrid vector query tester showing similarity score percentages and chunk matches.
+- [x] **Cross-Session Memory Hub (`/memory`)**: Memory management interface with fact creation dialog, semantic recall tester matching runtime agent prompt context, and priority scoring.
+- [x] **Capability Evaluations Hub (`/evaluations`)**: Benchmark evaluation runner against model engines, interactive accuracy gauge, latency breakdowns, and dataset catalogue.
+- [x] **OpenTelemetry Span Waterfall (`/executions/[executionId]`)**: Real-time visualization of execution sub-task spans, start offsets, durations, and attribute inspectors.
+- [x] **API Hook Architecture Standard (`api/use-*.ts`)**: Decomposed all API mutations and queries into dedicated `use-*.ts` files under `features/<feature>/api/` (`use-upload-document.ts`, `use-ingest-document.ts`, `use-knowledge-documents.ts`, `use-delete-document.ts`, `use-query-knowledge.ts`, `use-memories.ts`, `use-create-memory.ts`, `use-delete-memory.ts`, `use-search-memories.ts`, `use-evaluation-datasets.ts`, `use-run-benchmark.ts`). Zero direct `client.http.request` routes in TSX presentation layers.
+- [x] **Enum Normalization & Lowercase snake_case Invariant**: Shared enums (`DocumentUploadStatus`, `TraceSpanStatus`, `DocumentMimeType`, `BenchmarkDatasetName`, `MemoryType`, `PermissionScope`, `ApprovalRiskLevel`, `ArtifactType`, `ArtifactStatus`, `PlanStepStatus`, `EpisodeOutcome`) in `@orchestrai/shared-types`. Modularized `packages/shared-types/src/enums/` to keep all files < 250 lines. Zero raw string comparisons in UI or services.
+- [x] **Valid RFC 4122 v4 UUID Format**: Eliminated synthetic/fake non-UUID strings (`"d1a10001-..."`, `"eval-msg"`). Implemented standard `randomUUID()` generation adhering to `EvaluationDatasetSchema` and `ChatMessageSchema`.
+- [x] **Single-Toolbar UI Standard (Zero Nested Search Bars)**: Redesigned Knowledge and Memory hubs to strictly match the canonical `/agents` page pattern. Removed inline query/recall boxes with duplicate search bars; converted query/recall testing into accessible modal dialogs (`KnowledgeQueryDialog`, `MemoryRecallDialog`) accessible via header action buttons. Search bar uses native `Input startIcon={<Search className="size-3.5" />}` with zero broken padding or overlapping icons.
+- [x] **Zero Fallback/Dummy Menus**: Completely eliminated hardcoded fallback menus (`DEFAULT_MODES`) in frontend; UI cleanly relies on live database states with accessible loading indicators.
+- [x] **Real-Time Cross-Origin SSE Streaming & W3C Token Delimiter Compliance**:
+  - Resolved browser CORS preflight (`OPTIONS /api/v1/stream`) failure caused by missing `X-Tenant-ID` and custom headers in `apps/realtime`.
+  - Configured dynamic `localhost`/`127.0.0.1` origin reflection, `Access-Control-Allow-Credentials: true`, and socket TCP no-delay (`req.socket.setNoDelay(true)`).
+  - Clean stream closure on `done`/`error` events with `res.end()` preventing indefinite socket hang.
+  - Aligned `@orchestrai/sdk` `sse-parser.ts` with W3C SSE standard: only stripped single leading space delimiter (`rawValue.startsWith(" ") ? rawValue.slice(1) : rawValue`) instead of aggressive `.trim()`, preserving inter-word whitespace and newlines for live streaming tokens.
+  - Added immediate loop termination (`break;`) on `done` or `[DONE]` events in `use-agent-runner.ts`.
+  - Extracted HITL operator approval resolution mutation into `apps/console/src/features/studio/api/use-resolve-approval.ts` per modular API hook architecture guidelines, keeping `use-agent-runner.ts` well under 250 lines (227 lines).
+- [x] **Default-Collapsed Multi-Domain Tool Artifacts & Safe Process Termination**:
+  - Converted all 4 Studio artifact cards (`ArtifactTerminalCard`, `ArtifactCodeCard`, `ArtifactDocumentCard`, `ArtifactSearchCard`) to default-collapsed state with interactive "Show" / "Hide" toggles, chevron indicators, and clean single-line summary headers.
+  - Hardened bash tool execution against process hangs and unhandled timeout rejections by returning POSIX standard exit code 124 on timeout rather than unhandled promise rejection.
+  - Guided autonomous system prompts to exclude heavy folders (`node_modules`, `.git`) when searching and search sibling folders for external repositories.
+- [x] **Multi-Repository Trust Boundaries & Provenance-Guarded Anti-Hallucination**:
+  - Injected dynamic active workspace identity (`orchestrai`) and detected sibling repositories in parent directory (`finai`, `devlab-shared`, etc.) into `buildInitialConversationHistory`.
+  - Added smart sibling candidate resolution in `sanitizePath` and `checkPermission`: paths like `finai/package.json` resolve to `../finai/package.json` outside the workspace root, correctly triggering interactive HITL clearance cards.
+  - Added explicit filesystem provenance headers to `read_file` tool output (`[File: ... (Workspace: "orchestrai", path: ...)]`) so the model never confuses files from the current repo with external projects.
+  - Updated tool call prompt examples to specify `apps/gateway/src/index.ts` and `../finai/package.json` rather than bare `package.json`.
+
+---
+
+### Phase 14 — System-Wide AI Agent Data Model & Universal Access Architecture
+
+- [x] **System-Level Agent Elevation**:
+  - Decoupled `Agent` from repository, project, or application scopes. Made `Agent` a platform-level entity with `scope: PlatformScope @default(platform)` and nullable `tenantId`.
+  - Clean architectural separation: Agent (orchestration) $\rightarrow$ Capabilities (domain boundary) $\rightarrow$ Tools (concrete operations) $\rightarrow$ Resources (target canonical URI).
+- [x] **Generic Resource Registry & Canonical URI Taxonomy (`resources`)**:
+  - Universal resource schema supporting canonical schemes: `file://`, `repo://`, `db://`, `api://`, `service://`, `tenant://`.
+  - Implemented hierarchical containment checking (`isResourceContained(parentUri, childUri)`) enabling coarse-grained grants without repetitive clearance requests.
+  - Created `ResourceRegistryService` in Gateway for URI normalization, target classification, and lazy database indexing.
+- [x] **Capability-Based Permission Abstraction (`capabilities` & `capability_tools`)**:
+  - Introduced `Capability` model grouping execution tools under intelligible functional permissions (Filesystem, Repositories, System Execution, Database, APIs, Memory).
+  - Created `seedDefaultCapabilities` utility in `@orchestrai/database` providing idempotent platform capability seeding and tool bindings.
+  - Added `CapabilityDefinitionSchema` and `AgentCapabilityBindingSchema` in `@orchestrai/core`.
+- [x] **User Authority Chain & Persistent Access Grants (`access_grants` & `permission_requests`)**:
+  - Enforced strict user-authority chain: agent cannot self-authorize.
+  - Clearance requests persist to `permission_requests` with lifecycle states (`pending`, `approved`, `rejected`, `expired`, `revoked`).
+  - Human approvals persist to `access_grants` with duration scopes (`once`, `session`, `permanent`) and permission tiers (`read`, `write`, `execute`, `admin`).
+  - Created `DbGrantService` in Gateway for querying active grants, resolving approval promises, and revoking authorizations.
+- [x] **Multi-Turn HITL Clearance Resolution & SSE Stream Heartbeat Resilience**:
+  - **Component State Desynchronization Fix**: Added `key={message.approvalRequest.id}` to `StudioPermissionCard` in `studio-message-item.tsx` and reset resolution state on request changes, ensuring successive approval prompts (e.g. `package.json` followed by `pnpm-workspace.yaml`) mount interactive buttons rather than staying frozen in a resolved badge state.
+  - **SDK Scope Pass-Through**: Updated `useResolveApproval.ts` and `approvals.ts` SDK resource to pass `scope` (`once`, `session`, `permanent`, `deny`) in the resolve payload, ensuring "Allow for this Chat" and "Always Allow" properly propagate to `sessionGrants` and `.orchestrai/permissions.json`.
+  - **Session Grant Scope Resolution**: Passed `sessionId` (the conversation ID) from `live-execution.manager.ts` through `tool-approval-invoker.ts` into `createApprovalRequest` and `resolveApproval`, ensuring session-wide clearances match active conversation lookups across all turns.
+  - **SSE Idle Timeout Prevention**: Embedded a 15-second heartbeat ping (`: ping\n\n`) into `attachExecutionSseStream` in `live-execution-broadcaster.ts` to prevent HTTP proxies and browsers from terminating open SSE connections during operator decision pauses.
+  - **Read-File Prompt Confusion Elimination**: Removed ambiguous note from `read_file` header in `autonomous-agent-runner.ts` that erroneously caused LLMs to re-request already-read files.
+  - **Sticky Live Activity Bar & Inline Approval Audit Log**:
+    - Re-architected clearance UX by moving interactive security clearance prompts into sticky `StudioLiveActivityBar` anchored at the bottom between the message feed and command station, ensuring operators never need to scroll up to find approvals or monitor live tool/thinking execution.
+    - Extracted `StudioLiveClearanceCard` sub-component and added `ApprovalDecisionChip` in `studio-message-item.tsx` to provide an inline, permanent audit log of the operator's decision (`Cleared (once)`, `Cleared (session)`, `Always Allow`, `Denied`) with timestamp and resource target.
+    - Suppressed duplicate clearance cards in the message body during active streaming while keeping the audit log chip once resolved.
+    - Decomposed `StudioWorkspace` into `useStudioWorkspaceState` hook and dedicated type definitions (`use-studio-workspace-state.types.ts`), maintaining strict < 250 LOC compliance and clean separation between UI layout and state/lifecycle management.
+  - **Interleaved Chronological Message Segments Timeline (`MessageSegment`)**:
+    - Upgraded `CoworkMessage` with `segments?: MessageSegment[]` supporting discrete parts (`thinking`, `plan`, `artifact`, `approval`, `text`) rendered in their exact chronological sequence instead of grouping all tool artifacts at the top of the message body.
+    - Extracted `message-segment-utils.ts` and `execution-stream-consumer.ts` to maintain immutable chronological segment ordering during Gateway SSE streaming and clearance resolution.
+    - Rendered `ApprovalDecisionChip` and collapsed tool cards directly in-line between the text blocks that preceded and followed them, matching native agent workflows in Claude Cowork and ChatGPT Canvas.
+
+---
+
 ## 2. Invariant Compliance
 
-- **Hard 250-Line Maximum Rule**: 100% of files across all `apps/` and `packages/` are strictly < 250 lines (zero exceptions).
-- **Strict TypeScript**: `pnpm typecheck` passing with **0 errors** across all **32 targets**.
-- **ESLint**: `pnpm lint` passing with **0 warnings**.
+- **Hard 250-Line Maximum Rule**: 100% of files across all `apps/` and `packages/` are strictly < 250 lines (zero exceptions; all new files < 200 lines).
+- **Strict TypeScript & Zero Any**: `pnpm typecheck` passing with **0 errors** across all **37 targets**. Zero usage of `any` type.
+- **ESLint**: `pnpm lint` passing with **0 warnings** (`--max-warnings=0`).
+- **Design Tokens**: 100% semantic CSS theme tokens (`text-warning`, `border-border`, `bg-card`). Zero ad-hoc colors.
 - **No Test Policy**: Zero test cases written during phase implementation until requested.

@@ -33,10 +33,10 @@ export const OrderedDomainEventSchema = z.object({
    * Underlying domain event payload.
    */
   event: z.object({
-    eventId: z.string().uuid(),
+    eventId: z.uuid(),
     eventType: z.string(),
-    executionId: z.string().uuid(),
-    timestamp: z.string().datetime(),
+    executionId: z.uuid(),
+    timestamp: z.iso.datetime(),
     payload: z.record(z.string(), z.unknown()),
   }),
 });

@@ -6,3 +6,6 @@
 export * from "./agent-mode.schema";
 export * from "./agent-definition.schema";
 export * from "./agent-state.schema";
+export * from "./capability.schema";
+export * from "./resource.schema";
+export * from "./access-grant.schema";

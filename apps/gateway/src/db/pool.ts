@@ -73,6 +73,15 @@ export async function dbQuery<T extends QueryResultRow = QueryResultRow>(
 }
 
 /**
+ * Standard PostgreSQL transaction control statements.
+ */
+export const TRANSACTION_SQL = {
+  BEGIN: "BEGIN",
+  COMMIT: "COMMIT",
+  ROLLBACK: "ROLLBACK",
+} as const;
+
+/**
  * Executes operations within an atomic PostgreSQL transaction.
  *
  * @param fn - Callback executing queries on the isolated PoolClient
@@ -83,12 +92,12 @@ export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>)
   const client = await pool.connect();
 
   try {
-    await client.query("BEGIN");
+    await client.query(TRANSACTION_SQL.BEGIN);
     const result = await fn(client);
-    await client.query("COMMIT");
+    await client.query(TRANSACTION_SQL.COMMIT);
     return result;
   } catch (error) {
-    await client.query("ROLLBACK");
+    await client.query(TRANSACTION_SQL.ROLLBACK);
     logger.error("[DatabasePool] Transaction rolled back due to error", {
       error: error instanceof Error ? error.message : String(error),
     });

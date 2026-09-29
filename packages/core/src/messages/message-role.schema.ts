@@ -10,5 +10,5 @@ import { MessageRole } from "@orchestrai/shared-types";
  * Standard message roles supported by model adapters backed by MessageRole enum.
  */
 export const MessageRoleSchema = z
-  .nativeEnum(MessageRole)
+  .enum(MessageRole)
   .describe("Origin role of a chat message in the conversation thread");

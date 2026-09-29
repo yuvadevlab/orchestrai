@@ -5,7 +5,13 @@
  */
 
 import { getApiClient } from "@/lib/api-client";
-import type { CoworkArtifact, CoworkMessage, CoworkMode, CoworkSession } from "../types";
+import {
+  CoworkMessageRole,
+  CoworkMode,
+  type CoworkArtifact,
+  type CoworkMessage,
+  type CoworkSession,
+} from "../types";
 
 export const SESSIONS_STORAGE_KEY = "orchestrai_cowork_sessions";
 export const ACTIVE_SESSION_STORAGE_KEY = "orchestrai_active_session_id";
@@ -39,7 +45,7 @@ export function createDraftSession(id?: string): CoworkSession {
     updatedAt: now,
     specialistId: "",
     model: "",
-    mode: "auto",
+    mode: CoworkMode.AUTO,
     messages: [],
   };
 }
@@ -109,8 +115,12 @@ export function mapServerToCoworkSession(server: Record<string, unknown>): Cowor
   const mappedMessages: CoworkMessage[] = messagesRaw.map((m: Record<string, unknown>) => {
     const msgMeta = (m.metadata as Record<string, unknown>) || {};
     const roleStr = String(m.role || "user").toLowerCase();
-    const role: "user" | "agent" | "system" =
-      roleStr === "assistant" ? "agent" : (roleStr as "user" | "agent" | "system");
+    const role: CoworkMessageRole =
+      roleStr === CoworkMessageRole.AGENT || roleStr === "assistant"
+        ? CoworkMessageRole.AGENT
+        : roleStr === CoworkMessageRole.SYSTEM
+          ? CoworkMessageRole.SYSTEM
+          : CoworkMessageRole.USER;
 
     return {
       id: String(m.messageId || m.id || generateUUID()),
@@ -136,7 +146,7 @@ export function mapServerToCoworkSession(server: Record<string, unknown>): Cowor
     updatedAt: String(server.updatedAt || new Date().toISOString()),
     specialistId: String(server.agentId || meta.specialistId || ""),
     model: String(meta.model || ""),
-    mode: (meta.mode as CoworkMode) || "auto",
+    mode: (meta.mode as CoworkMode) || CoworkMode.AUTO,
     messages: mappedMessages,
   };
 }
@@ -169,8 +179,12 @@ export async function fetchServerSessionMessages(conversationId: string): Promis
     return res.messages.map((m) => {
       const msgMeta = (m.metadata as Record<string, unknown>) || {};
       const roleStr = String(m.role || "user").toLowerCase();
-      const role: "user" | "agent" | "system" =
-        roleStr === "assistant" ? "agent" : (roleStr as "user" | "agent" | "system");
+      const role: CoworkMessageRole =
+        roleStr === CoworkMessageRole.AGENT || roleStr === "assistant"
+          ? CoworkMessageRole.AGENT
+          : roleStr === CoworkMessageRole.SYSTEM
+            ? CoworkMessageRole.SYSTEM
+            : CoworkMessageRole.USER;
 
       return {
         id: String(m.messageId || generateUUID()),

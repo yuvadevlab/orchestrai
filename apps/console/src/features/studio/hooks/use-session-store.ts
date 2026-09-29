@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getApiClient } from "@/lib/api-client";
-import type { CoworkMessage, CoworkSession } from "../types";
+import { CoworkMode, type CoworkMessage, type CoworkSession } from "../types";
 import {
   createDraftSession,
   fetchServerSessionMessages,
@@ -94,7 +94,7 @@ export function useSessionStore(routeSessionId?: string): UseSessionStoreResult 
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
               specialistId: "",
-              mode: "auto",
+              mode: CoworkMode.AUTO,
               messages,
             };
             return [fallback, ...prev];

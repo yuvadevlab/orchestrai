@@ -3,29 +3,11 @@
  * @description Durable PostgreSQL adapter for HITL approvals table with optimistic concurrency control.
  */
 
-import { ApprovalStatus } from "@orchestrai/shared-types";
+import { ApprovalStatus, ApprovalDecisionVerdict } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import type { IDatabaseQueryRunner } from "@/checkpoint/database-adapter.interface";
 import type { ApprovalResolutionInput, ApprovalTicket, IApprovalStorage } from "../contracts";
-
-/**
- * Raw database row shape returned from the `approvals` relational table.
- */
-interface ApprovalDbRow {
-  readonly approval_id: string;
-  readonly execution_id: string;
-  readonly step_id?: string;
-  readonly tool_name: string;
-  readonly tool_arguments: string | Record<string, unknown>;
-  readonly rationale: string;
-  readonly status: string;
-  readonly operator_id?: string;
-  readonly rejection_reason?: string;
-  readonly modified_arguments?: string | Record<string, unknown>;
-  readonly requested_at: Date | string;
-  readonly expires_at: Date | string;
-  readonly decided_at?: Date | string;
-}
+import { APPROVAL_SQL_QUERIES, type ApprovalDbRow } from "./postgres-approval-queries";
 
 /**
  * PostgreSQL-backed storage adapter for HITL approval tickets.
@@ -41,15 +23,7 @@ export class PostgresApprovalStorage implements IApprovalStorage {
    * Persists an approval ticket into the approvals table.
    */
   public async createTicket(ticket: ApprovalTicket): Promise<ApprovalTicket> {
-    const sql = `
-      INSERT INTO approvals (
-        approval_id, execution_id, step_id, tool_name,
-        tool_arguments, rationale, status, requested_at, expires_at
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
-    `;
-
-    await this.db.query(sql, [
+    await this.db.query(APPROVAL_SQL_QUERIES.CREATE_TICKET, [
       ticket.approvalId,
       ticket.executionId,
       ticket.stepId ?? null,
@@ -68,14 +42,9 @@ export class PostgresApprovalStorage implements IApprovalStorage {
    * Retrieves an approval ticket by its primary key UUID.
    */
   public async getTicket(approvalId: string): Promise<ApprovalTicket | undefined> {
-    const sql = `
-      SELECT *
-      FROM approvals
-      WHERE approval_id = $1
-      LIMIT 1;
-    `;
-
-    const rows = await this.db.query<ApprovalDbRow>(sql, [approvalId]);
+    const rows = await this.db.query<ApprovalDbRow>(APPROVAL_SQL_QUERIES.GET_TICKET_BY_ID, [
+      approvalId,
+    ]);
     const row = rows[0];
     if (!row) {
       return undefined;
@@ -88,15 +57,9 @@ export class PostgresApprovalStorage implements IApprovalStorage {
    * Lists all PENDING tickets, optionally filtered by execution ID.
    */
   public async listPending(executionId?: string): Promise<readonly ApprovalTicket[]> {
-    const sql = `
-      SELECT *
-      FROM approvals
-      WHERE status = 'PENDING'
-        AND ($1::uuid IS NULL OR execution_id = $1::uuid)
-      ORDER BY requested_at ASC;
-    `;
-
-    const rows = await this.db.query<ApprovalDbRow>(sql, [executionId ?? null]);
+    const rows = await this.db.query<ApprovalDbRow>(APPROVAL_SQL_QUERIES.LIST_PENDING, [
+      executionId ?? null,
+    ]);
     return rows.map((r) => this.mapRowToTicket(r));
   }
 
@@ -109,30 +72,22 @@ export class PostgresApprovalStorage implements IApprovalStorage {
   ): Promise<ApprovalTicket> {
     // Invariant: Approvals table check constraint restricts status to PENDING, APPROVED, REJECTED, TIMED_OUT
     const nextStatus =
-      resolution.decision === "APPROVED" ? ApprovalStatus.APPROVED : ApprovalStatus.REJECTED;
+      resolution.decision === ApprovalDecisionVerdict.APPROVED
+        ? ApprovalStatus.APPROVED
+        : ApprovalStatus.REJECTED;
 
     const rejectionReason =
       resolution.reason ??
-      (resolution.decision === "CANCELLED" ? "Execution cancelled by operator" : null);
+      (resolution.decision === ApprovalDecisionVerdict.CANCELLED
+        ? "Execution cancelled by operator"
+        : null);
 
     const decidedAt = new Date();
     const modifiedArgsJson = resolution.modifiedArguments
       ? JSON.stringify(resolution.modifiedArguments)
       : null;
 
-    const sql = `
-      UPDATE approvals
-      SET
-        status = $1,
-        operator_id = $2,
-        rejection_reason = $3,
-        modified_arguments = $4,
-        decided_at = $5
-      WHERE approval_id = $6 AND status = 'PENDING'
-      RETURNING *;
-    `;
-
-    const rows = await this.db.query<ApprovalDbRow>(sql, [
+    const rows = await this.db.query<ApprovalDbRow>(APPROVAL_SQL_QUERIES.RESOLVE_TICKET, [
       nextStatus,
       resolution.operatorId,
       rejectionReason,
@@ -166,16 +121,10 @@ export class PostgresApprovalStorage implements IApprovalStorage {
    * Sweeps and transitions expired pending tickets to TIMED_OUT.
    */
   public async expireStaleTickets(now = new Date()): Promise<number> {
-    const sql = `
-      UPDATE approvals
-      SET
-        status = 'TIMED_OUT',
-        rejection_reason = 'Approval window expired without human response',
-        decided_at = $1
-      WHERE status = 'PENDING' AND expires_at < $1;
-    `;
-
-    const result = await this.db.query<{ count?: number }>(sql, [now]);
+    const result = await this.db.query<{ count?: number }>(
+      APPROVAL_SQL_QUERIES.EXPIRE_STALE_TICKETS,
+      [now],
+    );
     return result.length;
   }
 
@@ -197,23 +146,19 @@ export class PostgresApprovalStorage implements IApprovalStorage {
     return {
       approvalId: row.approval_id,
       executionId: row.execution_id,
-      stepId: row.step_id,
+      stepId: row.step_id ?? undefined,
       stepIndex: 0,
       toolName: row.tool_name,
       toolArguments: toolArgs,
       riskLevel: "HIGH",
       rationale: row.rationale,
       status: row.status as ApprovalStatus,
-      operatorId: row.operator_id,
-      rejectionReason: row.rejection_reason,
+      operatorId: row.operator_id ?? undefined,
+      rejectionReason: row.rejection_reason ?? undefined,
       modifiedArguments: modifiedArgs,
-      requestedAt: row.requested_at instanceof Date ? row.requested_at : new Date(row.requested_at),
-      expiresAt: row.expires_at instanceof Date ? row.expires_at : new Date(row.expires_at),
-      decidedAt: row.decided_at
-        ? row.decided_at instanceof Date
-          ? row.decided_at
-          : new Date(row.decided_at)
-        : undefined,
+      requestedAt: new Date(row.requested_at),
+      expiresAt: new Date(row.expires_at),
+      decidedAt: row.decided_at ? new Date(row.decided_at) : undefined,
     };
   }
 }

@@ -129,12 +129,20 @@ export class ConversationService {
     }
 
     const resolvedTenantId = await resolveDbTenantId(tenantId, this.db);
-    const row = await this.db.conversation.update({
+    const agentId = await resolveOrCreateDefaultAgent(resolvedTenantId, this.db);
+
+    const row = await this.db.conversation.upsert({
       where: {
         conversationId,
-        tenantId: resolvedTenantId,
       },
-      data: {
+      create: {
+        conversationId,
+        tenantId: resolvedTenantId,
+        agentId,
+        title: dto.title || "New Conversation",
+        metadata: (dto.metadata as Prisma.InputJsonValue) || {},
+      },
+      update: {
         ...(dto.title ? { title: dto.title } : {}),
         ...(dto.metadata ? { metadata: dto.metadata as Prisma.InputJsonValue } : {}),
         updatedAt: new Date(),
@@ -163,15 +171,21 @@ export class ConversationService {
     }
 
     const resolvedTenantId = await resolveDbTenantId(tenantId, this.db);
-    await this.db.conversation.update({
-      where: {
-        conversationId,
-        tenantId: resolvedTenantId,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
+    const existing = await this.db.conversation.findFirst({
+      where: { conversationId, tenantId: resolvedTenantId, deletedAt: null },
     });
+
+    if (existing) {
+      await this.db.conversation.update({
+        where: {
+          conversationId,
+          tenantId: resolvedTenantId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+    }
 
     return {
       success: true,

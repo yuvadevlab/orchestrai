@@ -81,8 +81,9 @@ export class WriteFileTool implements ITool<WriteFileInput, WriteFileOutput> {
    * Writes the specified content to disk within the sandbox boundary.
    */
   async execute(args: WriteFileInput, context: ToolExecutionContext): Promise<WriteFileOutput> {
-    const root = context.workspaceRoot ?? process.cwd();
-    const safePath = sanitizePath(args.path, root);
+    const roots =
+      context.allowedRoots ?? (context.workspaceRoot ? [context.workspaceRoot] : [process.cwd()]);
+    const safePath = sanitizePath(args.path, roots);
 
     // Check if file already existed before writing
     let isCreated: boolean;

@@ -8,8 +8,8 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
-import { useAuth } from "@/lib/auth";
-import type { LlmModel, LlmProvider, ModelDefinition } from "../types";
+import { ModelStatus, type LlmModel, type LlmProvider, type ModelDefinition } from "../types";
+import { useAuth } from "@/lib/auth-context";
 
 /**
  * Custom React hook querying live LLM models from the Gateway API.
@@ -74,7 +74,7 @@ export function useLegacyModels(): {
   const legacyList: ModelDefinition[] = models.map((m) => ({
     id: m.name || m.modelIdentifier,
     provider: providerMap.get(m.providerId) || "Configured Provider",
-    status: m.isEnabled ? "ONLINE" : "OFFLINE",
+    status: m.isEnabled ? ModelStatus.ONLINE : ModelStatus.OFFLINE,
     cost: "Dynamic",
     latency: m.contextWindow ? `${Math.round(m.contextWindow / 1000)}k ctx` : "8k ctx",
     isDefault: m.isDefault,

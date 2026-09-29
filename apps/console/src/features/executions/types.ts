@@ -1,8 +1,14 @@
 /**
- * Execution DAG status state.
+ * Execution DAG status state (console-local view matching gateway response values).
  */
-export type ExecutionStatus =
-  "COMPLETED" | "RUNNING" | "FAILED" | "PAUSED" | "CANCELLED" | "QUEUED";
+export enum ExecutionStatus {
+  COMPLETED = "completed",
+  RUNNING = "running",
+  FAILED = "failed",
+  PAUSED = "paused",
+  CANCELLED = "cancelled",
+  QUEUED = "queued",
+}
 
 /**
  * Step checkpoint summary within an execution DAG.

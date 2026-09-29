@@ -10,7 +10,7 @@ import { ExecutionStatus } from "@orchestrai/shared-types";
  * Valid lifecycle states for an execution run backed by ExecutionStatus enum.
  */
 export const ExecutionStatusSchema = z
-  .nativeEnum(ExecutionStatus)
+  .enum(ExecutionStatus)
   .describe("Current state machine status of an execution run");
 
 /**

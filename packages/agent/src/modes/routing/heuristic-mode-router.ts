@@ -3,7 +3,7 @@
  * @description Fast, zero-latency rule-based heuristic classifier for AUTO mode routing.
  */
 
-import { AgentMode } from "@orchestrai/shared-types";
+import { AgentMode, MessageRole } from "@orchestrai/shared-types";
 import type { IModeRouter, ModeRoutingContext } from "./mode-router.interface";
 
 /**
@@ -38,7 +38,8 @@ export class HeuristicModeRouter implements IModeRouter {
    * Evaluates the latest user message against heuristic rule sets.
    */
   public route(context: ModeRoutingContext): AgentMode {
-    const latestUserMsg = [...context.messages].reverse().find((m) => m.role === "user");
+    // Find last message from the user role to determine routing intent
+    const latestUserMsg = [...context.messages].reverse().find((m) => m.role === MessageRole.USER);
 
     // Guard: Fallback to default if no user message found in history
     if (!latestUserMsg || typeof latestUserMsg.content !== "string") {

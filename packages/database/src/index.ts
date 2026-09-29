@@ -10,3 +10,4 @@ export * from "./query";
 export * from "./health";
 export * from "./tenant-context";
 export * from "./client";
+export * from "./seed-capabilities";

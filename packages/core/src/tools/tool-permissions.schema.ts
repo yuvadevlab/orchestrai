@@ -10,7 +10,7 @@ import { ToolPermissionLevel } from "@orchestrai/shared-types";
  * Hierarchical permission classification for executable tools backed by ToolPermissionLevel enum.
  */
 export const ToolPermissionLevelSchema = z
-  .nativeEnum(ToolPermissionLevel)
+  .enum(ToolPermissionLevel)
   .describe("Risk classification tier governing execution clearance");
 
 /**

@@ -9,6 +9,7 @@ export * from "./conversation-query.service";
 export * from "./conversation-message.service";
 export * from "./agent.service";
 export * from "./rag.service";
+export * from "./memory.service";
 export * from "./approval.service";
 export * from "./auth.service";
 /* Platform configuration — split into focused domain services */

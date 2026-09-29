@@ -3,7 +3,7 @@
  * @description In-memory implementation of IApprovalStorage for local development and tests.
  */
 
-import { ApprovalStatus } from "@orchestrai/shared-types";
+import { ApprovalStatus, ApprovalDecisionVerdict } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import type { ApprovalResolutionInput, ApprovalTicket, IApprovalStorage } from "../contracts";
 
@@ -78,11 +78,15 @@ export class MemoryApprovalStorage implements IApprovalStorage {
 
     // Invariant: ApprovalStatus permits PENDING, APPROVED, REJECTED, TIMED_OUT
     const nextStatus =
-      resolution.decision === "APPROVED" ? ApprovalStatus.APPROVED : ApprovalStatus.REJECTED;
+      resolution.decision === ApprovalDecisionVerdict.APPROVED
+        ? ApprovalStatus.APPROVED
+        : ApprovalStatus.REJECTED;
 
     const rejectionReason =
       resolution.reason ??
-      (resolution.decision === "CANCELLED" ? "Execution cancelled by operator" : undefined);
+      (resolution.decision === ApprovalDecisionVerdict.CANCELLED
+        ? "Execution cancelled by operator"
+        : undefined);
 
     const resolved: ApprovalTicket = {
       ...existing,

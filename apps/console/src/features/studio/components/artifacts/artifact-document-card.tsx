@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { Check, Copy, Download, FileText } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Copy, Download, FileText } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
 import type { CoworkArtifact } from "../../types";
 
@@ -16,10 +16,11 @@ export interface ArtifactDocumentCardProps {
 }
 
 /**
- * Renders a structured document or report artifact.
+ * Renders a structured document or report artifact (default collapsed).
  */
 export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const wordCount = artifact.content.trim().split(/\s+/).length;
 
@@ -40,16 +41,30 @@ export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): R
   };
 
   return (
-    <div className="border-border/80 bg-card/70 my-3 overflow-hidden rounded-md border shadow-sm">
+    <div className="border-border/80 bg-card/70 my-2 overflow-hidden rounded-md border shadow-sm">
       {/* Document Header */}
-      <div className="border-border/60 bg-muted/30 flex items-center justify-between border-b px-4 py-2.5 font-mono text-xs">
-        <div className="flex items-center gap-2">
-          <FileText className="text-primary size-4" />
-          <span className="text-foreground font-semibold">{artifact.title}</span>
-          <span className="text-muted-foreground text-[11px]">({wordCount} words)</span>
-        </div>
+      <div
+        className={`bg-muted/30 flex items-center justify-between px-3.5 py-2 font-mono text-xs ${
+          isExpanded ? "border-border/60 border-b" : ""
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="flex min-w-0 items-center gap-2 text-left transition-opacity hover:opacity-80"
+        >
+          <FileText className="text-primary size-4 shrink-0" />
+          <span className="text-foreground truncate font-semibold">{artifact.title}</span>
+          <span className="text-muted-foreground hidden text-[11px] sm:inline">
+            ({wordCount} words)
+          </span>
+          <span className="text-muted-foreground ml-1 flex items-center gap-0.5 text-[10px]">
+            <span>{isExpanded ? "Hide" : "Show"}</span>
+            {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+          </span>
+        </button>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           <Button variant="ghost" size="sm" onClick={handleCopy} className="h-7 gap-1 px-2 text-xs">
             {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
             <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
@@ -68,9 +83,11 @@ export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): R
       </div>
 
       {/* Document Body */}
-      <div className="bg-background/40 text-foreground p-4 font-sans text-sm leading-relaxed whitespace-pre-wrap">
-        {artifact.content}
-      </div>
+      {isExpanded && (
+        <div className="bg-background/40 text-foreground p-4 font-sans text-sm leading-relaxed whitespace-pre-wrap">
+          {artifact.content}
+        </div>
+      )}
     </div>
   );
 }

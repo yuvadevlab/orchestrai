@@ -6,3 +6,4 @@
 export * from "./security.types";
 export * from "./client-options";
 export * from "./api-responses";
+export { PermissionScope, ApprovalDecisionVerdict } from "@orchestrai/shared-types";

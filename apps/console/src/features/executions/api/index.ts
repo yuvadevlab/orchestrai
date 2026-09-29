@@ -5,3 +5,4 @@
  */
 
 export * from "./use-executions";
+export * from "./use-execution-trace";

@@ -7,6 +7,7 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
+import { ToolPermissionLevel } from "@orchestrai/shared-types";
 import { getApiClient } from "@/lib/api-client";
 import type { ToolDefinition } from "../types";
 
@@ -43,8 +44,8 @@ export function useRegisterToolMutation(): UseMutationResult<
           slug,
           category: input.category || "General",
           description: input.description,
-          permissionLevel: input.permissions || "read_only",
-          sandbox: input.sandbox || "read_only",
+          permissionLevel: input.permissions || ToolPermissionLevel.READ_ONLY,
+          sandbox: input.sandbox || ToolPermissionLevel.READ_ONLY,
           isEnabled: true,
         },
       });

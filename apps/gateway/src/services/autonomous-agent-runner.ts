@@ -4,11 +4,19 @@
  * @module apps/gateway/services
  */
 
-import { ReadFileTool, WriteFileTool, ListDirectoryTool, BashTool } from "@orchestrai/tools";
+import {
+  ReadFileTool,
+  WriteFileTool,
+  ListDirectoryTool,
+  BashTool,
+  KnowledgeSearchTool,
+} from "@orchestrai/tools";
 import { buildAutonomousSystemPrompt } from "@orchestrai/prompts";
+import { ArtifactType, ArtifactStatus } from "@orchestrai/shared-types";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { ragService } from "./rag.service";
 
 export { buildAutonomousSystemPrompt };
 
@@ -16,15 +24,22 @@ const readFile = new ReadFileTool();
 const writeFile = new WriteFileTool();
 const listDir = new ListDirectoryTool();
 const bash = new BashTool();
+const knowledgeSearch = new KnowledgeSearchTool(async (query, limit, minScore) => {
+  const res = await ragService.query(
+    { query, limit: limit ?? 5, minScore: minScore ?? 0.3, alpha: 0.5 },
+    "default",
+  );
+  return res.chunks;
+});
 
 export interface ToolArtifact {
   id: string;
-  type: "document" | "code" | "terminal" | "search" | "data";
+  type: ArtifactType;
   title: string;
   content: string;
   filePath?: string;
   language?: string;
-  status: "running" | "success" | "error";
+  status: ArtifactStatus;
   metadata?: Record<string, unknown>;
 }
 
@@ -52,9 +67,16 @@ export async function executeWorkspaceTool(
   toolName: string,
   args: Record<string, unknown>,
   workspaceRoot: string = resolveMonorepoRoot(),
+  allowedRoots?: readonly string[],
 ): Promise<{ output: unknown; isError: boolean }> {
   const targetRoot = workspaceRoot || resolveMonorepoRoot();
-  const context = { workspaceRoot: targetRoot, tenantId: "default", executionId: randomUUID() };
+  const roots = Array.from(new Set([...(allowedRoots || []), targetRoot]));
+  const context = {
+    workspaceRoot: targetRoot,
+    allowedRoots: roots,
+    tenantId: "default",
+    executionId: randomUUID(),
+  };
 
   try {
     switch (toolName) {
@@ -63,7 +85,12 @@ export async function executeWorkspaceTool(
         const startLine = typeof args.startLine === "number" ? args.startLine : undefined;
         const lineCount = typeof args.lineCount === "number" ? args.lineCount : undefined;
         const res = await readFile.execute({ path: filePath, startLine, lineCount }, context);
-        return { output: res.content, isError: false };
+        const repo = path.basename(context.workspaceRoot || "");
+        const isCurrent = res.resolvedPath.startsWith(context.workspaceRoot || "");
+        const header = isCurrent
+          ? `[File: "${filePath}" (Workspace: "${repo}", path: ${res.resolvedPath})]`
+          : `[File: "${filePath}" (External Project, path: ${res.resolvedPath})]`;
+        return { output: `${header}\n\n${res.content}`, isError: false };
       }
       case "write_file": {
         const filePath = String(args.path || "");
@@ -93,6 +120,13 @@ export async function executeWorkspaceTool(
             ? "Command executed successfully with exit code 0."
             : `Command failed with exit code ${res.exitCode}.`);
         return { output: outputText, isError: res.exitCode !== 0 };
+      }
+      case "knowledge_search": {
+        const query = String(args.query || "");
+        const limit = typeof args.limit === "number" ? args.limit : 5;
+        const minScore = typeof args.minScore === "number" ? args.minScore : 0.3;
+        const res = await knowledgeSearch.execute({ query, limit, minScore }, context);
+        return { output: res.contextText, isError: false };
       }
       default:
         return { output: `Unknown tool: ${toolName}`, isError: true };
@@ -147,7 +181,7 @@ export function formatToolArtifact(
   args: Record<string, unknown>,
   result: { output: unknown; isError: boolean },
 ): ToolArtifact {
-  const isErr = result.isError;
+  const status = result.isError ? ArtifactStatus.ERROR : ArtifactStatus.SUCCESS;
   const contentStr =
     typeof result.output === "object"
       ? JSON.stringify(result.output, null, 2)
@@ -157,12 +191,12 @@ export function formatToolArtifact(
     const filePath = String(args.path || "file");
     return {
       id: randomUUID(),
-      type: "code",
+      type: ArtifactType.CODE,
       title: `Read: ${filePath}`,
       filePath,
       language: detectLanguage(filePath),
       content: contentStr,
-      status: isErr ? "error" : "success",
+      status,
     };
   }
 
@@ -170,12 +204,12 @@ export function formatToolArtifact(
     const filePath = String(args.path || "file");
     return {
       id: randomUUID(),
-      type: "code",
+      type: ArtifactType.CODE,
       title: `Modified: ${filePath}`,
       filePath,
       language: detectLanguage(filePath),
       content: String(args.content || ""),
-      status: isErr ? "error" : "success",
+      status,
     };
   }
 
@@ -183,18 +217,29 @@ export function formatToolArtifact(
     const cmd = String(args.command || "command");
     return {
       id: randomUUID(),
-      type: "terminal",
+      type: ArtifactType.TERMINAL,
       title: `Terminal: ${cmd.slice(0, 40)}`,
       content: contentStr,
-      status: isErr ? "error" : "success",
+      status,
+    };
+  }
+
+  if (tool === "knowledge_search") {
+    const q = String(args.query || "Search");
+    return {
+      id: randomUUID(),
+      type: ArtifactType.SEARCH,
+      title: `Knowledge: ${q.slice(0, 36)}`,
+      content: contentStr,
+      status,
     };
   }
 
   return {
     id: randomUUID(),
-    type: "document",
+    type: ArtifactType.DOCUMENT,
     title: `Tool: ${tool}`,
     content: contentStr,
-    status: isErr ? "error" : "success",
+    status,
   };
 }

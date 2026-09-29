@@ -18,7 +18,7 @@ export const ApprovalPolicyConfigSchema = z.object({
     .enum(["REJECT_AND_NOTIFY", "ABORT_EXECUTION"])
     .default("REJECT_AND_NOTIFY"),
   /** Highest clearance level that can bypass human approval automatically */
-  autoApproveClearance: z.nativeEnum(ToolPermissionLevel).default(ToolPermissionLevel.READ_ONLY),
+  autoApproveClearance: z.enum(ToolPermissionLevel).default(ToolPermissionLevel.READ_ONLY),
   /** Tool identifier names that unconditionally require human approval regardless of clearance */
   alwaysRequireApprovalTools: z
     .array(z.string())

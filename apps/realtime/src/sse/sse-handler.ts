@@ -23,9 +23,19 @@ interface SseHandlerDeps {
  * Resolves the permitted CORS origin for an SSE response based on request headers.
  */
 function resolveCorsOrigin(req: IncomingMessage, allowed: readonly string[]): string {
-  const requestOrigin = req.headers.origin ?? "";
-  // Allow if explicitly listed, otherwise default to first configured origin
-  return allowed.includes(requestOrigin) ? requestOrigin : (allowed[0] ?? "*");
+  const requestOrigin = req.headers.origin;
+  if (!requestOrigin) {
+    return allowed[0] ?? "*";
+  }
+  // In development, allow any localhost or 127.0.0.1 port or explicit whitelist
+  if (
+    allowed.includes(requestOrigin) ||
+    allowed.includes("*") ||
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(requestOrigin)
+  ) {
+    return requestOrigin;
+  }
+  return allowed[0] ?? "*";
 }
 
 /**
@@ -41,6 +51,9 @@ export function handleExecutionSseStream(
   const sessionId = crypto.randomUUID();
   const corsOrigin = resolveCorsOrigin(req, deps.corsOrigins);
 
+  // Disable Nagle's algorithm so streaming deltas flush immediately to client
+  req.socket?.setNoDelay(true);
+
   // Establish SSE response headers before writing any data frames
   configureSseHeaders(res, corsOrigin);
 
@@ -49,10 +62,25 @@ export function handleExecutionSseStream(
     id: sessionId,
     transport: "SSE",
     ipAddress: req.socket.remoteAddress,
-    userAgent: req.headers["user-agent"],
     sendFn: (data) => {
       if (!res.writableEnded) {
-        res.write(data);
+        if (data.startsWith("event:") || data.startsWith("data:") || data.startsWith(":")) {
+          res.write(data);
+        } else {
+          try {
+            const parsed = JSON.parse(data);
+            const eventName = parsed.event || parsed.type || "message";
+            const payload = parsed.data !== undefined ? parsed.data : parsed;
+            const serialized = JSON.stringify(payload);
+            res.write(`event: ${eventName}\ndata: ${serialized}\n\n`);
+
+            if (eventName === "done" || eventName === "error") {
+              res.end();
+            }
+          } catch {
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
+          }
+        }
       }
     },
     closeFn: () => {

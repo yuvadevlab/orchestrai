@@ -8,3 +8,4 @@ export * from "./execution-table";
 export * from "./executions-page-content";
 export * from "./execution-detail-page-content";
 export * from "./execution-debug-dialog";
+export * from "./execution-trace-waterfall";

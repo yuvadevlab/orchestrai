@@ -11,7 +11,11 @@ export type LlmProvider = LlmProviderRecord;
 export type LlmModel = LlmModelRecord;
 
 /** Model health status state. */
-export type ModelStatus = "ONLINE" | "DEGRADED" | "OFFLINE";
+export enum ModelStatus {
+  ONLINE = "online",
+  DEGRADED = "degraded",
+  OFFLINE = "offline",
+}
 
 /** Model routing definition entity. */
 export interface ModelDefinition {

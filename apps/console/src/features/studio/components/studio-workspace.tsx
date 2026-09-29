@@ -6,21 +6,16 @@
  * @module apps/console/features/studio/components
  */
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
+import { useSearchParams } from "next/navigation";
 import { StudioHeader } from "./studio-header";
 import { SessionDrawer } from "./session-drawer";
 import { StudioWelcome } from "./studio-welcome";
 import { StudioMessageItem } from "./studio-message-item";
 import { StudioPromptBar } from "./studio-prompt-bar";
 import { StudioInspectorRail } from "./studio-inspector-rail";
-import { useSessionStore } from "../hooks/use-session-store";
-import { useAgentRunner } from "../hooks/use-agent-runner";
-import { useAgents } from "@/features/agents/api";
-import { useModels } from "@/features/models/api";
-import { usePlatformModes } from "@/lib/use-modes";
-import { getStoredSession } from "@/lib/auth";
-import type { SpecialistPersona } from "../types";
+import { useStudioWorkspaceState } from "../hooks/use-studio-workspace-state";
+import type { CoworkMode } from "../types";
 
 export interface StudioWorkspaceProps {
   routeSessionId?: string;
@@ -28,204 +23,88 @@ export interface StudioWorkspaceProps {
 
 /**
  * Universal Autonomous Cowork Studio Workspace.
- * Dynamically queries and binds cluster specialist agents from the database.
+ * Dynamically queries and binds cluster specialist agents and models.
  */
 export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React.JSX.Element {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const urlPrompt = searchParams.get("prompt") || "";
 
-  const { data: dbAgents = [] } = useAgents();
-  const { data: models } = useModels();
-  const { data: platformModes = [] } = usePlatformModes();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [railOpen, setRailOpen] = useState(false);
-  const [prompt, setPrompt] = useState(urlPrompt);
-
-  const autoRunRef = useRef(false);
-  const chatScrollRef = useRef<HTMLDivElement>(null);
-
-  const {
-    sessions,
-    activeSession,
-    activeSessionId,
-    setActiveSessionId,
-    createNewSession,
-    updateActiveMessages,
-    updateSessionMeta,
-    deleteSession,
-  } = useSessionStore(routeSessionId);
-
-  // Map database agents into specialist personas dynamically
-  const specialists = useMemo<SpecialistPersona[]>(() => {
-    if (!dbAgents || dbAgents.length === 0) return [];
-    return dbAgents.map((a) => ({
-      id: a.id,
-      name: a.name,
-      domain: a.role || "General",
-      role: a.description || a.role || "Specialist",
-      description: a.description || "Active cluster specialist",
-    }));
-  }, [dbAgents]);
-
-  const activeSpecialist: SpecialistPersona | undefined = useMemo(() => {
-    return specialists.find((s) => s.id === activeSession.specialistId) || specialists[0];
-  }, [specialists, activeSession.specialistId]);
-
-  // Synchronize active session specialist with first available database agent
-  useEffect(() => {
-    if (specialists.length > 0) {
-      const exists = specialists.some((s) => s.id === activeSession.specialistId);
-      if (!exists && specialists[0]) {
-        updateSessionMeta({ specialistId: specialists[0].id });
-      }
-    }
-  }, [specialists, activeSession.specialistId, updateSessionMeta]);
-
-  const {
-    isRunning,
-    events,
-    activeExecutionId,
-    triggerRun,
-    resolveApproval,
-    stopExecution,
-    clearEvents,
-  } = useAgentRunner({
-    activeSpecialist,
-    selectedModel: activeSession.model || "",
-    activeSessionId,
-    existingMessages: activeSession.messages,
-    onUpdateMessages: updateActiveMessages,
+  const state = useStudioWorkspaceState({
+    routeSessionId,
+    urlPrompt,
   });
-
-  const session = getStoredSession();
-  const userFirstName = session?.user?.name ? session.user.name.split(" ")[0] : null;
-
-  // Auto-scroll on new message or stream chunk
-  useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-    }
-  }, [activeSession.messages, isRunning]);
-
-  // Auto-select database default model when models load
-  useEffect(() => {
-    if (models && models.length > 0) {
-      const defaultModel = models.find((m) => m.isDefault) || models[0];
-      const currentExists = models.some(
-        (m) => m.modelIdentifier === activeSession.model || m.name === activeSession.model,
-      );
-      if (!currentExists && defaultModel) {
-        updateSessionMeta({ model: defaultModel.modelIdentifier || defaultModel.name });
-      }
-    }
-  }, [models, activeSession.model, updateSessionMeta]);
-
-  // Auto-run if URL prompt exists
-  useEffect(() => {
-    if (urlPrompt && !autoRunRef.current) {
-      autoRunRef.current = true;
-      if (!routeSessionId) {
-        window.history.replaceState(null, "", `/session/${activeSession.id}`);
-      }
-      triggerRun(urlPrompt);
-    }
-  }, [urlPrompt, triggerRun, routeSessionId, activeSession.id]);
-
-  const handleSelectSession = (id: string): void => {
-    setActiveSessionId(id);
-    router.push(`/session/${id}`);
-  };
-
-  const handleNewSession = (): void => {
-    createNewSession();
-    clearEvents();
-    router.push("/");
-  };
-
-  const handleDeleteSession = (id: string): void => {
-    deleteSession(id);
-    if (id === activeSessionId || id === routeSessionId) {
-      router.push("/");
-    }
-  };
-
-  const handleSubmit = (customText?: string): void => {
-    const text = (customText ?? prompt).trim();
-    if (!text) return;
-    setPrompt("");
-
-    // If starting a fresh thread on root route, push ID into browser URL immediately like ChatGPT
-    if (!routeSessionId) {
-      window.history.replaceState(null, "", `/session/${activeSession.id}`);
-    }
-
-    triggerRun(text);
-  };
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
       {/* Top Control Header */}
       <StudioHeader
-        isRunning={isRunning}
-        onOpenHistory={() => setDrawerOpen((p) => !p)}
-        onToggleRail={() => setRailOpen((p) => !p)}
-        railOpen={railOpen}
+        isRunning={state.isRunning}
+        onOpenHistory={() => state.setDrawerOpen((p) => !p)}
+        onToggleRail={() => state.setRailOpen((p) => !p)}
+        railOpen={state.railOpen}
       />
 
       {/* Main Workspace Body with in-flow sidebars */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* Left Side: Session History Drawer */}
         <SessionDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          sessions={sessions}
-          activeSessionId={activeSessionId}
-          onSelectSession={handleSelectSession}
-          onNewSession={handleNewSession}
-          onDeleteSession={handleDeleteSession}
+          isOpen={state.drawerOpen}
+          onClose={() => state.setDrawerOpen(false)}
+          sessions={state.sessions}
+          activeSessionId={state.activeSessionId}
+          onSelectSession={state.handleSelectSession}
+          onNewSession={state.handleNewSession}
+          onDeleteSession={state.handleDeleteSession}
         />
 
         {/* Center: Main Canvas Feed & Prompt Station */}
         <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-          <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
-            {activeSession.messages.length === 0 ? (
-              <StudioWelcome onSelectPrompt={(p) => setPrompt(p)} userFirstName={userFirstName} />
+          <div ref={state.chatScrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
+            {state.activeSession.messages.length === 0 ? (
+              <StudioWelcome
+                onSelectPrompt={(p) => state.setPrompt(p)}
+                userFirstName={state.userFirstName}
+              />
             ) : (
               <div className="divide-border/20 mx-auto flex w-full max-w-4xl flex-col divide-y">
-                {activeSession.messages.map((m) => (
-                  <StudioMessageItem key={m.id} message={m} onResolveApproval={resolveApproval} />
+                {state.activeSession.messages.map((m) => (
+                  <StudioMessageItem key={m.id} message={m} />
                 ))}
+                {/* Sentinel: scrollIntoView targets this so the viewport stays pinned to bottom */}
+                <div ref={state.bottomSentinelRef} aria-hidden className="h-2 shrink-0" />
               </div>
             )}
           </div>
 
-          {/* Floating Command Input Station */}
+          {/* Floating Command Input Station — transforms into clearance card when authorization is required */}
           <StudioPromptBar
-            prompt={prompt}
-            onChange={setPrompt}
-            onSubmit={() => handleSubmit()}
-            onStop={stopExecution}
-            isRunning={isRunning}
-            specialists={specialists}
-            selectedSpecialistId={activeSpecialist?.id || ""}
-            onSelectSpecialist={(id) => updateSessionMeta({ specialistId: id })}
-            models={models}
-            selectedModel={activeSession.model || ""}
-            onSelectModel={(model) => updateSessionMeta({ model })}
-            modes={platformModes}
-            mode={activeSession.mode}
-            onSelectMode={(mode) => updateSessionMeta({ mode })}
+            prompt={state.prompt}
+            onChange={state.setPrompt}
+            onSubmit={(customText) => state.handleSubmit(customText)}
+            onStop={state.stopExecution}
+            isRunning={state.isRunning}
+            pendingApproval={state.pendingApproval}
+            onResolveApproval={state.resolveApproval}
+            onApprovalResolved={state.handleApprovalResolved}
+            specialists={state.specialists}
+            selectedSpecialistId={state.activeSpecialist?.id || ""}
+            onSelectSpecialist={(id) => state.updateSessionMeta({ specialistId: id })}
+            models={state.models}
+            selectedModel={state.activeSession.model || ""}
+            onSelectModel={(model) => state.updateSessionMeta({ model })}
+            modes={state.platformModes}
+            mode={state.activeSession.mode}
+            onSelectMode={(mode) => state.updateSessionMeta({ mode: mode as CoworkMode })}
           />
         </main>
 
         {/* Right Side: Collapsible Inspector Rail */}
-        {railOpen && (
+        {state.railOpen && (
           <aside className="border-border hidden w-80 shrink-0 border-l lg:block">
             <StudioInspectorRail
-              events={events}
-              isRunning={isRunning}
-              activeExecutionId={activeExecutionId}
+              events={state.events}
+              isRunning={state.isRunning}
+              activeExecutionId={state.activeExecutionId}
             />
           </aside>
         )}

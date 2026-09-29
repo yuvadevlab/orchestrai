@@ -10,6 +10,7 @@ import {
   type MessageRole,
   type Prisma,
 } from "@orchestrai/database";
+import { ExecutionStatus } from "@orchestrai/shared-types";
 import type { AddMessageDto } from "@/validation";
 import { resolveDbTenantId, resolveOrCreateDefaultAgent } from "./tenant-resolver";
 
@@ -71,7 +72,7 @@ export class ConversationMessageService {
           agentId: conv.agentId,
           conversationId: conv.conversationId,
           traceId: `tr_${Date.now()}`,
-          status: "completed",
+          status: ExecutionStatus.COMPLETED,
         },
       });
     }

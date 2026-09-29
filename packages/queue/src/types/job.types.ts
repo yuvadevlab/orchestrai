@@ -42,7 +42,7 @@ export const AgentExecutionJobPayloadSchema = z
       .default({})
       .describe("Dynamic workflow variables passed to the execution graph"),
     priority: z
-      .nativeEnum(JobPriority)
+      .enum(JobPriority)
       .default(JobPriority.NORMAL)
       .describe("Job scheduling priority in BullMQ"),
     enqueuedAt: z

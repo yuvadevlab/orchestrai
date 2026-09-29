@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod";
-import { ApprovalStatus } from "@orchestrai/shared-types";
+import { ApprovalStatus, ApprovalDecisionVerdict } from "@orchestrai/shared-types";
 
 /**
  * Operational risk classification assigned to a tool invocation requiring approval.
@@ -48,12 +48,17 @@ export interface ApprovalTicket {
   readonly decidedAt?: Date;
 }
 
+export { ApprovalDecisionVerdict };
+
 /**
  * Payload submitted by a human operator resolving an active approval ticket.
  */
 export const ApprovalResolutionInputSchema = z.object({
   /** Operator verdict: approval, refusal, or execution cancellation */
-  decision: z.enum(["APPROVED", "REJECTED", "CANCELLED"]),
+  decision: z.preprocess(
+    (val) => (typeof val === "string" ? val.toLowerCase() : val),
+    z.enum(ApprovalDecisionVerdict),
+  ),
   /** Username or operator identity of the decision maker */
   operatorId: z.string().min(1),
   /** Optional justification or feedback explaining the verdict */

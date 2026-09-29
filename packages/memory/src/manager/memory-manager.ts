@@ -146,6 +146,13 @@ export class MemoryManager {
   }
 
   /**
+   * Deletes a specific memory record by ID.
+   */
+  public async delete(memoryId: string): Promise<boolean> {
+    return this.storage.delete(memoryId);
+  }
+
+  /**
    * Purges all expired memory records across the backing store.
    */
   public async pruneExpired(): Promise<number> {
