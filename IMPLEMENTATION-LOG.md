@@ -4,6 +4,41 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 ---
 
+## Session: 2026-09-29 (Continued) — Phase 5 Complete: Console 120 FPS Stream Engine & State Modernization
+
+### Phase 5 Completion Summary
+
+#### High-Performance 120 FPS Stream Engine (`apps/console/src/lib/streaming/`)
+
+- **`RafStreamBuffer`**:
+  - Implemented 16ms `requestAnimationFrame` coalescing stream buffer.
+  - Batches fast inbound SSE text token deltas, scheduling React updates synchronized with display refresh rate (60Hz / 120Hz).
+  - Eliminates main-thread state thrashing during high-throughput local and cloud inference.
+- **`IncrementalAstParser`**:
+  - Incremental Markdown AST segmentation engine separating frozen completed blocks (`code`, `paragraph`) from the active streaming tail text.
+  - Eliminates $O(N^2)$ markdown re-parsing overhead by memoizing immutable AST blocks.
+
+#### Asynchronous IndexedDB Offline Engine (`apps/console/src/lib/storage/`)
+
+- **`indexedDbStorage`**:
+  - Replaced synchronous 5MB `localStorage` with asynchronous browser IndexedDB store via `idb-keyval`.
+  - Implements Zustand `StateStorage` interface (`getItem`, `setItem`, `removeItem`) with resilient in-memory fallback for SSR and restricted privacy modes.
+
+#### Tri-Tier Zustand Store Architecture (`apps/console/src/lib/stores/`)
+
+- **`session-slice`**: Active thread lifecycle, message history, streaming state, delta buffering, and agent selection.
+- **`canvas-slice`**: Interactive Dual-Pane Workspace Canvas display modes (`code`, `preview`, `diff`, `terminal`), active draft artifact, and terminal output logging.
+- **`execution-slice`**: DAG execution status, step waterfall telemetry, active node tracking, and token counters.
+- **`clearance-slice`**: Pending Human-In-The-Loop (HITL) approval tickets, auto-sliding clearance drawer trigger on critical interrupts, and decision audit history.
+- **Master `useConsoleStore`**: Unified hook combining all four slices with `persist` middleware targeting `indexedDbStorage`.
+
+#### Quality Invariants & Validation
+
+- **Hard 250-Line Rule**: 100% of files in `apps/console/src/lib/streaming/`, `src/lib/storage/`, and `src/lib/stores/` are strictly < 130 lines.
+- **TypeScript**: `pnpm --filter @orchestrai/console typecheck` and monorepo `pnpm typecheck` passed cleanly across all 43 targets with 0 errors.
+
+---
+
 ## Session: 2026-09-29 (Continued) — Phase 4 Complete: Intelligence Packages & Realtime Streaming Pipeline
 
 ### Phase 4 Completion Summary

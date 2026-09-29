@@ -251,12 +251,12 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] Configure `apps/realtime` as a dedicated SSE/WebSocket broker subscribing to Redis channels and fanning out to clients
 - [x] Configure `apps/worker` for heavy BullMQ async task processing (sandboxed Docker tools, batch evaluations)
 
-### [ ] Phase 5: Console 120 FPS Stream Engine & State Modernization (`apps/console`)
+### [x] Phase 5: Console 120 FPS Stream Engine & State Modernization (`apps/console`)
 
-- [ ] Implement `RafStreamBuffer` in `apps/console/src/lib/streaming/` with 16ms `requestAnimationFrame` coalescing
-- [ ] Implement incremental Markdown AST parser with frozen completed block cache to eliminate $O(N^2)$ re-parsing
-- [ ] Scaffold Zustand Tri-Tier store slices (`session-slice`, `canvas-slice`, `execution-slice`, `clearance-slice`)
-- [ ] Replace synchronous 5MB `localStorage` with asynchronous IndexedDB storage engine (`idb-keyval` / Dexie)
+- [x] Implement `RafStreamBuffer` in `apps/console/src/lib/streaming/` with 16ms `requestAnimationFrame` coalescing
+- [x] Implement incremental Markdown AST parser with frozen completed block cache to eliminate $O(N^2)$ re-parsing
+- [x] Scaffold Zustand Tri-Tier store slices (`session-slice`, `canvas-slice`, `execution-slice`, `clearance-slice`)
+- [x] Replace synchronous 5MB `localStorage` with asynchronous IndexedDB storage engine (`idb-keyval` / Dexie)
 
 ### [ ] Phase 6: Dual-Pane Workspace Canvas & Virtualized Chat (`apps/console`)
 
@@ -282,5 +282,6 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 
 - [ ] Verify 250-line rule across 100% of monorepo files (decompose any file approaching 200 lines)
 - [ ] Comprehensive JSDoc on every exported symbol; explanatory comments on every conditional/guard
+- [ ] Clean any stale or deprecated code or files after the complete implementations
 - [ ] Monorepo typecheck validation (`pnpm typecheck`) with 0 errors
 - [ ] Monorepo ESLint validation (`pnpm lint`) with 0 warnings (`--max-warnings=0`)
