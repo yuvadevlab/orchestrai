@@ -243,13 +243,13 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] Implement separate operator JWT verification isolating admin traffic from user execution traffic
 - [x] Store and load configurable HTTP header names via environment variables (`API_KEY_HEADER_NAME`, `ADMIN_API_KEY_HEADER_NAME`, `AUTH_HEADER_NAME`, `TENANT_HEADER_NAME`, `REQUEST_ID_HEADER_NAME`) across `.env` and `.env.example` with zero hardcoded header strings
 
-### [ ] Phase 4: Intelligence Packages & Realtime Streaming Pipeline
+### [x] Phase 4: Intelligence Packages & Realtime Streaming Pipeline
 
-- [ ] Build `packages/model-router`: dynamic provider routing, fallback cascades, latency P95/P99 tracking, and cost estimation
-- [ ] Build `packages/billing`: token counting, append-only cost ledger per tenant, usage aggregation, and budget enforcers
-- [ ] Build `packages/semantic-cache`: vector similarity search (>0.97 similarity) using `packages/rag` embeddings
-- [ ] Configure `apps/realtime` as a dedicated SSE/WebSocket broker subscribing to Redis channels and fanning out to clients
-- [ ] Configure `apps/worker` for heavy BullMQ async task processing (sandboxed Docker tools, batch evaluations)
+- [x] Build `packages/model-router`: dynamic provider routing, fallback cascades, latency P95/P99 tracking, and cost estimation
+- [x] Build `packages/billing`: token counting, append-only cost ledger per tenant, usage aggregation, and budget enforcers
+- [x] Build `packages/semantic-cache`: vector similarity search (>0.97 similarity) using `packages/rag` embeddings
+- [x] Configure `apps/realtime` as a dedicated SSE/WebSocket broker subscribing to Redis channels and fanning out to clients
+- [x] Configure `apps/worker` for heavy BullMQ async task processing (sandboxed Docker tools, batch evaluations)
 
 ### [ ] Phase 5: Console 120 FPS Stream Engine & State Modernization (`apps/console`)
 

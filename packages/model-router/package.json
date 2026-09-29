@@ -1,0 +1,25 @@
+{
+  "name": "@orchestrai/model-router",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dynamic provider routing, fallback cascades, latency P95/P99 tracking, and cost estimation",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/models": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "@yuva-devlab/logger": "1.1.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}

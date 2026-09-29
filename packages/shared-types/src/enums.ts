@@ -12,4 +12,5 @@ export * from "./enums/sse.enums";
 export * from "./enums/cqrs.enums";
 export * from "./enums/orchestrator.enums";
 export * from "./enums/platform.enums";
+export * from "./enums/intelligence.enums";
 export type { ErrorCode } from "./error-codes";

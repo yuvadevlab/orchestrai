@@ -1,0 +1,25 @@
+{
+  "name": "@orchestrai/semantic-cache",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Vector similarity semantic cache for LLM prompt completions using high-threshold embedding similarity",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/rag": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "@yuva-devlab/logger": "1.1.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}
