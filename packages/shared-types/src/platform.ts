@@ -76,3 +76,26 @@ export interface NavItemRecord {
   readonly createdAt?: string;
   readonly updatedAt?: string;
 }
+
+/**
+ * Budget allocation and quota usage metrics for a tenant partition.
+ */
+export interface TenantBudgetInfo {
+  readonly tenantId: string;
+  readonly maxMonthlySpendUsd: number;
+  readonly currentSpendUsd: number;
+  readonly totalTokensUsed: number;
+  readonly periodStart: string;
+  readonly isThrottled: boolean;
+}
+
+/**
+ * Universal Tenant metadata entity representation.
+ */
+export interface TenantRecord {
+  readonly tenantId: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}

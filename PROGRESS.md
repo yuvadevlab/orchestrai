@@ -236,11 +236,12 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] Stream DAG step events, state changes, and token deltas to Redis Pub/Sub channels (`orchestrai:realtime:execution:<id>`) via `OrchestratorRedisPublisher`
 - [x] Zero hardcoded strings: Added `OrchestratorState`, `OrchestratorEventType`, `OrchestratorPubSubEventName`, `PlatformScope`, `PlatformCapabilitySlug`, `PlatformToolName` in shared enums; updated agent rule files (`AGENTS.md`, `.agents/AGENTS.md`, `00-core-invariants.md`, `coding-standards.md`) to mandate strict `Enum.KEY` usage.
 
-### [ ] Phase 3: Extract Control Plane Service (`apps/admin`)
+### [x] Phase 3: Extract Control Plane Service (`apps/admin`)
 
-- [ ] Scaffold `apps/admin` as a dedicated control-plane microservice
-- [ ] Migrate all operator endpoints (`/platform/*`, providers, models, roles, tools, tenants, budgets) from Gateway to Admin
-- [ ] Implement separate operator JWT verification isolating admin traffic from user execution traffic
+- [x] Scaffold `apps/admin` as a dedicated control-plane microservice (Port 4005)
+- [x] Migrate all operator endpoints (`/platform/*`, providers, models, modes, roles, permissions, tools, tenants, budgets) to Admin
+- [x] Implement separate operator JWT verification isolating admin traffic from user execution traffic
+- [x] Store and load configurable HTTP header names via environment variables (`API_KEY_HEADER_NAME`, `ADMIN_API_KEY_HEADER_NAME`, `AUTH_HEADER_NAME`, `TENANT_HEADER_NAME`, `REQUEST_ID_HEADER_NAME`) across `.env` and `.env.example` with zero hardcoded header strings
 
 ### [ ] Phase 4: Intelligence Packages & Realtime Streaming Pipeline
 

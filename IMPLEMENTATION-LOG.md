@@ -4,6 +4,54 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 ---
 
+## Session: 2026-09-29 (Continued) — Phase 3 Complete: Dedicated Operator Control Plane Service (`apps/admin`)
+
+### Phase 3 Completion Summary
+
+#### Operator Control Plane Microservice (`apps/admin`)
+
+- **Microservice Scaffolding**: Built `apps/admin` (port 4005) with ESM `tsup` compilation and strict path aliases (`@/*`).
+- **Zero Hardcoded Strings & Canonical Role Enums**:
+  - `OperatorRole` (`admin`, `operator`, `developer`, `viewer`, `system`) and `BudgetQuotaStatus` (`healthy`, `warning`, `exceeded`, `throttled`) in `packages/shared-types/src/enums/platform.enums.ts`.
+  - Re-exported shared `TenantBudgetInfo` and `TenantRecord` in `@orchestrai/shared-types/src/platform.ts` and `@orchestrai/sdk`.
+- **Environment & Header Configuration (Zero Hardcoded Header Strings)**:
+  - Extracted all HTTP header names to `.env` and `.env.example`: `API_KEY_HEADER_NAME`, `ADMIN_API_KEY_HEADER_NAME`, `AUTH_HEADER_NAME`, `TENANT_HEADER_NAME`, `REQUEST_ID_HEADER_NAME`.
+  - Added dedicated Admin environment variables: `ADMIN_PORT=4005`, `ADMIN_HOST`, `ADMIN_API_KEY`, `OPERATOR_JWT_SECRET`, `ADMIN_CORS_ORIGINS`.
+  - Injected dynamic header resolution into `createAdminRequestContext`, `authenticateOperator`, and `handleAdminCors`.
+
+#### Operator Authentication & Traffic Isolation
+
+- **Operator Auth Guard** (`apps/admin/src/middleware/operator-auth.middleware.ts`):
+  - Validates `X-Admin-Api-Key` or `X-API-Key` matching `ADMIN_API_KEY`.
+  - Verifies Bearer token against dedicated `OPERATOR_JWT_SECRET`.
+  - Enforces database operator role verification (`OperatorRole.OPERATOR` or `OperatorRole.ADMIN`), rejecting normal user tokens with `403 Forbidden` (`OPERATOR_ACCESS_REQUIRED`).
+- **Dynamic CORS & Error Serialization**:
+  - Preflight OPTIONS handler merging declared header keys with credentials support.
+  - Standardized JSON error response serialization with RFC 7807 correlation `requestId`.
+
+#### Operator Domain Services & Catalog Endpoints
+
+- **Catalog Management Services**:
+  - `LlmProviderAdminService`: Provider registrations with live model counts.
+  - `LlmModelAdminService`: Deployment catalog with context window and provider relations.
+  - `PlatformModeAdminService`: Autonomy mode definitions and approval enforcement policies.
+  - `PlatformRoleAdminService`: Functional agent specialty domains.
+  - `PlatformPermissionAdminService`: Security clearance tiers and approval requirements.
+  - `PlatformToolAdminService`: Sandboxed tool registry and execution levels.
+  - `TenantBudgetAdminService`: Real-time tenant monthly budget caps, token tracking, and throttling state.
+- **REST Route Layer** (`apps/admin/src/routes/`):
+  - Parameterized router (`AdminRouter`) supporting pattern matching, query parameter parsing, and JSON body parsing.
+  - Full CRUD routes under `/platform/*`: `/platform/llm-provider`, `/platform/llm-model`, `/platform/platform-mode`, `/platform/platform-role`, `/platform/platform-permission`, `/platform/platform-tool`, `/platform/budgets/:tenantId`, `/platform/tenants`.
+  - Health probes under `/health` and `/ready`.
+
+#### Quality Invariants & Validation
+
+- **Hard 250-Line Rule**: 100% of files in `apps/admin` are strictly < 155 lines (well below the 250 LOC threshold).
+- **TypeScript**: `pnpm --filter @orchestrai/admin typecheck` and monorepo `pnpm typecheck` passed cleanly across all 40 targets with 0 errors.
+- **Build**: `pnpm --filter @orchestrai/admin build` built cleanly in 51ms.
+
+---
+
 ## Session: 2026-09-29 (Continued) — Phase 2 Complete: Dedicated DAG Execution Orchestrator Microservice
 
 ### Phase 2 Completion Summary

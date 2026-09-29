@@ -4,20 +4,10 @@
  * @module @orchestrai/sdk/resources
  */
 
-import type { LlmProviderRecord, LlmModelRecord } from "@orchestrai/shared-types";
+import type { LlmProviderRecord, LlmModelRecord, TenantBudgetInfo } from "@orchestrai/shared-types";
 import { ResourceBase } from "./resource-base";
 
-/**
- * Budget allocation and quota usage metrics for a tenant.
- */
-export interface TenantBudgetInfo {
-  readonly tenantId: string;
-  readonly maxMonthlySpendUsd: number;
-  readonly currentSpendUsd: number;
-  readonly totalTokensUsed: number;
-  readonly periodStart: string;
-  readonly isThrottled: boolean;
-}
+export type { TenantBudgetInfo };
 
 /**
  * Control Plane management resource for platform operators and cluster administration.

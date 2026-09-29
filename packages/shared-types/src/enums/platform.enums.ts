@@ -43,3 +43,24 @@ export enum PlatformToolName {
   CALL_API = "call_api",
   FETCH_URL = "fetch_url",
 }
+
+/**
+ * Standard operator and user role classifications for control-plane access control.
+ */
+export enum OperatorRole {
+  ADMIN = "admin",
+  OPERATOR = "operator",
+  DEVELOPER = "developer",
+  VIEWER = "viewer",
+  SYSTEM = "system",
+}
+
+/**
+ * Budget throttle and quota status classifications.
+ */
+export enum BudgetQuotaStatus {
+  HEALTHY = "healthy",
+  WARNING = "warning",
+  EXCEEDED = "exceeded",
+  THROTTLED = "throttled",
+}
