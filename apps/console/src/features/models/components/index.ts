@@ -8,3 +8,4 @@ export * from "./model-card";
 export * from "./models-page-content";
 export * from "./model-dialog";
 export * from "./model-form-fields";
+export * from "./cost-latency-cockpit";

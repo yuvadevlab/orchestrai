@@ -3,13 +3,13 @@
  * @description Approvals resource for querying and resolving human-in-the-loop operator tickets.
  */
 
-import { ApprovalDecisionVerdict, PermissionScope } from "@orchestrai/shared-types";
+import { ApprovalDecisionVerdict, PermissionScope, RequestStatus } from "@orchestrai/shared-types";
 import type { ApprovalRequest, ApprovalDecisionResult, PaginatedList } from "@/types";
 import { ResourceBase } from "./resource-base";
 
 export interface ApprovalFilter {
   executionId?: string;
-  status?: string;
+  status?: RequestStatus;
   limit?: number;
   cursor?: string;
 }

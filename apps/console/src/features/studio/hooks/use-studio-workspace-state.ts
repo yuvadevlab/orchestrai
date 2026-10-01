@@ -10,6 +10,7 @@ import { useAgents } from "@/features/agents/api";
 import { useModels } from "@/features/models/api";
 import { usePlatformModes } from "@/lib/use-modes";
 import { getStoredSession } from "@/lib/auth-client";
+import { useConsoleStore } from "@/lib/stores";
 import { useSessionStore } from "./use-session-store";
 import { useAgentRunner } from "./use-agent-runner";
 import { useStudioApproval } from "./use-studio-approval";
@@ -29,6 +30,9 @@ export function useStudioWorkspaceState({
   urlPrompt = "",
 }: UseStudioWorkspaceStateOptions): UseStudioWorkspaceStateReturn {
   const router = useRouter();
+
+  // Canvas reset action — used to clear stale artifacts when switching sessions
+  const setActiveArtifact = useConsoleStore((s) => s.setActiveArtifact);
 
   const { data: dbAgents = [] } = useAgents();
   const { data: models } = useModels();
@@ -145,17 +149,21 @@ export function useStudioWorkspaceState({
 
   const handleSelectSession = useCallback(
     (id: string): void => {
+      // Clear canvas so a prior session's artifact doesn't bleed into a different thread
+      setActiveArtifact(null);
       setActiveSessionId(id);
       router.push(`/session/${id}`);
     },
-    [router, setActiveSessionId],
+    [router, setActiveArtifact, setActiveSessionId],
   );
 
   const handleNewSession = useCallback((): void => {
+    // Clear canvas before creating a fresh thread — prevents stale artifact from showing
+    setActiveArtifact(null);
     createNewSession();
     clearEvents();
     router.push("/");
-  }, [clearEvents, createNewSession, router]);
+  }, [clearEvents, createNewSession, router, setActiveArtifact]);
 
   const handleDeleteSession = useCallback(
     (id: string): void => {

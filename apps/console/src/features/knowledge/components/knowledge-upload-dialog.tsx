@@ -28,16 +28,8 @@ const UPLOAD_FIELDS: FormFieldConfig[] = [
     required: true,
   },
   {
-    name: "sourceUri",
-    label: "Source URI / Identifier",
-    type: "text",
-    placeholder: "e.g. manual://docs/architecture.md",
-    required: true,
-    defaultValue: "manual://doc",
-  },
-  {
     name: "mimeType",
-    label: "MIME Type",
+    label: "Document Format",
     type: "select",
     defaultValue: DocumentMimeType.MARKDOWN,
     options: [
@@ -54,7 +46,6 @@ const UPLOAD_FIELDS: FormFieldConfig[] = [
     placeholder:
       "Paste or write the text content to be chunked and indexed into the vector store...",
     required: true,
-    colSpan: 2,
   },
 ];
 
@@ -70,9 +61,13 @@ export function KnowledgeUploadDialog({
 
   const handleSubmit = async (formData: Record<string, string>): Promise<void> => {
     try {
+      const derivedSlug = (formData.title || "doc")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
       await ingestMutation.mutateAsync({
         title: formData.title || "Untitled Document",
-        sourceUri: formData.sourceUri || "manual://doc",
+        sourceUri: formData.sourceUri || `manual://${derivedSlug}`,
         mimeType: formData.mimeType || "text/markdown",
         content: formData.content || "",
       });
@@ -91,6 +86,8 @@ export function KnowledgeUploadDialog({
       description="Ingest and chunk text or markdown into hybrid vector storage for swarm retrieval."
       fields={UPLOAD_FIELDS}
       submitText="Ingest Document"
+      maxWidth="md"
+      columns={1}
       onClose={onClose}
       onSubmit={handleSubmit}
     />

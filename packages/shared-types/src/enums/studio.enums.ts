@@ -97,3 +97,21 @@ export enum MessageSegmentType {
   APPROVAL = "approval",
   TEXT = "text",
 }
+
+/**
+ * Canonical workspace tool names dispatched by the autonomous agent executor.
+ * All tool dispatch (switch/case) MUST compare against these enum members —
+ * never bare string literals like "read_file" or "bash".
+ */
+export enum WorkspaceTool {
+  /** Reads the content of a file from the sandbox workspace. */
+  READ_FILE = "read_file",
+  /** Writes content to a file path, creating directories as needed. */
+  WRITE_FILE = "write_file",
+  /** Lists directory entries under a given path. */
+  LIST_DIR = "list_dir",
+  /** Executes an arbitrary bash command in the sandbox. */
+  BASH = "bash",
+  /** Performs a semantic knowledge base search via RAG. */
+  KNOWLEDGE_SEARCH = "knowledge_search",
+}

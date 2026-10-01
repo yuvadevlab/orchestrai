@@ -14,6 +14,8 @@ import { Play } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
 
 import { ExecutionTraceWaterfall } from "./execution-trace-waterfall";
+import { DagVisualizer } from "./dag-visualizer";
+import { CheckpointReplayer } from "./checkpoint-replayer";
 
 /** A label–value definition list row used in the execution metadata panel. */
 function Row({
@@ -82,6 +84,12 @@ export function ExecutionDetailPageContent({
                 <Row label="Tokens Billed" value={execution.tokensUsed.toLocaleString()} mono />
               </div>
             </Panel>
+
+            {/* Interactive DAG Visualizer */}
+            <DagVisualizer execution={execution} />
+
+            {/* Forensic Checkpoint Timeline Scrubber */}
+            <CheckpointReplayer execution={execution} />
 
             <ExecutionTraceWaterfall executionId={executionId} />
           </div>

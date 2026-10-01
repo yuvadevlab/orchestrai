@@ -1,0 +1,37 @@
+{
+  "name": "@orchestrai/orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dedicated execution orchestrator and DAG runtime engine for OrchestrAI",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@orchestrai/agent": "workspace:*",
+    "@orchestrai/core": "workspace:*",
+    "@orchestrai/database": "workspace:*",
+    "@orchestrai/events": "workspace:*",
+    "@orchestrai/grpc": "workspace:*",
+    "@orchestrai/models": "workspace:*",
+    "@orchestrai/observability": "workspace:*",
+    "@orchestrai/runtime": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
+    "@orchestrai/tools": "workspace:*",
+    "@yuva-devlab/logger": "1.1.0",
+    "dotenv": "^16.4.7",
+    "ioredis": "^6.0.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}

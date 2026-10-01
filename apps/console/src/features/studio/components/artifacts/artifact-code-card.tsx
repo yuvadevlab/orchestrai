@@ -7,8 +7,9 @@
  */
 
 import React, { useState } from "react";
-import { Check, ChevronDown, ChevronRight, Code2, Copy } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Code2, Copy, PanelRightOpen } from "lucide-react";
 import { Badge, Button } from "@yuva-devlab/ui";
+import { useConsoleStore } from "@/lib/stores";
 import type { CoworkArtifact } from "../../types";
 
 export interface ArtifactCodeCardProps {
@@ -21,6 +22,8 @@ export interface ArtifactCodeCardProps {
 export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX.Element {
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const setActiveArtifact = useConsoleStore((s) => s.setActiveArtifact);
+  const setCanvasMode = useConsoleStore((s) => s.setCanvasMode);
 
   const lines = artifact.content.split("\n");
   const language = artifact.language || artifact.filePath?.split(".").pop() || "typescript";
@@ -29,6 +32,18 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
     navigator.clipboard.writeText(artifact.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenInCanvas = (e: React.MouseEvent): void => {
+    e.stopPropagation();
+    const isHtml = language === "html" || artifact.filePath?.endsWith(".html");
+    setCanvasMode(isHtml ? "preview" : "code");
+    setActiveArtifact({
+      id: artifact.id,
+      title: artifact.title,
+      language,
+      code: artifact.content,
+    });
   };
 
   return (
@@ -57,10 +72,21 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
           </span>
         </button>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5">
           <Badge variant="outline" className="px-1.5 py-0 font-mono text-[10px] uppercase">
             {language} · {lines.length} lines
           </Badge>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenInCanvas}
+            className="h-7 cursor-pointer gap-1 px-2 text-xs"
+            title="Open in Right-Side Canvas"
+          >
+            <PanelRightOpen className="text-primary size-3" />
+            <span className="hidden sm:inline">Canvas</span>
+          </Button>
 
           <Button variant="ghost" size="sm" onClick={handleCopy} className="h-7 gap-1 px-2 text-xs">
             {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}

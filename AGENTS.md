@@ -11,3 +11,4 @@ All agents must read and adhere to:
 4. [`.agents/rules/session-continuity.md`](.agents/rules/session-continuity.md) — Session handoff protocol and progress tracking.
 5. [`PROGRESS.md`](PROGRESS.md) — Live phase tracking checklist.
 6. **Testing Policy** — While implementing phases, DO NOT implement test cases (unit, e2e, integration) or Storybook stories until explicitly requested by the user.
+7. **Zero Hardcoded Strings & Strict Enum Usage** — NO raw hardcoded string literals for domain entities, statuses, roles, event types, modes, scopes, or state transitions; always use shared `Enum.KEY`.

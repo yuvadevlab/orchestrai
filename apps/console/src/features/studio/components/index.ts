@@ -15,4 +15,6 @@ export * from "./studio-prompt-bar";
 export * from "./studio-inspector-rail";
 export * from "./studio-live-clearance-card";
 export * from "./approval-decision-chip";
+export * from "./canvas";
+export * from "./virtualized-message-feed";
 export * from "./studio-workspace";

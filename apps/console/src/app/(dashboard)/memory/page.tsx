@@ -1,16 +1,11 @@
 /**
  * @file apps/console/src/app/(dashboard)/memory/page.tsx
- * @description Agent Long-term Memory and Recall route.
+ * @description Memory route redirected to consolidated /context hub.
  * @module apps/console/app/(dashboard)/memory
  */
 
-import React from "react";
-import dynamic from "next/dynamic";
+import { redirect } from "next/navigation";
 
-const MemoryPageContent = dynamic(() =>
-  import("@/features/memory").then((m) => ({ default: m.MemoryPageContent })),
-);
-
-export default function MemoryPage(): React.JSX.Element {
-  return <MemoryPageContent />;
+export default function MemoryRedirect(): never {
+  redirect("/context?tab=memory");
 }

@@ -18,6 +18,7 @@
     "@orchestrai/database": "workspace:*",
     "@orchestrai/eval": "workspace:*",
     "@orchestrai/events": "workspace:*",
+    "@orchestrai/grpc": "workspace:*",
     "@orchestrai/memory": "workspace:*",
     "@orchestrai/models": "workspace:*",
     "@orchestrai/observability": "workspace:*",

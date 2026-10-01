@@ -230,6 +230,37 @@ importers:
         specifier: ^8.70.0
         version: 8.70.0(eslint@10.10.0(jiti@2.7.0))(typescript@6.0.3)
 
+  apps/admin:
+    dependencies:
+      '@orchestrai/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@orchestrai/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@orchestrai/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.1
+        version: 26.6.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   apps/console:
     dependencies:
       '@orchestrai/core':
@@ -244,6 +275,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.67.2
         version: 5.103.2(react@19.3.0)
+      '@tanstack/react-virtual':
+        specifier: ^3.13.2
+        version: 3.14.13(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@yuva-devlab/logger':
         specifier: 1.1.0
         version: 1.1.0
@@ -262,6 +296,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0
+      idb-keyval:
+        specifier: ^6.2.1
+        version: 6.3.0
       lucide-react:
         specifier: ^0.575.0
         version: 0.575.0(react@19.3.0)
@@ -298,6 +335,9 @@ importers:
       zod:
         specifier: ^3.25.76
         version: 3.25.76
+      zustand:
+        specifier: ^5.0.3
+        version: 5.0.15(@types/react@19.3.0)(react@19.3.0)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.2.1
@@ -332,6 +372,9 @@ importers:
       '@orchestrai/events':
         specifier: workspace:*
         version: link:../../packages/events
+      '@orchestrai/grpc':
+        specifier: workspace:*
+        version: link:../../packages/grpc
       '@orchestrai/memory':
         specifier: workspace:*
         version: link:../../packages/memory
@@ -384,6 +427,61 @@ importers:
       '@types/pg':
         specifier: ^8.23.1
         version: 8.23.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  apps/orchestrator:
+    dependencies:
+      '@orchestrai/agent':
+        specifier: workspace:*
+        version: link:../../packages/agent
+      '@orchestrai/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@orchestrai/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@orchestrai/events':
+        specifier: workspace:*
+        version: link:../../packages/events
+      '@orchestrai/grpc':
+        specifier: workspace:*
+        version: link:../../packages/grpc
+      '@orchestrai/models':
+        specifier: workspace:*
+        version: link:../../packages/models
+      '@orchestrai/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+      '@orchestrai/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@orchestrai/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      '@orchestrai/tools':
+        specifier: workspace:*
+        version: link:../../packages/tools
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+      ioredis:
+        specifier: ^6.0.0
+        version: 6.0.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.1
+        version: 26.6.1
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
@@ -516,6 +614,28 @@ importers:
       vitest:
         specifier: ^5.0.1
         version: 5.0.1(@types/node@26.6.1)(vite@7.3.6(@types/node@26.6.1)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.1))
+
+  packages/billing:
+    dependencies:
+      '@orchestrai/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.1
+        version: 26.6.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/core:
     dependencies:
@@ -650,6 +770,31 @@ importers:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../core
+      '@orchestrai/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.1
+        version: 26.6.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/model-router:
+    dependencies:
+      '@orchestrai/models':
+        specifier: workspace:*
+        version: link:../models
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
@@ -851,6 +996,31 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
     devDependencies:
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/semantic-cache:
+    dependencies:
+      '@orchestrai/rag':
+        specifier: workspace:*
+        version: link:../rag
+      '@orchestrai/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+      '@yuva-devlab/logger':
+        specifier: 1.1.0
+        version: 1.1.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.1
+        version: 26.6.1
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.28)(typescript@6.0.3)(yaml@2.9.1)
@@ -2801,6 +2971,15 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
+  '@tanstack/react-virtual@3.14.13':
+    resolution: {integrity: sha512-JbDTAwtzZ99aOeCrAfW5EsE5KSq5RWh6Af2dtFwyLIIk48Ja7vm6n4axu/43T3vfjFnEGJalxJ1wyYjSQD6bSg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@tanstack/virtual-core@3.17.11':
+    resolution: {integrity: sha512-+ILjvtHup6Y2hzQ6YzwMgX1Q+oQpxEGOXCEsCNaPoIP0VxMbizIBTmYTDtkerkIQS8/CbP1BRuyt8V/8BCsy1g==}
+
   '@turbo/darwin-64@2.11.1':
     resolution: {integrity: sha512-hmuxQFaISY7/6X9Sn/leocFVeN2u8n8q0qjRX5dpLtRU/P5ijGeweZ9nxbYLEFImp+k0nytqJ3ROAVq1SFSEMg==}
     cpu: [x64]
@@ -3759,6 +3938,9 @@ packages:
   iconv-lite@0.7.3:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
     engines: {node: '>=0.10.0'}
+
+  idb-keyval@6.3.0:
+    resolution: {integrity: sha512-um+2dgAWmYsu615EXpWVwSmapJhON0G43t3Ka/EVaohzPQXSMqKEqeDK/oIW3Ow+BXaF2PvSc+oBTFp793A5Ow==}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -5165,6 +5347,24 @@ packages:
 
   zod@4.6.5:
     resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+
+  zustand@5.0.15:
+    resolution: {integrity: sha512-MpSEjRiBkA9crSYeOUH32rJC7SVqAbm0Fqcqge/bUi2PPoLcBWKOsG+C8mevmpr8TwXHBVkChbbJiyvkE+i/3A==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -6902,6 +7102,14 @@ snapshots:
       '@tanstack/query-core': 5.103.2
       react: 19.3.0
 
+  '@tanstack/react-virtual@3.14.13(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@tanstack/virtual-core': 3.17.11
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+
+  '@tanstack/virtual-core@3.17.11': {}
+
   '@turbo/darwin-64@2.11.1':
     optional: true
 
@@ -7957,6 +8165,8 @@ snapshots:
   iconv-lite@0.7.3:
     dependencies:
       safer-buffer: 2.1.2
+
+  idb-keyval@6.3.0: {}
 
   ignore@5.3.2: {}
 
@@ -9491,5 +9701,10 @@ snapshots:
   zod@3.25.76: {}
 
   zod@4.6.5: {}
+
+  zustand@5.0.15(@types/react@19.3.0)(react@19.3.0):
+    optionalDependencies:
+      '@types/react': 19.3.0
+      react: 19.3.0
 
   zwitch@2.0.4: {}
