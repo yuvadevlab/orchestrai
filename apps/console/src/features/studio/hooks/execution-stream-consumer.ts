@@ -1,12 +1,18 @@
 /**
  * @file execution-stream-consumer.ts
- * @description Iterates Gateway SSE stream events and incrementally updates message state and chronological segments.
+ * @description Iterates Gateway SSE stream events and incrementally updates message state,
+ * chronological segments, AND the Inspector Rail ExecutionSlice store.
  * @module apps/console/features/studio/hooks
  */
 
-import { SseStreamEvent, ArtifactType } from "@orchestrai/shared-types";
+import {
+  SseStreamEvent,
+  ArtifactType,
+  ExecutionStatus,
+  StudioEventType,
+} from "@orchestrai/shared-types";
 import { useConsoleStore } from "@/lib/stores";
-import type { CoworkArtifact, CoworkMessage, StudioApprovalRequest } from "../types";
+import type { CoworkArtifact, CoworkMessage, StudioApprovalRequest, StudioEvent } from "../types";
 import {
   appendArtifactSegment,
   appendApprovalSegment,
@@ -20,22 +26,82 @@ export interface ConsumeExecutionStreamOptions {
   agentMsgId: string;
   /** Gateway execution run identifier */
   executionId: string;
+  /** Active specialist name for Inspector Rail display */
+  specialistName?: string;
   /** React state updater to mutate the conversation thread */
   onUpdateMessages: (updater: (prev: CoworkMessage[]) => CoworkMessage[]) => void;
+  /** Mutable signal checked each iteration — when true the loop exits early */
+  cancelledRef?: { current: boolean };
+  /** Appends a StudioEvent to the Inspector Rail */
+  onAddEvent: (event: StudioEvent) => void;
 }
 
 /**
- * Consumes an SSE stream from the Gateway and applies token chunks, artifacts,
- * and clearance requests in chronological order to both the message properties
- * and its interleaved segment timeline.
+ * Builds a StudioEvent for the Inspector Rail from a raw SSE payload.
+ *
+ * @param type - Event category
+ * @param title - Human-readable summary line
+ * @param detail - Optional supplemental content (truncated to 120 chars)
+ * @param agent - Specialist name to display in the rail
+ * @returns Fully-formed StudioEvent
+ */
+function makeEvent(
+  type: StudioEventType,
+  title: string,
+  detail: string,
+  agent: string,
+): StudioEvent {
+  return {
+    id: `evt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    agent,
+    title,
+    detail: detail.slice(0, 120),
+    meta: new Date().toLocaleTimeString(),
+    type,
+  };
+}
+
+/**
+ * Consumes an SSE stream from the Gateway and:
+ *  1. Applies token chunks, artifacts, and clearance requests chronologically to the message
+ *  2. Writes tool call, artifact, error, and done events to the Inspector Rail ExecutionSlice
+ *  3. Respects the cancelledRef signal — exits the loop early when the user stops the run
  */
 export async function consumeExecutionStream({
   streamIterator,
   agentMsgId,
   executionId,
+  specialistName = "Agent",
   onUpdateMessages,
+  cancelledRef,
+  onAddEvent,
 }: ConsumeExecutionStreamOptions): Promise<void> {
+  const store = useConsoleStore.getState();
+  store.setActiveExecutionId(executionId);
+  store.setExecutionStatus(ExecutionStatus.RUNNING);
+
   for await (const sse of streamIterator) {
+    // Respect external cancellation signal from stopExecution()
+    if (cancelledRef?.current) break;
+
+    if (sse.event === SseStreamEvent.TOOL_CALL) {
+      try {
+        const tc = typeof sse.data === "string" ? JSON.parse(sse.data) : sse.data;
+        const toolName = String(tc?.tool ?? "unknown");
+        const toolArgs = tc?.args ? JSON.stringify(tc.args).slice(0, 80) : "";
+        onAddEvent(makeEvent(StudioEventType.TOOL, `Tool: ${toolName}`, toolArgs, specialistName));
+        useConsoleStore.getState().appendExecutionStep({
+          id: `step_${Date.now()}`,
+          name: toolName,
+          stepType: "tool_call",
+          status: "running",
+        });
+      } catch {
+        /* Ignore malformed tool call JSON */
+      }
+      continue;
+    }
+
     if (sse.event === SseStreamEvent.ARTIFACT) {
       try {
         const art: CoworkArtifact = typeof sse.data === "string" ? JSON.parse(sse.data) : sse.data;
@@ -50,11 +116,11 @@ export async function consumeExecutionStream({
               : m,
           ),
         );
-        // Automatically open the right-side Canvas pane and display the artifact
+        // Automatically open the Canvas pane for the incoming artifact
         useConsoleStore.getState().setActiveArtifact({
           id: art.id,
           title: art.title,
-          language: art.language || "typescript",
+          language: art.language ?? "typescript",
           code: art.content,
         });
         if (art.type === ArtifactType.TERMINAL) {
@@ -64,6 +130,15 @@ export async function consumeExecutionStream({
         } else {
           useConsoleStore.getState().setCanvasMode("code");
         }
+        // Update the last execution step to success
+        onAddEvent(
+          makeEvent(StudioEventType.CODE, `Artifact: ${art.title}`, art.type, specialistName),
+        );
+        useConsoleStore
+          .getState()
+          .updateExecutionStep(useConsoleStore.getState().executionSteps.at(-1)?.id ?? "", {
+            status: "success",
+          });
       } catch {
         /* Ignore malformed artifact JSON */
       }
@@ -85,18 +160,39 @@ export async function consumeExecutionStream({
               : m,
           ),
         );
+        onAddEvent(
+          makeEvent(
+            StudioEventType.APPROVAL,
+            `Clearance required: ${String(req.target ?? "resource")}`,
+            req.reason ?? "",
+            specialistName,
+          ),
+        );
       } catch {
         /* Ignore malformed clearance ticket JSON */
       }
       continue;
     }
 
-    // Stop consuming if the backend explicitly emits a completion signal
-    if (sse.event === SseStreamEvent.DONE || sse.data === "[DONE]") {
+    if (sse.event === SseStreamEvent.ERROR) {
+      const errMsg = typeof sse.data === "string" ? sse.data : JSON.stringify(sse.data);
+      onAddEvent(
+        makeEvent(StudioEventType.MODEL, `Error: ${errMsg.slice(0, 60)}`, errMsg, specialistName),
+      );
+      useConsoleStore.getState().setExecutionStatus(ExecutionStatus.FAILED);
       break;
     }
 
-    // Stream regular text tokens directly into content and the chronological segment list
+    // Stop consuming when the backend signals completion
+    if (sse.event === SseStreamEvent.DONE || sse.data === "[DONE]") {
+      onAddEvent(
+        makeEvent(StudioEventType.PLAN, "Execution complete", executionId, specialistName),
+      );
+      useConsoleStore.getState().setExecutionStatus(ExecutionStatus.COMPLETED);
+      break;
+    }
+
+    // Regular text token — append to content and chronological segment list
     if (typeof sse.data === "string") {
       const chunk = sse.data;
       onUpdateMessages((prev) =>
@@ -113,8 +209,13 @@ export async function consumeExecutionStream({
     }
   }
 
-  // Mark the message as finished streaming once iteration concludes normally
+  // Mark message as finished streaming once iteration concludes (normally or cancelled)
   onUpdateMessages((prev) =>
     prev.map((m) => (m.id === agentMsgId ? { ...m, isStreaming: false, executionId } : m)),
   );
+
+  // If stopped early via cancellation, reflect CANCELLED status
+  if (cancelledRef?.current) {
+    useConsoleStore.getState().setExecutionStatus(ExecutionStatus.CANCELLED);
+  }
 }

@@ -23,16 +23,18 @@ import { traceService } from "@/modules/trace/trace.service";
 import type { ExecutionStreamState } from "@/modules/streaming/live-execution-broadcaster";
 import type { LiveMessage } from "@/modules/streaming/live-message-history";
 
-const MAX_AUTONOMOUS_TURNS = 5;
+import { handleToolInvocationWithApproval } from "@/modules/approval/tool-approval-invoker";
+
+/** Absolute safety ceiling — prevents runaway agents if DB record has no maxSteps set. */
+const ABSOLUTE_MAX_TURNS = 20;
 
 export interface TurnExecutorCallbacks {
   readonly emitEvent: (event: SseStreamEvent | string, data: unknown) => void;
 }
 
-import { handleToolInvocationWithApproval } from "@/modules/approval/tool-approval-invoker";
-
 /**
  * Executes multi-turn reasoning loop with streaming LLM, tools, and telemetry.
+ * @param maxTurns - Maximum number of autonomous tool-calling turns, sourced from agent DB record
  */
 export async function executeAutonomousTurns(
   executionId: string,
@@ -43,6 +45,7 @@ export async function executeAutonomousTurns(
   history: LiveMessage[],
   state: ExecutionStreamState,
   callbacks: TurnExecutorCallbacks,
+  maxTurns: number = ABSOLUTE_MAX_TURNS,
 ): Promise<void> {
   const tracer = traceService.tracer;
   const rootSpan = tracer.startSpan("agent.execution", {
@@ -58,7 +61,12 @@ export async function executeAutonomousTurns(
       defaultModel: selectedModel,
     });
 
-    for (let turn = 0; turn < MAX_AUTONOMOUS_TURNS; turn++) {
+    // Clamp maxTurns between 1 and the absolute ceiling to prevent misconfigured agents
+    const effectiveMaxTurns = Math.min(Math.max(1, maxTurns), ABSOLUTE_MAX_TURNS);
+
+    for (let turn = 0; turn < effectiveMaxTurns; turn++) {
+      // Respect external cancellation — check at the start of each turn
+      if (state.status === ExecutionStatus.CANCELLED) break;
       const turnSpan = tracer.startSpan(`agent.turn_${turn + 1}`, {
         parentSpanId: rootSpan.spanContext().spanId,
         attributes: { "execution.id": executionId, "turn.index": turn + 1 },

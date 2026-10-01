@@ -99,7 +99,7 @@ export class ExecutionDispatcher {
    */
   public dispatch(
     executionId: string,
-    targetAgent: { agentId: string; systemPrompt: string },
+    targetAgent: { agentId: string; systemPrompt: string; maxSteps?: number | null },
     resolvedTenantId: string,
     validConvId: string | null,
     dto: CreateExecutionDto,
@@ -146,6 +146,8 @@ export class ExecutionDispatcher {
           systemPrompt,
           validConvId || undefined,
           dto.history,
+          // Pass per-agent maxSteps from DB record; falls back to ABSOLUTE_MAX_TURNS if unset
+          typeof targetAgent.maxSteps === "number" ? targetAgent.maxSteps : undefined,
         )
         .then(async () => {
           await this.handleExecutionCompletion(executionId, validConvId, modelName);
@@ -204,5 +206,15 @@ export class ExecutionDispatcher {
         data: { updatedAt: new Date() },
       });
     }
+  }
+  /**
+   * Cancels a live SSE execution by signalling the running turn loop to stop.
+   * Has no effect on queue-dispatched (async) executions.
+   *
+   * @param executionId - The active execution to cancel
+   */
+  public cancelLiveExecution(executionId: string): void {
+    liveExecutionManager.cancelExecution(executionId);
+    logger.info("cancelLiveExecution: cancel signal sent", { executionId });
   }
 }

@@ -170,12 +170,16 @@ export class ExecutionService {
   }
 
   /**
-   * Cancels an active execution and marks it as `CANCELLED` in the database.
+   * Cancels an active execution:
+   *  1. Signals the live SSE autonomous turn loop to stop via the execution manager
+   *  2. Persists CANCELLED status to the database
    */
   public async cancelExecution(
     executionId: string,
     tenantId: string,
   ): Promise<{ executionId: string; status: ExecutionStatus; cancelledAt: string }> {
+    // Signal the in-process live execution to stop after the current turn
+    this.dispatcher.cancelLiveExecution(executionId);
     return this.queryService.cancelExecution(executionId, tenantId);
   }
 

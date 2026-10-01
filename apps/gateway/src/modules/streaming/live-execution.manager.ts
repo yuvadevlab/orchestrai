@@ -52,6 +52,8 @@ class LiveExecutionManager {
     systemPrompt?: string,
     conversationId?: string,
     history?: Array<{ role: string; content: string }>,
+    /** Max autonomous tool-calling turns from the agent DB record (defaults to ABSOLUTE_MAX_TURNS) */
+    maxSteps?: number,
   ): Promise<void> {
     const host = process.env.OLLAMA_HOST || "http://localhost:11434";
     const selectedModel = modelName || process.env.DEFAULT_MODEL_NAME || "gemma4:31b-cloud";
@@ -87,7 +89,20 @@ class LiveExecutionManager {
       {
         emitEvent: (event, data) => this.emitEvent(executionId, event, data),
       },
+      maxSteps,
     );
+  }
+
+  /**
+   * Signals a running execution to cancel after the current turn completes.
+   * The turn loop checks state.status at the start of each iteration.
+   */
+  public cancelExecution(executionId: string): void {
+    const state = this.states.get(executionId);
+    if (state && state.status === ExecutionStatus.RUNNING) {
+      state.status = ExecutionStatus.CANCELLED;
+      this.emitEvent(executionId, SseStreamEvent.DONE, "[CANCELLED]");
+    }
   }
 
   public attachSseStream(executionId: string, res: GatewayResponse): void {

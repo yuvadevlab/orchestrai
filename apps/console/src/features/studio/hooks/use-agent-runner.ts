@@ -3,11 +3,13 @@
 /**
  * @file use-agent-runner.ts
  * @description Real Gateway execution dispatch and SSE streaming hook for Cowork Studio.
+ * Includes real stop execution (cancel API call + cancelledRef signal) and
+ * Inspector Rail event forwarding via onAddEvent callback.
  * @module apps/console/features/studio/hooks
  */
 
-import { useCallback, useState } from "react";
-import { PermissionScope, CoworkMessageRole } from "@orchestrai/shared-types";
+import { useCallback, useRef, useState } from "react";
+import { PermissionScope, CoworkMessageRole, StudioEventType } from "@orchestrai/shared-types";
 import { getApiClient } from "@/lib/api-client";
 import { formatApiError } from "@/lib/error-utils";
 import { useResolveApproval } from "../api";
@@ -35,6 +37,8 @@ export interface UseAgentRunnerResult {
 
 /**
  * Executes agent tasks or interactive chats via Gateway SDK with live streaming feedback.
+ * stopExecution() calls `DELETE /executions/:id/cancel` on the Gateway AND signals the
+ * local stream iterator to exit early via `cancelledRef` — both must be done for clean stop.
  */
 export function useAgentRunner({
   activeSpecialist,
@@ -46,6 +50,16 @@ export function useAgentRunner({
   const [isRunning, setIsRunning] = useState(false);
   const [events, setEvents] = useState<StudioEvent[]>([]);
   const [activeExecutionId, setActiveExecutionId] = useState("");
+
+  /**
+   * Mutable ref shared between triggerRun and stopExecution.
+   * When true, the SSE iterator loop in consumeExecutionStream exits on next tick.
+   */
+  const cancelledRef = useRef(false);
+
+  /** Ref storing the latest execution ID so stopExecution always has the current one. */
+  const executionIdRef = useRef("");
+
   const resolveMutation = useResolveApproval();
 
   const resolveApproval = useCallback(
@@ -55,6 +69,34 @@ export function useAgentRunner({
     [resolveMutation],
   );
 
+  /**
+   * Appends a StudioEvent to the local events array for the Inspector Rail.
+   * Kept as a stable callback so it can be passed to consumeExecutionStream.
+   */
+  const addEvent = useCallback((event: StudioEvent): void => {
+    setEvents((prev) => [...prev, event]);
+  }, []);
+
+  /**
+   * Stops the current execution:
+   *  1. Sets cancelledRef so the SSE loop exits on next iteration
+   *  2. Calls the Gateway cancel API to terminate the server-side loop
+   *  3. Resets local running state
+   */
+  const stopExecution = useCallback((): void => {
+    cancelledRef.current = true;
+    setIsRunning(false);
+    const idToCancel = executionIdRef.current;
+    if (idToCancel) {
+      // Fire-and-forget — we don't block the UI on the API call completing
+      getApiClient()
+        .executions.cancel(idToCancel)
+        .catch(() => {
+          // Gateway may already have terminated; ignore cancellation errors
+        });
+    }
+  }, []);
+
   const triggerRun = useCallback(
     async (promptText: string): Promise<void> => {
       const text = promptText.trim();
@@ -63,7 +105,10 @@ export function useAgentRunner({
         throw new Error("No active specialist agent available in database.");
       }
 
+      // Reset cancellation signal for this new run
+      cancelledRef.current = false;
       setIsRunning(true);
+
       const now = (): string => new Date().toLocaleTimeString();
       const userMsgId = `user_${Date.now()}`;
       const agentMsgId = `agent_${Date.now()}`;
@@ -122,6 +167,7 @@ export function useAgentRunner({
         });
 
         setActiveExecutionId(handle.id);
+        executionIdRef.current = handle.id;
 
         try {
           const streamIterator = await handle.stream();
@@ -129,9 +175,13 @@ export function useAgentRunner({
             streamIterator,
             agentMsgId,
             executionId: handle.id,
+            specialistName: activeSpecialist.name,
             onUpdateMessages,
+            cancelledRef,
+            onAddEvent: addEvent,
           });
         } catch {
+          // Stream failed — fall back to polling the execution result
           const finalRecord = await handle.wait(1500, 30000);
           const fallbackOutput = (finalRecord as { result?: { output?: string } })?.result?.output;
           const fallbackText =
@@ -164,11 +214,27 @@ export function useAgentRunner({
               : m,
           ),
         );
+        addEvent({
+          id: `err_${Date.now()}`,
+          agent: activeSpecialist.name,
+          title: `Runtime error: ${errMsg.slice(0, 50)}`,
+          detail: errMsg,
+          meta: new Date().toLocaleTimeString(),
+          type: StudioEventType.MODEL,
+        });
       } finally {
         setIsRunning(false);
+        executionIdRef.current = "";
       }
     },
-    [activeSpecialist, selectedModel, existingMessages, onUpdateMessages, activeSessionId],
+    [
+      activeSpecialist,
+      selectedModel,
+      existingMessages,
+      onUpdateMessages,
+      activeSessionId,
+      addEvent,
+    ],
   );
 
   return {
@@ -177,7 +243,7 @@ export function useAgentRunner({
     activeExecutionId,
     triggerRun,
     resolveApproval,
-    stopExecution: () => setIsRunning(false),
+    stopExecution,
     clearEvents: () => setEvents([]),
   };
 }
