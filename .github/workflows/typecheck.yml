@@ -1,4 +1,4 @@
-name: 🛡️ Build & Quality Validation
+name: 🔎 Type Checking
 
 on:
   push:
@@ -12,12 +12,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: typecheck-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: 🔍 Lint, Typecheck & Build
+  typecheck:
+    name: 🔎 TypeScript Strict Typecheck
     runs-on: ubuntu-latest
 
     steps:
@@ -39,14 +39,5 @@ jobs:
       - name: 🗄️ Generate Prisma Client
         run: pnpm db:generate
 
-      - name: 🎨 Verify Code Formatting (Prettier)
-        run: pnpm format:check
-
-      - name: 🧹 Execute ESLint Code Check
-        run: pnpm lint
-
-      - name: 🔎 Execute TypeScript Type Check
+      - name: 🔎 Execute Type Check
         run: pnpm typecheck
-
-      - name: 🏗️ Execute Monorepo Turbo Build
-        run: pnpm build

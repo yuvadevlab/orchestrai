@@ -15,13 +15,17 @@
     "db:generate": "pnpm --filter @orchestrai/database db:generate",
     "db:migrate": "pnpm --filter @orchestrai/database db:migrate",
     "db:studio": "pnpm --filter @orchestrai/database db:studio",
-    "lint": "eslint . --max-warnings=0",
+    "lint": "eslint . --max-warnings=0 && ruff check apps/intelligence apps/crawler",
+    "lint:fix": "eslint . --fix --max-warnings=0 && ruff check --fix apps/intelligence apps/crawler",
     "lint:turbo": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "prettier --write . && ruff format apps/intelligence apps/crawler",
+    "format:check": "prettier --check . && ruff format --check apps/intelligence apps/crawler",
+    "py:setup": "python3 -m venv apps/intelligence/.venv && apps/intelligence/.venv/bin/pip install -r apps/intelligence/requirements.txt && python3 -m venv apps/crawler/.venv && apps/crawler/.venv/bin/pip install -r apps/crawler/requirements.txt",
+    "py:intelligence": "apps/intelligence/.venv/bin/python -m uvicorn src.server:app --app-dir apps/intelligence --host 0.0.0.0 --port 8082",
+    "py:crawler": "apps/crawler/.venv/bin/python -m uvicorn src.server:app --app-dir apps/crawler --host 0.0.0.0 --port 8083",
     "prepare": "husky",
     "postinstall": "pnpm db:generate"
   },
@@ -51,6 +55,10 @@
     "*.{js,jsx,mjs,cjs,ts,tsx}": [
       "eslint --fix --max-warnings=0 --no-warn-ignored",
       "prettier --write"
+    ],
+    "*.py": [
+      "ruff check --fix",
+      "ruff format"
     ],
     "*.{json,md,yml,yaml,css,scss}": [
       "prettier --write"
