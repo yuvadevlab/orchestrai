@@ -287,3 +287,59 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] Zero hardcoded default values / fallback arrays: eliminated `DEFAULT_NAV_ITEMS` in `apps/console`, purged unused static nav files, removed database `seedIfEmpty` from `nav-item.service.ts` and `platform-mode.service.ts` (100% database-driven)
 - [x] Monorepo typecheck validation (`pnpm typecheck`): 43/43 targets passing with 0 errors
 - [x] Clean zero-warning commit quality gate validated with commitlint and lint-staged
+
+---
+
+### [ ] Intelligence Wiring — Activate Orphaned Packages
+
+**Goal**: Every built package actively used. Zero dead code.
+
+#### ✅ Completed — Package Activation (gateway)
+
+- [x] **`@orchestrai/billing`** → `billing.service.ts` (new)
+  - `TokenCounter.countMessageTokens()` → compaction trigger (75% context window)
+  - `BudgetEnforcer.evaluateBudget()` → per-turn hard gate before each LLM call
+  - `CostLedger.recordExpenditure()` → post-turn cost ledger write
+  - All cost rates and context windows sourced from DB model record + env vars (zero hardcodes)
+
+- [x] **`@orchestrai/events`** → `domain-event-publisher.ts` (new)
+  - `EXECUTION_STARTED` emitted on first turn → Inspector Rail initialization
+  - `TOOL_CALLED` / `TOOL_COMPLETED` around every tool dispatch → observability traces
+  - `EXECUTION_COMPLETED` with token totals + duration → memory distillation trigger
+  - `EXECUTION_FAILED` on error exit → failure episode record
+  - `EXECUTION_CANCELLED` on stop signal → worker dequeue
+  - `APPROVAL_REQUESTED` for HITL gate → realtime modal
+
+- [x] **`@orchestrai/resilience`** → wired into `live-turn-executor.ts`
+  - `createModelResiliencePipeline()` wraps every `OllamaAdapter.stream()` call
+  - CircuitBreaker (5 failures → env-configured cooldown)
+  - Retry (2 attempts, exponential backoff + full jitter)
+  - Deadline (120s per turn)
+  - Bulkhead (max 8 concurrent LLM calls)
+
+- [x] **`@orchestrai/prompts`** → wired into `live-message-history.ts`
+  - `AUTONOMOUS_TOOLS_SYSTEM_PROMPT` replaces inline system prompt string
+  - `SPECIALIST_PERSONA_REGISTRY` resolves agent persona from DB agent role field
+  - `buildCompositeSystemPrompt(personaRole, override)` is the single entry point
+
+- [x] **Hardcoded constants eliminated**
+  - `AGENT_MAX_TURNS` → env var (default 20)
+  - `MODEL_DEFAULT_CONTEXT_WINDOW` → env var (default 8192)
+  - `CONTEXT_COMPACTION_THRESHOLD` → env var (default 0.75)
+  - Default model name `gemma4:31b-cloud` removed from agent creation fallback
+  - `contextWindow` and `costPerTokenUsd` threaded from DB model record through dispatch chain
+
+#### [ ] Pending — Runtime + Agent Wiring
+
+- [ ] **`@orchestrai/runtime`** → wire `StateGraph` into `apps/orchestrator` internals
+- [ ] **`@orchestrai/agent`** → `AgentRunner` resolves from DB agent record
+- [ ] **`@orchestrai/rag`** → auto-inject top-3 knowledge chunks per turn + conversational RAG
+- [ ] **`@orchestrai/memory`** → full 4-tier recall at execution start, distill via event
+- [ ] **`@orchestrai/model-router`** → task-type routing wired to turn executor nodes
+- [ ] **`@orchestrai/semantic-cache`** → 3-tier cache (response, plan, embedding)
+- [ ] **`@orchestrai/eval`** → auto LLM-as-judge quality gate on `EXECUTION_COMPLETED` event
+
+#### [ ] Pending — New Services
+
+- [ ] **`apps/intelligence`** (Python) → LangGraph agent loop replacing for-loop
+- [ ] **`apps/crawler`** (Python) → Playwright browser automation + RAG ingestion

@@ -360,6 +360,9 @@ importers:
 
   apps/gateway:
     dependencies:
+      '@orchestrai/billing':
+        specifier: workspace:*
+        version: link:../../packages/billing
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -378,6 +381,9 @@ importers:
       '@orchestrai/memory':
         specifier: workspace:*
         version: link:../../packages/memory
+      '@orchestrai/model-router':
+        specifier: workspace:*
+        version: link:../../packages/model-router
       '@orchestrai/models':
         specifier: workspace:*
         version: link:../../packages/models
@@ -396,6 +402,9 @@ importers:
       '@orchestrai/resilience':
         specifier: workspace:*
         version: link:../../packages/resilience
+      '@orchestrai/semantic-cache':
+        specifier: workspace:*
+        version: link:../../packages/semantic-cache
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types

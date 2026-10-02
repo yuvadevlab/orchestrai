@@ -44,6 +44,19 @@ class LiveExecutionManager {
 
   /**
    * Starts autonomous execution with memory recall, conversation history, and live tool execution.
+   *
+   * @param executionId - Unique execution identifier
+   * @param inputPrompt - User prompt instruction
+   * @param modelName - Selected model identifier
+   * @param systemPrompt - Caller/DB system prompt
+   * @param conversationId - Session/conversation identifier
+   * @param history - Prior conversation turns
+   * @param maxSteps - Maximum autonomous turns allowed
+   * @param tenantId - Tenant identifier partition
+   * @param agentId - Executing agent identifier
+   * @param contextWindow - Model context window size in tokens
+   * @param costPerTokenUsd - Cost per token from model record
+   * @param personaRole - Agent persona role (e.g., developer, researcher)
    */
   public async startExecution(
     executionId: string,
@@ -52,8 +65,12 @@ class LiveExecutionManager {
     systemPrompt?: string,
     conversationId?: string,
     history?: Array<{ role: string; content: string }>,
-    /** Max autonomous tool-calling turns from the agent DB record (defaults to ABSOLUTE_MAX_TURNS) */
     maxSteps?: number,
+    tenantId?: string,
+    agentId?: string,
+    contextWindow?: number,
+    costPerTokenUsd?: number,
+    personaRole?: string,
   ): Promise<void> {
     const host = process.env.OLLAMA_HOST || "http://localhost:11434";
     const selectedModel = modelName || process.env.DEFAULT_MODEL_NAME || "gemma4:31b-cloud";
@@ -68,12 +85,13 @@ class LiveExecutionManager {
     };
     this.states.set(executionId, state);
 
-    // Recall cross-session episodic & semantic memories
-    const memoryContext = await memoryService.recallContext(inputPrompt, "default");
+    // Recall cross-session episodic & semantic memories using tenant partition
+    const memoryContext = await memoryService.recallContext(inputPrompt, tenantId ?? "default");
     const augmentedSystemPrompt = [systemPrompt, memoryContext].filter(Boolean).join("\n\n");
 
     const conversationHistory = buildInitialConversationHistory(
       inputPrompt,
+      personaRole,
       augmentedSystemPrompt || undefined,
       history,
     );
@@ -90,6 +108,10 @@ class LiveExecutionManager {
         emitEvent: (event, data) => this.emitEvent(executionId, event, data),
       },
       maxSteps,
+      tenantId,
+      agentId,
+      contextWindow,
+      costPerTokenUsd,
     );
   }
 

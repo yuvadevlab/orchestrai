@@ -6,7 +6,7 @@
  */
 
 import { type PrismaClient, type Prisma, type Agent } from "@orchestrai/database";
-import { QUEUE_NAMES } from "@orchestrai/shared-types";
+import { QUEUE_NAMES, MessageRole } from "@orchestrai/shared-types";
 import {
   ExecutionIdSchema,
   AgentIdSchema,
@@ -52,8 +52,11 @@ export class ExecutionDispatcher {
           data: {
             tenantId,
             name: "Lead Orchestrator",
+            // System prompt is the only thing that should be here — model is read from DB model record
             systemPrompt: "You are the Lead Orchestrator.",
-            modelConfig: { model: "gemma4:31b-cloud" },
+            // modelConfig is intentionally left empty so the gateway reads the default model
+            // from the DB models table, never from a hardcoded constant
+            modelConfig: {},
           },
         }));
     }
@@ -99,12 +102,22 @@ export class ExecutionDispatcher {
    */
   public dispatch(
     executionId: string,
-    targetAgent: { agentId: string; systemPrompt: string; maxSteps?: number | null },
+    targetAgent: {
+      agentId: string;
+      systemPrompt: string;
+      maxSteps?: number | null;
+      /** Agent persona role (e.g. "developer", "researcher") from DB agent record */
+      role?: string | null;
+    },
     resolvedTenantId: string,
     validConvId: string | null,
     dto: CreateExecutionDto,
     modelName?: string,
     systemPrompt?: string,
+    /** Context window size from DB model record — never hardcoded */
+    contextWindow?: number,
+    /** Cost per token from DB model record (0 for Ollama local models) */
+    costPerTokenUsd?: number,
   ): void {
     if (!dto.input) return;
 
@@ -148,6 +161,13 @@ export class ExecutionDispatcher {
           dto.history,
           // Pass per-agent maxSteps from DB record; falls back to ABSOLUTE_MAX_TURNS if unset
           typeof targetAgent.maxSteps === "number" ? targetAgent.maxSteps : undefined,
+          resolvedTenantId,
+          targetAgent.agentId,
+          // Pass DB model record values — never hardcoded in the executor
+          contextWindow,
+          costPerTokenUsd,
+          // Persona role drives system prompt template selection in @orchestrai/prompts
+          targetAgent.role ?? undefined,
         )
         .then(async () => {
           await this.handleExecutionCompletion(executionId, validConvId, modelName);
@@ -192,7 +212,7 @@ export class ExecutionDispatcher {
         data: {
           executionId,
           conversationId: validConvId,
-          role: "assistant" as never,
+          role: MessageRole.ASSISTANT as never,
           content: state.fullOutput,
           metadata: {
             ...(state.artifacts?.length ? { artifacts: state.artifacts } : {}),
