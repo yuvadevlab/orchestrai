@@ -27,6 +27,7 @@ import {
   registerMemoryRoutes,
   registerTraceRoutes,
   registerResourceAccessRoutes,
+  registerWorkspaceRoutes,
   initEvalQualityGate,
   initMemoryDistillation,
 } from "@/modules";
@@ -83,6 +84,7 @@ export async function bootstrap(): Promise<GatewayServer> {
     registerMemoryRoutes(api);
     registerTraceRoutes(api);
     registerResourceAccessRoutes(api);
+    registerWorkspaceRoutes(api);
   });
 
   const server = new GatewayServer(config, router);

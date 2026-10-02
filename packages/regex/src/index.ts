@@ -16,3 +16,4 @@ export * from "./security.regex";
 export * from "./network.regex";
 export * from "./uri.regex";
 export * from "./text.regex";
+export * from "./prompt.regex";

@@ -426,3 +426,37 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 
 - [x] Created `docs/SYSTEM-FLOW-AND-ARCHITECTURE.md` comprehensive tree and end-to-end system flow
 - [x] Validated Mermaid sequence diagram syntax for 100% compatibility across markdown previewers
+
+---
+
+### Milestone 10: Workspace Folder Picker, Recent History, @ Mentions & Slash Commands
+
+#### [x] Workspace Folder Management (`apps/console`)
+
+- [x] **`StudioWorkspaceSelector` & `StudioWorkspaceRecentList`**:
+  - Live header selector with active directory name, monospace path badge, and one-click path clipboard copying
+  - Native browser directory picker (`showDirectoryPicker`) with path input fallback
+  - Recent workspaces history drawer with active indicator, single-click switching, and deletion
+- [x] **`WorkspaceSlice` with Asynchronous IndexedDB Persistence**:
+  - Persists active workspace and recent workspaces across page reloads without state loss
+  - Safe path normalization and folder name derivation using `@orchestrai/regex`
+
+#### [x] Workspace File Exploration API (`apps/gateway`)
+
+- [x] **`WorkspaceFileService` & `WorkspaceController`**:
+  - Exposes `GET /api/v1/workspace/files` with query parameters (`path`, `query`, `limit`)
+  - Fast recursive directory walker (up to depth 5) excluding ignored directories (`.git`, `node_modules`, `.next`, `dist`, `.turbo`, `.venv`, etc.)
+  - Registered under public gateway route group
+
+#### [x] Interactive Command Palette (@ Mentions & / Slash Commands)
+
+- [x] **`@` Mention Autocomplete (`StudioMentionPopover`)**:
+  - Triggered dynamically when typing `@`
+  - Searches workspace files via `useWorkspaceFiles` TanStack Query hook
+  - Auto-completes cluster specialist personas, switching active specialist on selection
+- [x] **`/` Slash Commands Palette (`StudioSlashCommands`)**:
+  - Instant mode switching (`/plan`, `/act`, `/chat`, `/auto`)
+  - Quick actions: `/clear` (resets conversation thread), `/compact`, `/files`, `/help`
+  - Full keyboard navigation (Arrow keys, Enter, Escape)
+- [x] **All Regular Expressions Sourced from `@orchestrai/regex`**:
+  - Added `prompt.regex.ts` with `MENTION_QUERY_REGEX`, `SLASH_COMMAND_PREFIX_REGEX`, `TRAILING_PATH_SLASH_REGEX`, `PATH_SPLIT_REGEX`

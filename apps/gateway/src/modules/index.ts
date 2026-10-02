@@ -23,3 +23,4 @@ export * from "./session";
 export * from "./streaming";
 export * from "./trace";
 export * from "./tenant-resolver";
+export * from "./workspace";

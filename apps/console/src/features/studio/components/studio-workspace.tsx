@@ -129,6 +129,7 @@ export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React
             modes={state.platformModes}
             mode={state.activeSession.mode}
             onSelectMode={(mode) => state.updateSessionMeta({ mode: mode as CoworkMode })}
+            onResetThread={state.handleNewSession}
           />
         </main>
 

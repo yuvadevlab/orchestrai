@@ -1130,3 +1130,47 @@ Chronological log of architecture, engineering decisions, and completed mileston
 - **250-Line Rule**: All new files are strictly under 130 LOC; all modified files remain under 200 LOC.
 - **Monorepo Typecheck**: 48 of 48 workspace targets passing cleanly (`pnpm typecheck`).
 - **Linting & Formatting**: `eslint --max-warnings=0`, `ruff check`, Prettier, and `ruff format` passing with 0 warnings/errors.
+
+---
+
+## Session: 2026-10-02 (Continued) — Workspace Folder Picker, Recent History, @ Mentions & Slash Commands
+
+### 1. Workspace Folder Management Architecture (`apps/console`)
+
+- **Dual-Mode Workspace Selector (`StudioWorkspaceSelector` & `StudioWorkspaceRecentList`)**:
+  - Implemented top header dropdown showing active workspace folder name, monospace path badge, and copy button.
+  - Native browser directory picker (`window.showDirectoryPicker()`) with fallback path input for arbitrary filesystem paths.
+  - Recent workspaces history drawer with active indicator checkmark, single-click workspace switching, and per-workspace deletion.
+- **Durable `WorkspaceSlice` with Asynchronous IndexedDB Persistence**:
+  - Added `WorkspaceSlice` to `apps/console/src/lib/stores/workspace-slice.ts` persisting `activeWorkspace` and `recentWorkspaces` (up to 15 MRU entries).
+  - Wired into `useConsoleStore` with IndexedDB persistence and path normalization.
+
+### 2. Workspace File Exploration API (`apps/gateway`)
+
+- **`WorkspaceFileService` & `WorkspaceController`**:
+  - Implemented `apps/gateway/src/modules/workspace/services/workspace-file.service.ts` providing fast directory walking (depth <= 5).
+  - Automatically filters out build and dependency directories (`.git`, `node_modules`, `.next`, `dist`, `.turbo`, `.venv`, etc.).
+  - Registered `GET /api/v1/workspace/files` endpoint on API router supporting `path`, `query`, and `limit` parameters.
+- **Client Query Hook**:
+  - Created `apps/console/src/features/studio/api/use-workspace-files.ts` utilizing TanStack Query for high-performance cached autocomplete.
+
+### 3. Interactive Command Station (@ Mentions & / Slash Commands)
+
+- **`@` Mentions Autocomplete (`StudioMentionPopover`)**:
+  - Real-time popover triggering on `@` in the command prompt.
+  - Searches workspace files and cluster specialist personas with file-type icons and role descriptions.
+  - Full keyboard navigation (Arrow Up/Down, Enter, Escape).
+  - Automatically switches active specialist when an agent persona is selected.
+- **`/` Slash Commands Palette (`StudioSlashCommands`)**:
+  - Instant command palette for `/plan`, `/act`, `/chat`, `/auto`, `/clear`, `/compact`, `/files`, and `/help`.
+  - Switching mode automatically strips the slash prefix so users can type their prompt immediately.
+  - `/clear` triggers `state.handleNewSession()` to clear message feeds and reset canvas cleanly.
+- **Canonical Regex Extraction**:
+  - Added `prompt.regex.ts` in `@orchestrai/regex` defining `MENTION_QUERY_REGEX`, `SLASH_COMMAND_PREFIX_REGEX`, `TRAILING_PATH_SLASH_REGEX`, and `PATH_SPLIT_REGEX`.
+  - Zero inline regular expressions in consumer components.
+
+### 4. Quality Invariants & Verification
+
+- **250-Line Maximum Rule**: All new files decomposed proactively; max LOC is 183 lines (0 files > 221 LOC).
+- **Monorepo Typecheck**: 48 of 48 workspace targets passing cleanly (`pnpm typecheck`).
+- **Linting & Formatting**: `eslint --max-warnings=0`, `ruff check`, Prettier, and `ruff format` passing with 0 warnings/errors.

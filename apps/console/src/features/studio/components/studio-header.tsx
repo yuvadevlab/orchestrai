@@ -10,6 +10,8 @@ import React from "react";
 import { History, Sidebar, Sparkles } from "lucide-react";
 import { Button, Badge } from "@yuva-devlab/ui";
 
+import { StudioWorkspaceSelector } from "./studio-workspace-selector";
+
 export interface StudioHeaderProps {
   isRunning: boolean;
   onOpenHistory: () => void;
@@ -19,8 +21,7 @@ export interface StudioHeaderProps {
 
 /**
  * Slim top bar for the Cowork Studio.
- * Selector controls (specialist/model/mode) live inside the prompt bar's
- * bottom control row; this header only hosts session history, the swarm
+ * Hosts workspace folder switcher, session history threads, the swarm
  * status badge, and the inspector rail toggle.
  */
 export function StudioHeader({
@@ -31,8 +32,10 @@ export function StudioHeader({
 }: StudioHeaderProps): React.JSX.Element {
   return (
     <header className="border-border bg-card/60 relative z-20 flex h-13 shrink-0 items-center justify-between border-b px-4 backdrop-blur-md">
-      {/* Left: Session History Drawer Button */}
+      {/* Left: Workspace Folder Picker & Session History Drawer Button */}
       <div className="flex items-center gap-2">
+        <StudioWorkspaceSelector />
+
         <Button
           variant="outline"
           size="sm"
