@@ -360,6 +360,9 @@ importers:
 
   apps/gateway:
     dependencies:
+      '@orchestrai/agent':
+        specifier: workspace:*
+        version: link:../../packages/agent
       '@orchestrai/billing':
         specifier: workspace:*
         version: link:../../packages/billing
@@ -402,6 +405,9 @@ importers:
       '@orchestrai/resilience':
         specifier: workspace:*
         version: link:../../packages/resilience
+      '@orchestrai/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
       '@orchestrai/semantic-cache':
         specifier: workspace:*
         version: link:../../packages/semantic-cache

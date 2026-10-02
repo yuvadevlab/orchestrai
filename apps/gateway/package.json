@@ -14,6 +14,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@orchestrai/agent": "workspace:*",
     "@orchestrai/billing": "workspace:*",
     "@orchestrai/core": "workspace:*",
     "@orchestrai/database": "workspace:*",
@@ -28,6 +29,7 @@
     "@orchestrai/queue": "workspace:*",
     "@orchestrai/rag": "workspace:*",
     "@orchestrai/resilience": "workspace:*",
+    "@orchestrai/runtime": "workspace:*",
     "@orchestrai/semantic-cache": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
     "@orchestrai/tools": "workspace:*",

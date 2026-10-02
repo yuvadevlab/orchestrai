@@ -358,8 +358,16 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 #### [ ] Pending — Runtime + Agent Wiring
 
 - [ ] **`@orchestrai/runtime`** → wire `StateGraph` into `apps/orchestrator` internals
-- [ ] **`@orchestrai/agent`** → `AgentRunner` resolves from DB agent record
-- [ ] **`@orchestrai/memory`** → full 4-tier recall at execution start, distill via event
+- [x] **`@orchestrai/memory`** → full 4-tier recall at execution start, distill via event
+  - 4-tier recall (`EPISODIC`, `FACT`, `USER_PREFERENCE`, `TASK`) in `memory.service.ts`
+  - Automated event-driven memory distillation on `EXECUTION_COMPLETED` via `initMemoryDistillation()`
+  - Zero hardcoded agent IDs or synthetic fallbacks
+
+- [x] **`@orchestrai/agent`** → `AgentRunner` resolves from DB agent record
+  - `resolveAgentRunner()` builds `AgentDefinition`, `AgentStateMachine`, and `AgentLoop`
+  - Strict database-backed agent configuration with zero synthetic fallbacks or seeders
+
+#### [ ] Pending — Runtime Wiring
 
 #### [ ] Pending — New Services
 

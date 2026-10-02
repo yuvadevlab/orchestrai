@@ -7,3 +7,4 @@ export { registerAgentRoutes } from "./controllers/agent.route";
 export { AgentController } from "./controllers/agent.controller";
 export { AgentService } from "./services/agent.service";
 export { PostgresAgentRepository } from "./repositories/agent.repository";
+export { resolveAgentRunner } from "./services/agent-runner-resolver";

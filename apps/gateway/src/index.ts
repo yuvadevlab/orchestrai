@@ -28,6 +28,7 @@ import {
   registerTraceRoutes,
   registerResourceAccessRoutes,
   initEvalQualityGate,
+  initMemoryDistillation,
 } from "@/modules";
 import { GatewayServer, registerProcessLifecycle } from "@/server";
 
@@ -55,6 +56,9 @@ export async function bootstrap(): Promise<GatewayServer> {
 
   // Initialize automated evaluation quality gate on domain events
   initEvalQualityGate();
+
+  // Initialize event-driven cross-session memory distillation
+  initMemoryDistillation();
 
   // Register root health probes
   registerHealthRoutes(router);
