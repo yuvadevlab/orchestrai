@@ -5,6 +5,7 @@
 
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { WORD_SPLIT_REGEX, ALPHANUMERIC_START_REGEX } from "@orchestrai/regex";
 
 /**
  * Combines Tailwind and conditional CSS classnames safely in both Server and Client environments.
@@ -30,7 +31,9 @@ export function getInitials(name?: string | null, fallback = "OP"): string {
   const clean = name.trim();
   const atIndex = clean.indexOf("@");
   const text = atIndex > -1 ? clean.slice(0, atIndex) : clean;
-  const parts = text.split(/[\s._-]+/).filter((p) => p.length > 0 && /^[a-zA-Z0-9]/.test(p));
+  const parts = text
+    .split(WORD_SPLIT_REGEX)
+    .filter((p: string) => p.length > 0 && ALPHANUMERIC_START_REGEX.test(p));
 
   if (parts.length === 0) {
     return fallback;

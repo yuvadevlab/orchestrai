@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@yuva-devlab/ui";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ALPHANUMERIC_START_REGEX } from "@orchestrai/regex";
 import type { AgentDefinition } from "../types";
 
 export interface AgentCardProps {
@@ -19,7 +20,7 @@ function getInitials(name: string): string {
   const words = name
     .trim()
     .split(/\s+/)
-    .filter((word) => /^[a-zA-Z0-9]/.test(word));
+    .filter((word) => ALPHANUMERIC_START_REGEX.test(word));
 
   // If two or more meaningful words exist, take the first letter of each of the first two words
   if (words.length >= 2 && words[0] && words[1]) {

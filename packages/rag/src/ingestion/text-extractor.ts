@@ -4,6 +4,7 @@
  */
 
 import type { ITextExtractor, ExtractedDocument } from "./extractor.interface";
+import { MARKDOWN_HEADING_REGEX } from "@orchestrai/regex";
 
 /**
  * Supported text MIME types handled by this extractor.
@@ -52,7 +53,7 @@ export class TextExtractor implements ITextExtractor {
 
       // Check if line represents a markdown heading (# Title)
       if (trimmed.startsWith("#")) {
-        inferredTitle = trimmed.replace(/^#+\s*/, "").trim();
+        inferredTitle = trimmed.replace(MARKDOWN_HEADING_REGEX, "").trim();
         break;
       }
 

@@ -5,7 +5,8 @@
  */
 
 import { EventEmitter } from "node:events";
-import { ExecutionStatus, SseStreamEvent } from "@orchestrai/shared-types";
+import { ExecutionStatus, SseStreamEvent, AgentMode } from "@orchestrai/shared-types";
+import { autoDetectMode } from "@orchestrai/agent";
 import type { GatewayResponse } from "@/routes/http-types";
 import {
   attachExecutionSseStream,
@@ -59,6 +60,7 @@ class LiveExecutionManager {
    * @param contextWindow - Model context window size in tokens
    * @param costPerTokenUsd - Cost per token from model record
    * @param personaRole - Agent persona role (e.g., developer, researcher)
+   * @param mode - Operational autonomy mode (CHAT, PLAN, ACT, AUTO)
    */
   public async startExecution(
     executionId: string,
@@ -73,6 +75,7 @@ class LiveExecutionManager {
     contextWindow?: number,
     costPerTokenUsd?: number,
     personaRole?: string,
+    mode?: AgentMode,
   ): Promise<void> {
     const host = process.env.OLLAMA_HOST || "http://localhost:11434";
     const selectedModel =
@@ -82,6 +85,10 @@ class LiveExecutionManager {
         throw new Error("No model specified and DEFAULT_MODEL_NAME is not configured");
       })();
     const sessionId = conversationId || executionId;
+
+    // Automatically detect operational mode when AUTO or omitted
+    const effectiveMode =
+      mode && mode !== AgentMode.AUTO ? mode : autoDetectMode(inputPrompt, AgentMode.ACT);
 
     const state: ExecutionStreamState = {
       executionId,
@@ -130,6 +137,7 @@ class LiveExecutionManager {
       personaRole,
       augmentedSystemPrompt || undefined,
       history,
+      effectiveMode,
     );
 
     await executeAutonomousTurns(

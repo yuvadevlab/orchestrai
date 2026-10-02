@@ -95,6 +95,7 @@ const config: UserConfig = {
         "resilience",
         "grpc",
         "shared-types",
+        "regex",
 
         // Tooling & CI
         "ci",

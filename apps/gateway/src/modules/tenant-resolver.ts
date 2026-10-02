@@ -5,8 +5,7 @@
  */
 
 import { getPrismaClient, type PrismaClient } from "@orchestrai/database";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID_REGEX } from "@orchestrai/regex";
 
 /**
  * Resolves a valid tenant UUID from database.

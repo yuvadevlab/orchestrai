@@ -1078,3 +1078,55 @@ Chronological log of architecture, engineering decisions, and completed mileston
   - Monorepo typecheck: **43 of 43 targets passing with 0 errors**.
   - Monorepo 250-line rule: **0 files > 250 LOC** (maximum file length is 229 LOC).
   - 100% semantic CSS theme variables used; zero hardcoded strings.
+
+---
+
+## Session: 2026-10-02 — DRY Consolidation, Dedicated `@orchestrai/regex` Package & Automatic Mode and Rule Engine
+
+### 1. Dedicated Zero-Dependency Regex Package (`packages/regex/`)
+
+- **Centralized Pattern Extraction**:
+  - Created `@orchestrai/regex` package providing canonical regular expressions and validation helpers across the entire monorepo.
+  - Submodules:
+    - [`uuid.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/uuid.regex.ts): Canonical `UUID_REGEX` supporting versions 1-5 and `isUuid(value)` predicate.
+    - [`mode.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/mode.regex.ts): Heuristic mode triggers `PLAN_PATTERNS`, `ACT_PATTERNS`, and `CHAT_PATTERNS`.
+    - [`security.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/security.regex.ts): `SECRET_REDACTION_PATTERNS` (Bearer tokens, API keys, private keys), `CRITICAL_CREDENTIAL_PATTERns`, `SECRET_CONFIG_PATTERNS`.
+    - [`network.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/network.regex.ts): `BLOCKED_IP_PATTERNS` (SSRF loopback/private range protection), `LOCALHOST_ORIGIN_REGEX`, `IPV4_REGEX`.
+    - [`uri.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/uri.regex.ts): `CANONICAL_URI_REGEX`, `FILE_PROTOCOL_REGEX`, `POSTGRES_PROTOCOL_REGEX`, `REALTIME_CHANNEL_PREFIX_REGEX`, `TOOL_NAME_REGEX`.
+    - [`text.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/text.regex.ts): `EMBEDDING_ARRAY_REGEX`, `MARKDOWN_HEADING_REGEX`, `LEADING_TRAILING_DASH_REGEX`, `ALPHANUMERIC_START_REGEX`, `WORD_SPLIT_REGEX`.
+- **Consumer Migration**:
+  - Replaced ad-hoc and duplicate regex definitions in `@orchestrai/agent`, `@orchestrai/memory`, `@orchestrai/rag`, `@orchestrai/tools`, `apps/gateway`, `apps/realtime`, and `apps/console`.
+  - Maintained `@orchestrai/core` zero internal workspace dependency invariant.
+
+### 2. Centralized Platform Rules & Mode Prompts (`packages/prompts/`)
+
+- **Single Source of Truth for Prompts**:
+  - Created [`modes.prompt.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/prompts/src/system/modes.prompt.ts) providing canonical `CHAT_MODE_SYSTEM_PROMPT`, `PLAN_MODE_SYSTEM_PROMPT`, `ACT_MODE_SYSTEM_PROMPT`, `AUTO_MODE_SYSTEM_PROMPT`, and `MODE_PROMPT_REGISTRY`.
+  - Created [`rules.prompt.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/prompts/src/system/rules.prompt.ts) defining canonical `CORE_PLATFORM_RULES_PROMPT` and `COMPACT_PLATFORM_RULES_PROMPT`.
+  - Refactored `ChatModeStrategy`, `PlanModeStrategy`, `ActModeStrategy`, and `AutoModeStrategy` in `@orchestrai/agent` to source prompt definitions directly from `@orchestrai/prompts`.
+
+### 3. Automatic Rule Adoption & Mode Selection Engine
+
+- **Prompt Compiler Rule Injection**:
+  - Updated `PromptCompiler` (`packages/agent/src/compiler/prompt-compiler.ts`) to inject `CORE_PLATFORM_RULES_PROMPT` automatically in `<platform_rules>` block unless explicitly disabled (`adoptRules: false`).
+- **Autonomous Intent-to-Mode Resolution**:
+  - Updated `AgentLoop` (`packages/agent/src/loop/agent-loop.ts`) to initialize default `HeuristicModeRouter`. If mode is `AgentMode.AUTO`, router dynamically resolves whether the prompt is conversational (`CHAT`), analytical planning (`PLAN`), or tool execution (`ACT`) per turn.
+  - Updated `apps/gateway` (`live-execution.manager.ts` and `live-message-history.ts`):
+    - Added `autoDetectMode(prompt)` to dynamically pick execution mode from user input if not explicitly provided.
+    - Updated `buildCompositeSystemPrompt` to inject `CORE_PLATFORM_RULES_PROMPT`, `SAFETY_GUARDRAILS_SYSTEM_PROMPT`, and active mode instructions from `MODE_PROMPT_REGISTRY[mode]`.
+- **Python Intelligence Service Alignment**:
+  - Implemented `apps/intelligence/src/mode_router.py` with identical regex-based heuristics (`auto_detect_mode`) and canonical system prompts (`PLATFORM_INVARIANTS_PROMPT`, `MODE_PROMPT_REGISTRY`).
+  - Wired into `apps/intelligence/src/server.py` to auto-detect mode and adopt platform rules into LangGraph `StateGraph`.
+
+### 4. Architecture Documentation & Markdown Preview Fix
+
+- **System Flow & Architecture Document**:
+  - Authored comprehensive `docs/SYSTEM-FLOW-AND-ARCHITECTURE.md` with complete monorepo directory tree, package purpose map, and end-to-end execution flow.
+- **Mermaid Preview Compatibility**:
+  - Fixed syntax in Mermaid sequence diagrams (un-nested `alt` conditional blocks, quoted participant aliases containing parentheses, removed unescaped angle brackets) ensuring error-free rendering in all Markdown preview engines.
+
+### 5. Quality Invariants & Verification
+
+- **250-Line Rule**: All new files are strictly under 130 LOC; all modified files remain under 200 LOC.
+- **Monorepo Typecheck**: 48 of 48 workspace targets passing cleanly (`pnpm typecheck`).
+- **Linting & Formatting**: `eslint --max-warnings=0`, `ruff check`, Prettier, and `ruff format` passing with 0 warnings/errors.

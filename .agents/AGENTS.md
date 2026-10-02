@@ -40,7 +40,9 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, a local-first, modul
 6. **Continuous Session Continuity**:
    - Leave the codebase in an unambiguous, continuation-ready state at the end of every session.
    - Always update [`PROGRESS.md`](PROGRESS.md) and log in [`IMPLEMENTATION-LOG.md`](IMPLEMENTATION-LOG.md).
-7. **Zero Hardcoded Strings & Strict Enum Usage**:
+7. **Zero Hardcoded Strings, Models & Strict Enum Usage**:
    - NO raw hardcoded string literals or magic numbers for domain entities, statuses, roles, event types, modes, scopes, or state transitions.
    - All statuses, events, roles, and modes must be canonical enums in `@orchestrai/shared-types`.
    - Always check and compare using `Enum.KEY` (e.g. `status === ExecutionStatus.COMPLETED`, `role === MessageRole.USER`), NEVER bare strings like `"completed"`.
+   - NO hardcoded fallback model constants (e.g. `"gemma4:31b-cloud"`, `"qwen2.5:7b"`) or fallback candidate objects (`DEFAULT_FALLBACK_CANDIDATE`). All models must be DB- or env-driven.
+   - NO synthetic agent auto-seeding (`DEFAULT_SUPERVISOR`, `Lead Orchestrator`). If a tenant has no agent, fail fast and instruct the user to create one in the Studio.

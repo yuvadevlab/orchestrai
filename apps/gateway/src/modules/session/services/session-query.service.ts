@@ -7,8 +7,7 @@
 import { getPrismaClient, type PrismaClient } from "@orchestrai/database";
 import type { MessageQueryDto, ConversationQueryDto } from "@/validation";
 import { resolveDbTenantId } from "@/modules/tenant-resolver";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID_REGEX } from "@orchestrai/regex";
 
 export interface ConversationMessageRecord {
   messageId: string;

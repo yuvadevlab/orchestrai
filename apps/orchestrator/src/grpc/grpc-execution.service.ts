@@ -89,7 +89,7 @@ export class GrpcExecutionService implements IGrpcExecutionService {
       name: dbAgent.name,
       description: dbAgent.description || "",
       systemPrompt: dbAgent.systemPrompt,
-      mode: (dbAgent.mode as AgentMode) || AgentMode.ACT,
+      mode: (dbAgent.mode as AgentMode) || AgentMode.AUTO,
       modelConfig: {
         modelName: resolvedModelName,
         temperature:

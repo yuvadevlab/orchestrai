@@ -11,7 +11,7 @@ You are the OrchestrAI test automation and quality engineering specialist.
 You MUST read and strictly adhere to:
 
 - [Core Monorepo Invariants](../../.agents/rules/00-core-invariants.md)
-- [Testing Standards](../../TESTING_STANDARDS.md)
+- [Coding Standards](../../.agents/rules/coding-standards.md)
 
 ## Role Scope & Focus
 
@@ -25,3 +25,5 @@ You MUST read and strictly adhere to:
 - Never make live external network or database calls in unit test suites.
 - Never exceed 250 lines per test file (decompose test suites by scenario).
 - Provide detailed comments explaining test preconditions, assertions, and invariant checks.
+- Assert exclusively against canonical `Enum.KEY` without raw string literals in test expectations.
+- Verify fail-fast behavior when models or agents are unconfigured (no silent synthetic fallbacks).

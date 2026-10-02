@@ -13,6 +13,7 @@ import {
   resolveModeStrategy,
   ModeConstraintEnforcer,
   parsePlanFromResponse,
+  HeuristicModeRouter,
   type IModeRouter,
 } from "@/modes";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
@@ -42,14 +43,14 @@ export class AgentLoop {
   private readonly config: AgentLoopConfig;
   private readonly clearance: ToolPermissionLevel;
   private readonly modeEnforcer: ModeConstraintEnforcer;
-  private readonly router?: IModeRouter;
+  private readonly router: IModeRouter;
   private readonly logger: Logger;
 
   constructor(config: AgentLoopConfig) {
     this.config = config;
     this.clearance = config.clearance ?? ToolPermissionLevel.READ_ONLY;
     this.modeEnforcer = config.modeEnforcer ?? new ModeConstraintEnforcer();
-    this.router = config.modeRouter;
+    this.router = config.modeRouter ?? new HeuristicModeRouter();
     this.logger = loggerWithConfig(new Logger("AgentLoop"));
   }
 
@@ -63,9 +64,9 @@ export class AgentLoop {
     const stepIndex = this.config.state.advanceStep();
     this.logger.debug("Entering AgentLoop step", { stepIndex, historyLength: history.length });
 
-    // 1. Resolve operational mode (dynamically routed in AUTO mode if router present)
+    // 1. Resolve operational mode (dynamically routed in AUTO mode via router)
     const activeMode =
-      this.config.definition.mode === AgentMode.AUTO && this.router
+      this.config.definition.mode === AgentMode.AUTO
         ? await this.router.route({
             messages: history,
             tools: this.config.tools.list(),

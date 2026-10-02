@@ -28,6 +28,7 @@
     "@orchestrai/prompts": "workspace:*",
     "@orchestrai/queue": "workspace:*",
     "@orchestrai/rag": "workspace:*",
+    "@orchestrai/regex": "workspace:*",
     "@orchestrai/resilience": "workspace:*",
     "@orchestrai/runtime": "workspace:*",
     "@orchestrai/semantic-cache": "workspace:*",

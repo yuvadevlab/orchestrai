@@ -4,6 +4,7 @@
  */
 
 import { AgentMode, ToolPermissionLevel } from "@orchestrai/shared-types";
+import { CHAT_MODE_SYSTEM_PROMPT } from "@orchestrai/prompts";
 import type { ITool } from "@orchestrai/tools";
 import type { IModeStrategy } from "./mode-strategy.interface";
 
@@ -15,14 +16,10 @@ export class ChatModeStrategy implements IModeStrategy {
   public readonly mode = AgentMode.CHAT;
 
   /**
-   * System guidance for CHAT mode.
+   * Returns canonical system guidance for CHAT mode from @orchestrai/prompts.
    */
   public getSystemInstructions(): string {
-    return (
-      "Operating Mode: CHAT.\n" +
-      "Focus on direct, helpful, conversational responses. " +
-      "Only invoke tools if the user explicitly requests an action, search, or data inspection."
-    );
+    return CHAT_MODE_SYSTEM_PROMPT;
   }
 
   /**

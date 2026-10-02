@@ -27,3 +27,5 @@ You MUST read and strictly adhere to:
 - Keep UI components small, modular, and composed of reusable design tokens.
 - Never exceed 250 lines per file (decompose proactively at 200 lines).
 - Provide detailed JSDoc and explanatory inline comments on all routes and UI state logic.
+- Compare domain statuses and roles strictly with `Enum.KEY` with zero raw strings.
+- Zero hardcoded fallback models or synthetic agents in gateways or UI dispatchers.

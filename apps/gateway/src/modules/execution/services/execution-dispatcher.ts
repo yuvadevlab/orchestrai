@@ -6,7 +6,7 @@
  */
 
 import { type PrismaClient, type Prisma, type Agent } from "@orchestrai/database";
-import { QUEUE_NAMES, MessageRole } from "@orchestrai/shared-types";
+import { QUEUE_NAMES, MessageRole, AgentMode } from "@orchestrai/shared-types";
 import {
   ExecutionIdSchema,
   AgentIdSchema,
@@ -18,10 +18,9 @@ import type { CreateExecutionDto } from "@/validation";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { liveExecutionManager } from "@/modules/streaming/live-execution.manager";
 import { toSharedStatus } from "../repositories/execution-status.mapper";
+import { UUID_REGEX } from "@orchestrai/regex";
 
 const logger = loggerWithConfig(new Logger("ExecutionDispatcher"));
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Coordinates dispatching agent execution runs either to async BullMQ or live SSE.
@@ -102,6 +101,8 @@ export class ExecutionDispatcher {
       maxSteps?: number | null;
       /** Agent persona role (e.g. "developer", "researcher") from DB agent record */
       role?: string | null;
+      /** Operational mode (e.g. "chat", "plan", "act", "auto") from DB agent record */
+      mode?: string | null;
     },
     resolvedTenantId: string,
     validConvId: string | null,
@@ -162,6 +163,7 @@ export class ExecutionDispatcher {
           costPerTokenUsd,
           // Persona role drives system prompt template selection in @orchestrai/prompts
           targetAgent.role ?? undefined,
+          (dto.mode as AgentMode) || (targetAgent.mode as AgentMode) || AgentMode.AUTO,
         )
         .then(async () => {
           await this.handleExecutionCompletion(executionId, validConvId, modelName);

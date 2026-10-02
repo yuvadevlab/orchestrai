@@ -4,25 +4,8 @@
  */
 
 import { AgentMode, MessageRole } from "@orchestrai/shared-types";
+import { PLAN_PATTERNS, ACT_PATTERNS, CHAT_PATTERNS } from "@orchestrai/regex";
 import type { IModeRouter, ModeRoutingContext } from "./mode-router.interface";
-
-/**
- * High-speed regex patterns for intent classification.
- */
-const PLAN_PATTERNS = [
-  /\b(plan|design|architect|roadmap|breakdown|strategy|steps to|how would we)\b/i,
-  /\b(decompose|outline the process|prepare a plan|milestones)\b/i,
-];
-
-const ACT_PATTERNS = [
-  /\b(create|build|delete|remove|deploy|execute|run|install|update|modify|refactor)\b/i,
-  /\b(write to|make the changes|push|commit|checkout|apply)\b/i,
-];
-
-const CHAT_PATTERNS = [
-  /\b(hi|hello|hey|greetings|thanks|thank you|who are you|what can you do)\b/i,
-  /\b(explain|what is|tell me about|summarize|why does|describe|difference between)\b/i,
-];
 
 /**
  * Heuristic router classifying user intent via lexical patterns and query features.
@@ -35,7 +18,41 @@ export class HeuristicModeRouter implements IModeRouter {
   }
 
   /**
+   * Static helper to detect the appropriate AgentMode directly from text.
+   *
+   * @param text - Raw prompt or instruction string.
+   * @param fallback - Default mode to return if no pattern matches.
+   * @returns Detected AgentMode (PLAN, ACT, CHAT, or fallback).
+   */
+  public static detectMode(text: string, fallback: AgentMode = AgentMode.ACT): AgentMode {
+    const trimmed = text.trim();
+    if (!trimmed) {
+      return fallback;
+    }
+
+    // 1. Check for explicit planning cues
+    if (PLAN_PATTERNS.some((pattern) => pattern.test(trimmed))) {
+      return AgentMode.PLAN;
+    }
+
+    // 2. Check for action / mutation cues
+    if (ACT_PATTERNS.some((pattern) => pattern.test(trimmed))) {
+      return AgentMode.ACT;
+    }
+
+    // 3. Check for conversational / informational queries
+    if (CHAT_PATTERNS.some((pattern) => pattern.test(trimmed))) {
+      return AgentMode.CHAT;
+    }
+
+    return fallback;
+  }
+
+  /**
    * Evaluates the latest user message against heuristic rule sets.
+   *
+   * @param context - Routing context with message history and environment.
+   * @returns Resolved AgentMode.
    */
   public route(context: ModeRoutingContext): AgentMode {
     // Find last message from the user role to determine routing intent
@@ -46,27 +63,17 @@ export class HeuristicModeRouter implements IModeRouter {
       return this.defaultMode;
     }
 
-    const text = latestUserMsg.content.trim();
-
-    // 1. Check for explicit planning cues
-    const isPlan = PLAN_PATTERNS.some((pattern) => pattern.test(text));
-    if (isPlan) {
-      return AgentMode.PLAN;
-    }
-
-    // 2. Check for action / mutation cues
-    const isAct = ACT_PATTERNS.some((pattern) => pattern.test(text));
-    if (isAct) {
-      return AgentMode.ACT;
-    }
-
-    // 3. Check for conversational / informational queries
-    const isChat = CHAT_PATTERNS.some((pattern) => pattern.test(text));
-    if (isChat) {
-      return AgentMode.CHAT;
-    }
-
-    // Default: Fallback to configured operational default mode
-    return this.defaultMode;
+    return HeuristicModeRouter.detectMode(latestUserMsg.content, this.defaultMode);
   }
+}
+
+/**
+ * Functional convenience helper for detecting mode from prompt text.
+ *
+ * @param prompt - User prompt text.
+ * @param defaultMode - Fallback mode if no pattern matches (defaults to ACT).
+ * @returns Detected AgentMode.
+ */
+export function autoDetectMode(prompt: string, defaultMode: AgentMode = AgentMode.ACT): AgentMode {
+  return HeuristicModeRouter.detectMode(prompt, defaultMode);
 }

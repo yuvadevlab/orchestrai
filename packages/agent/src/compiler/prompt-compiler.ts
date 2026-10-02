@@ -8,8 +8,9 @@
  *
  * 1. Base Persona Layer: System prompt instructions (e.g. "You are an expert TypeScript engineer").
  * 2. Operating Mode Layer: Modifies strategy (e.g. "Plan mode: output numbered steps before calling tools").
- * 3. Environment State Layer: Injects active context variables (current workspace, user ID, etc.).
- * 4. Conversation History Layer: Ordered user inputs, model reasoning, tool invocations, and results.
+ * 3. Platform Rules Layer: Automatically adopts platform invariants and safety constraints.
+ * 4. Environment State Layer: Injects active context variables (current workspace, user ID, etc.).
+ * 5. Conversation History Layer: Ordered user inputs, model reasoning, tool invocations, and results.
  *
  * This pure compiler constructs the canonical `AIMessage[]` ready for adapter dispatch.
  * ───────────────────────────────────────────────────────────────────
@@ -17,6 +18,7 @@
 
 import { MessageRole } from "@orchestrai/shared-types";
 import { AIMessageSchema, type AIMessage } from "@orchestrai/core";
+import { CORE_PLATFORM_RULES_PROMPT } from "@orchestrai/prompts";
 import type { PromptCompileOptions } from "./compiler.types";
 
 /**
@@ -56,7 +58,13 @@ export function compilePrompt(options: PromptCompileOptions): AIMessage[] {
     );
   }
 
-  // 3. Dynamic Context Variables
+  // 3. Platform Invariants & Rules Adoption (automatically included by default)
+  if (options.adoptRules !== false) {
+    const rulesList = [CORE_PLATFORM_RULES_PROMPT, ...(options.customRules ?? [])].join("\n\n");
+    sections.push(`\n<platform_rules>\n${rulesList}\n</platform_rules>`);
+  }
+
+  // 4. Dynamic Context Variables
   const contextBlock = formatContextVariables(options.contextVariables);
   if (contextBlock.length > 0) {
     sections.push(contextBlock);

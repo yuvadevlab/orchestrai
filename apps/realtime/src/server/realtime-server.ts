@@ -10,6 +10,7 @@ import { SubscriptionManager } from "@/subscriptions";
 import { RedisPubSubBroker } from "@/broker";
 import { WsGateway } from "@/websocket";
 import { createHttpRouter } from "./http-router";
+import { REALTIME_CHANNEL_PREFIX_REGEX } from "@orchestrai/regex";
 
 import type { RealtimeConfig } from "@/config";
 
@@ -88,7 +89,7 @@ export class RealtimeServer {
   private fanOutToSubscribers(channel: string, message: string): void {
     // Derive the SSE/WebSocket topic from the Redis channel
     // Convention: 'orchestrai:realtime:execution:<id>' → 'execution:<id>'
-    const topic = channel.replace(/^orchestrai:realtime:/, "").replace(/^orchestrai:events:/, "");
+    const topic = channel.replace(REALTIME_CHANNEL_PREFIX_REGEX, "");
     const delivered = this.subscriptions.broadcastToTopic(topic, message, this.registry);
 
     if (delivered > 0) {

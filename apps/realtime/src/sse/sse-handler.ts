@@ -9,6 +9,7 @@ import { ClientSession, ConnectionRegistry } from "@/connection";
 import { SubscriptionManager } from "@/subscriptions";
 import { ChannelTopics } from "@/contracts";
 import { configureSseHeaders, sendSseEvent, sendSseKeepalive, closeSseStream } from "./sse-channel";
+import { LOCALHOST_ORIGIN_REGEX } from "@orchestrai/regex";
 
 const logger = loggerWithConfig(new Logger("SseHandler"));
 
@@ -31,7 +32,7 @@ function resolveCorsOrigin(req: IncomingMessage, allowed: readonly string[]): st
   if (
     allowed.includes(requestOrigin) ||
     allowed.includes("*") ||
-    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(requestOrigin)
+    LOCALHOST_ORIGIN_REGEX.test(requestOrigin)
   ) {
     return requestOrigin;
   }

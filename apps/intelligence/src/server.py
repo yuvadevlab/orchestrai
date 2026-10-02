@@ -10,6 +10,11 @@ from pydantic import BaseModel, Field
 from .config import settings
 from .graph import create_agent_graph
 from .retrieval import retrieve_selective_history
+from .mode_router import (
+    detect_mode,
+    get_mode_instructions,
+    PLATFORM_INVARIANTS_PROMPT,
+)
 
 app = FastAPI(
     title="OrchestrAI Intelligence Service",
@@ -29,6 +34,9 @@ class ExecuteRequest(BaseModel):
     input_prompt: str = Field(..., description="Incoming user query")
     model_name: Optional[str] = Field(None, description="Model to execute")
     system_prompt: Optional[str] = Field(None, description="System instructions")
+    mode: Optional[str] = Field(
+        default="auto", description="Operational autonomy mode (chat, plan, act, auto)"
+    )
     tools: list[dict[str, Any]] = Field(
         default_factory=list, description="Available tool schemas"
     )
@@ -44,6 +52,7 @@ class ExecuteResponse(BaseModel):
 
     execution_id: str
     status: str
+    mode: Optional[str] = None
     final_output: Optional[str] = None
     turn_count: int
     context_tokens: int
@@ -86,13 +95,26 @@ async def execute_agent(req: ExecuteRequest):
             detail="No model specified in request and DEFAULT_MODEL_NAME environment variable is not set",
         )
 
-    # 1. Apply conversational RAG to prune older non-relevant history
+    # 1. Automatically pick agent mode if AUTO or unassigned
+    raw_mode = (req.mode or "auto").lower()
+    active_mode = detect_mode(req.input_prompt) if raw_mode == "auto" else raw_mode
+    mode_instructions = get_mode_instructions(active_mode)
+
+    # 2. Automatically adopt platform invariant rules and mode strategy
+    prompt_sections = []
+    if req.system_prompt:
+        prompt_sections.append(req.system_prompt.strip())
+    prompt_sections.append(PLATFORM_INVARIANTS_PROMPT)
+    prompt_sections.append(mode_instructions)
+    composite_system_prompt = "\n\n".join(prompt_sections)
+
+    # 3. Apply conversational RAG to prune older non-relevant history
     pruned_history = await retrieve_selective_history(
         current_prompt=req.input_prompt,
         full_history=req.history,
     )
 
-    # 2. Append current user prompt to message stream
+    # 4. Append current user prompt to message stream
     messages = [
         *pruned_history,
         {"role": "user", "content": req.input_prompt},
@@ -104,7 +126,7 @@ async def execute_agent(req: ExecuteRequest):
         "agent_id": req.agent_id,
         "tenant_id": req.tenant_id,
         "model_name": resolved_model,
-        "system_prompt": req.system_prompt or "",
+        "system_prompt": composite_system_prompt,
         "tools": req.tools,
         "turn_count": 0,
         "max_turns": req.max_turns,
@@ -131,6 +153,7 @@ async def execute_agent(req: ExecuteRequest):
     return ExecuteResponse(
         execution_id=req.execution_id,
         status=status,
+        mode=active_mode,
         final_output=final_state.get("final_output"),
         turn_count=final_state.get("turn_count", 0),
         context_tokens=final_state.get("context_tokens", 0),

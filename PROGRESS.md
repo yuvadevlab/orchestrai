@@ -385,4 +385,44 @@ Master architecture specification documented in [`master-architecture-plan.md`](
   - Single `pnpm lint`, `pnpm format`, and `lint-staged` pre-commit hooks covering both TypeScript and Python
   - Instant 10ms Ruff Python validation + ESLint & Prettier without manual virtualenv friction
 - [x] **Commitlint Scope Enum Synchronized**
-  - Added all apps (`orchestrator`, `admin`, `intelligence`, `crawler`) and packages (`billing`, `semantic-cache`, `model-router`, `prompts`, `resilience`, `grpc`, `shared-types`)
+  - Added all apps (`orchestrator`, `admin`, `intelligence`, `crawler`) and packages (`billing`, `semantic-cache`, `model-router`, `prompts`, `resilience`, `grpc`, `shared-types`, `regex`)
+
+---
+
+### Milestone 9: DRY Consolidation, Regex Package & Automatic Mode & Rule Engine
+
+#### [x] `@orchestrai/regex` Package (`packages/regex/`)
+
+- [x] Centralized all scattered regular expressions into a dedicated, zero-dependency package:
+  - `uuid.regex.ts`: Canonical `UUID_REGEX` (v1-v5) and `isUuid()` validator
+  - `mode.regex.ts`: Canonical `PLAN_PATTERNS`, `ACT_PATTERNS`, `CHAT_PATTERNS`
+  - `security.regex.ts`: `SECRET_REDACTION_PATTERNS`, `CRITICAL_CREDENTIAL_PATTERNS`, `SECRET_CONFIG_PATTERNS`
+  - `network.regex.ts`: `BLOCKED_IP_PATTERNS`, `LOCALHOST_ORIGIN_REGEX`, `IPV4_REGEX`
+  - `uri.regex.ts`: `CANONICAL_URI_REGEX`, `FILE_PROTOCOL_REGEX`, `POSTGRES_PROTOCOL_REGEX`, `REALTIME_CHANNEL_PREFIX_REGEX`, `TOOL_NAME_REGEX`
+  - `text.regex.ts`: `EMBEDDING_ARRAY_REGEX`, `MARKDOWN_HEADING_REGEX`, `LEADING_TRAILING_DASH_REGEX`, `ALPHANUMERIC_START_REGEX`, `WORD_SPLIT_REGEX`
+- [x] Refactored all consumers to import from `@orchestrai/regex`:
+  - `packages/agent`, `packages/memory`, `packages/rag`, `packages/tools`, `apps/gateway`, `apps/realtime`, `apps/console`
+
+#### [x] Centralized System Prompts & Invariant Rules (`@orchestrai/prompts`)
+
+- [x] Extracted mode prompts into `packages/prompts/src/system/modes.prompt.ts`:
+  - `CHAT_MODE_SYSTEM_PROMPT`, `PLAN_MODE_SYSTEM_PROMPT`, `ACT_MODE_SYSTEM_PROMPT`, `AUTO_MODE_SYSTEM_PROMPT`, `MODE_PROMPT_REGISTRY`
+- [x] Extracted platform invariants into `packages/prompts/src/system/rules.prompt.ts`:
+  - `CORE_PLATFORM_RULES_PROMPT`, `COMPACT_PLATFORM_RULES_PROMPT`
+- [x] Refactored `ChatModeStrategy`, `PlanModeStrategy`, `ActModeStrategy`, `AutoModeStrategy` in `@orchestrai/agent` to source prompts directly from `@orchestrai/prompts`
+
+#### [x] Automatic Rule Adoption & Mode Selection Engine
+
+- [x] **Agent Compiler (`packages/agent/src/compiler/prompt-compiler.ts`)**:
+  - Automatically embeds platform rules in `<platform_rules>` block (`adoptRules !== false`)
+- [x] **Agent Loop (`packages/agent/src/loop/agent-loop.ts`)**:
+  - Automatically routes input intent (`HeuristicModeRouter`) when mode is `AgentMode.AUTO`
+- [x] **Gateway Live Execution (`apps/gateway/src/modules/streaming/`)**:
+  - `autoDetectMode(prompt)` resolves execution mode; `buildCompositeSystemPrompt` injects core platform rules, safety guardrails, and dynamic mode instructions
+- [x] **Intelligence Service (`apps/intelligence/`)**:
+  - Implemented Python `mode_router.py` matching regex heuristics, embedding `PLATFORM_INVARIANTS_PROMPT` and detected mode into LangGraph `StateGraph`
+
+#### [x] Architecture Documentation & Diagrams
+
+- [x] Created `docs/SYSTEM-FLOW-AND-ARCHITECTURE.md` comprehensive tree and end-to-end system flow
+- [x] Validated Mermaid sequence diagram syntax for 100% compatibility across markdown previewers

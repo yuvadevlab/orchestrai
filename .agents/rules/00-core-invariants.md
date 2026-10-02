@@ -59,12 +59,14 @@ Core Contracts (@orchestrai/core)
 
 ---
 
-## 5. Zero Hardcoded Strings & Strict Enum Usage Invariant
+## 5. Zero Hardcoded Strings, Models & Strict Enum Usage Invariant
 
 - **Zero Raw String Literals for Domain Entities**: NO raw hardcoded string literals or magic values may be stored, dispatched, or compared for domain entities, statuses, roles, event types, modes, scopes, commands, or state transitions.
 - **Shared Canonical Enums**: ALL domain statuses, roles, modes, event names, and error codes MUST be defined as canonical TypeScript enums in `@orchestrai/shared-types` (or `@orchestrai/core`).
 - **Always Check with `Enum.KEY`**: When checking, matching, or branching on any value, agents MUST use `Enum.KEY` (e.g., `status === ExecutionStatus.COMPLETED`, `event.type === OrchestratorEventType.START`, `role === MessageRole.USER`). Never use raw string comparisons like `status === "completed"` or `"user"`.
 - **Zod Schemas Bound to Enums**: All validation schemas must use `z.nativeEnum(MyEnum)` or `z.enum([...])` sourced directly from canonical enum keys.
+- **Zero Hardcoded Models or Fallback Constants**: NO hardcoded model names (e.g. `"gemma4:31b-cloud"`, `"qwen2.5:7b"`) or fallback candidate objects (e.g. `DEFAULT_FALLBACK_CANDIDATE`). All models must be dynamically resolved from database records or the `DEFAULT_MODEL_NAME` environment variable.
+- **Zero Synthetic Agents or Auto-Seeding**: Never auto-seed or inject synthetic fallback agents (e.g. `DEFAULT_SUPERVISOR`, `Lead Orchestrator`) in service layers or repositories. If no agent exists, fail fast and explicitly instruct the user to create one in the Studio.
 
 ---
 
