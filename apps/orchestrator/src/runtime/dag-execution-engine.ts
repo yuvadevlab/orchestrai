@@ -86,11 +86,22 @@ export class DagExecutionEngine {
 
     try {
       const toolRegistry = new ToolRegistry();
+      const modelName =
+        agent.modelConfig.modelName ||
+        process.env.DEFAULT_MODEL_NAME ||
+        process.env.OLLAMA_DEFAULT_MODEL;
+
+      // Guard against unconfigured models: require database or environment definition
+      if (!modelName) {
+        throw new Error(
+          `No model configured for agent "${agent.name}" and DEFAULT_MODEL_NAME environment variable is not set.`,
+        );
+      }
+
       const adapter = await OllamaAdapter.create({
         host: process.env.OLLAMA_HOST || "http://localhost:11434",
         timeoutMs: AGENT_EXECUTION_DEFAULTS.DEFAULT_TIMEOUT_MS,
-        defaultModel:
-          agent.modelConfig.modelName || AGENT_EXECUTION_DEFAULTS.DEFAULT_LOCAL_MODEL_NAME,
+        defaultModel: modelName,
       });
 
       const initialMessage = AIMessageSchema.parse({

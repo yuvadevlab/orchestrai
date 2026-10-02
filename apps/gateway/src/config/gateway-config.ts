@@ -48,7 +48,7 @@ export function loadGatewayConfig(): GatewayConfig {
     rateLimitMaxRequests: process.env.RATE_LIMIT_MAX_REQUESTS,
     shutdownTimeoutMs: process.env.SHUTDOWN_TIMEOUT_MS,
     defaultModelProvider: process.env.DEFAULT_MODEL_PROVIDER || "ollama",
-    defaultModelName: process.env.DEFAULT_MODEL_NAME || "qwen2.5:7b",
+    defaultModelName: process.env.DEFAULT_MODEL_NAME || process.env.OLLAMA_DEFAULT_MODEL || "",
     defaultAgentTemperature: process.env.DEFAULT_AGENT_TEMPERATURE,
     defaultMaxSteps: process.env.DEFAULT_MAX_AGENT_STEPS,
   });

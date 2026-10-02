@@ -22,8 +22,10 @@ import {
   ExecutionIdSchema,
   AGENT_EXECUTION_DEFAULTS,
   type AgentDefinition,
+  AgentIdSchema,
 } from "@orchestrai/core";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
+import { getPrismaClient } from "@orchestrai/database";
 import { DagExecutionEngine } from "@/runtime";
 import { toCanonicalExecutionStatus } from "@/state-machine";
 
@@ -48,30 +50,65 @@ export class GrpcExecutionService implements IGrpcExecutionService {
       traceId: request.traceId,
     });
 
-    const agent: AgentDefinition = {
-      agentId: request.agentId,
-      tenantId: null,
-      scope: PlatformScope.PLATFORM,
-      name: "Autonomous Specialist",
-      description: "Autonomous agent executing compiled DAG workflow",
-      systemPrompt: "You are a specialized autonomous orchestrator agent.",
-      mode: AgentMode.ACT,
-      modelConfig: {
-        modelName: AGENT_EXECUTION_DEFAULTS.DEFAULT_MODEL_NAME,
-        temperature: AGENT_EXECUTION_DEFAULTS.FACTUAL_TEMPERATURE,
+    const prisma = getPrismaClient();
+    const dbAgent = await prisma.agent.findFirst({
+      where: {
+        agentId: request.agentId,
+        deletedAt: null,
       },
-      capabilities: [
-        PlatformCapabilitySlug.FILESYSTEM_ACCESS,
-        PlatformCapabilitySlug.SYSTEM_EXECUTION,
-      ],
-      enabledTools: [
-        PlatformToolName.READ_FILE,
-        PlatformToolName.WRITE_FILE,
-        PlatformToolName.BASH,
-      ],
-      maxSteps: AGENT_EXECUTION_DEFAULTS.DEFAULT_MAX_STEPS,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    });
+
+    // Guard against missing agent: Fail fast and instruct user to create one
+    if (!dbAgent) {
+      const errorMsg = `Agent with ID "${request.agentId}" does not exist. Please create an agent first.`;
+      logger.error("gRPC dispatchExecution failed: agent not found", {
+        agentId: request.agentId,
+      });
+      throw new Error(errorMsg);
+    }
+
+    const meta = (dbAgent.metadata as Record<string, unknown>) || {};
+    const modelCfg = (dbAgent.modelConfig as Record<string, unknown>) || {};
+    const resolvedModelName =
+      (modelCfg.modelName as string) ||
+      (modelCfg.model as string) ||
+      process.env.DEFAULT_MODEL_NAME ||
+      process.env.OLLAMA_DEFAULT_MODEL;
+
+    // Guard against missing model configuration: require DB or env definition
+    if (!resolvedModelName) {
+      throw new Error(
+        `Agent "${dbAgent.name}" has no model configured and DEFAULT_MODEL_NAME environment variable is not set.`,
+      );
+    }
+
+    const agent: AgentDefinition = {
+      agentId: AgentIdSchema.parse(dbAgent.agentId),
+      tenantId: dbAgent.tenantId,
+      scope: (meta.scope as PlatformScope) || PlatformScope.TENANT,
+      name: dbAgent.name,
+      description: dbAgent.description || "",
+      systemPrompt: dbAgent.systemPrompt,
+      mode: (dbAgent.mode as AgentMode) || AgentMode.ACT,
+      modelConfig: {
+        modelName: resolvedModelName,
+        temperature:
+          typeof modelCfg.temperature === "number"
+            ? modelCfg.temperature
+            : AGENT_EXECUTION_DEFAULTS.FACTUAL_TEMPERATURE,
+      },
+      capabilities: Array.isArray(meta.capabilities)
+        ? (meta.capabilities as PlatformCapabilitySlug[])
+        : [],
+      enabledTools: Array.isArray(dbAgent.enabledTools)
+        ? (dbAgent.enabledTools as PlatformToolName[])
+        : [],
+      maxSteps:
+        typeof meta.maxSteps === "number"
+          ? meta.maxSteps
+          : AGENT_EXECUTION_DEFAULTS.DEFAULT_MAX_STEPS,
+      createdAt: dbAgent.createdAt,
+      updatedAt: dbAgent.updatedAt,
     };
 
     // Run execution asynchronously; return initial running response

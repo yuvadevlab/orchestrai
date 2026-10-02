@@ -47,7 +47,9 @@ export const WorkerConfigSchema = z.object({
   /** Default application-wide LLM Provider configured via environment */
   defaultModelProvider: z.string().default(process.env.DEFAULT_MODEL_PROVIDER || "ollama"),
   /** Default application-wide LLM Model configured via environment */
-  defaultModelName: z.string().default(process.env.DEFAULT_MODEL_NAME || "qwen2.5:7b"),
+  defaultModelName: z
+    .string()
+    .default(process.env.DEFAULT_MODEL_NAME || process.env.OLLAMA_DEFAULT_MODEL || ""),
   /** Default sampling temperature for worker-orchestrated agents */
   defaultAgentTemperature: z.coerce
     .number()

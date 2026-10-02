@@ -355,19 +355,11 @@ Master architecture specification documented in [`master-architecture-plan.md`](
   - If a tenant has no configured agent, system fails fast and explicitly informs user to create one
   - Eradicated all `gemma4:31b-cloud` default constants across the entire monorepo
 
-#### [ ] Pending — Runtime + Agent Wiring
-
-- [ ] **`@orchestrai/runtime`** → wire `StateGraph` into `apps/orchestrator` internals
-- [x] **`@orchestrai/memory`** → full 4-tier recall at execution start, distill via event
-  - 4-tier recall (`EPISODIC`, `FACT`, `USER_PREFERENCE`, `TASK`) in `memory.service.ts`
-  - Automated event-driven memory distillation on `EXECUTION_COMPLETED` via `initMemoryDistillation()`
-  - Zero hardcoded agent IDs or synthetic fallbacks
-
-- [x] **`@orchestrai/agent`** → `AgentRunner` resolves from DB agent record
-  - `resolveAgentRunner()` builds `AgentDefinition`, `AgentStateMachine`, and `AgentLoop`
-  - Strict database-backed agent configuration with zero synthetic fallbacks or seeders
-
-#### [ ] Pending — Runtime Wiring
+- [x] **`@orchestrai/runtime`** → wire `StateGraph` into `apps/orchestrator` internals
+  - `DagExecutionEngine` executes compiled `StateGraph` DAG via `OrchestrAIRuntime`
+  - `GrpcExecutionService` resolves real database agent and model configuration
+  - Durable PostgreSQL checkpointer persistence across graph transitions
+  - Zero hardcoded agent definitions or model fallbacks across orchestrator and defaults
 
 #### [ ] Pending — New Services
 
