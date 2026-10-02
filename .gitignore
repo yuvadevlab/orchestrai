@@ -46,3 +46,12 @@ Thumbs.db
 scratch/
 tmp/
 *.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+*.egg-info/
+

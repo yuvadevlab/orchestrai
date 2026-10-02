@@ -361,7 +361,17 @@ Master architecture specification documented in [`master-architecture-plan.md`](
   - Durable PostgreSQL checkpointer persistence across graph transitions
   - Zero hardcoded agent definitions or model fallbacks across orchestrator and defaults
 
-#### [ ] Pending — New Services
+#### [x] New Services (Fully Implemented)
 
-- [ ] **`apps/intelligence`** (Python) → LangGraph agent loop replacing for-loop
-- [ ] **`apps/crawler`** (Python) → Playwright browser automation + RAG ingestion
+- [x] **`apps/intelligence`** (Python) → LangGraph agent loop replacing for-loop
+  - Declarative `StateGraph` topology (`reason` -> `tools` -> `evaluate` -> `compact`)
+  - Conversational RAG selective context injection filtering history to relevant turns
+  - Self-evaluation quality gate and autonomous context compaction at 75% token budget
+  - FastAPI execution and selective context endpoints matching platform schemas
+  - Zero hardcoded model constants; 100% environment- and request-driven
+
+- [x] **`apps/crawler`** (Python) → Playwright browser automation + RAG ingestion
+  - Headless Chromium browser automation with anti-bot headers and resilient HTTP fallback
+  - HTML cleaner, metadata extractor, and clean Markdown transformation engine
+  - Breadth-first recursive domain crawler with depth and page bounds
+  - Automatic semantic chunking and upstream OrchestrAI RAG knowledge base ingestion
