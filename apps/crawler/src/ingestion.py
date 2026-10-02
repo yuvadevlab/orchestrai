@@ -16,12 +16,12 @@ def chunk_markdown_text(
 ) -> list[str]:
     """
     Splits long Markdown documents into overlapping chunks on semantic boundaries.
-    
+
     Args:
         text: Raw Markdown document string.
         chunk_size: Target characters per chunk.
         overlap: Character overlap between consecutive chunks.
-        
+
     Returns:
         List of discrete text chunks.
     """
@@ -59,11 +59,11 @@ async def ingest_page_to_rag(
 ) -> dict[str, Any]:
     """
     Chunks a parsed document and registers each chunk with the OrchestrAI Gateway RAG engine.
-    
+
     Args:
         page: Parsed web page document.
         tenant_id: Optional tenant UUID for multi-tenant data isolation.
-        
+
     Returns:
         Ingestion outcome summary including created chunk count.
     """

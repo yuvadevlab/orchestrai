@@ -49,14 +49,14 @@ def route_after_evaluate(state: AgentState) -> Literal["compact", "reason"]:
 def create_agent_graph():
     """
     Constructs and compiles the full LangGraph agent execution graph.
-    
+
     Graph Topology:
       START -> reason
       reason -> [has tools? -> tools | complete/max steps? -> END]
       tools -> evaluate
       evaluate -> [near token limit? -> compact | else -> reason]
       compact -> reason
-      
+
     Returns:
         Compiled LangGraph runner ready for asynchronous invocation.
     """

@@ -65,14 +65,14 @@ async def retrieve_selective_history(
       2. Always keep last `always_include_last` turns for immediate conversational flow
       3. For older turns, score similarity against current prompt embedding
       4. Select top_k older turns, merge, and preserve original chronological order
-    
+
     Args:
         current_prompt: Incoming user prompt.
         full_history: Full list of past conversation message objects.
         top_k: Maximum number of older turns to selectively retrieve.
         min_similarity: Cosine similarity cutoff threshold.
         always_include_last: Number of recent turns to always retain.
-        
+
     Returns:
         Filtered, chronologically ordered subset of messages.
     """

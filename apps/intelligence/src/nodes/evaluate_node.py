@@ -10,15 +10,15 @@ from ..state import AgentState
 async def evaluate_node(state: AgentState) -> dict[str, Any]:
     """
     Evaluates intermediate tool responses and checks for errors or incomplete executions.
-    
+
     Args:
         state: Current immutable AgentState.
-        
+
     Returns:
         State updates containing quality score and feedback hints.
     """
     tool_results = state.get("tool_results") or []
-    
+
     if not tool_results:
         return {
             "evaluation_score": 1.0,
@@ -38,7 +38,9 @@ async def evaluate_node(state: AgentState) -> dict[str, Any]:
     quality_score = max(0.0, 1.0 - error_rate)
 
     if quality_score < 0.5:
-        feedback = f"{error_count}/{total_tools} tools failed. Self-correction required."
+        feedback = (
+            f"{error_count}/{total_tools} tools failed. Self-correction required."
+        )
     else:
         feedback = f"All {total_tools} tools executed successfully."
 

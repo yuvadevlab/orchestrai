@@ -10,6 +10,7 @@ from .config import settings
 # Attempt playwright import; fallback to httpx if browser binaries are not installed
 try:
     from playwright.async_api import async_playwright, Browser, Playwright
+
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
@@ -49,10 +50,10 @@ class BrowserManager:
     async def fetch_page_content(self, url: str) -> tuple[str, Optional[bytes]]:
         """
         Loads a page URL and retrieves the evaluated DOM HTML and optional screenshot.
-        
+
         Args:
             url: Target web page URL.
-            
+
         Returns:
             Tuple of (html_string, screenshot_bytes_or_none).
         """
@@ -64,7 +65,9 @@ class BrowserManager:
             )
             page = await context.new_page()
             try:
-                await page.goto(url, wait_until="domcontentloaded", timeout=settings.timeout_ms)
+                await page.goto(
+                    url, wait_until="domcontentloaded", timeout=settings.timeout_ms
+                )
                 content = await page.content()
                 screenshot = await page.screenshot(type="png")
                 return content, screenshot

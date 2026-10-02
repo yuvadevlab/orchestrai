@@ -50,7 +50,9 @@ async def _execute_single_tool(
             if resp.status_code == 200:
                 output = resp.json().get("result", "")
             else:
-                output = f"Tool execution failed with status {resp.status_code}: {resp.text}"
+                output = (
+                    f"Tool execution failed with status {resp.status_code}: {resp.text}"
+                )
         except Exception as exc:
             output = f"Tool dispatch exception: {str(exc)}"
 
@@ -64,10 +66,10 @@ async def _execute_single_tool(
 async def tool_node(state: AgentState) -> dict[str, Any]:
     """
     Executes all pending tool calls and appends their outputs to conversation messages.
-    
+
     Args:
         state: Current immutable AgentState.
-        
+
     Returns:
         State updates containing formatted tool messages and execution logs.
     """
@@ -85,12 +87,14 @@ async def tool_node(state: AgentState) -> dict[str, Any]:
             tenant_id=state.get("tenant_id"),
         )
         results.append(res)
-        messages.append({
-            "role": "tool",
-            "name": res["name"],
-            "content": res["content"],
-            "tool_call_id": res["tool_call_id"],
-        })
+        messages.append(
+            {
+                "role": "tool",
+                "name": res["name"],
+                "content": res["content"],
+                "tool_call_id": res["tool_call_id"],
+            }
+        )
 
     return {
         "messages": messages,

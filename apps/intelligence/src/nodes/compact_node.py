@@ -12,10 +12,10 @@ from ..state import AgentState
 async def compact_node(state: AgentState) -> dict[str, Any]:
     """
     Summarizes older conversation turns to reclaim token budget without losing context.
-    
+
     Args:
         state: Current immutable AgentState.
-        
+
     Returns:
         Compacted message history and updated context token metrics.
     """
@@ -28,7 +28,9 @@ async def compact_node(state: AgentState) -> dict[str, Any]:
     middle_msgs = messages[1:-2]
     recent_msgs = messages[-2:]
 
-    middle_text = "\n".join([f"{m.get('role')}: {m.get('content')}" for m in middle_msgs])
+    middle_text = "\n".join(
+        [f"{m.get('role')}: {m.get('content')}" for m in middle_msgs]
+    )
 
     summary_prompt = (
         "Summarize the following intermediate actions, tool calls, and responses "
@@ -48,7 +50,9 @@ async def compact_node(state: AgentState) -> dict[str, Any]:
                 },
             )
             if resp.status_code == 200:
-                summary_content = resp.json().get("response", "Intermediate history summarized.")
+                summary_content = resp.json().get(
+                    "response", "Intermediate history summarized."
+                )
         except Exception:
             summary_content = f"Summary of {len(middle_msgs)} prior intermediate steps."
 

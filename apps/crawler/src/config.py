@@ -16,9 +16,15 @@ class CrawlerSettings(BaseSettings):
     host: str = Field(default="0.0.0.0", description="Server bind host")
     port: int = Field(default=8083, description="Server listen HTTP port")
     headless: bool = Field(default=True, description="Run browser in headless mode")
-    timeout_ms: int = Field(default=30000, description="Page navigation timeout in milliseconds")
-    max_crawl_depth: int = Field(default=3, description="Maximum link crawl traversal depth")
-    max_pages_per_crawl: int = Field(default=25, description="Maximum total pages per crawl request")
+    timeout_ms: int = Field(
+        default=30000, description="Page navigation timeout in milliseconds"
+    )
+    max_crawl_depth: int = Field(
+        default=3, description="Maximum link crawl traversal depth"
+    )
+    max_pages_per_crawl: int = Field(
+        default=25, description="Maximum total pages per crawl request"
+    )
     gateway_url: str = Field(
         default_factory=lambda: os.getenv("GATEWAY_URL", "http://localhost:3000"),
         description="Upstream OrchestrAI Gateway URL for RAG ingestion",

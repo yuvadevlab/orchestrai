@@ -22,20 +22,26 @@ compiled_graph = create_agent_graph()
 
 class ExecuteRequest(BaseModel):
     """Execution dispatch request payload."""
+
     execution_id: str = Field(..., description="Unique execution UUID")
     agent_id: str = Field(..., description="Agent identifier")
     tenant_id: Optional[str] = Field(None, description="Optional tenant ID")
     input_prompt: str = Field(..., description="Incoming user query")
     model_name: Optional[str] = Field(None, description="Model to execute")
     system_prompt: Optional[str] = Field(None, description="System instructions")
-    tools: list[dict[str, Any]] = Field(default_factory=list, description="Available tool schemas")
-    history: list[dict[str, Any]] = Field(default_factory=list, description="Prior message history")
+    tools: list[dict[str, Any]] = Field(
+        default_factory=list, description="Available tool schemas"
+    )
+    history: list[dict[str, Any]] = Field(
+        default_factory=list, description="Prior message history"
+    )
     max_turns: int = Field(default=20, description="Max allowed execution steps")
     max_context_tokens: int = Field(default=8192, description="Context window size")
 
 
 class ExecuteResponse(BaseModel):
     """Execution dispatch response payload."""
+
     execution_id: str
     status: str
     final_output: Optional[str] = None
@@ -47,6 +53,7 @@ class ExecuteResponse(BaseModel):
 
 class SelectiveContextRequest(BaseModel):
     """Selective context compression request payload."""
+
     current_prompt: str
     history: list[dict[str, Any]]
     top_k: int = 4
@@ -70,10 +77,7 @@ async def execute_agent(req: ExecuteRequest):
     """
     Executes an autonomous agent run through the compiled LangGraph StateGraph.
     """
-    resolved_model = (
-        req.model_name
-        or settings.default_model_name
-    )
+    resolved_model = req.model_name or settings.default_model_name
 
     # Enforce model requirement: no hardcoded defaults allowed
     if not resolved_model:
@@ -118,7 +122,9 @@ async def execute_agent(req: ExecuteRequest):
     try:
         final_state = await compiled_graph.ainvoke(initial_state)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"LangGraph execution error: {str(exc)}")
+        raise HTTPException(
+            status_code=500, detail=f"LangGraph execution error: {str(exc)}"
+        )
 
     status = "failed" if final_state.get("error") else "completed"
 

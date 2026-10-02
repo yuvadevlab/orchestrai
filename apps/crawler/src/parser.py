@@ -48,11 +48,11 @@ def extract_metadata(soup: BeautifulSoup, base_url: str) -> dict[str, Any]:
 def parse_html_document(html_content: str, base_url: str) -> ParsedPage:
     """
     Strips noise, extracts metadata, converts clean body to Markdown, and gathers child links.
-    
+
     Args:
         html_content: Raw HTML text from browser or HTTP fetch.
         base_url: Document URL used for resolving relative links.
-        
+
     Returns:
         Structured ParsedPage instance.
     """
@@ -68,7 +68,11 @@ def parse_html_document(html_content: str, base_url: str) -> ParsedPage:
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
         # Filter out javascript and anchor fragment links
-        if href.startswith("javascript:") or href.startswith("#") or href.startswith("mailto:"):
+        if (
+            href.startswith("javascript:")
+            or href.startswith("#")
+            or href.startswith("mailto:")
+        ):
             continue
 
         resolved = urljoin(base_url, href)
@@ -77,7 +81,9 @@ def parse_html_document(html_content: str, base_url: str) -> ParsedPage:
             links.append(resolved)
 
     # 3. Clean document tree by stripping boilerplate elements
-    for element in soup(["script", "style", "nav", "footer", "aside", "noscript", "svg"]):
+    for element in soup(
+        ["script", "style", "nav", "footer", "aside", "noscript", "svg"]
+    ):
         element.decompose()
 
     # 4. Extract metadata prior to Markdown conversion

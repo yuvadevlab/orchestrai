@@ -12,10 +12,10 @@ from ..state import AgentState
 async def reason_node(state: AgentState) -> dict[str, Any]:
     """
     Invokes the LLM to analyze the conversation and decide on next actions.
-    
+
     Args:
         state: Current immutable AgentState.
-        
+
     Returns:
         State updates containing newly generated assistant message and detected tool calls.
     """
@@ -75,7 +75,9 @@ async def reason_node(state: AgentState) -> dict[str, Any]:
     is_terminal = len(tool_calls) == 0
 
     return {
-        "messages": [{"role": "assistant", "content": content, "tool_calls": tool_calls}],
+        "messages": [
+            {"role": "assistant", "content": content, "tool_calls": tool_calls}
+        ],
         "pending_tool_calls": tool_calls,
         "turn_count": new_turn_count,
         "context_tokens": eval_tokens,

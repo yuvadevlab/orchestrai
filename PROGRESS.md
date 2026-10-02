@@ -375,3 +375,14 @@ Master architecture specification documented in [`master-architecture-plan.md`](
   - HTML cleaner, metadata extractor, and clean Markdown transformation engine
   - Breadth-first recursive domain crawler with depth and page bounds
   - Automatic semantic chunking and upstream OrchestrAI RAG knowledge base ingestion
+
+#### [x] CI/CD, Polyglot Tooling & Developer Experience
+
+- [x] **Parallel GitHub Actions Architecture**
+  - Split monolithic CI into 5 concurrent workflows: `format.yml`, `lint.yml`, `typecheck.yml`, `build.yml`, `commitlint.yml`
+  - Runs in parallel on separate runners to drastically cut CI wait times
+- [x] **Unified Polyglot Tooling Facade**
+  - Single `pnpm lint`, `pnpm format`, and `lint-staged` pre-commit hooks covering both TypeScript and Python
+  - Instant 10ms Ruff Python validation + ESLint & Prettier without manual virtualenv friction
+- [x] **Commitlint Scope Enum Synchronized**
+  - Added all apps (`orchestrator`, `admin`, `intelligence`, `crawler`) and packages (`billing`, `semantic-cache`, `model-router`, `prompts`, `resilience`, `grpc`, `shared-types`)

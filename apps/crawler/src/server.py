@@ -33,15 +33,19 @@ app = FastAPI(
 
 class ScrapeRequest(BaseModel):
     """Single URL scrape request."""
+
     url: str = Field(..., description="Target webpage URL")
 
 
 class CrawlRequest(BaseModel):
     """Recursive crawl request."""
+
     url: str = Field(..., description="Root seed URL")
     max_depth: Optional[int] = Field(None, description="Max link depth")
     max_pages: Optional[int] = Field(None, description="Max visited pages")
-    ingest_to_rag: bool = Field(default=False, description="Automatically ingest pages into RAG")
+    ingest_to_rag: bool = Field(
+        default=False, description="Automatically ingest pages into RAG"
+    )
     tenant_id: Optional[str] = Field(None, description="Tenant UUID for isolation")
 
 
@@ -60,7 +64,9 @@ async def scrape_url(req: ScrapeRequest):
     try:
         raw_html, screenshot = await browser_manager.fetch_page_content(req.url)
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to fetch {req.url}: {str(exc)}")
+        raise HTTPException(
+            status_code=502, detail=f"Failed to fetch {req.url}: {str(exc)}"
+        )
 
     parsed = parse_html_document(raw_html, req.url)
 

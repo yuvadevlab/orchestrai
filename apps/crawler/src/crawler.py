@@ -23,17 +23,19 @@ class WebCrawler:
     ) -> list[ParsedPage]:
         """
         Crawls starting from `start_url` up to configured depth and page limits.
-        
+
         Args:
             start_url: Root starting URL.
             max_depth: Maximum link hop depth (defaults to settings.max_crawl_depth).
             max_pages: Maximum documents to visit (defaults to settings.max_pages_per_crawl).
-            
+
         Returns:
             List of successfully parsed ParsedPage records.
         """
         depth_limit = max_depth if max_depth is not None else settings.max_crawl_depth
-        page_limit = max_pages if max_pages is not None else settings.max_pages_per_crawl
+        page_limit = (
+            max_pages if max_pages is not None else settings.max_pages_per_crawl
+        )
 
         visited: set[str] = set()
         queue: deque[tuple[str, int]] = deque([(start_url, 0)])
