@@ -104,7 +104,7 @@ export class ExecutionService {
       conversationId: validConvId || undefined,
       input: dto.input || "",
       status: ExecutionStatus.RUNNING,
-      metadata: { model: modelName || "gemma4:31b-cloud", ...(dto.variables || {}) },
+      metadata: { ...(modelName ? { model: modelName } : {}), ...(dto.variables || {}) },
     });
 
     logger.info("Execution persisted via repository port", {

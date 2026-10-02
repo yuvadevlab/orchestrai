@@ -70,7 +70,12 @@ export class EvalService {
       BUILTIN_BENCHMARK_DATASETS[0]!;
 
     const host = process.env.OLLAMA_HOST || "http://localhost:11434";
-    const selectedModel = modelName || process.env.DEFAULT_MODEL_NAME || "gemma4:31b-cloud";
+    const selectedModel =
+      modelName ||
+      process.env.DEFAULT_MODEL_NAME ||
+      (() => {
+        throw new Error("No model specified and DEFAULT_MODEL_NAME is not configured");
+      })();
 
     const adapter = await OllamaAdapter.create({
       host,

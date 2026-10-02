@@ -44,21 +44,15 @@ export class ExecutionDispatcher {
       : null;
 
     if (!target) {
-      target =
-        (await this.db.agent.findFirst({
-          where: { tenantId, deletedAt: null },
-        })) ||
-        (await this.db.agent.create({
-          data: {
-            tenantId,
-            name: "Lead Orchestrator",
-            // System prompt is the only thing that should be here — model is read from DB model record
-            systemPrompt: "You are the Lead Orchestrator.",
-            // modelConfig is intentionally left empty so the gateway reads the default model
-            // from the DB models table, never from a hardcoded constant
-            modelConfig: {},
-          },
-        }));
+      target = await this.db.agent.findFirst({
+        where: { tenantId, deletedAt: null },
+      });
+    }
+
+    if (!target) {
+      throw new Error(
+        "No agent found for tenant. Please create an agent in Studio or via API before dispatching execution.",
+      );
     }
 
     return target;

@@ -52,7 +52,7 @@ export async function resolveDbTenantId(
 }
 
 /**
- * Finds the first active agent for a tenant or creates a default orchestrator agent.
+ * Finds the first active agent for a tenant, or throws an error if none exists.
  *
  * @param tenantId - Resolved tenant UUID
  * @param db - Optional PrismaClient instance
@@ -71,15 +71,7 @@ export async function resolveOrCreateDefaultAgent(
     return existing.agentId;
   }
 
-  const created = await db.agent.create({
-    data: {
-      tenantId,
-      name: "Supervisor Orchestrator",
-      systemPrompt: "You are the OrchestrAI Supervisor.",
-      modelConfig: { model: "gemma4:31b-cloud" },
-    },
-    select: { agentId: true },
-  });
-
-  return created.agentId;
+  throw new Error(
+    "No agent found for tenant. Please create an agent in Studio or via the Agent API before proceeding.",
+  );
 }

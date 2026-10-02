@@ -28,6 +28,7 @@ import {
   handleExecutionSuccess,
   handleExecutionFailure,
 } from "@/modules/streaming/live-turn-terminal";
+import { modelRouterService } from "@/modules/model-router/model-router.service";
 
 export { ABSOLUTE_MAX_TURNS, DEFAULT_CONTEXT_WINDOW };
 
@@ -120,6 +121,7 @@ export async function executeAutonomousTurns(
         attributes: { "execution.id": executionId, "turn.index": turn + 1 },
       });
 
+      const turnStart = Date.now();
       // Stream LLM response wrapped in resilience pipeline
       const turnOutput = await resilience.execute(async () => {
         const stream = adapter.stream({
@@ -142,6 +144,7 @@ export async function executeAutonomousTurns(
       });
 
       turnSpan.end();
+      modelRouterService.recordTurnLatency(selectedModel, Date.now() - turnStart);
 
       // Record token consumption and update ledger
       const promptTokens = countMessageTokens(history);

@@ -15,6 +15,8 @@ import { liveExecutionRedisPublisher } from "@/modules/streaming/live-execution-
 import { buildInitialConversationHistory } from "@/modules/streaming/live-message-history";
 import { executeAutonomousTurns } from "@/modules/streaming/live-turn-executor";
 import { memoryService } from "@/modules/memory/memory.service";
+import { ragService } from "@/modules/rag/rag.service";
+import { checkSemanticCache, storeSemanticCache } from "@/modules/cache/semantic-cache.service";
 
 export type { ExecutionStreamState };
 
@@ -73,7 +75,12 @@ class LiveExecutionManager {
     personaRole?: string,
   ): Promise<void> {
     const host = process.env.OLLAMA_HOST || "http://localhost:11434";
-    const selectedModel = modelName || process.env.DEFAULT_MODEL_NAME || "gemma4:31b-cloud";
+    const selectedModel =
+      modelName ||
+      process.env.DEFAULT_MODEL_NAME ||
+      (() => {
+        throw new Error("No model specified and DEFAULT_MODEL_NAME is not configured");
+      })();
     const sessionId = conversationId || executionId;
 
     const state: ExecutionStreamState = {
@@ -85,9 +92,38 @@ class LiveExecutionManager {
     };
     this.states.set(executionId, state);
 
+    // Check semantic vector cache for identical or near-duplicate queries
+    const cachedResponse = await checkSemanticCache(inputPrompt);
+    if (cachedResponse) {
+      state.chunks.push(cachedResponse);
+      state.fullOutput = cachedResponse;
+      state.status = ExecutionStatus.COMPLETED;
+      state.completedAt = new Date().toISOString();
+      this.emitEvent(executionId, SseStreamEvent.CHUNK, cachedResponse);
+      this.emitEvent(executionId, SseStreamEvent.DONE, cachedResponse);
+      return;
+    }
+
     // Recall cross-session episodic & semantic memories using tenant partition
     const memoryContext = await memoryService.recallContext(inputPrompt, tenantId ?? "default");
-    const augmentedSystemPrompt = [systemPrompt, memoryContext].filter(Boolean).join("\n\n");
+
+    // Auto-inject top-3 relevant knowledge base documents via RAG
+    let ragContext = "";
+    try {
+      const ragResult = await ragService.query(
+        { query: inputPrompt, limit: 3, minScore: 0.35, alpha: 0.5 },
+        tenantId ?? "default",
+      );
+      if (ragResult.context) {
+        ragContext = `\n\n[Knowledge Base Context]:\n${ragResult.context}`;
+      }
+    } catch {
+      // Non-critical: continue without knowledge base documents
+    }
+
+    const augmentedSystemPrompt = [systemPrompt, memoryContext, ragContext]
+      .filter(Boolean)
+      .join("\n\n");
 
     const conversationHistory = buildInitialConversationHistory(
       inputPrompt,
@@ -113,6 +149,11 @@ class LiveExecutionManager {
       contextWindow,
       costPerTokenUsd,
     );
+
+    // Cache successful execution output for semantic query deduplication
+    if (state.status === ExecutionStatus.COMPLETED && state.fullOutput) {
+      void storeSemanticCache(inputPrompt, state.fullOutput);
+    }
   }
 
   /**

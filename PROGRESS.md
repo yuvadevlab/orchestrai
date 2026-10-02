@@ -329,15 +329,37 @@ Master architecture specification documented in [`master-architecture-plan.md`](
   - Default model name `gemma4:31b-cloud` removed from agent creation fallback
   - `contextWindow` and `costPerTokenUsd` threaded from DB model record through dispatch chain
 
+- [x] **`@orchestrai/semantic-cache`** → wired via `semantic-cache.service.ts` into live turn execution
+  - Cosine vector similarity deduplication (threshold 0.97) with `ResilientEmbeddingProvider`
+  - Zero-latency, zero-cost cache HIT returns cached response immediately via SSE
+  - Auto-caches completed execution outputs on `ExecutionStatus.COMPLETED`
+
+- [x] **`@orchestrai/rag`** → auto-inject top-3 knowledge chunks per execution prompt
+  - Hybrid retrieval query (`ragService.query`) auto-appends relevant document context
+  - Transparent fallback from Ollama embeddings to deterministic mock provider
+  - Zero model call bloat when knowledge base is not populated
+
+- [x] **`@orchestrai/model-router`** → `model-router.service.ts`
+  - Real-time empirical per-model turn latency tracking via `LatencyTracker`
+  - Dynamic routing strategies: `LOWEST_LATENCY`, `LEAST_EXPENSIVE`, `PRIORITY_FALLBACK`
+  - Zero hardcoded fallback candidate constants; 100% database & environment driven
+
+- [x] **`@orchestrai/eval`** → auto quality gate on `EXECUTION_COMPLETED` domain event
+  - `initEvalQualityGate()` subscribes to `domainEventBus` on `DomainEventType.EXECUTION_COMPLETED`
+  - Heuristic scoring of output completeness, tool usage, error indicators, and tokens/sec throughput
+  - Non-blocking telemetry metrics emitted for operator cockpit
+
+- [x] **Zero Hardcoded Default Agents & Synthetic Seeding Eliminated**
+  - Purged `DEFAULT_SUPERVISOR` constant and `ensureTenantAgents` auto-seeding
+  - Purged `Lead Orchestrator` fallback creation in `execution-dispatcher.ts`
+  - If a tenant has no configured agent, system fails fast and explicitly informs user to create one
+  - Eradicated all `gemma4:31b-cloud` default constants across the entire monorepo
+
 #### [ ] Pending — Runtime + Agent Wiring
 
 - [ ] **`@orchestrai/runtime`** → wire `StateGraph` into `apps/orchestrator` internals
 - [ ] **`@orchestrai/agent`** → `AgentRunner` resolves from DB agent record
-- [ ] **`@orchestrai/rag`** → auto-inject top-3 knowledge chunks per turn + conversational RAG
 - [ ] **`@orchestrai/memory`** → full 4-tier recall at execution start, distill via event
-- [ ] **`@orchestrai/model-router`** → task-type routing wired to turn executor nodes
-- [ ] **`@orchestrai/semantic-cache`** → 3-tier cache (response, plan, embedding)
-- [ ] **`@orchestrai/eval`** → auto LLM-as-judge quality gate on `EXECUTION_COMPLETED` event
 
 #### [ ] Pending — New Services
 

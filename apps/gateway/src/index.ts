@@ -27,6 +27,7 @@ import {
   registerMemoryRoutes,
   registerTraceRoutes,
   registerResourceAccessRoutes,
+  initEvalQualityGate,
 } from "@/modules";
 import { GatewayServer, registerProcessLifecycle } from "@/server";
 
@@ -51,6 +52,9 @@ export async function bootstrap(): Promise<GatewayServer> {
   });
 
   const router = new Router();
+
+  // Initialize automated evaluation quality gate on domain events
+  initEvalQualityGate();
 
   // Register root health probes
   registerHealthRoutes(router);
