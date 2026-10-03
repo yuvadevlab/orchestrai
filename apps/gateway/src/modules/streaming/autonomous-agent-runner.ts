@@ -136,6 +136,40 @@ export function formatToolArtifact(
     };
   }
 
+  if (tool === WorkspaceTool.VERIFY_CODE) {
+    const targetPath = String(args.path || "workspace");
+    return {
+      id: randomUUID(),
+      type: ArtifactType.CODE,
+      title: `Verification: ${targetPath}`,
+      filePath: targetPath,
+      language: detectLanguage(targetPath),
+      content: contentStr,
+      status,
+    };
+  }
+
+  if (tool === WorkspaceTool.READ_SKILL) {
+    const skillName = String(args.name || "Skill");
+    return {
+      id: randomUUID(),
+      type: ArtifactType.DOCUMENT,
+      title: `Skill: ${skillName}`,
+      content: contentStr,
+      status,
+    };
+  }
+
+  if (tool === WorkspaceTool.LIST_SKILLS) {
+    return {
+      id: randomUUID(),
+      type: ArtifactType.DOCUMENT,
+      title: "Workspace Discovered Skills",
+      content: contentStr,
+      status,
+    };
+  }
+
   // LIST_DIR and any future tools fall through to DOCUMENT
   return {
     id: randomUUID(),

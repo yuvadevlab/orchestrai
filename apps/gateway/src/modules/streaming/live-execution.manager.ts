@@ -86,6 +86,7 @@ class LiveExecutionManager {
     costPerTokenUsd?: number,
     personaRole?: string,
     mode?: AgentMode,
+    workspacePath?: string,
   ): Promise<void> {
     const host = process.env.OLLAMA_HOST || "http://localhost:11434";
     const selectedModel =
@@ -178,7 +179,8 @@ class LiveExecutionManager {
     const resolvedTemperature = policy?.temperature;
 
     // Discover and register workspace instructions, modular rules, and skills
-    const harnessContext = workspaceInstructionLoader.loadContext(resolveMonorepoRoot());
+    const targetWorkspace = workspacePath || resolveMonorepoRoot();
+    const harnessContext = workspaceInstructionLoader.loadContext(targetWorkspace);
     harnessSkillRegistry.registerContext(harnessContext);
     const harnessPrompt = workspaceInstructionLoader.formatPromptContext(harnessContext);
 

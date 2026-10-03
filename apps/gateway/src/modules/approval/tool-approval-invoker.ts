@@ -20,6 +20,7 @@ import {
   resourceRegistryService,
   resourceAccessLogger,
 } from "@/modules/permission";
+import { harnessSkillRegistry } from "@/modules/harness";
 import type { ExecutionStreamState } from "@/modules/streaming/live-execution-broadcaster";
 
 /**
@@ -39,8 +40,8 @@ export async function handleToolInvocationWithApproval(
   state: ExecutionStreamState,
   emitEvent: (event: string, data: unknown) => void,
 ): Promise<{ output: unknown; isError: boolean }> {
+  const workspaceRoot = harnessSkillRegistry.getWorkspaceRoot() || resolveMonorepoRoot();
   const perm = permissionPolicyManager.checkPermission(toolCall.tool, toolCall.args, sessionId);
-  const workspaceRoot = resolveMonorepoRoot();
   const canonical = resourceRegistryService.canonicalizeTarget(
     String(toolCall.args.path || toolCall.args.command || ""),
     toolCall.tool,
@@ -118,7 +119,8 @@ export async function handleToolInvocationWithApproval(
     resourceUri: canonical.uri,
     toolSlug: toolCall.tool,
     action: "execute",
-    permissionLevel: toolCall.tool === "bash" ? PermissionLevel.EXECUTE : PermissionLevel.READ,
+    permissionLevel:
+      toolCall.tool === WorkspaceTool.BASH ? PermissionLevel.EXECUTE : PermissionLevel.READ,
     decision: "allowed",
     reason: `Cleared by operator (scope: ${decision.scope})`,
   });
@@ -135,5 +137,10 @@ export async function handleToolInvocationWithApproval(
     ]),
   ).filter((r): r is string => typeof r === "string" && r.length > 0);
 
-  return executeWorkspaceTool(toolCall.tool, toolCall.args, workspaceRoot, combinedRoots);
+  return executeWorkspaceTool(
+    toolCall.tool,
+    toolCall.args,
+    targetRoot || workspaceRoot,
+    combinedRoots,
+  );
 }

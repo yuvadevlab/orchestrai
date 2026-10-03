@@ -33,6 +33,7 @@ export function useStudioWorkspaceState({
 
   // Canvas reset action — used to clear stale artifacts when switching sessions
   const setActiveArtifact = useConsoleStore((s) => s.setActiveArtifact);
+  const activeWorkspace = useConsoleStore((s) => s.activeWorkspace);
 
   const { data: dbAgents = [] } = useAgents();
   const { data: models } = useModels();
@@ -96,6 +97,7 @@ export function useStudioWorkspaceState({
     selectedModel: activeSession.model || "",
     activeSessionId,
     existingMessages: activeSession.messages,
+    workspacePath: activeWorkspace?.path,
     onUpdateMessages: updateActiveMessages,
   });
 

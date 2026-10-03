@@ -7,7 +7,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import { getPrismaClient, type Resource } from "@orchestrai/database";
-import { ResourceType } from "@orchestrai/shared-types";
+import { ResourceType, WorkspaceTool } from "@orchestrai/shared-types";
 import { expandUserHome } from "@orchestrai/tools";
 import { isResourceContained } from "@orchestrai/core";
 import { FILE_PROTOCOL_REGEX, POSTGRES_PROTOCOL_REGEX } from "@orchestrai/regex";
@@ -31,7 +31,7 @@ export class ResourceRegistryService {
     workspaceRoot: string,
   ): { uri: string; type: ResourceType; name: string } {
     // 1. Shell commands execute against system shell service
-    if (toolName === "bash") {
+    if (toolName === WorkspaceTool.BASH) {
       const commandStr = target || "command";
       return {
         uri: `service://system/bash?cmd=${encodeURIComponent(commandStr.slice(0, 120))}`,

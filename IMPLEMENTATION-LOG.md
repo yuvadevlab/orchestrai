@@ -2,6 +2,57 @@
 
 Chronological log of architecture, engineering decisions, and completed milestones for OrchestrAI.
 
+## Session: 2026-10-03 (Continued) — Harness Audit, Bug Fixes & HITL Semi-Autonomous Engineering
+
+### Summary of Completed Work
+
+#### 1. Parser & Invariant Bug Fixes
+
+- **ESLint Compact Formatter Diagnostic Parsing**:
+  - Added `ESLINT_COMPACT_DIAGNOSTIC_REGEX` to `@orchestrai/regex` matching compact format (`/path: line X, col Y, Error - msg (rule)`).
+  - Updated `WorkspaceDiagnosticRunner` to parse compact ESLint lines and fall back to stylish format without missing errors.
+  - Added project-aware `tsc` execution reading `tsconfig.json` to eliminate false-positive path-alias and JSX errors on single-file checks.
+- **Strict Enum Invariant Enforcement (Rule 7)**:
+  - Replaced raw string literals (`=== "bash"`) with canonical `WorkspaceTool.BASH` across `tool-approval-invoker.ts`, `permission-policy.manager.ts`, `permission-evaluator.ts`, and `resource-registry.service.ts`.
+- **Centralized Regex Invariant Enforcement (Rule 8)**:
+  - Added `LANGUAGE_CLASS_REGEX` and `STRIP_TOOL_CALLS_REGEX` to `@orchestrai/regex`.
+  - Replaced inline regexes in `apps/console/src/components/markdown-renderer.tsx`.
+
+#### 2. Dynamic Workspace Path Isolation & Propagation
+
+- **Console Studio Forwarding**:
+  - Updated `useAgentRunner` in `apps/console` to forward `workspacePath: activeWorkspace?.path` to `client.agents.run(...)`.
+  - Hooked `activeWorkspace` from `useConsoleStore` in `useStudioWorkspaceState`.
+- **Gateway Runtime Execution Target**:
+  - Updated `ExecutionDispatcher.dispatch` and `LiveExecutionManager.startExecution` to accept `workspacePath`.
+  - Dynamically points `workspaceInstructionLoader.loadContext(workspacePath || resolveMonorepoRoot())` to the operator's active project directory rather than hardcoding the monorepo root.
+  - Linked `harnessSkillRegistry.getWorkspaceRoot()` as default target for tool approval and sandboxed execution.
+
+#### 3. Semi-Autonomous HITL Clearance for Code Modifications
+
+- **`WorkspaceTool.WRITE_FILE` Clearance Gate**:
+  - Enhanced `permission-evaluator.ts` to require operator clearance for file write operations unless authorized in `onceGrants`, `sessionSet`, or `permanentGrants`.
+  - Prompts human operator with `StudioLiveClearanceCard` (`Allow Once | This Chat | Always Allow | Deny`) before modifying code.
+  - Once granted for "This Chat", subsequent writes and self-repair diffs in the session proceed autonomously.
+
+#### 4. Workspace Harness API & Studio UI Integration
+
+- **Harness Context Endpoint**:
+  - Added `GET /api/v1/workspace/harness` to `WorkspaceController` returning loaded instructions, rules count, and skills count.
+- **Console UI Status Pill**:
+  - Implemented `useWorkspaceHarness` hook in `apps/console/src/features/studio/api/use-workspace-harness.ts`.
+  - Added live harness status pill in `StudioHeader` (`e.g. "X rules · Y skills"`), providing immediate visual transparency of loaded workspace context.
+- **Enhanced Tool Artifacts**:
+  - Formatted specialized visual cards in `autonomous-agent-runner.ts` for `VERIFY_CODE`, `READ_SKILL`, and `LIST_SKILLS`.
+
+#### 5. Strict Invariants Verified
+
+- Verified 48/48 packages pass `pnpm typecheck`.
+- Verified `pnpm lint` (`--max-warnings=0`) with zero errors.
+- Verified all 8 modified files are strictly below the 250 LOC threshold (`studio-header.tsx`: 100 LOC, `live-execution.manager.ts`: 248 LOC, `use-agent-runner.ts`: 229 LOC).
+
+---
+
 ## Session: 2026-10-03 (Continued) — Milestone 14: Big 3 Agent Harness Engineering
 
 ### Summary of Completed Work

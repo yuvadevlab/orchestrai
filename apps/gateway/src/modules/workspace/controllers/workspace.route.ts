@@ -19,5 +19,6 @@ export function registerWorkspaceRoutes(
 ): void {
   api.group("/workspace", (group) => {
     group.get("/files", (req, res) => controller.listFiles(req, res));
+    group.get("/harness", (req, res) => controller.getHarnessContext(req, res));
   });
 }

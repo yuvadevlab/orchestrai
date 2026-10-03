@@ -145,7 +145,9 @@ export class ExecutionDispatcher {
         variables: dto.variables,
       });
     } else {
-      logger.debug("Starting live SSE execution", { executionId, model: modelName });
+      const workspacePath =
+        typeof dto.variables?.workspacePath === "string" ? dto.variables.workspacePath : undefined;
+      logger.debug("Starting live SSE execution", { executionId, model: modelName, workspacePath });
       void liveExecutionManager
         .startExecution(
           executionId,
@@ -164,6 +166,7 @@ export class ExecutionDispatcher {
           // Persona role drives system prompt template selection in @orchestrai/prompts
           targetAgent.role ?? undefined,
           (dto.mode as AgentMode) || (targetAgent.mode as AgentMode) || AgentMode.AUTO,
+          workspacePath,
         )
         .then(async () => {
           await this.handleExecutionCompletion(executionId, validConvId, modelName);

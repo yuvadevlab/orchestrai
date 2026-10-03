@@ -11,7 +11,12 @@ import { applyGrant, loadPermanentPermissions } from "../storage/permission-stor
 import { evaluateToolPermission } from "./permission-evaluator";
 import { resourceRegistryService } from "./resource-registry.service";
 import { resourceAccessLogger } from "./resource-access-logger";
-import { PermissionLevel, ApprovalRiskLevel, PermissionScope } from "@orchestrai/shared-types";
+import {
+  PermissionLevel,
+  ApprovalRiskLevel,
+  PermissionScope,
+  WorkspaceTool,
+} from "@orchestrai/shared-types";
 import type {
   ApprovalDecision,
   ApprovalRequest,
@@ -114,7 +119,7 @@ class PermissionPolicyManager {
     const granted = scope !== PermissionScope.DENY;
     const target = pending.request.target;
     const prefix = pending.request.suggestedPrefix || target;
-    const isBash = pending.request.tool === "bash";
+    const isBash = pending.request.tool === WorkspaceTool.BASH;
 
     const sessionKeys = Array.from(
       new Set(

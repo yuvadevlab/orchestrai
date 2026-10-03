@@ -7,10 +7,11 @@
  */
 
 import React from "react";
-import { History, Sidebar, Sparkles } from "lucide-react";
+import { BookOpen, History, Sidebar, Sparkles } from "lucide-react";
 import { Button, Badge } from "@yuva-devlab/ui";
 import { UI_COPY } from "@/lib/ui-copy";
-
+import { useConsoleStore } from "@/lib/stores";
+import { useWorkspaceHarness } from "../api";
 import { StudioWorkspaceSelector } from "./studio-workspace-selector";
 
 export interface StudioHeaderProps {
@@ -31,11 +32,29 @@ export function StudioHeader({
   onToggleRail,
   railOpen,
 }: StudioHeaderProps): React.JSX.Element {
+  const activeWorkspace = useConsoleStore((s) => s.activeWorkspace);
+  const { data: harness } = useWorkspaceHarness(activeWorkspace?.path);
+
+  const totalHarnessSpecs = (harness?.rulesCount ?? 0) + (harness?.skillsCount ?? 0);
+
   return (
     <header className="border-border bg-card/60 relative z-20 flex h-13 shrink-0 items-center justify-between border-b px-4 backdrop-blur-md">
       {/* Left: Workspace Folder Picker & Session History Drawer Button */}
       <div className="flex items-center gap-2">
         <StudioWorkspaceSelector />
+
+        {harness && totalHarnessSpecs > 0 && (
+          <Badge
+            variant="outline"
+            className="border-primary/30 bg-primary/5 text-primary hidden items-center gap-1.5 px-2 py-0.5 font-mono text-[10px] md:inline-flex"
+            title={`Harness active: ${harness.rootInstructionsCount} root specs, ${harness.rulesCount} rules, ${harness.skillsCount} skills loaded from ${harness.workspaceRoot}`}
+          >
+            <BookOpen className="text-primary size-3" />
+            <span>
+              {harness.rulesCount} rules · {harness.skillsCount} skills
+            </span>
+          </Badge>
+        )}
 
         <Button
           variant="outline"

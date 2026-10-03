@@ -597,3 +597,7 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 
 - [x] **Diagnostic Feedback Protocol**: Injects clean, actionable error logs into the agent turn loop.
 - [x] **HITL Repair Gate**: Requires the agent to analyze violations, explain the root cause, formulate a minimal diff, and request Human-in-the-Loop (HITL) approval before applying corrective file modifications.
+- [x] **`WRITE_FILE` Clearance Interception**: Intercepts code modifications in `permission-evaluator.ts` through `StudioLiveClearanceCard` (`Allow Once | This Chat | Always Allow | Deny`).
+- [x] **Compact ESLint & Project-Aware TSC**: Added `ESLINT_COMPACT_DIAGNOSTIC_REGEX` and `tsconfig.json` resolution in `workspace-diagnostic-runner.ts` to ensure 100% accurate diagnostic captures.
+- [x] **Dynamic `workspacePath` Propagation**: Console Studio (`useAgentRunner`) passes active workspace path down to Gateway and harness context.
+- [x] **Workspace Harness API & Studio UI Badge**: Exposes `GET /api/v1/workspace/harness` and displays discovered rules/skills badge in `StudioHeader` (`useWorkspaceHarness`).

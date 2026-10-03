@@ -10,6 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   ESLINT_DIAGNOSTIC_REGEX,
+  ESLINT_COMPACT_DIAGNOSTIC_REGEX,
   TSC_DIAGNOSTIC_REGEX,
   RUFF_DIAGNOSTIC_REGEX,
 } from "@orchestrai/regex";
@@ -114,7 +115,25 @@ export class WorkspaceDiagnosticRunner {
       const lines = output.split("\n");
 
       for (const line of lines) {
-        // e.g. path/to/file.ts: line 12, col 5, Error - 'x' is defined but never used. (rule)
+        // First test compact format: e.g. path/to/file.ts: line 12, col 5, Error - msg (rule)
+        const compactMatch = ESLINT_COMPACT_DIAGNOSTIC_REGEX.exec(line);
+        if (compactMatch) {
+          diagnostics.push({
+            file: filePath,
+            line: Number.parseInt(compactMatch[2] || "1", 10),
+            column: Number.parseInt(compactMatch[3] || "1", 10),
+            severity:
+              compactMatch[4]?.toLowerCase() === "warning"
+                ? DiagnosticSeverity.WARNING
+                : DiagnosticSeverity.ERROR,
+            message: compactMatch[5] || "ESLint violation",
+            code: compactMatch[6],
+            tool: DiagnosticToolType.ESLINT,
+          });
+          continue;
+        }
+
+        // Fallback test stylish format: e.g.   12:5  error  'x' is defined  (rule)
         const match = ESLINT_DIAGNOSTIC_REGEX.exec(line);
         if (match) {
           diagnostics.push({
@@ -138,13 +157,20 @@ export class WorkspaceDiagnosticRunner {
       const tscBin = path.join(workspaceRoot, "node_modules", ".bin", "tsc");
       if (fs.existsSync(tscBin)) {
         try {
-          const proc = spawnSync(tscBin, ["--noEmit", filePath], {
+          const tsconfigPath = path.join(workspaceRoot, "tsconfig.json");
+          const tscArgs = fs.existsSync(tsconfigPath)
+            ? ["--noEmit", "--project", tsconfigPath]
+            : ["--noEmit", filePath];
+          const proc = spawnSync(tscBin, tscArgs, {
             cwd: workspaceRoot,
             encoding: "utf-8",
             timeout: 8000,
           });
           const output = (proc.stdout || "") + (proc.stderr || "");
+          const fileBase = path.basename(filePath);
           for (const line of output.split("\n")) {
+            // Isolate diagnostics targeting the edited file
+            if (!line.includes(fileBase)) continue;
             const match = TSC_DIAGNOSTIC_REGEX.exec(line);
             if (match) {
               diagnostics.push({
