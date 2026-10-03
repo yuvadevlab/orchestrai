@@ -14,7 +14,9 @@ import { Search, RotateCcw, Play } from "lucide-react";
 import { useExecutions } from "../api";
 import { ExecutionStatus, type ExecutionRun } from "../types";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/skeleton";
 import { PageShell } from "@/components/layout/page-shell";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /**
  * Main Executions View.
@@ -39,10 +41,10 @@ export function ExecutionsPageContent(): React.JSX.Element {
 
   return (
     <PageShell
-      title="Execution history"
-      breadcrumb="Executions"
-      stats={`${executionList.length} DAG runs`}
-      description="A replayable record of execution DAG runs, step checkpoints, and forensic traces."
+      title={UI_COPY.EXECUTIONS.PAGE_TITLE}
+      breadcrumb={UI_COPY.EXECUTIONS.BREADCRUMB}
+      stats={UI_COPY.EXECUTIONS.STATS(executionList.length)}
+      description={UI_COPY.EXECUTIONS.PAGE_DESCRIPTION}
       actions={
         <Button
           variant="outline"
@@ -53,7 +55,7 @@ export function ExecutionsPageContent(): React.JSX.Element {
           className="h-8 gap-1.5 font-sans text-xs"
         >
           <RotateCcw className="size-3.5" />
-          <span>Refresh traces</span>
+          <span>{UI_COPY.COMMON.ACTIONS.REFRESH}</span>
         </Button>
       }
     >
@@ -64,7 +66,7 @@ export function ExecutionsPageContent(): React.JSX.Element {
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
-              placeholder="Search by ID, intent, or agent..."
+              placeholder={UI_COPY.EXECUTIONS.SEARCH_PLACEHOLDER}
               startIcon={<Search className="size-3.5" />}
               className="bg-card h-8 font-sans text-xs"
             />
@@ -92,22 +94,18 @@ export function ExecutionsPageContent(): React.JSX.Element {
 
         {/* Main Execution Area */}
         {isLoading ? (
-          <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
-            <span className="text-muted-foreground animate-pulse font-sans text-xs">
-              Fetching execution traces from gateway...
-            </span>
-          </div>
+          <TableSkeleton rows={5} />
         ) : executionList.length === 0 ? (
           <EmptyState
             icon={Play}
-            title="No Executions Recorded"
-            description="No execution traces have been dispatched to the OrchestrAI cluster yet."
+            title={UI_COPY.EXECUTIONS.EMPTY_TITLE}
+            description={UI_COPY.EXECUTIONS.EMPTY_DESC}
           />
         ) : filteredExecutions.length === 0 ? (
           <EmptyState
             icon={Search}
-            title="No Executions Matched"
-            description={`No execution traces matched your search query "${search}".`}
+            title={UI_COPY.EXECUTIONS.NO_MATCH_TITLE}
+            description={UI_COPY.EXECUTIONS.NO_MATCH_DESC(search)}
           />
         ) : (
           <ExecutionTable

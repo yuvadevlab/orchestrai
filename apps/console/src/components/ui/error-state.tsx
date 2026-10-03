@@ -9,6 +9,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface DynamicErrorStateProps {
   /** Error instance or payload */
@@ -33,9 +34,9 @@ export interface DynamicErrorStateProps {
 export function DynamicErrorState({
   error,
   reset,
-  title = "This page didn't load",
-  description = "Something went wrong on our end. You can try refreshing or head back home.",
-  boundaryName = "root_error_component",
+  title = UI_COPY.COMMON.ERROR.DEFAULT_TITLE,
+  description = UI_COPY.COMMON.ERROR.DEFAULT_DESCRIPTION,
+  boundaryName = UI_COPY.COMMON.ERROR.DEFAULT_BOUNDARY,
   onError,
   className,
 }: DynamicErrorStateProps): React.JSX.Element {
@@ -50,7 +51,8 @@ export function DynamicErrorState({
     }
   }, [error, boundaryName, onError]);
 
-  const errorMessage = error instanceof Error ? error.message : String(error || "Unknown Error");
+  const errorMessage =
+    error instanceof Error ? error.message : String(error || UI_COPY.COMMON.ERROR.UNKNOWN_ERROR);
   const errorStack = error instanceof Error ? error.stack : undefined;
 
   return (
@@ -72,7 +74,7 @@ export function DynamicErrorState({
               onClick={reset}
               className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-xs transition-colors"
             >
-              Try again
+              {UI_COPY.COMMON.ERROR.TRY_AGAIN}
             </button>
           )}
 
@@ -80,14 +82,14 @@ export function DynamicErrorState({
             href="/"
             className="border-input bg-background text-foreground hover:bg-accent inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium shadow-xs transition-colors"
           >
-            Go home
+            {UI_COPY.COMMON.ERROR.GO_HOME}
           </Link>
 
           <button
             onClick={() => setShowDetails((prev) => !prev)}
             className="border-input bg-background text-muted-foreground hover:bg-accent hover:text-foreground inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium shadow-xs transition-colors"
           >
-            {showDetails ? "Hide details" : "Details"}
+            {showDetails ? UI_COPY.COMMON.ERROR.HIDE_DETAILS : UI_COPY.COMMON.ERROR.DETAILS}
           </button>
         </div>
 

@@ -10,10 +10,12 @@ import React, { useState } from "react";
 import { Activity, Clock, ChevronDown, ChevronRight, AlertCircle } from "lucide-react";
 import { Panel } from "@yuva-devlab/ui";
 import { TraceSpanStatus } from "@orchestrai/shared-types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useExecutionTrace } from "../api/use-execution-trace";
 
 export interface ExecutionTraceWaterfallProps {
-  executionId: string;
+  readonly executionId: string;
 }
 
 /**
@@ -29,11 +31,11 @@ export function ExecutionTraceWaterfall({
 
   if (isLoading) {
     return (
-      <Panel title="Distributed Tracing (OpenTelemetry)">
-        <div className="flex h-28 items-center justify-center">
-          <span className="text-muted-foreground animate-pulse font-mono text-xs">
-            Loading OpenTelemetry spans...
-          </span>
+      <Panel title={UI_COPY.EXECUTIONS.WATERFALL.TITLE}>
+        <div className="space-y-2 p-1">
+          <Skeleton className="h-10 w-full rounded" />
+          <Skeleton className="h-10 w-full rounded" />
+          <Skeleton className="h-10 w-full rounded" />
         </div>
       </Panel>
     );
@@ -41,12 +43,10 @@ export function ExecutionTraceWaterfall({
 
   if (spans.length === 0) {
     return (
-      <Panel title="Distributed Tracing (OpenTelemetry)">
+      <Panel title={UI_COPY.EXECUTIONS.WATERFALL.TITLE}>
         <div className="flex h-24 flex-col items-center justify-center text-center">
           <Activity className="text-muted-foreground mb-1.5 size-5" />
-          <p className="text-muted-foreground text-xs">
-            No OpenTelemetry spans recorded for this execution session yet.
-          </p>
+          <p className="text-muted-foreground text-xs">{UI_COPY.EXECUTIONS.WATERFALL.EMPTY_DESC}</p>
         </div>
       </Panel>
     );
@@ -62,12 +62,14 @@ export function ExecutionTraceWaterfall({
   const totalWindowMs = Math.max(1, maxTime - minTime);
 
   return (
-    <Panel title="Distributed Tracing Waterfall">
+    <Panel title={UI_COPY.EXECUTIONS.WATERFALL.TITLE}>
       <div className="mb-2 flex items-center justify-between border-b pb-2">
-        <span className="text-muted-foreground text-xs font-medium">Execution Spans</span>
+        <span className="text-muted-foreground text-xs font-medium">
+          {UI_COPY.EXECUTIONS.WATERFALL.SPANS_LABEL}
+        </span>
         <div className="text-muted-foreground flex items-center gap-1.5 font-mono text-[11px]">
           <Clock className="size-3" />
-          <span>Total: {totalWindowMs}ms</span>
+          <span>{UI_COPY.EXECUTIONS.WATERFALL.TOTAL_DURATION(totalWindowMs)}</span>
         </div>
       </div>
       <div className="space-y-2">
@@ -138,14 +140,16 @@ export function ExecutionTraceWaterfall({
               {isExpanded && (
                 <div className="border-border/40 bg-background/90 mt-2.5 rounded border p-2 font-mono text-[10px]">
                   <div className="text-muted-foreground mb-1 font-semibold">
-                    Span ID: {span.spanId}
+                    {UI_COPY.EXECUTIONS.WATERFALL.SPAN_ID(span.spanId)}
                   </div>
                   {Object.keys(span.attributes).length > 0 ? (
                     <pre className="text-muted-foreground overflow-x-auto whitespace-pre-wrap">
                       {JSON.stringify(span.attributes, null, 2)}
                     </pre>
                   ) : (
-                    <span className="text-muted-foreground italic">No span attributes</span>
+                    <span className="text-muted-foreground italic">
+                      {UI_COPY.EXECUTIONS.WATERFALL.NO_ATTRIBUTES}
+                    </span>
                   )}
                 </div>
               )}

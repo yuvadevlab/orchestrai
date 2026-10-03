@@ -30,7 +30,7 @@ class CrawlerSettings(BaseSettings):
         description="Upstream OrchestrAI Gateway URL for RAG ingestion",
     )
     rag_ingest_path: str = Field(
-        default="/rag/documents",
+        default_factory=lambda: os.getenv("RAG_INGEST_PATH", "/rag/documents"),
         description="Gateway endpoint path for storing document embeddings",
     )
 

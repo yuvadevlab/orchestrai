@@ -11,6 +11,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { BookOpen, Brain, Layers } from "lucide-react";
 import { KnowledgePageContent } from "@/features/knowledge";
 import { MemoryPageContent } from "@/features/memory";
+import { UI_COPY } from "@/lib/ui-copy";
 
 type ContextTab = "knowledge" | "memory";
 
@@ -42,7 +43,9 @@ export function ContextHubPageContent(): React.JSX.Element {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <Layers className="text-primary size-4" />
-            <span className="text-sm font-semibold tracking-tight">Context Hub</span>
+            <span className="text-sm font-semibold tracking-tight">
+              {UI_COPY.CONTEXT.PAGE_TITLE}
+            </span>
           </div>
           <div className="bg-muted/40 border-border/60 flex rounded-md border p-0.5 text-xs">
             <button
@@ -55,7 +58,7 @@ export function ContextHubPageContent(): React.JSX.Element {
               }`}
             >
               <BookOpen className="size-3.5" />
-              <span>RAG Knowledge Base</span>
+              <span>{UI_COPY.CONTEXT.TAB_KNOWLEDGE}</span>
             </button>
 
             <button
@@ -68,7 +71,7 @@ export function ContextHubPageContent(): React.JSX.Element {
               }`}
             >
               <Brain className="size-3.5" />
-              <span>Episodic & Semantic Memory</span>
+              <span>{UI_COPY.CONTEXT.TAB_MEMORY}</span>
             </button>
           </div>
         </div>

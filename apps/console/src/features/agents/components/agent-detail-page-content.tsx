@@ -11,9 +11,10 @@ import Link from "next/link";
 import { Panel, StatusChip } from "@yuva-devlab/ui";
 import { useAgents } from "../api";
 import { useExecutions } from "../../executions/api";
-import { EmptyState } from "@/components";
+import { EmptyState, DetailPageSkeleton } from "@/components";
 import { Bot } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /** A label–value definition list row for agent detail panels. */
 function Row({
@@ -50,37 +51,36 @@ export function AgentDetailPageContent({
   return (
     <PageShell
       title={agent ? agent.name : `Agent / ${agentId}`}
-      breadcrumb="Agents"
+      breadcrumb={UI_COPY.AGENTS.BREADCRUMB}
       stats={agent ? `${agent.status} · ${agent.model}` : undefined}
-      description="Autonomous agent identity, system prompt boundaries, parameter specs, and recorded traces."
+      description={agent?.description || UI_COPY.AGENTS.PAGE_DESCRIPTION}
     >
       {isLoadingAgents ? (
-        <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
-          <span className="text-muted-foreground animate-pulse font-mono text-xs">
-            Loading agent specification...
-          </span>
-        </div>
+        <DetailPageSkeleton />
       ) : !agent ? (
         <EmptyState
           icon={Bot}
-          title="Agent Entity Not Found"
-          description={`No agent with identifier "${agentId}" was found in the cluster registry.`}
+          title={UI_COPY.AGENTS.DETAIL.NOT_FOUND_TITLE}
+          description={UI_COPY.AGENTS.DETAIL.NOT_FOUND_DESC(agentId)}
         />
       ) : (
         <div className="grid gap-3 lg:grid-cols-3">
           {/* Main Column */}
           <div className="space-y-3 lg:col-span-2">
-            <Panel title="System Instructions">
+            <Panel title={UI_COPY.AGENTS.DETAIL.SYSTEM_INSTRUCTIONS_TITLE}>
               <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
                 {agent.description}
               </p>
             </Panel>
 
-            <Panel title="Execution history" meta={`${history.length} recorded runs`}>
+            <Panel
+              title={UI_COPY.AGENTS.DETAIL.EXECUTION_HISTORY_TITLE}
+              meta={UI_COPY.AGENTS.DETAIL.RUNS_COUNT(history.length)}
+            >
               <div className="space-y-2">
                 {history.length === 0 ? (
                   <p className="text-muted-foreground font-mono text-xs">
-                    No recorded runs for this agent yet.
+                    {UI_COPY.AGENTS.DETAIL.NO_RUNS_DESC}
                   </p>
                 ) : (
                   history.map((execution) => (
@@ -103,7 +103,7 @@ export function AgentDetailPageContent({
 
           {/* Sidebar Cards */}
           <div className="space-y-3">
-            <Panel title="Identity">
+            <Panel title={UI_COPY.AGENTS.DETAIL.SPECIFICATION_TITLE}>
               <div className="flex items-center gap-3">
                 <span className="border-border bg-secondary text-primary font-display grid size-12 place-items-center rounded-md border text-xl">
                   ◉
@@ -114,23 +114,35 @@ export function AgentDetailPageContent({
                 </div>
               </div>
               <dl className="mt-4 space-y-2 text-xs">
-                <Row label="Model" value={agent.model} mono />
-                <Row label="Status" value={agent.status} />
-                <Row label="Executions" value={String(agent.totalExecutions)} />
-                <Row label="Success rate" value={`${agent.successRate}%`} />
+                <Row label={UI_COPY.AGENTS.DETAIL.MODEL_LABEL} value={agent.model} mono />
+                <Row label={UI_COPY.AGENTS.DETAIL.STATUS_LABEL} value={agent.status} />
+                <Row
+                  label={UI_COPY.AGENTS.DETAIL.EXECUTIONS_LABEL}
+                  value={String(agent.totalExecutions)}
+                />
+                <Row
+                  label={UI_COPY.AGENTS.DETAIL.SUCCESS_RATE_LABEL}
+                  value={UI_COPY.AGENTS.DETAIL.PERCENTAGE(agent.successRate)}
+                />
               </dl>
             </Panel>
 
-            <Panel title="Attached Tools">
+            <Panel title={UI_COPY.AGENTS.DETAIL.TOOLS_TITLE}>
               <div className="flex flex-wrap gap-1.5">
-                {agent.tools.map((tool) => (
-                  <span
-                    key={tool}
-                    className="border-primary/25 bg-primary/5 text-primary rounded border px-2 py-0.5 font-mono text-[10px]"
-                  >
-                    {tool}
-                  </span>
-                ))}
+                {agent.tools.length === 0 ? (
+                  <p className="text-muted-foreground font-mono text-xs">
+                    {UI_COPY.AGENTS.DETAIL.NO_TOOLS_DESC}
+                  </p>
+                ) : (
+                  agent.tools.map((tool) => (
+                    <span
+                      key={tool}
+                      className="border-primary/25 bg-primary/5 text-primary rounded border px-2 py-0.5 font-mono text-[10px]"
+                    >
+                      {tool}
+                    </span>
+                  ))
+                )}
               </div>
             </Panel>
           </div>

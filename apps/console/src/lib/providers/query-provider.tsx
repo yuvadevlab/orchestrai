@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * @file apps/console/src/lib/query-provider.tsx
+ * @file apps/console/src/lib/providers/query-provider.tsx
  * @description Centralized TanStack Query client provider managing server state caching and garbage collection.
- * @module apps/console/lib
+ * @module apps/console/lib/providers
  */
 
 import React, { useState, type ReactNode } from "react";

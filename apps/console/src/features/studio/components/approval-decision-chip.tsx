@@ -8,6 +8,7 @@ import React from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { Badge } from "@yuva-devlab/ui";
 import { PermissionScope } from "@orchestrai/shared-types";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { StudioApprovalRequest } from "../types";
 
 export interface ApprovalDecisionChipProps {
@@ -32,7 +33,7 @@ export function ApprovalDecisionChip({ request }: ApprovalDecisionChipProps): Re
   return (
     <div
       role="log"
-      aria-label={`Permission decision: ${request.resolvedScope}`}
+      aria-label={UI_COPY.STUDIO.CLEARANCE.DECISION_LOG_A11Y(request.resolvedScope ?? "")}
       className="border-border/40 bg-muted/20 my-2 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border px-3 py-1.5 font-mono text-[11px]"
     >
       {/* Decision icon */}
@@ -44,7 +45,9 @@ export function ApprovalDecisionChip({ request }: ApprovalDecisionChipProps): Re
 
       {/* Verb + scope */}
       <span className={isDeny ? "text-destructive font-semibold" : "text-primary font-semibold"}>
-        {isDeny ? "Denied" : `Cleared (${request.resolvedScope})`}
+        {isDeny
+          ? UI_COPY.STUDIO.CLEARANCE.DENIED_SHORT
+          : UI_COPY.STUDIO.CLEARANCE.CLEARED_SHORT(request.resolvedScope ?? "")}
       </span>
 
       {/* Separator */}

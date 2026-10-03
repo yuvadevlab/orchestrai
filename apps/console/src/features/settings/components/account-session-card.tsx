@@ -11,6 +11,7 @@ import { Panel, Button, Badge } from "@yuva-devlab/ui";
 import { LogOut, Copy, Check } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { getInitials } from "@/lib/utils";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /**
  * Clean account profile and session security panel with properly aligned sign out actions.
@@ -29,13 +30,13 @@ export function AccountSessionCard(): React.JSX.Element {
 
   return (
     <Panel
-      title="Active operator profile"
+      title={UI_COPY.SETTINGS.ACCOUNT.TITLE}
       meta={
         <Badge
           variant="outline"
           className="border-primary/30 bg-primary/10 text-primary font-mono text-[10px]"
         >
-          ACTIVE SESSION
+          {UI_COPY.SETTINGS.ACCOUNT.BADGE_ACTIVE}
         </Badge>
       }
       className="md:col-span-2"
@@ -47,11 +48,9 @@ export function AccountSessionCard(): React.JSX.Element {
           </span>
           <div className="min-w-0">
             <p className="font-display text-foreground text-sm font-semibold">
-              {user?.name || "Operator"}
+              {user?.name || UI_COPY.SETTINGS.ACCOUNT.FALLBACK_OPERATOR}
             </p>
-            <p className="text-muted-foreground font-mono text-[11px]">
-              {user?.email || "operator@orchestrai.dev"}
-            </p>
+            <p className="text-muted-foreground font-mono text-[11px]">{user?.email || ""}</p>
           </div>
           <Button
             variant="outline"
@@ -60,17 +59,19 @@ export function AccountSessionCard(): React.JSX.Element {
             className="border-border hover:border-destructive/40 hover:text-destructive ml-auto cursor-pointer gap-1.5 font-mono text-xs"
           >
             <LogOut className="size-3.5" />
-            <span>Sign out session</span>
+            <span>{UI_COPY.SETTINGS.ACCOUNT.SIGN_OUT_SESSION}</span>
           </Button>
         </div>
 
         <dl className="border-border/60 grid gap-2.5 border-t pt-3.5 text-xs sm:grid-cols-2">
           <div className="border-border/60 flex items-center justify-between gap-3 border-b pb-1.5 sm:border-b-0 sm:pb-0">
-            <dt className="text-muted-foreground">Session state</dt>
-            <dd className="text-foreground font-medium">Active session</dd>
+            <dt className="text-muted-foreground">{UI_COPY.SETTINGS.ACCOUNT.SESSION_STATE}</dt>
+            <dd className="text-foreground font-medium">
+              {UI_COPY.SETTINGS.ACCOUNT.ACTIVE_SESSION}
+            </dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-muted-foreground">Tenant partition</dt>
+            <dt className="text-muted-foreground">{UI_COPY.SETTINGS.ACCOUNT.TENANT_PARTITION}</dt>
             <dd className="text-foreground flex items-center gap-1.5 font-mono text-[11px]">
               <span>{tenantId}</span>
               <Button
@@ -78,7 +79,8 @@ export function AccountSessionCard(): React.JSX.Element {
                 size="icon"
                 onClick={handleCopyTenant}
                 className="text-muted-foreground hover:text-foreground size-6"
-                title="Copy Full Tenant ID"
+                title={UI_COPY.SETTINGS.ACCOUNT.COPY_TENANT_TOOLTIP}
+                aria-label={UI_COPY.SETTINGS.ACCOUNT.COPY_TENANT_TOOLTIP}
               >
                 {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
               </Button>

@@ -17,6 +17,7 @@ import {
   SelectItem,
   toast,
 } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useRunBenchmark } from "../api";
 import { EvaluationsResultsDisplay } from "./evaluations-results-display";
 import type { EvaluationDataset } from "../types";
@@ -36,9 +37,9 @@ export function EvaluationsRunnerCard({ datasets }: EvaluationsRunnerCardProps):
     if (!selectedDataset) return;
     try {
       await runBenchmark({ datasetName: selectedDataset });
-      toast.success(`Benchmark "${selectedDataset}" completed`);
+      toast.success(UI_COPY.EVALUATIONS.RUNNER.TOAST_COMPLETED(selectedDataset));
     } catch {
-      toast.error("Failed to run benchmark evaluation suite");
+      toast.error(UI_COPY.EVALUATIONS.RUNNER.TOAST_ERROR);
     }
   };
 
@@ -46,18 +47,17 @@ export function EvaluationsRunnerCard({ datasets }: EvaluationsRunnerCardProps):
     <div className="border-border bg-card/60 rounded-md border p-4 backdrop-blur">
       <div className="mb-3 flex items-center gap-2">
         <BarChart2 className="text-primary size-4" />
-        <h3 className="text-sm font-semibold tracking-tight">Run Capability Benchmark</h3>
+        <h3 className="text-sm font-semibold tracking-tight">
+          {UI_COPY.EVALUATIONS.RUNNER.CARD_TITLE}
+        </h3>
       </div>
-      <p className="text-muted-foreground mb-4 text-xs">
-        Evaluate your cluster model against structured tool execution, reasoning steps, and accuracy
-        metrics.
-      </p>
+      <p className="text-muted-foreground mb-4 text-xs">{UI_COPY.EVALUATIONS.RUNNER.CARD_DESC}</p>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="w-64">
           <Select value={selectedDataset} onValueChange={setSelectedDataset}>
             <SelectTrigger className="border-border bg-background h-8 text-xs font-medium">
-              <SelectValue placeholder="Select benchmark dataset" />
+              <SelectValue placeholder={UI_COPY.EVALUATIONS.RUNNER.SELECT_PLACEHOLDER} />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border text-foreground text-xs">
               {datasets.map((d) => (
@@ -80,7 +80,11 @@ export function EvaluationsRunnerCard({ datasets }: EvaluationsRunnerCardProps):
           ) : (
             <Play className="size-3.5 fill-current" />
           )}
-          <span>{isRunning ? "Evaluating Swarm..." : "Run Benchmark"}</span>
+          <span>
+            {isRunning
+              ? UI_COPY.EVALUATIONS.RUNNER.RUNNING_BUTTON
+              : UI_COPY.EVALUATIONS.RUNNER.RUN_BUTTON}
+          </span>
         </Button>
       </div>
 

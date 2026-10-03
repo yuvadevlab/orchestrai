@@ -9,6 +9,7 @@
 import React from "react";
 import { History, Sidebar, Sparkles } from "lucide-react";
 import { Button, Badge } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 
 import { StudioWorkspaceSelector } from "./studio-workspace-selector";
 
@@ -41,10 +42,10 @@ export function StudioHeader({
           size="sm"
           onClick={onOpenHistory}
           className="h-8 gap-1.5 px-2.5 font-mono text-xs"
-          title="Open session threads history"
+          title={UI_COPY.STUDIO.HEADER.THREADS_TOOLTIP}
         >
           <History className="size-3.5" />
-          <span className="hidden sm:inline">Threads</span>
+          <span className="hidden sm:inline">{UI_COPY.STUDIO.HEADER.THREADS_BUTTON}</span>
         </Button>
       </div>
 
@@ -59,7 +60,9 @@ export function StudioHeader({
           }`}
         >
           <Sparkles className="size-3" />
-          {isRunning ? "COLLABORATING..." : "SWARM // READY"}
+          {isRunning
+            ? UI_COPY.STUDIO.HEADER.STATUS_COLLABORATING
+            : UI_COPY.STUDIO.HEADER.STATUS_READY}
         </Badge>
 
         <Button
@@ -67,8 +70,8 @@ export function StudioHeader({
           size="sm"
           onClick={onToggleRail}
           className={`size-8 p-0 ${railOpen ? "bg-accent text-primary" : ""}`}
-          title="Toggle inspector rail"
-          aria-label="Toggle inspector rail"
+          title={UI_COPY.STUDIO.HEADER.TOGGLE_INSPECTOR_A11Y}
+          aria-label={UI_COPY.STUDIO.HEADER.TOGGLE_INSPECTOR_A11Y}
         >
           <Sidebar className="size-3.5" />
         </Button>

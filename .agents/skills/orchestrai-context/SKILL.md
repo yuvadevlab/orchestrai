@@ -33,9 +33,10 @@ Use this skill when developing, refactoring, or planning any feature within Orch
 4. **Zero Hardcoded Models & Synthetic Agents**: All models and agents are DB- or env-driven (`DEFAULT_MODEL_NAME`). Never auto-seed fallback agents.
 5. **Testing Policy**: Never write test cases or Storybook stories during phase implementation unless requested.
 6. **Package Boundaries**: `@orchestrai/core` is pure with zero workspace dependencies. Dependencies flow inward.
+7. **Dynamic Server-Driven Configuration (Big 3 Standard) & Centralized Regex**: Zero hardcoded runtime parameters (commands, prompts, steps, temperatures, cache/RAG limits). All runtime parameters must be database/control-plane-driven. All regexes must come from `@orchestrai/regex`.
 
 ## Monorepo Directory
 
 - **Apps (`apps/*`)**: `console` (3001), `gateway` (4001), `realtime` (4002), `worker` (4003), `admin` (4004), `orchestrator` (gRPC 50051), `intelligence` (Python LangGraph 8082), `crawler` (Python Playwright 8083).
-- **Packages (`packages/*`)**: `core`, `shared-types`, `database`, `models`, `tools`, `agent`, `runtime`, `memory`, `rag`, `semantic-cache`, `model-router`, `eval`, `prompts`, `billing`, `resilience`, `events`, `queue`, `grpc`, `observability`, `sdk`.
-- **Quality Gates**: `pnpm typecheck` (46 targets), `pnpm lint` (ESLint + Ruff), `pnpm format:check` (Prettier + Ruff).
+- **Packages (`packages/*`)**: `core`, `shared-types`, `database`, `models`, `tools`, `agent`, `runtime`, `memory`, `rag`, `semantic-cache`, `model-router`, `eval`, `prompts`, `billing`, `resilience`, `events`, `queue`, `grpc`, `observability`, `sdk`, `regex`.
+- **Quality Gates**: `pnpm typecheck` (48 targets), `pnpm lint` (ESLint + Ruff), `pnpm format:check` (Prettier + Ruff).

@@ -1,12 +1,14 @@
 /**
  * @file apps/gateway/src/modules/streaming/live-turn-compaction.ts
  * @description Manages context threshold evaluation, token limits, and compaction notices for live turns.
+ * Dynamically driven by database platform configuration with fallback bounds.
  * @module apps/gateway/modules/streaming
  */
 
 import { countMessageTokens } from "@/modules/billing/billing.service";
 import type { LiveMessage } from "@/modules/streaming/live-message-history";
 import type { TurnExecutorCallbacks } from "@/modules/streaming/live-turn-executor";
+import { platformConfigService } from "@/modules/platform/services/platform-config.service";
 
 /**
  * Absolute safety ceiling for autonomous turn loops.
@@ -30,7 +32,6 @@ export const DEFAULT_CONTEXT_WINDOW = Math.max(
 
 /**
  * Fraction of the context window at which compaction is triggered.
- * Sourced from CONTEXT_COMPACTION_THRESHOLD env (0.0–1.0).
  * Default 0.75 leaves 25% room for the next LLM response + tool result.
  */
 export const COMPACTION_THRESHOLD_RATIO = Math.min(
@@ -40,16 +41,32 @@ export const COMPACTION_THRESHOLD_RATIO = Math.min(
 
 /**
  * Checks whether the current message history exceeds the compaction threshold.
- * When true, the history is too long and needs to be summarized before the next turn.
+ * Resolves compaction threshold dynamically from database platform configuration.
  *
  * @param history - Current conversation history
  * @param contextWindow - Model context window size sourced from the DB model record
+ * @param customRatio - Optional explicit threshold override
  * @returns true if compaction should be triggered
  */
-export function shouldCompact(history: LiveMessage[], contextWindow: number): boolean {
+export async function shouldCompact(
+  history: LiveMessage[],
+  contextWindow: number,
+  customRatio?: number,
+): Promise<boolean> {
   const tokenCount = countMessageTokens(history);
+  let ratio = customRatio;
+
+  if (typeof ratio !== "number") {
+    try {
+      const config = await platformConfigService.getCompactionConfig();
+      ratio = config.thresholdRatio;
+    } catch {
+      ratio = COMPACTION_THRESHOLD_RATIO;
+    }
+  }
+
   // Trigger at configured ratio (default 75%) to leave room for the next response + tool result
-  return tokenCount > contextWindow * COMPACTION_THRESHOLD_RATIO;
+  return tokenCount > contextWindow * ratio;
 }
 
 /**

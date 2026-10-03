@@ -8,6 +8,7 @@
 
 import React, { useEffect, useState } from "react";
 import { FileCode, Bot, FileText, File } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useWorkspaceFiles } from "../api/use-workspace-files";
 import type { SpecialistPersona } from "../types";
 
@@ -112,8 +113,8 @@ export function StudioMentionPopover({
   return (
     <div className="border-border bg-card/95 text-card-foreground animate-in fade-in-50 slide-in-from-bottom-2 absolute bottom-full left-4 z-50 mb-2 max-h-64 w-80 overflow-y-auto rounded-md border p-1 shadow-2xl backdrop-blur-md">
       <div className="border-border/60 text-muted-foreground flex items-center justify-between border-b px-2 py-1 font-mono text-[10px] uppercase">
-        <span>Mentions (@)</span>
-        <span>{items.length} matches</span>
+        <span>{UI_COPY.STUDIO.MENTIONS.HEADER_TITLE}</span>
+        <span>{UI_COPY.STUDIO.MENTIONS.MATCHES_COUNT(items.length)}</span>
       </div>
 
       <div className="space-y-0.5 p-0.5">

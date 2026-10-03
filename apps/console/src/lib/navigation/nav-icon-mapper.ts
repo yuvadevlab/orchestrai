@@ -1,7 +1,7 @@
 /**
- * @file apps/console/src/lib/nav-icon-mapper.ts
+ * @file apps/console/src/lib/navigation/nav-icon-mapper.ts
  * @description Dynamic Lucide icon resolver for database-driven navigation items.
- * @module apps/console/lib
+ * @module apps/console/lib/navigation
  */
 
 import React from "react";

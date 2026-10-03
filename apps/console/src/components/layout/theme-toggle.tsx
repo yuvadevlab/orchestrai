@@ -12,6 +12,7 @@
 import React from "react";
 import { Moon, Sun } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, useTheme } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /**
  * Interactive button that toggles between light and dark color schemes.
@@ -29,14 +30,16 @@ export function ThemeToggle(): React.JSX.Element {
         <button
           type="button"
           onClick={handleToggle}
-          aria-label="Toggle color theme"
+          aria-label={UI_COPY.COMMON.A11Y.TOGGLE_THEME}
           className="text-muted-foreground hover:bg-accent hover:text-foreground grid size-9 shrink-0 cursor-pointer place-items-center rounded-md transition-colors"
         >
           {resolvedTheme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>
       </TooltipTrigger>
       <TooltipContent side="right" className="font-mono text-xs">
-        {resolvedTheme === "dark" ? "Switch to Light mode" : "Switch to Dark mode"}
+        {resolvedTheme === "dark"
+          ? UI_COPY.COMMON.A11Y.SWITCH_LIGHT
+          : UI_COPY.COMMON.A11Y.SWITCH_DARK}
       </TooltipContent>
     </Tooltip>
   );

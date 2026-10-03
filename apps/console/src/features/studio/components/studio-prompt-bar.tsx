@@ -21,6 +21,7 @@ import { StudioPromptActionRow } from "./studio-prompt-action-row";
 import { StudioMentionPopover } from "./studio-mention-popover";
 import { StudioSlashCommands } from "./studio-slash-commands";
 import { usePromptCommands } from "../hooks/use-prompt-commands";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface StudioPromptBarProps {
   prompt: string;
@@ -191,7 +192,7 @@ export function StudioPromptBar({
               value={prompt}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Describe any objective — use @ to mention files/specialists, / for commands…"
+              placeholder={UI_COPY.STUDIO.PROMPT.PLACEHOLDER}
               rows={3}
               disabled={isRunning}
               className="placeholder:text-muted-foreground max-h-56 min-h-21 w-full resize-none bg-transparent px-3 py-2 text-sm leading-relaxed outline-none disabled:opacity-50"

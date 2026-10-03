@@ -9,7 +9,7 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { ModelStatus, type LlmModel, type LlmProvider, type ModelDefinition } from "../types";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/lib/auth";
 
 /**
  * Custom React hook querying live LLM models from the Gateway API.

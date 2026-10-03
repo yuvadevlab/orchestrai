@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * @file apps/console/src/lib/use-modes.ts
+ * @file apps/console/src/lib/hooks/use-modes.ts
  * @description TanStack Query hook fetching platform execution modes from the live database.
- * @module apps/console/lib
+ * @module apps/console/lib/hooks
  */
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";

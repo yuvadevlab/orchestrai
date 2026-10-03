@@ -99,3 +99,80 @@ export interface TenantRecord {
   readonly createdAt: string;
   readonly updatedAt: string;
 }
+
+/**
+ * Universal Platform Slash Command entity representation.
+ */
+export interface PlatformCommandRecord {
+  readonly commandId: string;
+  readonly command: string;
+  readonly title: string;
+  readonly description: string;
+  readonly icon: string;
+  readonly targetMode?: string;
+  readonly action?: string;
+  readonly isEnabled: boolean;
+  readonly sortOrder: number;
+  readonly createdAt?: string;
+  readonly updatedAt?: string;
+}
+
+/**
+ * Canonical configuration namespaces for dynamic server-driven parameters.
+ */
+export enum ConfigNamespace {
+  COMMANDS = "commands",
+  SUGGESTIONS = "suggestions",
+  EXECUTION = "execution",
+  CACHE = "cache",
+  COMPACTION = "compaction",
+  RAG = "rag",
+  BRANDING = "branding",
+  TOOLS = "tools",
+}
+
+/**
+ * Canonical configuration keys for dynamic parameters.
+ */
+export enum ConfigKey {
+  SLASH_COMMANDS = "slash_commands",
+  WELCOME_CHIPS = "welcome_chips",
+  WELCOME_HEADLINE = "welcome_headline",
+  WELCOME_SUBTITLE = "welcome_subtitle",
+  EXECUTION_DEFAULTS = "execution_defaults",
+  SEMANTIC_CACHE = "semantic_cache",
+  COMPACTION_THRESHOLD = "compaction_threshold",
+  RAG_CHUNKING = "rag_chunking",
+  BRAND_NAME = "brand_name",
+  BRAND_VERSION = "brand_version",
+  CATEGORY_BLURBS = "category_blurbs",
+}
+
+/**
+ * Canonical feature flag and kill switch keys.
+ */
+export enum FeatureFlagKey {
+  KILL_SWITCH_BASH_TOOL = "kill_switch_bash_tool",
+  ENABLE_EXTENDED_THINKING = "enable_extended_thinking",
+  KILL_SWITCH_CRAWLER = "kill_switch_crawler",
+  MAINTENANCE_MODE = "maintenance_mode",
+}
+
+/**
+ * Canonical cognitive policy slugs.
+ */
+export enum CognitivePolicySlug {
+  DEEP_REASONING = "deep_reasoning",
+  AUTONOMOUS_ACT = "autonomous_act",
+  FAST_CHAT = "fast_chat",
+}
+
+/**
+ * Canonical system prompt template slugs.
+ */
+export enum SystemPromptSlug {
+  MODE_PLAN = "mode_plan",
+  MODE_ACT = "mode_act",
+  MODE_CHAT = "mode_chat",
+  PLATFORM_RULES = "platform_rules",
+}

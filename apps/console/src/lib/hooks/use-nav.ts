@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * @file apps/console/src/lib/use-nav.ts
+ * @file apps/console/src/lib/hooks/use-nav.ts
  * @description TanStack Query hook fetching dynamic navigation items from the live database.
- * @module apps/console/lib
+ * @module apps/console/lib/hooks
  */
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";

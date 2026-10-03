@@ -8,6 +8,7 @@
 
 import React from "react";
 import { Folder, Check, Clock, Trash2 } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { WorkspaceRecord } from "@/lib/stores";
 
 export interface StudioWorkspaceRecentListProps {
@@ -32,7 +33,7 @@ export function StudioWorkspaceRecentList({
     <div className="border-border/60 border-t pt-1.5">
       <div className="text-muted-foreground flex items-center justify-between p-1 font-mono text-[11px]">
         <span className="flex items-center gap-1">
-          <Clock className="size-3" /> Recent Workspaces
+          <Clock className="size-3" /> {UI_COPY.STUDIO.WORKSPACE.RECENTS_TITLE}
         </span>
         {recentWorkspaces.length > 1 && (
           <button
@@ -40,7 +41,7 @@ export function StudioWorkspaceRecentList({
             onClick={onClear}
             className="hover:text-destructive text-[10px] transition-colors"
           >
-            Clear
+            {UI_COPY.STUDIO.WORKSPACE.CLEAR_RECENTS}
           </button>
         )}
       </div>
@@ -82,7 +83,8 @@ export function StudioWorkspaceRecentList({
                     onRemove(ws.id);
                   }}
                   className="hover:text-destructive p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
-                  title="Remove from history"
+                  title={UI_COPY.STUDIO.WORKSPACE.REMOVE_TOOLTIP}
+                  aria-label={UI_COPY.STUDIO.WORKSPACE.REMOVE_TOOLTIP}
                 >
                   <Trash2 className="size-3" />
                 </button>

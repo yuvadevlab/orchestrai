@@ -10,6 +10,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowDown } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkMessage } from "../types";
 import { StudioMessageItem } from "./studio-message-item";
 
@@ -138,9 +139,10 @@ export function VirtualizedMessageFeed({
           <button
             type="button"
             onClick={scrollToBottom}
+            aria-label={UI_COPY.STUDIO.FEED.NEW_OUTPUT_A11Y}
             className="bg-primary text-primary-foreground hover:bg-primary/90 pointer-events-auto flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold shadow-lg transition-transform hover:scale-105 active:scale-95"
           >
-            <span>New output streaming below</span>
+            <span>{UI_COPY.STUDIO.FEED.NEW_OUTPUT_STREAMING}</span>
             <ArrowDown className="size-3.5 animate-bounce" />
           </button>
         </div>

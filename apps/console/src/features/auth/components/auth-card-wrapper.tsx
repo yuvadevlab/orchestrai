@@ -10,6 +10,7 @@ import React, { type ReactNode } from "react";
 import Link from "next/link";
 import { Sparkles, Terminal } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface AuthCardWrapperProps {
   title: string;
@@ -27,7 +28,7 @@ export interface AuthCardWrapperProps {
 export function AuthCardWrapper({
   title,
   subtitle,
-  badgeText = "AI OPERATOR ACCESS",
+  badgeText = UI_COPY.AUTH.CARD.BADGE_TEXT,
   children,
   footerPrompt,
   footerLinkText,
@@ -91,11 +92,11 @@ export function AuthCardWrapper({
           <div className="border-border/40 text-muted-foreground/50 mt-4 flex items-center justify-between border-t pt-3 font-mono text-[9px]">
             <span className="flex items-center gap-1">
               <Terminal className="size-2.5" />
-              <span>ORCH-NODE-V1</span>
+              <span>{UI_COPY.AUTH.CARD.NODE_TELEMETRY}</span>
             </span>
             <span className="flex items-center gap-1">
               <span className="bg-primary size-1.5 animate-pulse rounded-full" />
-              <span>ENGINE: READY</span>
+              <span>{UI_COPY.AUTH.CARD.ENGINE_STATUS}</span>
             </span>
           </div>
         </CardContent>

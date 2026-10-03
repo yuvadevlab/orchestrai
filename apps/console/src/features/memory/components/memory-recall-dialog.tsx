@@ -21,12 +21,13 @@ import {
   DialogBody,
   DialogFooter,
 } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useSearchMemories } from "../api";
 import type { ScoredMemoryResult } from "../types";
 
 export interface MemoryRecallDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
 }
 
 /**
@@ -48,7 +49,7 @@ export function MemoryRecallDialog({
     try {
       await recall(queryText.trim());
     } catch {
-      toast.error("Failed to query memory store");
+      toast.error(UI_COPY.MEMORY.RECALL_TESTER.TOAST_ERROR);
     }
   };
 
@@ -67,9 +68,11 @@ export function MemoryRecallDialog({
               <Sparkles className="size-4" />
             </div>
             <div>
-              <DialogTitle className="text-base font-semibold">Memory Recall Tester</DialogTitle>
+              <DialogTitle className="text-base font-semibold">
+                {UI_COPY.MEMORY.RECALL_TESTER.TITLE}
+              </DialogTitle>
               <DialogDescription className="text-muted-foreground text-xs">
-                Test semantic recall matching what agents will see during session prompt synthesis.
+                {UI_COPY.MEMORY.RECALL_TESTER.DESCRIPTION}
               </DialogDescription>
             </div>
           </div>
@@ -81,7 +84,7 @@ export function MemoryRecallDialog({
               <Input
                 value={queryText}
                 onChange={(e) => setQueryText(e.target.value)}
-                placeholder="Enter a prompt to recall associated agent memories..."
+                placeholder={UI_COPY.MEMORY.RECALL_TESTER.PLACEHOLDER}
                 startIcon={<Search className="size-3.5" />}
                 className="bg-card h-8 text-xs"
               />
@@ -97,7 +100,7 @@ export function MemoryRecallDialog({
               ) : (
                 <Search className="size-3.5" />
               )}
-              <span>Recall</span>
+              <span>{UI_COPY.MEMORY.RECALL_TESTER.SUBMIT_BUTTON}</span>
             </Button>
           </form>
 
@@ -106,7 +109,7 @@ export function MemoryRecallDialog({
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground font-mono">
-                  Recalled {results.length} memories for &quot;{queryText}&quot;
+                  {UI_COPY.MEMORY.RECALL_TESTER.MATCHES_COUNT(results.length, queryText)}
                 </span>
               </div>
 
@@ -114,7 +117,7 @@ export function MemoryRecallDialog({
                 <div className="border-border/60 bg-muted/20 flex flex-col items-center justify-center rounded border py-6 text-center">
                   <Brain className="text-muted-foreground mb-2 size-6" />
                   <p className="text-muted-foreground text-xs">
-                    No relevant memories recalled above relevance threshold.
+                    {UI_COPY.MEMORY.RECALL_TESTER.NO_MATCHES}
                   </p>
                 </div>
               ) : (
@@ -157,7 +160,7 @@ export function MemoryRecallDialog({
             onClick={handleClose}
             className="h-8 cursor-pointer text-xs"
           >
-            Close
+            {UI_COPY.COMMON.ACTIONS.CLOSE}
           </Button>
         </DialogFooter>
       </DialogContent>

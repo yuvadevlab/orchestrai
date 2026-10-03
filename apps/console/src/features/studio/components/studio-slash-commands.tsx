@@ -6,8 +6,13 @@
  * @module apps/console/features/studio/components
  */
 
-import React, { useEffect, useState } from "react";
-import { STUDIO_SLASH_COMMANDS, type SlashCommandItem } from "./studio-slash-commands.types";
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  type SlashCommandItem,
+  mapPlatformRecordToSlashCommand,
+} from "./studio-slash-commands.types";
+import { usePlatformCommands } from "../api";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export * from "./studio-slash-commands.types";
 
@@ -27,15 +32,30 @@ export function StudioSlashCommands({
 }: StudioSlashCommandsProps): React.JSX.Element | null {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  // Fetch commands
+  const { data: serverCommands } = usePlatformCommands();
+
+  // Resolve active commands list
+  const commands = useMemo<readonly SlashCommandItem[]>(() => {
+    if (!serverCommands || serverCommands.length === 0) {
+      return [];
+    }
+    return serverCommands.map(mapPlatformRecordToSlashCommand);
+  }, [serverCommands]);
+
   const cleanQuery = query.startsWith("/")
     ? query.slice(1).toLowerCase().trim()
     : query.toLowerCase().trim();
-  const filtered = STUDIO_SLASH_COMMANDS.filter(
-    (c) =>
-      c.command.toLowerCase().includes(cleanQuery) ||
-      c.title.toLowerCase().includes(cleanQuery) ||
-      c.description.toLowerCase().includes(cleanQuery),
-  );
+
+  // Filter commands matching current input query
+  const filtered = useMemo(() => {
+    return commands.filter(
+      (c) =>
+        c.command.toLowerCase().includes(cleanQuery) ||
+        c.title.toLowerCase().includes(cleanQuery) ||
+        c.description.toLowerCase().includes(cleanQuery),
+    );
+  }, [commands, cleanQuery]);
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -65,13 +85,14 @@ export function StudioSlashCommands({
     return () => window.removeEventListener("keydown", handleKeyDown, { capture: true });
   }, [filtered, selectedIndex, onSelect, onClose]);
 
+  // If no commands match the query, do not render popup
   if (filtered.length === 0) return null;
 
   return (
     <div className="border-border bg-card/95 text-card-foreground animate-in fade-in-50 slide-in-from-bottom-2 absolute bottom-full left-4 z-50 mb-2 max-h-72 w-80 overflow-y-auto rounded-md border p-1 shadow-2xl backdrop-blur-md">
       <div className="border-border/60 text-muted-foreground flex items-center justify-between border-b px-2 py-1 font-mono text-[10px] uppercase">
-        <span>Commands (/)</span>
-        <span>{filtered.length} available</span>
+        <span>{UI_COPY.STUDIO.COMMANDS.HEADER_TITLE}</span>
+        <span>{UI_COPY.STUDIO.COMMANDS.AVAILABLE_COUNT(filtered.length)}</span>
       </div>
 
       <div className="space-y-0.5 p-0.5">

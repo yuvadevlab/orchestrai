@@ -9,6 +9,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Folder, ChevronDown, Plus, FolderOpen, Copy } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useConsoleStore, type WorkspaceRecord } from "@/lib/stores";
 import { StudioWorkspaceRecentList } from "./studio-workspace-recent-list";
 
@@ -78,7 +79,7 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const displayName = activeWorkspace?.name || "Select Workspace";
+  const displayName = activeWorkspace?.name || UI_COPY.STUDIO.WORKSPACE.SELECT_WORKSPACE;
 
   return (
     <div className="relative inline-block text-left" ref={popoverRef}>
@@ -87,7 +88,7 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
         className="hover:border-primary/40 h-8 max-w-55 gap-1.5 px-2.5 font-mono text-xs"
-        title={activeWorkspace?.path || "Switch or open workspace"}
+        title={activeWorkspace?.path || UI_COPY.STUDIO.WORKSPACE.SWITCH_TOOLTIP}
       >
         <Folder className="text-primary size-3.5 shrink-0" />
         <span className="truncate font-semibold">{displayName}</span>
@@ -99,7 +100,7 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
           {/* Active Workspace Header */}
           <div className="border-border/60 border-b px-1 pb-2">
             <div className="text-muted-foreground flex items-center justify-between text-[11px] font-medium">
-              <span>ACTIVE WORKSPACE</span>
+              <span>{UI_COPY.STUDIO.WORKSPACE.ACTIVE_WORKSPACE}</span>
               {activeWorkspace?.path && (
                 <button
                   type="button"
@@ -107,13 +108,15 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
                   className="hover:text-foreground inline-flex items-center gap-1 font-mono text-[10px]"
                 >
                   <Copy className="size-2.5" />
-                  {copied ? "Copied!" : "Copy Path"}
+                  {copied ? UI_COPY.COMMON.ACTIONS.COPIED : UI_COPY.STUDIO.WORKSPACE.COPY_PATH}
                 </button>
               )}
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-sm font-semibold">
               <FolderOpen className="text-primary size-4" />
-              <span className="truncate">{activeWorkspace?.name || "orchestrai"}</span>
+              <span className="truncate">
+                {activeWorkspace?.name || UI_COPY.STUDIO.WORKSPACE.SELECT_WORKSPACE}
+              </span>
             </div>
             {activeWorkspace?.path && (
               <p
@@ -134,7 +137,7 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
               className="h-7 justify-center gap-1 font-mono text-xs"
             >
               <Plus className="size-3" />
-              <span>Open Folder</span>
+              <span>{UI_COPY.STUDIO.WORKSPACE.OPEN_FOLDER}</span>
             </Button>
             <Button
               variant="outline"
@@ -142,7 +145,7 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
               onClick={() => setIsEnteringPath(!isEnteringPath)}
               className="h-7 justify-center gap-1 font-mono text-xs"
             >
-              <span>Enter Path...</span>
+              <span>{UI_COPY.STUDIO.WORKSPACE.ENTER_PATH}</span>
             </Button>
           </div>
 
@@ -154,12 +157,12 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
                   type="text"
                   value={pathInput}
                   onChange={(e) => setPathInput(e.target.value)}
-                  placeholder="/Users/.../my-project"
+                  placeholder={UI_COPY.STUDIO.WORKSPACE.PATH_PLACEHOLDER}
                   className="border-border bg-background flex-1 rounded border px-2 py-1 font-mono text-xs outline-none"
                   autoFocus
                 />
                 <Button type="submit" size="sm" className="h-7 px-2 text-xs">
-                  Open
+                  {UI_COPY.STUDIO.WORKSPACE.OPEN_BUTTON}
                 </Button>
               </div>
             </form>

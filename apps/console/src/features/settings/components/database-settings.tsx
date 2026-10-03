@@ -10,6 +10,7 @@ import {
   Switch,
 } from "@yuva-devlab/ui";
 import { Database } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /**
  * Props for DatabaseSettings component.
@@ -36,15 +37,15 @@ export function DatabaseSettings({
       <CardHeader className="border-border/50 border-b pb-3">
         <div className="flex items-center gap-2">
           <Database className="text-primary size-4" />
-          <CardTitle className="text-sm font-semibold">PostgreSQL & Outbox Topology</CardTitle>
+          <CardTitle className="text-sm font-semibold">{UI_COPY.SETTINGS.DATABASE.TITLE}</CardTitle>
         </div>
         <CardDescription className="text-muted-foreground text-xs">
-          Primary relational connection and pgvector storage parameters.
+          {UI_COPY.SETTINGS.DATABASE.DESCRIPTION}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 p-4">
         <div className="space-y-2">
-          <Label className="text-xs font-medium">Database Connection URI</Label>
+          <Label className="text-xs font-medium">{UI_COPY.SETTINGS.DATABASE.URI_LABEL}</Label>
           <Input
             defaultValue={databaseUri}
             className="bg-background/50 font-mono text-xs"
@@ -53,12 +54,16 @@ export function DatabaseSettings({
         </div>
         <div className="flex items-center justify-between pt-2">
           <div className="space-y-0.5">
-            <span className="text-xs font-semibold">Transactional Outbox Poller</span>
+            <span className="text-xs font-semibold">{UI_COPY.SETTINGS.DATABASE.OUTBOX_TITLE}</span>
             <p className="text-muted-foreground text-[11px]">
-              Automatically flush unpublished outbox records
+              {UI_COPY.SETTINGS.DATABASE.OUTBOX_DESC}
             </p>
           </div>
-          <Switch checked={outboxEnabled} onCheckedChange={onOutboxChange} />
+          <Switch
+            checked={outboxEnabled}
+            onCheckedChange={onOutboxChange}
+            aria-label={UI_COPY.SETTINGS.DATABASE.OUTBOX_A11Y}
+          />
         </div>
       </CardContent>
     </Card>

@@ -460,3 +460,114 @@ Master architecture specification documented in [`master-architecture-plan.md`](
   - Full keyboard navigation (Arrow keys, Enter, Escape)
 - [x] **All Regular Expressions Sourced from `@orchestrai/regex`**:
   - Added `prompt.regex.ts` with `MENTION_QUERY_REGEX`, `SLASH_COMMAND_PREFIX_REGEX`, `TRAILING_PATH_SLASH_REGEX`, `PATH_SPLIT_REGEX`
+
+---
+
+### Milestone 11: Dynamic Platform Configuration & Slash Commands API
+
+#### [x] Dynamic Slash Commands API (`apps/gateway`)
+
+- [x] **Universal Entity Contract (`@orchestrai/shared-types`)**:
+  - Added `PlatformCommandRecord` interface
+- [x] **Gateway Service & Controller (`apps/gateway/src/modules/platform/`)**:
+  - Implemented `PlatformCommandService` managing commands (`listCommands`, `getCommand`, `createCommand`, `updateCommand`, `deleteCommand`)
+  - Implemented `PlatformCommandController` exposing `GET /api/v1/commands`, `POST /api/v1/commands`, `PUT /api/v1/commands/:id`, `DELETE /api/v1/commands/:id`
+  - Registered route group on `/commands` with admin authorization for mutations
+  - Integrated into Gateway bootstrap in `apps/gateway/src/index.ts`
+
+#### [x] Dynamic Slash Commands Consumer (`apps/console`)
+
+- [x] **`usePlatformCommands` API Hook**:
+  - Implemented TanStack Query hook querying `/api/v1/commands`
+  - Re-exported from `@/features/studio/api`
+- [x] **Zero Hardcoded Frontend Commands**:
+  - Removed static fallback commands from client code
+  - Implemented dynamic icon resolution dictionary (`resolveCommandIcon`) mapping icon names to Lucide icons
+  - Updated `StudioSlashCommands` to render commands received from Gateway API
+
+---
+
+### Milestone 12: Anthropic-Grade Dynamic Cognition, Thinking & Idempotent Database Seeding
+
+#### [x] Dynamic Cognition & Operational Models (`packages/database/prisma/schema.prisma`)
+
+- [x] **`CognitivePolicy`**: Dynamic thinking token budgets, temperature overrides, loop steps, and thinking guidelines.
+- [x] **`SystemPromptTemplate`**: Versioned, living prompt templates and platform behavioral rules.
+- [x] **`PlatformConfig`**: Unified namespaced JSON configuration store for slash commands, suggestion chips, cache parameters, compaction thresholds, and RAG chunking.
+- [x] **`FeatureFlag`**: Instant sub-2ms kill switches and circuit breakers for tools and capabilities.
+
+#### [x] Idempotent Platform Database Seeders (`packages/database/src/seeds/`)
+
+- [x] **Zero Data Loss Guarantee**: All seeders execute with idempotent `upsert` and preserve existing records untouched (`update: {}`). Never drops, truncates, or cleans the database.
+- [x] **Decomposed Modular Seeders (< 250 LOC)**:
+  - `seed-providers-models.ts`: Ollama provider and Gemma 4 31B model records.
+  - `seed-modes-nav.ts`: Chat, Plan, Act, and Auto execution modes + 8 navigation hub items.
+  - `seed-roles-tools.ts`: 4 platform permissions, 7 platform roles, and 11 execution tools.
+  - `seed-agents.ts`: Default workspace tenant and 6 core specialist agents.
+  - `seed-platform-data.ts`: Cognitive policy blueprints, prompt templates, and platform configs.
+  - `seed-platform-manifest.ts`: Automated sync for cognitive policies, prompts, configs, and flags.
+  - `seed-all.ts`: Master orchestrator running all seed modules in dependency order.
+- [x] **Gateway Auto-Sync (`apps/gateway/src/index.ts`)**:
+  - Automatically synchronizes platform manifest on gateway bootstrap without manual SQL scripts.
+- [x] **Database-Driven Slash Commands (`apps/gateway/src/modules/platform/services/platform-command.service.ts`)**:
+  - Completely removed in-memory static fallback arrays; commands are stored and queried directly from PostgreSQL `platform_configs`.
+
+---
+
+### Milestone 13: End-to-End Hardcoded Value Eradication & Server-Driven Dynamic Configuration
+
+#### [x] Canonical Shared Enums & Strict Typing (`packages/shared-types`)
+
+- [x] **Dynamic Configuration Enums (`platform.ts`)**:
+  - `ConfigNamespace`: Added `BRANDING`, `TOOLS` alongside `COMMANDS`, `SUGGESTIONS`, `EXECUTION`, `CACHE`, `COMPACTION`, `RAG`.
+  - `ConfigKey`: Added `WELCOME_HEADLINE`, `WELCOME_SUBTITLE`, `BRAND_NAME`, `BRAND_VERSION`, `CATEGORY_BLURBS`.
+- [x] **Canonical Domain & Tool Enums (`enums/platform.enums.ts`)**:
+  - `AgentRoleSlug`: `STRATEGY`, `RESEARCH`, `WRITING`, `ENGINEERING`, `DATA`, `AUTOMATION`, `SPECIALIST`.
+  - `PlatformToolName`: Added all 26 canonical platform tools (`PYTHON_SANDBOX`, `WEB_SEARCH`, `DOCUMENT_READER`, `URL_SCRAPER`, `REST_API_CALLER`, `SQL_ANALYTICS`, `WEBHOOKS`, `PDF_PARSER`, `LIST_DIR`, etc.).
+  - `ToolSandboxType`: `READ_ONLY`, `NETWORK_READ`, `NETWORK_WRITE`, `WORKSPACE_WRITE`, `EPHEMERAL_VM`.
+
+#### [x] Modular Database Seeders (< 250 LOC & Zero Overwrite) (`packages/database/src/seeds/`)
+
+- [x] **Decomposition & Enums**:
+  - `seed-permissions.ts` (59 LOC): Decomposed with `ToolPermissionLevel`.
+  - `seed-roles.ts` (83 LOC): Decomposed with `AgentRoleSlug`.
+  - `seed-tools.ts` (148 LOC): Decomposed with `PlatformToolName`, `ToolSandboxType`, `ToolPermissionLevel`.
+  - `seed-agents.ts` (166 LOC): Uses `AgentMode`, `PlatformScope`, `AgentRoleSlug`, `PlatformToolName`, and dynamic `DEFAULT_SEED_MODEL` from env.
+  - `seed-platform-configs.ts` (223 LOC): Seeds all namespaces using `ConfigNamespace` and `ConfigKey` with `update: {}`.
+  - `seed-capabilities.ts` (133 LOC): Uses `PlatformCapabilitySlug` and `PlatformToolName`.
+  - `seed-providers-models.ts` (93 LOC): Uses `PlatformScope.PLATFORM` and env-driven model identifier.
+
+#### [x] Dynamic Control Plane & Gateway Services (`apps/gateway`)
+
+- [x] **Dynamic Configuration Endpoints**:
+  - `GET /api/v1/welcome`: Dynamic welcome headline, subtitle, and starter chips.
+  - `GET /api/v1/branding`: Dynamic brand name and version badge.
+  - `GET /api/v1/tools/categories`: Dynamic tool category descriptive blurbs.
+  - `GET /api/v1/config/:namespace/:key` & `PUT /api/v1/config/:namespace/:key`: Scoped configuration reads/writes.
+- [x] **Dynamic Execution & Compaction**:
+  - `live-execution.manager.ts`: Injects dynamic thinking guidelines, sets dynamic temperature and maxSteps from DB `CognitivePolicy`.
+  - `live-turn-compaction.ts`: Threshold ratio dynamically resolved from `PlatformConfigService.getCompactionConfig()`.
+  - `live-turn-executor.ts`: Removed hardcoded `lead-orchestrator` fallback; dynamic temperature and runtime parameters.
+  - `workspace-tool-executor.ts`: Feature flag kill switch check for `WorkspaceTool.BASH`.
+  - `memory-distillation.ts`: Removed static agent strings; safely resolves agent ID from event payload.
+
+#### [x] Dynamic Console UI & Browser Persistence (`apps/console`)
+
+- [x] **Server-Driven UI Hooks & Components**:
+  - `usePlatformWelcome` & `StudioWelcome`: Dynamic greeting headline, subtitle, and starter suggestions from database.
+  - `usePlatformBranding`, `SidebarNav`, & `PageShell`: Dynamic application name and version badge; dynamic root breadcrumb.
+  - `useToolCategories` & `ToolsPageContent`: Purged static `CATEGORY_BLURBS` constant; queries database-driven category blurbs.
+  - `StudioWorkspaceSelector`: Removed hardcoded `orchestrai` fallback; dynamically reflects active workspace name or placeholder.
+  - `workspace-slice.ts`: Dynamically resolves initial workspace directory from `process.env.WORKSPACE_ROOT` without static paths.
+  - `stores/index.ts`: Dynamically configurable IndexedDB persistence store name (`process.env.NEXT_PUBLIC_STORE_NAME`).
+
+#### [x] Worker & Crawler Dynamic Configuration (`apps/worker`, `apps/crawler`)
+
+- [x] `apps/worker/src/bootstrap/config.ts`: Purged static `ollama` provider fallback; strictly uses `process.env.DEFAULT_MODEL_PROVIDER`.
+- [x] `apps/crawler/src/config.py`: Made `rag_ingest_path` env-driven via `RAG_INGEST_PATH`.
+
+#### [x] Zero-Hardcoded UI Text & Accessible Shimmer Skeletons (`apps/console`)
+
+- [x] **Accessible UI Skeletons (`skeleton.tsx`)**: Replaced raw `"Loading..."` text spinners with layout-preserving animated Skeletons (`Skeleton`, `CardGridSkeleton`, `TableSkeleton`, `DetailPageSkeleton`) across all 8 dashboard routes to eliminate cumulative layout shift (CLS).
+- [x] **Centralized Type-Safe UI Copy Dictionary (`ui-copy.ts`)**: Created unified dictionary `UI_COPY` (< 200 LOC) standardizing all page headings, descriptions, stats, breadcrumbs, search empty states, and modal workbenches (`AGENTS`, `EXECUTIONS`, `MODELS`, `KNOWLEDGE`, `MEMORY`, `EVALUATIONS`, `TOOLS`, `CONTEXT`, `STUDIO`, and `COMMON`).
+- [x] **Developer Workbenches Adherence**: Migrated interactive developer test workbenches (`MemoryRecallDialog`, `KnowledgeQueryDialog`) and trace waterfall components to use centralized `UI_COPY` tokens while strictly preserving their role as production operator tools (distinct from automated test cases).

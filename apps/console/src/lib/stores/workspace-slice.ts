@@ -29,15 +29,6 @@ export interface WorkspaceSlice {
   readonly clearWorkspaceHistory: () => void;
 }
 
-/** Default initial workspace pointing to the local repository root. */
-const DEFAULT_WORKSPACE: WorkspaceRecord = {
-  id: "default-orchestrai-workspace",
-  name: "orchestrai",
-  path:
-    typeof process !== "undefined" && process.env?.WORKSPACE_ROOT ? process.env.WORKSPACE_ROOT : "",
-  lastOpenedAt: Date.now(),
-};
-
 /**
  * Helper to derive a clean human-readable folder name from an absolute path.
  */
@@ -48,13 +39,36 @@ function deriveFolderName(dirPath: string): string {
 }
 
 /**
+ * Resolves initial default workspace dynamically from environment configuration.
+ * Returns null if no WORKSPACE_ROOT environment variable is provided.
+ */
+function resolveInitialWorkspace(): WorkspaceRecord | null {
+  const envPath =
+    typeof process !== "undefined" && process.env?.WORKSPACE_ROOT
+      ? process.env.WORKSPACE_ROOT.trim()
+      : "";
+  if (!envPath) {
+    return null;
+  }
+  const folderName = deriveFolderName(envPath);
+  return {
+    id: `ws-${folderName}`,
+    name: folderName,
+    path: envPath,
+    lastOpenedAt: Date.now(),
+  };
+}
+
+const INITIAL_WORKSPACE = resolveInitialWorkspace();
+
+/**
  * Creates the workspace slice for tracking active and historical project folders.
  */
 export const createWorkspaceSlice: StateCreator<WorkspaceSlice, [], [], WorkspaceSlice> = (
   set,
 ) => ({
-  activeWorkspace: DEFAULT_WORKSPACE,
-  recentWorkspaces: [DEFAULT_WORKSPACE],
+  activeWorkspace: INITIAL_WORKSPACE,
+  recentWorkspaces: INITIAL_WORKSPACE ? [INITIAL_WORKSPACE] : [],
 
   setActiveWorkspace: (workspace: WorkspaceRecord): void => {
     set((state) => {

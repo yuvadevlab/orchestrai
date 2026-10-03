@@ -13,19 +13,23 @@ import { Input, Button } from "@yuva-devlab/ui";
 import { Plus, Search, Bot } from "lucide-react";
 import { useAgents } from "../api";
 import { AgentStatus } from "../types";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, CardGridSkeleton } from "@/components/ui";
 import { PageShell } from "@/components/layout/page-shell";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export function AgentsPageContent(): React.JSX.Element {
   const [search, setSearch] = useState("");
-  const [selectedDomain, setSelectedDomain] = useState<string>("All");
+  const [selectedDomain, setSelectedDomain] = useState<string>(UI_COPY.AGENTS.FILTER_ALL);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { data: agentList, isLoading, error, refetch } = useAgents();
 
   const activeCount = agentList.filter((a) => a.status === AgentStatus.ACTIVE).length;
 
   // Dynamically extract domains/roles from registered agents
-  const domains = ["All", ...Array.from(new Set(agentList.map((a) => a.role).filter(Boolean)))];
+  const domains = [
+    UI_COPY.AGENTS.FILTER_ALL,
+    ...Array.from(new Set(agentList.map((a) => a.role).filter(Boolean))),
+  ];
 
   const filteredAgents = agentList.filter((agent) => {
     const matchesSearch =
@@ -34,16 +38,17 @@ export function AgentsPageContent(): React.JSX.Element {
       agent.model.toLowerCase().includes(search.toLowerCase());
 
     const matchesDomain =
-      selectedDomain === "All" || agent.role.toLowerCase() === selectedDomain.toLowerCase();
+      selectedDomain === UI_COPY.AGENTS.FILTER_ALL ||
+      agent.role.toLowerCase() === selectedDomain.toLowerCase();
     return matchesSearch && matchesDomain;
   });
 
   return (
     <PageShell
-      title="Agents & Specialists"
-      breadcrumb="Agents"
-      stats={`${activeCount}/${agentList.length} active`}
-      description="The specialists your orchestrator can delegate to."
+      title={UI_COPY.AGENTS.PAGE_TITLE}
+      breadcrumb={UI_COPY.AGENTS.BREADCRUMB}
+      stats={UI_COPY.AGENTS.ACTIVE_STATS(activeCount, agentList.length)}
+      description={UI_COPY.AGENTS.PAGE_DESCRIPTION}
       actions={
         <Button
           variant="default"
@@ -52,7 +57,7 @@ export function AgentsPageContent(): React.JSX.Element {
           className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
         >
           <Plus className="size-3.5" />
-          <span>New agent</span>
+          <span>{UI_COPY.AGENTS.REGISTER_BUTTON}</span>
         </Button>
       }
     >
@@ -62,7 +67,7 @@ export function AgentsPageContent(): React.JSX.Element {
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
-              placeholder="Search agents by name, model, role..."
+              placeholder={UI_COPY.AGENTS.SEARCH_PLACEHOLDER}
               startIcon={<Search className="size-3.5" />}
               className="bg-card h-8 text-xs"
             />
@@ -85,14 +90,10 @@ export function AgentsPageContent(): React.JSX.Element {
         </div>
 
         {isLoading ? (
-          <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
-            <span className="text-muted-foreground animate-pulse text-xs">
-              Fetching cluster agents from gateway...
-            </span>
-          </div>
+          <CardGridSkeleton count={6} />
         ) : error ? (
           <div className="border-border bg-card flex flex-col items-center justify-center gap-2 rounded-md border p-6 text-center">
-            <p className="text-foreground text-xs font-medium">Failed to load cluster agents</p>
+            <p className="text-foreground text-xs font-medium">{UI_COPY.AGENTS.ERROR_TITLE}</p>
             <p className="text-muted-foreground max-w-md text-xs">{error.message}</p>
             <Button
               size="sm"
@@ -100,14 +101,14 @@ export function AgentsPageContent(): React.JSX.Element {
               onClick={() => void refetch()}
               className="mt-2 h-7 cursor-pointer text-xs"
             >
-              Retry
+              {UI_COPY.AGENTS.RETRY_BUTTON}
             </Button>
           </div>
         ) : agentList.length === 0 ? (
           <EmptyState
             icon={Bot}
-            title="No Agents Registered"
-            description="There are currently no active or configured agent specifications in the OrchestrAI cluster registry."
+            title={UI_COPY.AGENTS.EMPTY_TITLE}
+            description={UI_COPY.AGENTS.EMPTY_DESC}
             action={
               <Button
                 size="sm"
@@ -115,15 +116,15 @@ export function AgentsPageContent(): React.JSX.Element {
                 onClick={() => setIsModalOpen(true)}
                 className="h-8 cursor-pointer text-xs"
               >
-                <Plus className="mr-1.5 size-3.5" /> Register First Agent
+                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.AGENTS.REGISTER_BUTTON}
               </Button>
             }
           />
         ) : filteredAgents.length === 0 ? (
           <EmptyState
             icon={Search}
-            title="No Agents Matched"
-            description={`No agents in the cluster registry matched your search query "${search}".`}
+            title={UI_COPY.AGENTS.NO_MATCH_TITLE}
+            description={UI_COPY.AGENTS.NO_MATCH_DESC(search)}
           />
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

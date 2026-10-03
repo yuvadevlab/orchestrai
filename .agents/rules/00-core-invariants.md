@@ -70,7 +70,24 @@ Core Contracts (@orchestrai/core)
 
 ---
 
-## 6. Phase Implementation Testing Policy (Strict)
+## 6. Dynamic Server-Driven Configuration Invariant (Big 3 Standard)
+
+- **Zero Hardcoded Runtime Behaviors**: Following the enterprise architecture of OpenAI, Anthropic, and Google DeepMind, NO client or worker application may hardcode operational parameters that can require real-time adjustment, security mitigation, or experimentation.
+- **Dynamic Database & Control Plane Sourcing**:
+  - **Slash Commands & Capabilities**: Must be served dynamically via Gateway API (`GET /api/v1/platform/commands`) from the database, enabling instant disablement or customization without redeployment.
+  - **System Prompts & Personas**: Must reside in a versioned Prompt Registry (database/control plane), allowing hot-patching of prompt regressions or injection mitigations in seconds.
+  - **Execution & Model Hyperparameters**: Execution steps (`maxSteps`), sampling temperatures, context compaction thresholds, cache similarity thresholds, RAG chunking parameters, and memory retention policies must be database-driven and configurable per tenant or agent.
+  - **Starter Suggestions & UI Catalogs**: Suggestion pills, starter templates, and catalog items must be loaded dynamically from the platform API.
+- **The 4-Tier Configuration Hierarchy**:
+  1. _Tier 1 (Database / Control Plane)_: Prompts, commands, models, temperatures, quotas, retention policies, suggestions.
+  2. _Tier 2 (Real-time Feature Flags)_: Emergency kill switches (`disable_bash_tool`), circuit breakers, and A/B rollouts.
+  3. _Tier 3 (12-Factor Infrastructure)_: Network ports, DB connection strings, pool sizes, and crypto secrets in `.env`.
+  4. _Tier 4 (Permanent Code Invariants)_: Core protocol enums (`AgentMode`, `ExecutionStatus`), Zod schemas, and RFC regexes.
+- **Client Offline-First Resilient Caching**: Frontends must consume server-driven configuration using TanStack Query backed by asynchronous IndexedDB stale-while-revalidate caching to guarantee instantaneous 0ms startup.
+
+---
+
+## 7. Phase Implementation Testing Policy (Strict)
 
 - While implementing roadmap phases, **DO NOT** write or implement test cases (unit tests, e2e tests, integration tests) or Storybook stories unless explicitly instructed by the user.
 - Focus effort and code strictly on production code: domain logic, state machines, Zod contracts, database schemas, API routes, event handlers, and polished UI screens.
@@ -78,7 +95,7 @@ Core Contracts (@orchestrai/core)
 
 ---
 
-## 7. Universal Verification Checklist
+## 8. Universal Verification Checklist
 
 Before completing any task, verify:
 
@@ -86,6 +103,8 @@ Before completing any task, verify:
 - [ ] All exported symbols have complete JSDoc annotations.
 - [ ] All conditionals, guards, and branching logic have explanatory inline comments.
 - [ ] Shared contracts originate from `@orchestrai/core` without cross-package duplication.
+- [ ] Zero hardcoded runtime parameters; commands, prompts, and execution hyperparameters are dynamic (Big 3 Standard).
+- [ ] All regexes are centralized in `@orchestrai/regex`.
 - [ ] No test cases (unit, e2e, integration) or Storybook stories added during phase implementation unless requested.
 - [ ] `pnpm lint` and `pnpm typecheck` pass with zero errors and zero warnings.
 - [ ] Commit messages conform to `commitlint.config.ts`.

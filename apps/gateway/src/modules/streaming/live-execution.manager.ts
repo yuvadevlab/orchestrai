@@ -5,7 +5,13 @@
  */
 
 import { EventEmitter } from "node:events";
-import { ExecutionStatus, SseStreamEvent, AgentMode } from "@orchestrai/shared-types";
+import {
+  ExecutionStatus,
+  SseStreamEvent,
+  AgentMode,
+  FeatureFlagKey,
+  CognitivePolicySlug,
+} from "@orchestrai/shared-types";
 import { autoDetectMode } from "@orchestrai/agent";
 import type { GatewayResponse } from "@/routes/http-types";
 import {
@@ -18,6 +24,8 @@ import { executeAutonomousTurns } from "@/modules/streaming/live-turn-executor";
 import { memoryService } from "@/modules/memory/memory.service";
 import { ragService } from "@/modules/rag/rag.service";
 import { checkSemanticCache, storeSemanticCache } from "@/modules/cache/semantic-cache.service";
+import { featureFlagService } from "@/modules/platform/services/feature-flag.service";
+import { cognitivePolicyService } from "@/modules/platform/services/cognitive-policy.service";
 
 export type { ExecutionStreamState };
 
@@ -128,7 +136,46 @@ class LiveExecutionManager {
       // Non-critical: continue without knowledge base documents
     }
 
-    const augmentedSystemPrompt = [systemPrompt, memoryContext, ragContext]
+    // Maintenance mode circuit breaker check
+    const isMaintenance = await featureFlagService.isEnabled(
+      FeatureFlagKey.MAINTENANCE_MODE,
+      false,
+    );
+    if (isMaintenance) {
+      const maintenanceState: ExecutionStreamState = {
+        executionId,
+        chunks: [],
+        fullOutput: "",
+        artifacts: [],
+        status: ExecutionStatus.FAILED,
+      };
+      this.states.set(executionId, maintenanceState);
+      this.emitEvent(
+        executionId,
+        SseStreamEvent.ERROR,
+        "System is currently in maintenance mode. Please try again later.",
+      );
+      return;
+    }
+
+    // Resolve dynamic cognitive policy from database
+    const policySlug =
+      effectiveMode === AgentMode.PLAN
+        ? CognitivePolicySlug.DEEP_REASONING
+        : effectiveMode === AgentMode.CHAT
+          ? CognitivePolicySlug.FAST_CHAT
+          : CognitivePolicySlug.AUTONOMOUS_ACT;
+
+    const policy = await cognitivePolicyService.getPolicy(policySlug);
+    const thinkingGuidelines =
+      policy?.enableThinking && policy.thinkingGuidelines
+        ? `\n\n[Cognitive Thinking Guidelines]:\n${policy.thinkingGuidelines}`
+        : "";
+
+    const resolvedMaxSteps = maxSteps ?? policy?.maxExecutionSteps;
+    const resolvedTemperature = policy?.temperature;
+
+    const augmentedSystemPrompt = [systemPrompt, memoryContext, ragContext, thinkingGuidelines]
       .filter(Boolean)
       .join("\n\n");
 
@@ -151,11 +198,12 @@ class LiveExecutionManager {
       {
         emitEvent: (event, data) => this.emitEvent(executionId, event, data),
       },
-      maxSteps,
+      resolvedMaxSteps,
       tenantId,
       agentId,
       contextWindow,
       costPerTokenUsd,
+      resolvedTemperature,
     );
 
     // Cache successful execution output for semantic query deduplication

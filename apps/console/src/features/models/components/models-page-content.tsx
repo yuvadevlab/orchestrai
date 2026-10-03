@@ -13,8 +13,9 @@ import { ModelCard } from "./model-card";
 import { ModelDialog } from "./model-dialog";
 import { CostLatencyCockpit } from "./cost-latency-cockpit";
 import { useModels, useProviders } from "../api";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, CardGridSkeleton } from "@/components/ui";
 import { PageShell } from "@/components/layout/page-shell";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /** Model Providers page content displaying live database models. */
 export function ModelsPageContent(): React.JSX.Element {
@@ -42,10 +43,10 @@ export function ModelsPageContent(): React.JSX.Element {
 
   return (
     <PageShell
-      title="Model Providers & Routing"
-      breadcrumb="Models"
-      stats={`${models.length} models · ${providers.length} providers`}
-      description="Live AI models, context limits, and inference engines available across the workspace."
+      title={UI_COPY.MODELS.PAGE_TITLE}
+      breadcrumb={UI_COPY.MODELS.BREADCRUMB}
+      stats={UI_COPY.MODELS.STATS(models.length)}
+      description={UI_COPY.MODELS.PAGE_DESCRIPTION}
       actions={
         <div className="flex items-center gap-2">
           <div className="bg-muted/30 border-border/60 flex rounded border p-0.5">
@@ -58,7 +59,7 @@ export function ModelsPageContent(): React.JSX.Element {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Model Catalog
+              {UI_COPY.MODELS.TAB_CATALOG}
             </button>
             <button
               type="button"
@@ -69,7 +70,7 @@ export function ModelsPageContent(): React.JSX.Element {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Cost & Latency Cockpit
+              {UI_COPY.MODELS.TAB_COCKPIT}
             </button>
           </div>
           <Button
@@ -79,7 +80,7 @@ export function ModelsPageContent(): React.JSX.Element {
             className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
           >
             <Plus className="size-3.5" />
-            <span>Add model</span>
+            <span>{UI_COPY.MODELS.REGISTER_BUTTON}</span>
           </Button>
         </div>
       }
@@ -87,17 +88,13 @@ export function ModelsPageContent(): React.JSX.Element {
       {activeTab === "telemetry" ? (
         <CostLatencyCockpit />
       ) : isLoading ? (
-        <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
-          <span className="text-muted-foreground animate-pulse font-mono text-xs">
-            Loading live model catalog...
-          </span>
-        </div>
+        <CardGridSkeleton count={6} />
       ) : models.length === 0 ? (
         <>
           <EmptyState
             icon={Cpu}
-            title="No Models Configured"
-            description="No active models registered in the database catalog. Configure a model endpoint to enable agent inference."
+            title={UI_COPY.MODELS.EMPTY_TITLE}
+            description={UI_COPY.MODELS.EMPTY_DESC}
             action={
               <Button
                 size="sm"
@@ -105,7 +102,7 @@ export function ModelsPageContent(): React.JSX.Element {
                 onClick={() => setIsModalOpen(true)}
                 className="h-8 cursor-pointer font-mono text-xs"
               >
-                <Plus className="mr-1.5 size-3.5" /> Configure First Model
+                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.MODELS.REGISTER_BUTTON}
               </Button>
             }
           />

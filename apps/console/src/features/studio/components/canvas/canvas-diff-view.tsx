@@ -8,6 +8,7 @@
  */
 
 import React from "react";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface CanvasDiffViewProps {
   originalText?: string;
@@ -111,8 +112,10 @@ export function CanvasDiffView({
     <div className="bg-card text-foreground flex h-full flex-col overflow-hidden font-mono text-xs">
       {/* Diff Header */}
       <div className="border-border/40 bg-muted/40 grid grid-cols-2 border-b px-4 py-2">
-        <span className="text-destructive font-semibold">Original</span>
-        <span className="text-primary font-semibold">Modified</span>
+        <span className="text-destructive font-semibold">
+          {UI_COPY.STUDIO.CANVAS.DIFF_ORIGINAL}
+        </span>
+        <span className="text-primary font-semibold">{UI_COPY.STUDIO.CANVAS.DIFF_MODIFIED}</span>
       </div>
 
       {/* Side-by-Side Diff Content */}

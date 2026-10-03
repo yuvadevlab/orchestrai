@@ -10,6 +10,7 @@ import React, { useRef, useState } from "react";
 import { Plus, FileText, X, Loader2 } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
 import { DocumentUploadStatus } from "@orchestrai/shared-types";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useUploadDocument } from "../api";
 
 export interface AttachedFile {
@@ -75,7 +76,7 @@ export function StudioFileAttachment({
       <input
         ref={fileInputRef}
         type="file"
-        aria-label="Upload document"
+        aria-label={UI_COPY.STUDIO.FILE.UPLOAD_A11Y}
         className="hidden"
         accept=".txt,.md,.json,.csv,.ts,.js,.tsx,.jsx,.py,.html,.css,.yaml,.yml"
         onChange={handleFileSelect}
@@ -89,7 +90,8 @@ export function StudioFileAttachment({
         onClick={() => fileInputRef.current?.click()}
         disabled={disabled || uploadMutation.isPending}
         className="hover:bg-accent/60 size-7 shrink-0 rounded-md transition-colors"
-        title="Upload & index document (ChatGPT style)"
+        title={UI_COPY.STUDIO.FILE.UPLOAD_TOOLTIP}
+        aria-label={UI_COPY.STUDIO.FILE.UPLOAD_A11Y}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -139,14 +141,15 @@ export function StudioAttachedFilesList({
           </span>
           {file.status === DocumentUploadStatus.INDEXED && (
             <span className="text-primary text-[9px] font-semibold tracking-wide uppercase">
-              indexed
+              {UI_COPY.STUDIO.FILE.INDEXED}
             </span>
           )}
           <button
             type="button"
             onClick={() => onRemove(file.id)}
             className="hover:bg-muted ml-0.5 rounded p-0.5 transition-colors"
-            title="Remove attachment"
+            title={UI_COPY.STUDIO.FILE.REMOVE_TOOLTIP}
+            aria-label={UI_COPY.STUDIO.FILE.REMOVE_TOOLTIP}
           >
             <X className="size-3" />
           </button>

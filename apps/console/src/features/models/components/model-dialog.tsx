@@ -10,6 +10,7 @@ import React from "react";
 import { toast } from "@yuva-devlab/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { FormDialog } from "@/components/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { buildModelFields } from "./model-form-fields";
 import { useProviders, useRegisterModelMutation } from "../api";
 
@@ -32,18 +33,19 @@ export function ModelDialog({
 
   const handleAddModel = async (formData: Record<string, string>): Promise<void> => {
     const modelPromise = registerMutation.mutateAsync({
-      name: formData.name || "Custom Model",
+      name: formData.name || UI_COPY.MODELS.DIALOG.FALLBACK_NAME,
       providerId: formData.providerId || (providers[0]?.providerId ?? ""),
-      modelIdentifier: formData.modelIdentifier || formData.name || "custom-model",
+      modelIdentifier:
+        formData.modelIdentifier || formData.name || UI_COPY.MODELS.DIALOG.FALLBACK_IDENTIFIER,
       description: formData.description,
       contextWindow: formData.contextWindow ? parseInt(formData.contextWindow, 10) : 8192,
       isDefault: formData.isDefault === "true",
     });
 
     toast.promise(modelPromise, {
-      loading: "Registering model...",
-      success: "Model registered successfully!",
-      error: (err) => formatApiError(err, "Failed to register model"),
+      loading: UI_COPY.MODELS.DIALOG.TOAST_LOADING,
+      success: UI_COPY.MODELS.DIALOG.TOAST_SUCCESS,
+      error: (err) => formatApiError(err, UI_COPY.MODELS.DIALOG.TOAST_ERROR),
     });
 
     await modelPromise;
@@ -58,10 +60,10 @@ export function ModelDialog({
   return (
     <FormDialog
       isOpen={isOpen}
-      title="Add LLM Model"
-      description="Register a new AI model under an active provider."
+      title={UI_COPY.MODELS.DIALOG.TITLE}
+      description={UI_COPY.MODELS.DIALOG.DESCRIPTION}
       fields={fields}
-      submitText="Add Model"
+      submitText={UI_COPY.MODELS.DIALOG.SUBMIT_BUTTON}
       onClose={onClose}
       onSubmit={handleAddModel}
     />

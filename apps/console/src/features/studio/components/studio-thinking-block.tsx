@@ -8,6 +8,7 @@
 
 import React, { useState } from "react";
 import { ChevronDown, ChevronRight, Sparkles } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface StudioThinkingBlockProps {
   text: string;
@@ -36,14 +37,14 @@ export function StudioThinkingBlock({
       >
         <div className="flex items-center gap-2">
           <Sparkles className="text-primary size-3.5 animate-pulse" />
-          <span className="font-medium">Thinking Process</span>
+          <span className="font-medium">{UI_COPY.STUDIO.THINKING.TITLE}</span>
           <span className="text-muted-foreground/60 text-[10px]">
             ({durationSeconds.toFixed(1)}s)
           </span>
         </div>
 
         <div className="flex items-center gap-1 text-[11px]">
-          <span>{isOpen ? "Hide" : "Show"}</span>
+          <span>{isOpen ? UI_COPY.STUDIO.THINKING.HIDE : UI_COPY.STUDIO.THINKING.SHOW}</span>
           {isOpen ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
         </div>
       </button>

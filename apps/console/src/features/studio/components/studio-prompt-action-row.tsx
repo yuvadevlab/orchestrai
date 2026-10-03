@@ -13,6 +13,7 @@ import type { SpecialistPersona } from "../types";
 import type { LlmModelRecord, PlatformModeRecord } from "@orchestrai/shared-types";
 import { StudioFileAttachment, type AttachedFile } from "./studio-file-attachment";
 import { StudioPromptBarSelectors } from "./studio-prompt-bar-selectors";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface StudioPromptActionRowProps {
   readonly isRunning: boolean;
@@ -73,7 +74,7 @@ export function StudioPromptActionRow({
             size="icon"
             onClick={onStop}
             className="size-7 rounded-md"
-            aria-label="Stop execution"
+            aria-label={UI_COPY.STUDIO.PROMPT.STOP_A11Y}
           >
             <Square className="size-3 fill-current" />
           </Button>
@@ -84,7 +85,7 @@ export function StudioPromptActionRow({
             onClick={onSubmit}
             disabled={!canSubmit}
             className="size-7 rounded-md"
-            aria-label="Run"
+            aria-label={UI_COPY.STUDIO.PROMPT.RUN_A11Y}
           >
             <ArrowUp className="size-3.5" />
           </Button>

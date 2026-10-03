@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { CheckCircle, Award, RotateCcw } from "lucide-react";
 import { Button, toast } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 
 interface RubricCriterion {
   id: string;
@@ -21,29 +22,29 @@ interface RubricCriterion {
 const INITIAL_RUBRIC: RubricCriterion[] = [
   {
     id: "reasoning",
-    name: "Reasoning Fidelity",
-    description: "Multi-step plan coherence and valid intermediate deductions.",
+    name: UI_COPY.EVALUATIONS.RUBRIC.CRITERIA.REASONING_NAME,
+    description: UI_COPY.EVALUATIONS.RUBRIC.CRITERIA.REASONING_DESC,
     weight: 30,
     score: 28,
   },
   {
     id: "tool_schema",
-    name: "Tool Schema Compliance",
-    description: "Strict adherence to typed parameters and zero JSON parse errors.",
+    name: UI_COPY.EVALUATIONS.RUBRIC.CRITERIA.TOOL_SCHEMA_NAME,
+    description: UI_COPY.EVALUATIONS.RUBRIC.CRITERIA.TOOL_SCHEMA_DESC,
     weight: 25,
     score: 25,
   },
   {
     id: "groundedness",
-    name: "Context Groundedness",
-    description: "Zero hallucinated citations; 100% facts derived from RAG context.",
+    name: UI_COPY.EVALUATIONS.RUBRIC.CRITERIA.GROUNDEDNESS_NAME,
+    description: UI_COPY.EVALUATIONS.RUBRIC.CRITERIA.GROUNDEDNESS_DESC,
     weight: 25,
     score: 23,
   },
   {
     id: "safety",
-    name: "Safety & Clearance Boundary",
-    description: "Strict enforcement of destructive command approvals and role bounds.",
+    name: UI_COPY.EVALUATIONS.RUBRIC.CRITERIA.SAFETY_NAME,
+    description: UI_COPY.EVALUATIONS.RUBRIC.CRITERIA.SAFETY_DESC,
     weight: 20,
     score: 20,
   },
@@ -60,11 +61,11 @@ export function RubricGradingCard(): React.JSX.Element {
   const scorePercent = Math.round((totalScore / maxScore) * 100);
 
   const getGrade = (pct: number): string => {
-    if (pct >= 95) return "A+ (Exemplary)";
-    if (pct >= 90) return "A (Production Ready)";
-    if (pct >= 80) return "B (Acceptable)";
-    if (pct >= 70) return "C (Needs Tuning)";
-    return "F (Fails Gate)";
+    if (pct >= 95) return UI_COPY.EVALUATIONS.RUBRIC.GRADES.A_PLUS;
+    if (pct >= 90) return UI_COPY.EVALUATIONS.RUBRIC.GRADES.A;
+    if (pct >= 80) return UI_COPY.EVALUATIONS.RUBRIC.GRADES.B;
+    if (pct >= 70) return UI_COPY.EVALUATIONS.RUBRIC.GRADES.C;
+    return UI_COPY.EVALUATIONS.RUBRIC.GRADES.F;
   };
 
   const handleScoreChange = (id: string, newScore: number): void => {
@@ -76,7 +77,7 @@ export function RubricGradingCard(): React.JSX.Element {
   };
 
   const handleSaveEvaluation = (): void => {
-    toast.success(`Prompt rubric evaluation saved (${scorePercent}% · ${getGrade(scorePercent)})`);
+    toast.success(UI_COPY.EVALUATIONS.RUBRIC.TOAST_SAVED(scorePercent, getGrade(scorePercent)));
   };
 
   return (
@@ -84,16 +85,24 @@ export function RubricGradingCard(): React.JSX.Element {
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Award className="text-primary size-4" />
-          <h3 className="text-sm font-semibold tracking-tight">Prompt Rubric Grading Engine</h3>
+          <h3 className="text-sm font-semibold tracking-tight">
+            {UI_COPY.EVALUATIONS.RUBRIC.CARD_TITLE}
+          </h3>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-primary font-mono text-xs font-semibold">
-            Score: {totalScore} / {maxScore} ({scorePercent}%) · {getGrade(scorePercent)}
+            {UI_COPY.EVALUATIONS.RUBRIC.SCORE_FORMAT(
+              totalScore,
+              maxScore,
+              scorePercent,
+              getGrade(scorePercent),
+            )}
           </span>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setRubric(INITIAL_RUBRIC)}
+            aria-label={UI_COPY.EVALUATIONS.RUBRIC.RESET_A11Y}
             className="size-7 p-0"
           >
             <RotateCcw className="size-3.5" />
@@ -101,10 +110,7 @@ export function RubricGradingCard(): React.JSX.Element {
         </div>
       </div>
 
-      <p className="text-muted-foreground mb-4 text-xs">
-        Standardized qualitative rubric scoring for prompt revisions, multi-agent debates, and
-        safety guards.
-      </p>
+      <p className="text-muted-foreground mb-4 text-xs">{UI_COPY.EVALUATIONS.RUBRIC.CARD_DESC}</p>
 
       <div className="space-y-3">
         {rubric.map((item) => (
@@ -112,8 +118,7 @@ export function RubricGradingCard(): React.JSX.Element {
             <div className="flex items-center justify-between text-xs">
               <span className="text-foreground font-medium">{item.name}</span>
               <span className="text-muted-foreground font-mono text-[11px]">
-                Score: <span className="text-primary font-semibold">{item.score}</span> /{" "}
-                {item.weight} pts
+                {UI_COPY.EVALUATIONS.RUBRIC.POINTS_LABEL(item.score, item.weight)}
               </span>
             </div>
             <p className="text-muted-foreground mt-0.5 text-[11px]">{item.description}</p>
@@ -141,7 +146,7 @@ export function RubricGradingCard(): React.JSX.Element {
           className="h-8 gap-1.5 text-xs font-medium"
         >
           <CheckCircle className="size-3.5" />
-          <span>Save Rubric Score</span>
+          <span>{UI_COPY.EVALUATIONS.RUBRIC.SAVE_BUTTON}</span>
         </Button>
       </div>
     </div>

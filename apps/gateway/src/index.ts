@@ -19,6 +19,8 @@ import {
   registerLlmProviderRoutes,
   registerLlmModelRoutes,
   registerPlatformModeRoutes,
+  registerPlatformCommandRoutes,
+  registerPlatformConfigRoutes,
   registerNavItemRoutes,
   registerPlatformRoleRoutes,
   registerPlatformPermissionRoutes,
@@ -31,6 +33,7 @@ import {
   initEvalQualityGate,
   initMemoryDistillation,
 } from "@/modules";
+import { getPrismaClient, seedAllPlatformData } from "@orchestrai/database";
 import { GatewayServer, registerProcessLifecycle } from "@/server";
 
 // Re-export all internal modules for test harnesses and downstream programmatic consumption
@@ -61,6 +64,11 @@ export async function bootstrap(): Promise<GatewayServer> {
   // Initialize event-driven cross-session memory distillation
   initMemoryDistillation();
 
+  // Synchronize dynamic platform manifest and seeds idempotently (zero data destruction)
+  seedAllPlatformData(getPrismaClient()).catch((err) => {
+    logger.warn("Platform manifest sync deferred or failed", { error: String(err) });
+  });
+
   // Register root health probes
   registerHealthRoutes(router);
 
@@ -72,10 +80,12 @@ export async function bootstrap(): Promise<GatewayServer> {
     registerAgentRoutes(api);
     registerRagRoutes(api);
     registerApprovalRoutes(api);
-    // Individual service routes for providers, models, modes, nav items, roles, permissions, tools
+    // Individual service routes for providers, models, modes, commands, configs, nav items, roles, permissions, tools
     registerLlmProviderRoutes(api);
     registerLlmModelRoutes(api);
     registerPlatformModeRoutes(api);
+    registerPlatformCommandRoutes(api);
+    registerPlatformConfigRoutes(api);
     registerNavItemRoutes(api);
     registerPlatformRoleRoutes(api);
     registerPlatformPermissionRoutes(api);

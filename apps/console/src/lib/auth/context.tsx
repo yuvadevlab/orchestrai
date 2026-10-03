@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * @file apps/console/src/lib/auth-context.tsx
+ * @file apps/console/src/lib/auth/context.tsx
  * @description Centralized React authentication provider and state manager with cross-tab reactive synchronization.
- * @module apps/console/lib
+ * @module apps/console/lib/auth
  */
 
 import React, {
@@ -17,6 +17,7 @@ import React, {
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import {
   getStoredSession,
   apiLogin,
@@ -29,7 +30,7 @@ import {
   type LoginPayload,
   type SignupPayload,
   type ForgotPasswordPayload,
-} from "./auth-client";
+} from "./client";
 
 export interface AuthContextValue {
   user: AuthUser | null;
@@ -131,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
     clearSession();
     queryClient.clear();
     setSession(null);
-    toast.success("Signed out successfully");
+    toast.success(UI_COPY.AUTH.LOGOUT.TOAST_SUCCESS);
     router.push("/login");
     router.refresh();
   };

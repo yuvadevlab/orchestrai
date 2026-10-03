@@ -42,7 +42,9 @@ export const useConsoleStore = create<ConsoleStoreState>()(
       ...createWorkspaceSlice(...args),
     }),
     {
-      name: "orchestrai-console-store",
+      name:
+        (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_STORE_NAME) ||
+        "orchestrai-console-store",
       storage: createJSONStorage(() => indexedDbStorage),
       // Persist durable conversation state and workspace history across reloads
       partialize: (state) => ({

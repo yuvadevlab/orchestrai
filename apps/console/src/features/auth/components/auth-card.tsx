@@ -7,6 +7,7 @@
 import React from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface AuthCardProps {
   title: string;
@@ -22,7 +23,7 @@ export interface AuthCardProps {
 export function AuthCard({
   title,
   subtitle,
-  badgeText = "AI OPERATOR ACCESS",
+  badgeText = UI_COPY.AUTH.CARD.BADGE_TEXT,
   children,
 }: AuthCardProps): React.JSX.Element {
   return (
@@ -43,7 +44,7 @@ export function AuthCard({
             <Link
               href="/"
               className="bg-primary text-primary-foreground font-display relative grid size-12 place-items-center rounded-md text-lg font-black shadow-lg transition-transform hover:scale-105"
-              aria-label="OrchestrAI Home"
+              aria-label={UI_COPY.AUTH.CARD.HOME_A11Y}
             >
               O
             </Link>

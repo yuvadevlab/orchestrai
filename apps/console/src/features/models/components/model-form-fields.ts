@@ -5,6 +5,7 @@
  */
 
 import type { FormFieldSpec } from "@/components/ui/action-dialog";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { LlmProvider } from "../types";
 
 /**
@@ -14,7 +15,7 @@ export function buildModelFields(providers: LlmProvider[]): FormFieldSpec[] {
   return [
     {
       name: "providerId",
-      label: "Provider",
+      label: UI_COPY.MODELS.DIALOG.PROVIDER_LABEL,
       type: "select",
       options: providers.map((p) => ({ label: p.name, value: p.providerId })),
       required: true,
@@ -22,39 +23,39 @@ export function buildModelFields(providers: LlmProvider[]): FormFieldSpec[] {
     },
     {
       name: "name",
-      label: "Display Name",
-      placeholder: "e.g. Primary Model",
+      label: UI_COPY.MODELS.DIALOG.NAME_LABEL,
+      placeholder: UI_COPY.MODELS.DIALOG.NAME_PLACEHOLDER,
       required: true,
       colSpan: 1,
     },
     {
       name: "modelIdentifier",
-      label: "Model Identifier",
-      placeholder: "e.g. model-identifier-tag",
+      label: UI_COPY.MODELS.DIALOG.IDENTIFIER_LABEL,
+      placeholder: UI_COPY.MODELS.DIALOG.IDENTIFIER_PLACEHOLDER,
       required: true,
       colSpan: 1,
     },
     {
       name: "contextWindow",
-      label: "Context Window (tokens)",
-      placeholder: "32768",
+      label: UI_COPY.MODELS.DIALOG.CONTEXT_WINDOW_LABEL,
+      placeholder: UI_COPY.MODELS.DIALOG.CONTEXT_WINDOW_PLACEHOLDER,
       colSpan: 1,
     },
     {
       name: "isDefault",
-      label: "Default Engine",
+      label: UI_COPY.MODELS.DIALOG.DEFAULT_ENGINE_LABEL,
       type: "select",
       options: [
-        { value: "false", label: "Standard Catalog Model" },
-        { value: "true", label: "Default AI Engine" },
+        { value: "false", label: UI_COPY.MODELS.DIALOG.STANDARD_MODEL_LABEL },
+        { value: "true", label: UI_COPY.MODELS.DIALOG.DEFAULT_MODEL_LABEL },
       ],
       defaultValue: "false",
       colSpan: 2,
     },
     {
       name: "description",
-      label: "Description",
-      placeholder: "Model capabilities and notes...",
+      label: UI_COPY.MODELS.DIALOG.DESC_LABEL,
+      placeholder: UI_COPY.MODELS.DIALOG.DESC_PLACEHOLDER,
       type: "textarea",
       colSpan: 2,
     },

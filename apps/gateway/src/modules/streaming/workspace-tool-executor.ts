@@ -12,11 +12,12 @@ import {
   BashTool,
   KnowledgeSearchTool,
 } from "@orchestrai/tools";
-import { WorkspaceTool } from "@orchestrai/shared-types";
+import { WorkspaceTool, FeatureFlagKey } from "@orchestrai/shared-types";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { ragService } from "@/modules/rag/rag.service";
+import { featureFlagService } from "@/modules/platform/services/feature-flag.service";
 
 const readFile = new ReadFileTool();
 const writeFile = new WriteFileTool();
@@ -108,6 +109,18 @@ export async function executeWorkspaceTool(
         return { output: res, isError: false };
       }
       case WorkspaceTool.BASH: {
+        const isBashAllowed = await featureFlagService.isEnabled(
+          FeatureFlagKey.KILL_SWITCH_BASH_TOOL,
+          true,
+        );
+        if (!isBashAllowed) {
+          return {
+            output:
+              "Bash command execution is currently disabled by platform administrator kill switch.",
+            isError: true,
+          };
+        }
+
         const command = String(args.command || "");
         const cwdArg = typeof args.cwd === "string" ? args.cwd : undefined;
         const res = await bash.execute({ command, cwd: cwdArg, maxOutputBytes: 50000 }, context);

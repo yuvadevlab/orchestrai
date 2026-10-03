@@ -6,7 +6,7 @@
  * @module apps/console/features/agents/api
  */
 
-import { useApiData, type UseApiDataResult } from "@/lib/use-api-data";
+import { useApiData, type UseApiDataResult } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth";
 import { AgentStatus, type AgentDefinition } from "../types";
 import type { Agent } from "@orchestrai/sdk";

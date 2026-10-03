@@ -6,6 +6,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { WORD_SPLIT_REGEX, ALPHANUMERIC_START_REGEX } from "@orchestrai/regex";
+import { UI_COPY } from "./ui-copy";
 
 /**
  * Combines Tailwind and conditional CSS classnames safely in both Server and Client environments.
@@ -24,7 +25,10 @@ export function cn(...inputs: ClassValue[]): string {
  * @param fallback - Default initials if name is missing
  * @returns Uppercase 1-2 character initials
  */
-export function getInitials(name?: string | null, fallback = "OP"): string {
+export function getInitials(
+  name?: string | null,
+  fallback = UI_COPY.COMMON.BRAND.DEFAULT_INITIALS,
+): string {
   if (!name || !name.trim()) {
     return fallback;
   }

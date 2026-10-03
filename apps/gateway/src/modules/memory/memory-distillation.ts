@@ -31,13 +31,20 @@ export function initMemoryDistillation(): void {
         const { executionId, output } = payload;
         const tenantId = (event.tenantId as string) || "default";
 
+        const payloadRecord = event.payload as Record<string, unknown>;
+        const agentId =
+          typeof payloadRecord.agentId === "string" && payloadRecord.agentId
+            ? payloadRecord.agentId
+            : "agent";
+
         if (output && output.trim().length > 30) {
           // Distill concise summary of completed output into semantic knowledge
           const distilledFact = `[Execution ${executionId} Output]: ${output.slice(0, 400).trim()}`;
-          await memoryService.storeFact(tenantId, "lead-orchestrator", distilledFact, 0.8);
+          await memoryService.storeFact(tenantId, agentId, distilledFact, 0.8);
 
           logger.info("Distilled execution outcome into semantic memory", {
             executionId,
+            agentId,
             factLength: distilledFact.length,
           });
         }
@@ -55,13 +62,19 @@ export function initMemoryDistillation(): void {
       const payload = event.payload as ExecutionFailedPayload;
       const { executionId, error } = payload;
       const tenantId = (event.tenantId as string) || "default";
+      const payloadRecord = event.payload as Record<string, unknown>;
+      const agentId =
+        typeof payloadRecord.agentId === "string" && payloadRecord.agentId
+          ? payloadRecord.agentId
+          : "agent";
 
       if (error && error.trim().length > 0) {
         const failureNote = `[Execution ${executionId} Failure Warning]: Task encountered error "${error.slice(0, 200)}".`;
-        await memoryService.storeFact(tenantId, "lead-orchestrator", failureNote, 0.6);
+        await memoryService.storeFact(tenantId, agentId, failureNote, 0.6);
 
         logger.info("Distilled execution failure into episodic memory", {
           executionId,
+          agentId,
           errorPreview: error.slice(0, 80),
         });
       }

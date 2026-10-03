@@ -6,6 +6,7 @@
 
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
+import { TableSkeleton } from "@/components/ui/skeleton";
 
 const ContextHubPageContent = dynamic(() =>
   import("@/features/context").then((m) => ({ default: m.ContextHubPageContent })),
@@ -13,15 +14,7 @@ const ContextHubPageContent = dynamic(() =>
 
 export default function ContextPage(): React.JSX.Element {
   return (
-    <Suspense
-      fallback={
-        <div className="flex size-full min-w-0 flex-1 items-center justify-center">
-          <span className="text-muted-foreground animate-pulse font-mono text-xs">
-            Loading Context Hub...
-          </span>
-        </div>
-      }
-    >
+    <Suspense fallback={<TableSkeleton rows={6} />}>
       <ContextHubPageContent />
     </Suspense>
   );

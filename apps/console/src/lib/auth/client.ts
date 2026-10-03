@@ -1,10 +1,10 @@
 /**
- * @file apps/console/src/lib/auth-client.ts
+ * @file apps/console/src/lib/auth/client.ts
  * @description Enterprise authentication client managing HTTP requests, secure cookies, and cross-tab sync.
- * @module apps/console/lib
+ * @module apps/console/lib/auth
  */
 
-import { formatApiError } from "./error-utils";
+import { formatApiError } from "../error-utils";
 
 export interface AuthUser {
   id: string;

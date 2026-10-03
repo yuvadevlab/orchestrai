@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from "react";
 import { History, Play, Pause, SkipBack, SkipForward, RotateCw } from "lucide-react";
 import { Button, toast } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { ExecutionRun } from "../types";
 
 export interface CheckpointReplayerProps {
@@ -80,7 +81,7 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
 
   const handleForkCheckpoint = (): void => {
     toast.success(
-      `Replaying execution from checkpoint #${activeCheckpoint.index}: "${activeCheckpoint.label}"`,
+      UI_COPY.EXECUTIONS.REPLAYER.TOAST_FORK(activeCheckpoint.index, activeCheckpoint.label),
     );
   };
 
@@ -90,7 +91,9 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
       <div className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b pb-3">
         <div className="flex items-center gap-2">
           <History className="text-primary size-4" />
-          <h3 className="text-sm font-semibold tracking-tight">Checkpoint Time-Travel Replayer</h3>
+          <h3 className="text-sm font-semibold tracking-tight">
+            {UI_COPY.EXECUTIONS.REPLAYER.TITLE}
+          </h3>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -99,6 +102,7 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
             size="sm"
             onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
             disabled={currentIndex === 0}
+            aria-label={UI_COPY.EXECUTIONS.REPLAYER.A11Y_PREV}
             className="size-7 p-0"
           >
             <SkipBack className="size-3" />
@@ -115,7 +119,7 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
             ) : (
               <Play className="mr-1 size-3 fill-current" />
             )}
-            {isPlaying ? "Pause" : "Play"}
+            {isPlaying ? UI_COPY.EXECUTIONS.REPLAYER.PAUSE : UI_COPY.EXECUTIONS.REPLAYER.PLAY}
           </Button>
 
           <Button
@@ -123,6 +127,7 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
             size="sm"
             onClick={() => setCurrentIndex((prev) => Math.min(checkpoints.length - 1, prev + 1))}
             disabled={currentIndex === checkpoints.length - 1}
+            aria-label={UI_COPY.EXECUTIONS.REPLAYER.A11Y_NEXT}
             className="size-7 p-0"
           >
             <SkipForward className="size-3" />
@@ -135,7 +140,7 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
             className="h-7 gap-1 px-2 font-mono text-xs"
           >
             <RotateCw className="size-3" />
-            <span>Fork Here</span>
+            <span>{UI_COPY.EXECUTIONS.REPLAYER.FORK_HERE}</span>
           </Button>
         </div>
       </div>
@@ -144,7 +149,7 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
       <div className="my-4 space-y-2">
         <div className="text-muted-foreground flex items-center justify-between font-mono text-[11px]">
           <span>
-            Checkpoint {currentIndex + 1} of {checkpoints.length}
+            {UI_COPY.EXECUTIONS.REPLAYER.STEP_LABEL(currentIndex + 1, checkpoints.length)}
           </span>
           <span>{activeCheckpoint.timestamp}</span>
         </div>
@@ -153,6 +158,7 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
           min={0}
           max={checkpoints.length - 1}
           value={currentIndex}
+          aria-label={UI_COPY.EXECUTIONS.REPLAYER.A11Y_SLIDER}
           onChange={(e) => {
             setIsPlaying(false);
             setCurrentIndex(Number(e.target.value));

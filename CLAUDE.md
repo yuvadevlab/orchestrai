@@ -27,6 +27,10 @@ Master rulebooks are indexed in [`.agents/AGENTS.md`](.agents/AGENTS.md). Adhere
    - NO raw hardcoded string literals for domain entities, statuses, roles, event types, modes, scopes, or state transitions; always use shared `Enum.KEY`.
    - Zero hardcoded fallback model constants (`DEFAULT_FALLBACK_CANDIDATE`, `"gemma4:31b-cloud"`, `"qwen2.5:7b"`). Everything must be 100% database- or env-driven.
    - Zero synthetic fallback agents or auto-seeding (`DEFAULT_SUPERVISOR`, `Lead Orchestrator`). If a tenant has no agent, fail fast and instruct the user to create one in the Studio.
+7. **Dynamic Server-Driven Configuration (Big 3 Standard) & Centralized Regex**:
+   - NO client or worker application may hardcode operational parameters (slash commands, system prompts, max execution steps, sampling temperatures, compaction thresholds, cache similarity/TTL, RAG chunking parameters, retention policies, or starter suggestions).
+   - All runtime behaviors must be dynamic, database- or control-plane-driven, served via Gateway APIs (`/api/v1/platform/...`), and cached with stale-while-revalidate IndexedDB persistence.
+   - All regular expressions must originate from `@orchestrai/regex`. Zero inline regexes.
 
 ---
 

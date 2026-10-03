@@ -2,6 +2,147 @@
 
 Chronological log of architecture, engineering decisions, and completed milestones for OrchestrAI.
 
+## Session: 2026-10-03 (Continued) — Console Lib Folder Modularization & Architectural Cleanup
+
+### Summary of Completed Work
+
+#### 1. Directory Modularization (`apps/console/src/lib/`)
+
+- Collapsed noisy root-level files into focused, domain-driven subdirectories:
+  - `lib/auth/`: Centralized `client.ts`, `context.tsx`, and `index.ts`. All consumers import via `@/lib/auth`.
+  - `lib/hooks/`: Aggregated platform hooks (`use-api-data.ts`, `use-modes.ts`, `use-nav.ts`, `use-platform-branding.ts`, and `index.ts`). All consumers import via `@/lib/hooks`.
+  - `lib/navigation/`: Isolated `nav-icon-mapper.ts` and `index.ts`. Consumers import via `@/lib/navigation`.
+  - `lib/providers/`: Extracted `query-provider.tsx` and `index.ts`. Consumers import via `@/lib/providers`.
+- Retained only 4 universal root modules in `apps/console/src/lib`: `api-client.ts`, `error-utils.ts`, `types.ts`, and `utils.ts`.
+
+#### 2. Dead Code & Duplicate File Purge
+
+- Removed dead `theme.tsx` (superseded by `@yuva-devlab/ui`'s `ConfigProvider`).
+- Removed duplicate `lib/use-platform-branding.ts` in favor of `lib/hooks/use-platform-branding.ts`.
+- Removed deleted loose files (`auth-client.ts`, `auth-context.tsx`, `auth.ts`, `use-api-data.ts`, `use-modes.ts`, `use-nav.ts`).
+
+#### 3. Verification & Quality Gates
+
+- `pnpm typecheck` (48/48 packages) passed with zero errors.
+- `pnpm lint` passed with zero ESLint warnings (`--max-warnings=0`) and clean Ruff checks.
+
+---
+
+## Session: 2026-10-03 — Milestone 13 Complete: End-to-End Hardcoded Value Eradication & Server-Driven Dynamic Configuration
+
+### Summary of Completed Work
+
+#### 1. Universal Domain Enums (`packages/shared-types`)
+
+- **Namespaces & Keys**: Defined `ConfigNamespace.BRANDING`, `ConfigNamespace.TOOLS` and keys `WELCOME_HEADLINE`, `WELCOME_SUBTITLE`, `BRAND_NAME`, `BRAND_VERSION`, `CATEGORY_BLURBS`.
+- **Role & Tool Classifications**: Created canonical `AgentRoleSlug` (`STRATEGY`, `RESEARCH`, `WRITING`, `ENGINEERING`, `DATA`, `AUTOMATION`, `SPECIALIST`), `PlatformToolName` (all 26 platform tools), and `ToolSandboxType` (`READ_ONLY`, `NETWORK_READ`, `NETWORK_WRITE`, `WORKSPACE_WRITE`, `EPHEMERAL_VM`).
+- Rebuilt `@orchestrai/shared-types` cleanly.
+
+#### 2. Modular Database Seeders (< 250 LOC with Zero Data Loss Guarantee) (`packages/database/src/seeds/`)
+
+- Decomposed monolithic seeders into single-responsibility modules:
+  - `seed-permissions.ts` (59 LOC): Seeds permissions with `ToolPermissionLevel`.
+  - `seed-roles.ts` (83 LOC): Seeds roles with `AgentRoleSlug`.
+  - `seed-tools.ts` (148 LOC): Seeds tools with `PlatformToolName`, `ToolSandboxType`, and `ToolPermissionLevel`.
+  - `seed-agents.ts` (166 LOC): Uses `AgentMode`, `PlatformScope`, `AgentRoleSlug`, `PlatformToolName`, and env-driven `DEFAULT_SEED_MODEL`.
+  - `seed-platform-configs.ts` (223 LOC): Seeds all namespaces using `ConfigNamespace` and `ConfigKey`.
+  - `seed-capabilities.ts` (133 LOC): Uses `PlatformCapabilitySlug` and `PlatformToolName`.
+  - `seed-providers-models.ts` (93 LOC): Uses `PlatformScope.PLATFORM` and env-driven model identifier.
+- All seeders use idempotent `upsert` with `update: {}` to strictly protect pre-existing database records.
+
+#### 3. Control Plane Gateway Services & Endpoints (`apps/gateway`)
+
+- **Endpoints**:
+  - `GET /api/v1/welcome`: Dynamic welcome headline, subtitle, and starter chips.
+  - `GET /api/v1/branding`: Dynamic brand name and version badge.
+  - `GET /api/v1/tools/categories`: Dynamic tool category descriptive blurbs.
+  - `GET /api/v1/config/:namespace/:key` & `PUT /api/v1/config/:namespace/:key`: Scoped configuration reads/writes with admin guards.
+- **Dynamic Services**:
+  - `PlatformConfigService`: Unified cached accessor for branding, welcome, categories, cache, compaction, and execution.
+  - `CognitivePolicyService`: Dynamic thinking tokens, temperature, and thinking guidelines.
+  - `FeatureFlagService`: High-performance kill switches (e.g. `WorkspaceTool.BASH` kill switch check in `WorkspaceToolExecutor`).
+  - `LiveTurnCompaction` & `LiveTurnExecutor`: Dynamic threshold ratio from database; dynamic temperature; eradicated static `lead-orchestrator` fallback.
+  - `MemoryDistillation`: Removed static agent strings; safely resolves agent ID from event payload.
+
+#### 4. Dynamic Console UI & Browser Persistence (`apps/console`)
+
+- **Hooks & Components**:
+  - `usePlatformWelcome` & `StudioWelcome`: Dynamic greeting headline, subtitle, and starter suggestions from database.
+  - `usePlatformBranding`, `SidebarNav`, & `PageShell`: Dynamic application name and version badge; dynamic root breadcrumb.
+  - `useToolCategories` & `ToolsPageContent`: Purged static `CATEGORY_BLURBS` constant; queries database-driven category blurbs.
+  - `StudioWorkspaceSelector`: Removed hardcoded `orchestrai` fallback; dynamically reflects active workspace name or placeholder.
+  - `workspace-slice.ts`: Dynamically resolves initial workspace directory from `process.env.WORKSPACE_ROOT` without static paths.
+  - `stores/index.ts`: Dynamically configurable IndexedDB persistence store name (`process.env.NEXT_PUBLIC_STORE_NAME`).
+
+#### 5. Worker & Crawler Dynamic Configuration (`apps/worker`, `apps/crawler`)
+
+- `apps/worker/src/bootstrap/config.ts`: Purged static `ollama` provider fallback; strictly uses `process.env.DEFAULT_MODEL_PROVIDER`.
+- `apps/crawler/src/config.py`: Made `rag_ingest_path` env-driven via `RAG_INGEST_PATH`.
+
+---
+
+## Session: 2026-10-02 (Continued) — Milestone 12 Complete: Anthropic-Grade Dynamic Cognition, Thinking & Database Seeding
+
+### Summary of Completed Work
+
+#### 1. Dynamic Cognition & Manifest Schema Models (`packages/database/prisma/schema.prisma`)
+
+- Defined 4 foundational dynamic entities:
+  - **`CognitivePolicy`**: Dynamic thinking tokens, temperature overrides, loop steps, and thinking guidelines.
+  - **`SystemPromptTemplate`**: Versioned, living prompt templates and behavioral guidelines.
+  - **`PlatformConfig`**: Unified namespaced JSON configuration store for slash commands, suggestion chips, cache parameters, compaction thresholds, and RAG chunking.
+  - **`FeatureFlag`**: Instant sub-2ms kill switches and circuit breakers for tools and capabilities.
+- Generated Prisma Client types with zero manual migrations.
+
+#### 2. Idempotent Platform Database Seeders (`packages/database/src/seeds/`)
+
+- Implemented modular seeders with a zero data loss guarantee (uses `upsert` with `update: {}` to strictly preserve existing database data without truncating or cleaning):
+  - `seed-providers-models.ts`: Ollama provider and Gemma 4 31B model records.
+  - `seed-modes-nav.ts`: Chat, Plan, Act, and Auto execution modes + 8 navigation hub items.
+  - `seed-roles-tools.ts`: 4 platform permissions, 7 platform roles, and 11 execution tools.
+  - `seed-agents.ts`: Default workspace tenant and 6 core specialist agents.
+  - `seed-platform-data.ts`: Cognitive policy blueprints, prompt templates, and platform configs.
+  - `seed-platform-manifest.ts`: Automated sync for cognitive policies, prompts, configs, and flags.
+  - `seed-all.ts`: Master orchestrator running all seed modules in dependency order.
+
+#### 3. Database-Driven Gateway Service (`apps/gateway`)
+
+- Refactored `PlatformCommandService` to query `this.db.platformConfig` under `namespace: "commands"`, eliminating all hardcoded static fallback arrays.
+- Integrated `seedAllPlatformData` into gateway bootstrap in `apps/gateway/src/index.ts`.
+
+---
+
+## Session: 2026-10-02 — Milestone 11 Complete: Platform Slash Commands API & Dynamic Consumer
+
+### Summary of Completed Work
+
+#### 1. Core Contracts (`packages/shared-types`)
+
+- Defined `PlatformCommandRecord` entity interface in `packages/shared-types/src/platform.ts`.
+- Rebuilt `@orchestrai/shared-types` package.
+
+#### 2. Gateway Platform Slash Commands Module (`apps/gateway/src/modules/platform/`)
+
+- **`PlatformCommandService` (`services/platform-command.service.ts`)**:
+  - Service managing slash commands (`/plan`, `/act`, `/chat`, `/auto`, `/clear`, `/compact`, `/files`, `/help`).
+  - Supports `listCommands(includeDisabled)`, `getCommand(commandId)`, `createCommand(dto)`, `updateCommand(commandId, patch)`, and `deleteCommand(commandId)`.
+- **`PlatformCommandController` (`controllers/platform-command.controller.ts`)**:
+  - Exposes REST handlers for listing, creating, updating, and deleting commands.
+- **`registerPlatformCommandRoutes` (`controllers/platform-command.route.ts`)**:
+  - Maps `GET /commands` (public read) and `POST /commands`, `PUT /commands/:id`, `DELETE /commands/:id` (admin protected).
+  - Integrated into Gateway bootstrap in `apps/gateway/src/index.ts`.
+
+#### 3. Console Dynamic Slash Commands Consumer (`apps/console`)
+
+- **`usePlatformCommands` (`features/studio/api/use-platform-commands.ts`)**:
+  - TanStack Query hook querying `/api/v1/commands`.
+- **Dynamic Icon Resolution & Zero Hardcoding (`studio-slash-commands.types.ts`)**:
+  - Removed static fallback array completely from client code.
+  - Implemented `resolveCommandIcon` mapping icon strings to Lucide components.
+  - Implemented `mapPlatformRecordToSlashCommand`.
+- **`StudioSlashCommands` (`studio-slash-commands.tsx`)**:
+  - Consumes dynamic commands from Gateway API.
+
 ---
 
 ## Session: 2026-09-29 (Continued) — Phase 6 Complete: Dual-Pane Workspace Canvas & Virtualized Chat
@@ -1174,3 +1315,32 @@ Chronological log of architecture, engineering decisions, and completed mileston
 - **250-Line Maximum Rule**: All new files decomposed proactively; max LOC is 183 lines (0 files > 221 LOC).
 - **Monorepo Typecheck**: 48 of 48 workspace targets passing cleanly (`pnpm typecheck`).
 - **Linting & Formatting**: `eslint --max-warnings=0`, `ruff check`, Prettier, and `ruff format` passing with 0 warnings/errors.
+
+---
+
+## Session: 2026-10-03 — UI Shimmer Skeletons, Zero-Hardcoded Copy Catalog & Developer Workbench Normalization
+
+### 1. Accessible UI Skeletons & Layout Shift Elimination (`apps/console`)
+
+- **Root Problem**: Console dashboard pages displayed unstyled raw `"Loading..."` text blocks during TanStack Query resolution, causing cumulative layout shifts (CLS) and degraded visual aesthetics.
+- **Solution (`components/ui/skeleton.tsx`)**:
+  - Implemented primitive `Skeleton` shimmer block with subtle animation and rounded corners.
+  - Implemented composite skeletons matching reference dashboard layouts: `CardGridSkeleton` (for Agents, Models, Tools), `TableSkeleton` (for Executions, Knowledge, Memory, Context), and `DetailPageSkeleton` (for Agent & Execution details).
+  - Re-exported via `components/ui/index.ts`.
+
+### 2. Centralized Type-Safe UI Copy Dictionary (`apps/console/src/lib/ui-copy.ts`)
+
+- **Root Problem**: User interface strings (empty state headlines, descriptions, button labels, and modal headers) were hardcoded as bare literals in JSX, violating the zero-hardcoded-strings standard.
+- **Solution**:
+  - Created centralized dictionary `UI_COPY` (< 200 LOC) standardizing strings across all 8 dashboard domains: `AGENTS`, `EXECUTIONS`, `MODELS`, `KNOWLEDGE`, `MEMORY`, `EVALUATIONS`, `TOOLS`, `CONTEXT`, `STUDIO`, and `COMMON`.
+  - Replaced raw text in all page containers, table views, filter empty states, and action buttons.
+
+### 3. Developer Test Workbenches Clarification & Normalization
+
+- **Nature of "Testers"**: Clarified that in-browser testing features (`MemoryRecallDialog`, `KnowledgeQueryDialog`, `ExecutionDebugDialog`, and `EvaluationsDatasetsList`) are **production operator workbenches**, not unit or e2e test cases. They fully comply with the Phase Implementation Testing Policy (which only forbids automated test suite implementation).
+- **String Migration**: Migrated all strings within `MemoryRecallDialog` and `KnowledgeQueryDialog` to `UI_COPY.MEMORY.RECALL_TESTER` and `UI_COPY.KNOWLEDGE.QUERY_TESTER`.
+
+### 4. Quality Gates Verification
+
+- **250-Line Rule**: 100% of modified and newly created files remain strictly under 200 lines (e.g. `ui-copy.ts` at 191 LOC, `skeleton.tsx` at 98 LOC).
+- **TypeScript Compilation**: `pnpm typecheck` passed cleanly across all 48 Turbo targets with 0 errors.

@@ -1,7 +1,7 @@
 /**
  * @file apps/gateway/src/modules/cache/semantic-cache.service.ts
  * @description Enterprise semantic vector cache wiring @orchestrai/semantic-cache into the gateway.
- * Deduplicates inbound agent prompts based on cosine similarity, saving model calls and latency.
+ * Dynamically configured from database platform_configs with zero hardcoding.
  * @module apps/gateway/modules/cache
  */
 
@@ -9,17 +9,32 @@ import { SemanticCache, SemanticCacheStats } from "@orchestrai/semantic-cache";
 import { CacheHitStatus } from "@orchestrai/shared-types";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { ResilientEmbeddingProvider } from "@/modules/rag/rag.service";
+import { platformConfigService } from "@/modules/platform/services/platform-config.service";
 
 const logger = loggerWithConfig(new Logger("SemanticCacheService"));
 
+let cacheInstance: SemanticCache<string> | null = null;
+let lastConfigSync = 0;
+const SYNC_INTERVAL_MS = 30_000;
+
 /**
- * Singleton semantic cache instance configured with resilient vector embeddings.
+ * Returns dynamic semantic cache instance wired with latest database configuration.
  */
-const semanticCache = new SemanticCache<string>(new ResilientEmbeddingProvider(), {
-  similarityThreshold: 0.97,
-  defaultTtlMs: 3600000,
-  maxEntries: 1000,
-});
+async function getSemanticCache(): Promise<SemanticCache<string>> {
+  const now = Date.now();
+  if (cacheInstance && now - lastConfigSync < SYNC_INTERVAL_MS) {
+    return cacheInstance;
+  }
+
+  const config = await platformConfigService.getSemanticCacheConfig();
+  cacheInstance = new SemanticCache<string>(new ResilientEmbeddingProvider(), {
+    similarityThreshold: config.similarityThreshold,
+    defaultTtlMs: config.ttlMs,
+    maxEntries: config.maxEntries,
+  });
+  lastConfigSync = now;
+  return cacheInstance;
+}
 
 /**
  * Looks up a previously cached model output for a given prompt query.
@@ -29,7 +44,8 @@ const semanticCache = new SemanticCache<string>(new ResilientEmbeddingProvider()
  */
 export async function checkSemanticCache(prompt: string): Promise<string | null> {
   try {
-    const result = await semanticCache.get(prompt);
+    const cache = await getSemanticCache();
+    const result = await cache.get(prompt);
 
     if (result.status === CacheHitStatus.HIT && typeof result.value === "string") {
       logger.info("Semantic cache HIT", {
@@ -65,7 +81,8 @@ export async function storeSemanticCache(prompt: string, response: string): Prom
   }
 
   try {
-    await semanticCache.set(prompt, response);
+    const cache = await getSemanticCache();
+    await cache.set(prompt, response);
     logger.debug("Stored prompt/response in semantic cache", {
       promptPreview: prompt.slice(0, 60),
       responseLength: response.length,
@@ -81,6 +98,7 @@ export async function storeSemanticCache(prompt: string, response: string): Prom
 /**
  * Retrieves cache utilization and hit/miss statistics.
  */
-export function getSemanticCacheStats(): SemanticCacheStats {
-  return semanticCache.getStats();
+export async function getSemanticCacheStats(): Promise<SemanticCacheStats> {
+  const cache = await getSemanticCache();
+  return cache.getStats();
 }

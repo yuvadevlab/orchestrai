@@ -8,6 +8,7 @@
 
 import React from "react";
 import { Code, Eye, GitCompare, Terminal, X } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useConsoleStore, type CanvasMode } from "@/lib/stores";
 import { CanvasCodeView } from "./canvas-code-view";
 import { CanvasPreviewView } from "./canvas-preview-view";
@@ -32,10 +33,10 @@ export function CanvasPane(): React.JSX.Element | null {
     label: string;
     icon: React.ComponentType<{ className?: string }>;
   }[] = [
-    { mode: "code", label: "Code", icon: Code },
-    { mode: "preview", label: "Preview", icon: Eye },
-    { mode: "diff", label: "Diff", icon: GitCompare },
-    { mode: "terminal", label: "Terminal", icon: Terminal },
+    { mode: "code", label: UI_COPY.STUDIO.CANVAS.TABS.CODE, icon: Code },
+    { mode: "preview", label: UI_COPY.STUDIO.CANVAS.TABS.PREVIEW, icon: Eye },
+    { mode: "diff", label: UI_COPY.STUDIO.CANVAS.TABS.DIFF, icon: GitCompare },
+    { mode: "terminal", label: UI_COPY.STUDIO.CANVAS.TABS.TERMINAL, icon: Terminal },
   ];
 
   return (
@@ -75,7 +76,8 @@ export function CanvasPane(): React.JSX.Element | null {
           type="button"
           onClick={() => setCanvasOpen(false)}
           className="text-muted-foreground hover:bg-muted hover:text-foreground ml-3 rounded-md p-1 transition-colors"
-          title="Close Canvas"
+          title={UI_COPY.STUDIO.CANVAS.CLOSE_A11Y}
+          aria-label={UI_COPY.STUDIO.CANVAS.CLOSE_A11Y}
         >
           <X className="size-4" />
         </button>

@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * @file page-shell.tsx
  * @description Standard page container for all Console routes.
@@ -13,6 +15,8 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "./page-header";
 import type { BreadcrumbSegment } from "./page-header";
+import { usePlatformBranding } from "@/lib/hooks";
+import { UI_COPY } from "@/lib/ui-copy";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -97,13 +101,16 @@ export function PageShell({
   children,
   className,
 }: PageShellProps): React.JSX.Element {
+  const { data: branding } = usePlatformBranding();
+  const brandName = branding?.brandName ?? UI_COPY.COMMON.BRAND.DEFAULT_NAME;
+
   /**
-   * Resolve the breadcrumb trail.
+   * Resolve the breadcrumb trail dynamically.
    * Priority: explicit `breadcrumbs` array > shorthand `breadcrumb` string.
    */
   const resolvedBreadcrumbs: BreadcrumbSegment[] = breadcrumbsProp
     ? breadcrumbsProp
-    : [{ label: "OrchestrAI", href: "/" }, ...(breadcrumb ? [{ label: breadcrumb }] : [])];
+    : [{ label: brandName, href: "/" }, ...(breadcrumb ? [{ label: breadcrumb }] : [])];
 
   /**
    * Merge `stats` and `actions` into a single right-side ReactNode.

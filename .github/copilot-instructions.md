@@ -22,6 +22,10 @@ All code must strictly adhere to the project invariants documented below and in 
    - Dependencies flow inward: `apps/*` ──▶ `packages/*` ──▶ `@orchestrai/core`. Never create circular dependencies.
 5. **Phase Testing Policy**:
    - Do NOT write or generate test cases (unit, e2e, integration) or Storybook stories unless explicitly instructed by the user.
+6. **Dynamic Server-Driven Configuration (Big 3 Standard) & Centralized Regex**:
+   - NO client or worker application may hardcode operational parameters (slash commands, system prompts, max execution steps, sampling temperatures, compaction thresholds, cache similarity/TTL, RAG chunking parameters, retention policies, or starter suggestions).
+   - All runtime behaviors must be dynamic, database- or control-plane-driven, served via Gateway APIs (`/api/v1/platform/...`), and cached with stale-while-revalidate IndexedDB persistence.
+   - All regular expressions must originate from `@orchestrai/regex`. Zero inline regexes.
 
 ---
 
@@ -38,9 +42,9 @@ All code must strictly adhere to the project invariants documented below and in 
   - `crawler`: Python Playwright Web Scraping & RAG Ingestion (`8083`).
 
 - **Domain Packages (`packages/*`)**:
-  - `core`, `shared-types`, `database`, `models`, `tools`, `agent`, `runtime`, `memory`, `rag`, `semantic-cache`, `model-router`, `eval`, `prompts`, `billing`, `resilience`, `events`, `queue`, `grpc`, `observability`, `sdk`.
+  - `core`, `shared-types`, `database`, `models`, `tools`, `agent`, `runtime`, `memory`, `rag`, `semantic-cache`, `model-router`, `eval`, `prompts`, `billing`, `resilience`, `events`, `queue`, `grpc`, `observability`, `sdk`, `regex`.
 
 - **Quality Gates**:
-  - `pnpm typecheck`: Must pass 46/46 targets cleanly.
+  - `pnpm typecheck`: Must pass 48/48 targets cleanly.
   - `pnpm lint`: ESLint (`--max-warnings=0`) + Ruff.
   - `pnpm format`: Prettier + Ruff.

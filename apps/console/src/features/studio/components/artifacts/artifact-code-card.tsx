@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { Check, ChevronDown, ChevronRight, Code2, Copy, PanelRightOpen } from "lucide-react";
 import { Badge, Button } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useConsoleStore } from "@/lib/stores";
 import type { CoworkArtifact } from "../../types";
 
@@ -67,14 +68,14 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
             </span>
           )}
           <span className="text-muted-foreground ml-1 flex items-center gap-0.5 text-[10px]">
-            <span>{isExpanded ? "Hide" : "Show"}</span>
+            <span>{isExpanded ? UI_COPY.COMMON.ACTIONS.HIDE : UI_COPY.COMMON.ACTIONS.SHOW}</span>
             {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
           </span>
         </button>
 
         <div className="flex shrink-0 items-center gap-1.5">
           <Badge variant="outline" className="px-1.5 py-0 font-mono text-[10px] uppercase">
-            {language} · {lines.length} lines
+            {UI_COPY.STUDIO.ARTIFACTS.LINES_COUNT(language, lines.length)}
           </Badge>
 
           <Button
@@ -82,15 +83,18 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
             size="sm"
             onClick={handleOpenInCanvas}
             className="h-7 cursor-pointer gap-1 px-2 text-xs"
-            title="Open in Right-Side Canvas"
+            title={UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS_TOOLTIP}
+            aria-label={UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS_TOOLTIP}
           >
             <PanelRightOpen className="text-primary size-3" />
-            <span className="hidden sm:inline">Canvas</span>
+            <span className="hidden sm:inline">{UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS}</span>
           </Button>
 
           <Button variant="ghost" size="sm" onClick={handleCopy} className="h-7 gap-1 px-2 text-xs">
             {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
-            <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+            <span className="hidden sm:inline">
+              {copied ? UI_COPY.COMMON.ACTIONS.COPIED : UI_COPY.COMMON.ACTIONS.COPY}
+            </span>
           </Button>
         </div>
       </div>

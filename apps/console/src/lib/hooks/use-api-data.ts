@@ -1,15 +1,15 @@
 "use client";
 
 /**
- * @file apps/console/src/lib/use-api-data.ts
+ * @file apps/console/src/lib/hooks/use-api-data.ts
  * @description Universal data fetching hook integrating TanStack Query caching, deduping, and error normalization.
- * @module apps/console/lib
+ * @module apps/console/lib/hooks
  */
 
 import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getApiClient } from "./api-client";
-import { formatApiError } from "./error-utils";
+import { getApiClient } from "@/lib/api-client";
+import { formatApiError } from "@/lib/error-utils";
 
 export interface UseApiDataOptions<T> {
   /** Async fetch callback taking initialized OrchestrAIClient */

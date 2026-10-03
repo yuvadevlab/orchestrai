@@ -46,3 +46,7 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, a local-first, modul
    - Always check and compare using `Enum.KEY` (e.g. `status === ExecutionStatus.COMPLETED`, `role === MessageRole.USER`), NEVER bare strings like `"completed"`.
    - NO hardcoded fallback model constants (e.g. `"gemma4:31b-cloud"`, `"qwen2.5:7b"`) or fallback candidate objects (`DEFAULT_FALLBACK_CANDIDATE`). All models must be DB- or env-driven.
    - NO synthetic agent auto-seeding (`DEFAULT_SUPERVISOR`, `Lead Orchestrator`). If a tenant has no agent, fail fast and instruct the user to create one in the Studio.
+8. **Dynamic Server-Driven Configuration (Big 3 Standard) & Centralized Regex**:
+   - NO client or worker application may hardcode operational parameters (slash commands, system prompts, max execution steps, sampling temperatures, compaction thresholds, cache similarity/TTL, RAG chunking parameters, retention policies, or starter suggestions).
+   - All operational behaviors must be dynamic, database- or control-plane-driven, served via Gateway APIs (`/api/v1/platform/...`), and cached with stale-while-revalidate IndexedDB persistence.
+   - All regular expressions across all apps and packages must originate from `@orchestrai/regex`. Zero inline regexes.

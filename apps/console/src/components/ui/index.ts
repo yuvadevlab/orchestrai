@@ -12,3 +12,4 @@ export * from "./action-dialog";
 export * from "./form-dialog-field";
 export * from "./form-dialog";
 export * from "./status-badge";
+export * from "./skeleton";

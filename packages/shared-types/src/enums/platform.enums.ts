@@ -42,6 +42,29 @@ export enum PlatformToolName {
   INSPECT_SCHEMA = "inspect_schema",
   CALL_API = "call_api",
   FETCH_URL = "fetch_url",
+  RECORD_MEMORY = "record_memory",
+  RECALL_MEMORY = "recall_memory",
+  SEARCH_RAG = "search_rag",
+  PYTHON_SANDBOX = "python_sandbox",
+  WEB_SEARCH = "web_search",
+  DOCUMENT_READER = "document_reader",
+  URL_SCRAPER = "url_scraper",
+  REST_API_CALLER = "rest_api_caller",
+  SQL_ANALYTICS = "sql_analytics",
+  WEBHOOKS = "webhooks",
+  PDF_PARSER = "pdf_parser",
+  LIST_DIR = "list_dir",
+}
+
+/**
+ * Sandboxing tier and isolation boundary enforced on tool execution.
+ */
+export enum ToolSandboxType {
+  READ_ONLY = "read_only",
+  NETWORK_READ = "network_read",
+  NETWORK_WRITE = "network_write",
+  WORKSPACE_WRITE = "workspace_write",
+  EPHEMERAL_VM = "ephemeral_vm",
 }
 
 /**
@@ -63,4 +86,17 @@ export enum BudgetQuotaStatus {
   WARNING = "warning",
   EXCEEDED = "exceeded",
   THROTTLED = "throttled",
+}
+
+/**
+ * Canonical platform agent role classifications.
+ */
+export enum AgentRoleSlug {
+  STRATEGY = "strategy",
+  RESEARCH = "research",
+  WRITING = "writing",
+  ENGINEERING = "engineering",
+  DATA = "data",
+  AUTOMATION = "automation",
+  SPECIALIST = "specialist",
 }

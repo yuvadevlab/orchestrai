@@ -52,6 +52,7 @@ export interface TurnExecutorCallbacks {
  * @param agentId - Agent DB identifier for episode recording
  * @param contextWindow - Model context window from DB model record (used for compaction trigger)
  * @param costPerTokenUsd - Cost per token from DB model record (0 for local Ollama)
+ * @param temperature - Sampling temperature from agent or cognitive policy
  */
 export async function executeAutonomousTurns(
   executionId: string,
@@ -64,9 +65,10 @@ export async function executeAutonomousTurns(
   callbacks: TurnExecutorCallbacks,
   maxTurns: number = ABSOLUTE_MAX_TURNS,
   tenantId = "default",
-  agentId = "lead-orchestrator",
+  agentId = "",
   contextWindow: number = DEFAULT_CONTEXT_WINDOW,
   costPerTokenUsd = 0,
+  temperature?: number,
 ): Promise<void> {
   const tracer = traceService.tracer;
   const rootSpan = tracer.startSpan("agent.execution", {
@@ -96,6 +98,7 @@ export async function executeAutonomousTurns(
 
     // Clamp maxTurns between 1 and the absolute ceiling to prevent misconfigured runaway loops
     const effectiveMaxTurns = Math.min(Math.max(1, maxTurns), ABSOLUTE_MAX_TURNS);
+    const effectiveTemperature = typeof temperature === "number" ? temperature : 0.7;
 
     // Emit EXECUTION_STARTED domain event — triggers Inspector Rail initialization
     publishExecutionStarted(executionId as never, agentId, tenantId as never);
@@ -112,7 +115,7 @@ export async function executeAutonomousTurns(
       }
 
       // Context compaction warning: notify UI when window is approaching threshold
-      if (shouldCompact(history, contextWindow)) {
+      if (await shouldCompact(history, contextWindow)) {
         emitCompactionNotice(executionId, history, contextWindow, callbacks);
       }
 
@@ -127,7 +130,7 @@ export async function executeAutonomousTurns(
         const stream = adapter.stream({
           model: selectedModel,
           messages: history,
-          temperature: 0.7,
+          temperature: effectiveTemperature,
           stream: true,
         });
 
