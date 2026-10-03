@@ -215,7 +215,7 @@ export class PlatformConfigService {
     const brandVersion = await this.getConfig<string>(
       ConfigNamespace.BRANDING,
       ConfigKey.BRAND_VERSION,
-      "v0.1.0 • local-first",
+      "v1.0.0 • enterprise",
     );
     return { brandName, brandVersion };
   }

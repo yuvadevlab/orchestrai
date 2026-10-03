@@ -49,7 +49,7 @@ export const COMMON_COPY = {
     SWITCH_LIGHT: "Switch to Light mode",
     SWITCH_DARK: "Switch to Dark mode",
     GATEWAY_ACTIVE: "Gateway Active",
-    LOCAL_CORE: "Local Core",
+    LOCAL_CORE: "Control Plane Runtime",
     OUTBOX_BUS_CONNECTED: "Outbox Bus: Connected",
     NEW_EXECUTION: "New Execution",
     SIGN_IN: "Sign In",
@@ -61,7 +61,7 @@ export const COMMON_COPY = {
     PAGE_TITLE: "Loading page...",
   },
   SIDEBAR: {
-    DEFAULT_BRAND_VERSION: "v0.1.0 • local-first",
+    DEFAULT_BRAND_VERSION: "v1.0.0 • enterprise",
     NO_NAV_ITEMS: "No navigation items configured.",
     WORKER_DAEMON: "Worker Daemon",
     REDIS_QUEUE: "Redis Queue",

@@ -1,6 +1,6 @@
 # OrchestrAI — Claude Code Developer Guide
 
-You are working on **OrchestrAI**, a local-first, modular AI agent orchestration platform.
+You are working on **OrchestrAI**, an enterprise-grade distributed AI agent orchestration platform designed for high-scale autonomous swarms, cognitive reasoning, and sandboxed execution.
 Master rulebooks are indexed in [`.agents/AGENTS.md`](.agents/AGENTS.md). Adhere strictly to all invariants.
 
 ---

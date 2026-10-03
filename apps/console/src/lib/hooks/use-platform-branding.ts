@@ -14,7 +14,7 @@ import { getApiClient } from "@/lib/api-client";
 export interface PlatformBranding {
   /** Application brand name (e.g. OrchestrAI) */
   brandName: string;
-  /** Application version and distribution badge (e.g. v0.1.0 • local-first) */
+  /** Application version and distribution badge (e.g. v1.0.0 • enterprise) */
   brandVersion: string;
 }
 
@@ -37,7 +37,7 @@ export function usePlatformBranding(): UseQueryResult<PlatformBranding, Error> {
 
       return {
         brandName: process.env.NEXT_PUBLIC_APP_NAME || "OrchestrAI",
-        brandVersion: process.env.NEXT_PUBLIC_APP_VERSION || "v0.1.0 • local-first",
+        brandVersion: process.env.NEXT_PUBLIC_APP_VERSION || "v1.0.0 • enterprise",
       };
     },
     staleTime: 300_000,

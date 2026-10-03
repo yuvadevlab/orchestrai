@@ -181,7 +181,7 @@ export const SEED_PLATFORM_CONFIGS: readonly PlatformConfigBlueprint[] = [
     namespace: ConfigNamespace.BRANDING,
     key: ConfigKey.BRAND_VERSION,
     description: "Platform application version badge string",
-    value: "v0.1.0 • local-first",
+    value: "v1.0.0 • enterprise",
   },
   {
     namespace: ConfigNamespace.TOOLS,

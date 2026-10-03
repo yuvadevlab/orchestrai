@@ -128,7 +128,7 @@ export const STUDIO_COPY = {
     HANDLE_LABEL: "Execution Handle",
     ENGINE_LABEL: "Runtime Engine",
     SANDBOX_LABEL: "Sandbox Status",
-    LOCAL_FIRST_STATUS: "Local-First Isolated Workspace",
+    LOCAL_FIRST_STATUS: "Zero-Trust Sandboxed Workspace",
     IDLE: "Idle",
   },
   WELCOME: {

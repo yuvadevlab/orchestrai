@@ -657,7 +657,7 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 ---
 
-### 3. Zero-Docker Local-First Engine & Security
+### 3. Zero-Docker Embedded Runtime Engine & Security
 
 - **Eliminated Container Dependencies**:
   - Removed all `docker-compose` files and legacy `infrastructure/` directory.
@@ -1440,3 +1440,37 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 - **250-Line Rule**: 100% of modified and newly created files remain strictly under 200 lines (e.g. `ui-copy.ts` at 191 LOC, `skeleton.tsx` at 98 LOC).
 - **TypeScript Compilation**: `pnpm typecheck` passed cleanly across all 48 Turbo targets with 0 errors.
+
+---
+
+## Session: Enterprise Architecture Character & Brand Transformation (2026-10-03)
+
+### 1. Architectural Re-Positioning & Portfolio Standard
+
+- **Enterprise Platform Mandate**: Elevated OrchestrAI from a "simple local-first project" framing to its true production character: an **enterprise-grade distributed AI agent orchestration platform** engineered to execute complex, massive-scale multi-agent DAGs, distributed queue tasks, and sandboxed tool executions.
+- **Air-Gapped Sovereignty as Capability**: Re-framed edge and self-contained execution not as a limiting toy boundary, but as a critical enterprise security feature: **Zero-Trust Security & Air-Gapped Sovereignty** (zero required external cloud egress for complete data sovereignty).
+
+### 2. Comprehensive Brand & Copy Normalization
+
+- **Console UI Copy**:
+  - `UI_COPY.COMMON.SIDEBAR.DEFAULT_BRAND_VERSION`: Elevated to `"v1.0.0 • enterprise"`.
+  - `UI_COPY.COMMON.A11Y.LOCAL_CORE`: Renamed text to `"Control Plane Runtime"`.
+  - `UI_COPY.STUDIO.INSPECTOR.LOCAL_FIRST_STATUS`: Updated to `"Zero-Trust Sandboxed Workspace"`.
+  - `UI_COPY.MODELS.PAGE_DESCRIPTION`: Updated to `"High-performance cloud and cluster inference providers configured for this tenant."`.
+  - `UI_COPY.MODELS.EMPTY_DESC`: Updated to reflect cloud, cluster, or private inference providers.
+- **Branding Hooks & Services**:
+  - `use-platform-branding.ts`: Default fallback updated to `"v1.0.0 • enterprise"`.
+  - `platform-config.service.ts`: Backend service fallback updated to `"v1.0.0 • enterprise"`.
+  - `seed-platform-configs.ts`: PostgreSQL seed data updated to `"v1.0.0 • enterprise"`.
+  - `apps/gateway/src/db/local-store.ts`: Elevated JSDoc to reflect embedded zero-dependency storage engine for self-contained runtime environments.
+- **Documentation & Agent Directives**:
+  - `package.json`: Version bumped to `"1.0.0"` and description elevated to enterprise distributed AI agent orchestration platform.
+  - `README.md`: Updated tagline, architecture pillars, tech stack, and prerequisites.
+  - `CLAUDE.md`, `AGENTS.md`, and `.agents/AGENTS.md`: Standardized agent instructions around enterprise scale and distributed architecture.
+  - `.agents/rules/architecture.md` & `docs/architecture/ARCHITECTURE.md`: Elevated Section 3 to "Air-Gapped Sovereignty & Enterprise Dual-Runtime".
+
+### 3. Verification & Compliance
+
+- **Zero "local-first" string matches**: Verified complete removal across all monorepo source files, markdown docs, and seed configs.
+- **Strict Invariants**: All files strictly adhere to the 250 LOC maximum rule.
+- **Typecheck & Linting**: Turbo `pnpm typecheck` passed across 48/48 targets with 0 errors; `pnpm lint` passed with 0 warnings.

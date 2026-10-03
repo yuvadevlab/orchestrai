@@ -1,6 +1,6 @@
 # AGENTS.md — AI Agent Operating Instructions for OrchestrAI
 
-Welcome, Agent. You are pair-programming on **OrchestrAI**, a local-first, modular AI agent orchestration platform.
+Welcome, Agent. You are pair-programming on **OrchestrAI**, an enterprise-grade distributed AI agent orchestration platform designed for high-scale autonomous swarms, cognitive reasoning, and sandboxed execution.
 
 > **FOR ALL AI ASSISTANTS (Antigravity, Claude Code, GitHub Copilot, Cursor):**
 > Master invariants and rules are indexed below. Read and adhere to the relevant rulebooks in `.agents/rules/`.
@@ -12,7 +12,7 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, a local-first, modul
 | Rulebook               | Path                                                           | Primary Scope                                                                           |
 | :--------------------- | :------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
 | **Core Invariants**    | [`00-core-invariants.md`](.agents/rules/00-core-invariants.md) | 250-line rule, code splitting, detailed JSDoc, explanatory comments, package boundaries |
-| **Architecture**       | [`architecture.md`](.agents/rules/architecture.md)             | Layer hierarchy, local-first stack, state machines & outbox pattern                     |
+| **Architecture**       | [`architecture.md`](.agents/rules/architecture.md)             | Layer hierarchy, distributed execution stack, state machines & outbox pattern           |
 | **Coding Standards**   | [`coding-standards.md`](.agents/rules/coding-standards.md)     | Strict TypeScript, Zod schemas, error handling & pure functions                         |
 | **Session Continuity** | [`session-continuity.md`](.agents/rules/session-continuity.md) | Handoff protocol, PROGRESS.md checklist, continuation state                             |
 

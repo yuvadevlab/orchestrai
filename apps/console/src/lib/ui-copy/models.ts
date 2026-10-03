@@ -7,11 +7,12 @@
 export const MODELS_COPY = {
   PAGE_TITLE: "Models & Providers",
   BREADCRUMB: "Models",
-  PAGE_DESCRIPTION: "Local and cloud inference providers configured in this cluster.",
+  PAGE_DESCRIPTION:
+    "High-performance cloud and cluster inference providers configured for this tenant.",
   REGISTER_BUTTON: "Add Model",
   STATS: (count: number) => `${count} models configured`,
   EMPTY_TITLE: "No Inference Models Configured",
-  EMPTY_DESC: "Connect Ollama, OpenAI, or Anthropic providers to power autonomous agents.",
+  EMPTY_DESC: "Connect cloud, cluster, or private inference providers to power autonomous agents.",
   TAB_CATALOG: "Model Catalog",
   TAB_COCKPIT: "Cost & Latency Cockpit",
   COCKPIT: {

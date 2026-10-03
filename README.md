@@ -1,6 +1,6 @@
 # OrchestrAI
 
-> A modular, local-first AI agent platform designed for autonomous agent orchestration, tool execution, multi-tier memory, Conversational RAG, real-time streaming, LangGraph reasoning, web crawling, evaluation, and resilient workflows.
+> An enterprise-grade distributed AI agent orchestration platform engineered to handle massive, complex tasks through autonomous multi-agent swarms, sandboxed tool harnesses, multi-tier memory, Conversational RAG, real-time event streaming, and resilient execution DAGs.
 
 ---
 
@@ -105,7 +105,7 @@ orchestrai/
 - **Languages**: TypeScript (NodeNext strict), Python 3.11+
 - **Agent Intelligence**: [LangGraph](https://langchain-ai.github.io/langgraph/), [LangChain](https://www.langchain.com/), `@orchestrai/runtime`
 - **Browser Automation**: [Playwright](https://playwright.dev/) (headless Chromium)
-- **Local AI Models**: [Ollama](https://ollama.com/) (100% database- and env-driven)
+- **Model Inference**: Enterprise cloud providers (OpenAI, Anthropic, Gemini, Groq) and private edge/cluster inference (Ollama, vLLM, DeepSeek) (100% database- and env-driven)
 - **Database & Storage**: PostgreSQL 16+ via [Prisma](https://www.prisma.io/) + pgvector
 - **Queueing & Realtime**: Redis 7+ with [BullMQ](https://bullmq.io/) + Server-Sent Events (SSE)
 - **Validation & Contracts**: [Zod](https://zod.dev/) & [Pydantic v2](https://docs.pydantic.dev/)
@@ -120,7 +120,7 @@ orchestrai/
 - pnpm >= 9 (v12 recommended)
 - Python >= 3.11
 - PostgreSQL 16 with pgvector & Redis 7 (or Docker compose)
-- Ollama running locally (`http://localhost:11434`)
+- LLM Inference provider configured (Cloud API keys or local Ollama/vLLM daemon)
 
 ### Quick Setup
 

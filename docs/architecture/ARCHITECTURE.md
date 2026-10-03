@@ -2,12 +2,12 @@
 
 ## 1. System Overview
 
-OrchestrAI is an enterprise-grade, local-first platform for autonomous and human-in-the-loop AI agent orchestration. It bridges the gap between simple prompt wrappers and resilient, distributed execution engines.
+OrchestrAI is an enterprise-grade distributed platform for autonomous and human-in-the-loop AI agent orchestration. It bridges the gap between simple prompt wrappers and resilient, distributed execution engines engineered to handle enterprise-scale workflows.
 
 The platform is designed around seven core pillars:
 
 1. **Stateful Graph Execution**: Agents operate as state machines with checkpointed transitions, rewindability, and branching.
-2. **Local-First Foundations**: Complete system functions offline using PostgreSQL + pgvector, Redis, and local Ollama models.
+2. **Zero-Trust Security & Air-Gapped Sovereignty**: Complete system operates with zero required cloud data egress using PostgreSQL + pgvector, Redis, and private cluster inference models, while scaling horizontally across distributed cloud environments.
 3. **Strict Contract Boundaries**: Domain schemas and types in `@orchestrai/core` enforce invariant correctness across services.
 4. **Resilient Intelligence**: Composable circuit breakers, retries, timeouts, and bulkheads wrap every LLM turn.
 5. **Human-in-the-Loop Safeguards**: High-risk tool calls (filesystem, network, database writes) trigger interactive pauses awaiting operator clearance.
