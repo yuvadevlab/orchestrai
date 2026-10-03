@@ -114,4 +114,10 @@ export enum WorkspaceTool {
   BASH = "bash",
   /** Performs a semantic knowledge base search via RAG. */
   KNOWLEDGE_SEARCH = "knowledge_search",
+  /** Runs workspace code standards and diagnostics verification (linter, compiler, format). */
+  VERIFY_CODE = "verify_code",
+  /** Reads the full markdown content and instructions of a workspace skill. */
+  READ_SKILL = "read_skill",
+  /** Lists all discovered workspace skills with descriptions and trigger conditions. */
+  LIST_SKILLS = "list_skills",
 }

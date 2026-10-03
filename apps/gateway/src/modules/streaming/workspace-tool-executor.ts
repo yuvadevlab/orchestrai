@@ -18,6 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ragService } from "@/modules/rag/rag.service";
 import { featureFlagService } from "@/modules/platform/services/feature-flag.service";
+import { codeStandardsGate, harnessSkillRegistry } from "@/modules/harness";
 
 const readFile = new ReadFileTool();
 const writeFile = new WriteFileTool();
@@ -98,7 +99,48 @@ export async function executeWorkspaceTool(
           { path: filePath, content, createDirectories: true },
           context,
         );
+
+        // Run automated code standards and diagnostic verification gate
+        const evalResult = codeStandardsGate.evaluateWrittenFile(filePath, targetRoot);
+        if (!evalResult.passed) {
+          // Embed diagnostic violations so the model immediately analyzes and repairs them
+          return {
+            output: `${JSON.stringify(res)}\n\n${evalResult.feedback}`,
+            isError: true,
+          };
+        }
+
         return { output: res, isError: false };
+      }
+      case WorkspaceTool.VERIFY_CODE: {
+        const targetPath = String(args.path || ".");
+        const evalResult = codeStandardsGate.evaluateWrittenFile(targetPath, targetRoot);
+        return {
+          output: evalResult.passed ? evalResult.feedback : evalResult.feedback,
+          isError: !evalResult.passed,
+        };
+      }
+      case WorkspaceTool.READ_SKILL: {
+        const skillName = String(args.name || "");
+        const skill = harnessSkillRegistry.getSkill(skillName);
+        if (!skill) {
+          return {
+            output: `Skill "${skillName}" was not found in discovered workspace skills. Run list_skills to see available skills.`,
+            isError: true,
+          };
+        }
+        return {
+          output: `### Skill: ${skill.name}\n${skill.description}\n\n${skill.instructions || ""}`,
+          isError: false,
+        };
+      }
+      case WorkspaceTool.LIST_SKILLS: {
+        const skills = harnessSkillRegistry.listSkills();
+        const skillSummaries = skills.map((s) => `- **${s.name}**: ${s.description}`).join("\n");
+        return {
+          output: skillSummaries || "No workspace skills currently discovered.",
+          isError: false,
+        };
       }
       case WorkspaceTool.LIST_DIR: {
         const dirPath = String(args.path || ".");

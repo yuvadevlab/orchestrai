@@ -26,6 +26,8 @@ import { ragService } from "@/modules/rag/rag.service";
 import { checkSemanticCache, storeSemanticCache } from "@/modules/cache/semantic-cache.service";
 import { featureFlagService } from "@/modules/platform/services/feature-flag.service";
 import { cognitivePolicyService } from "@/modules/platform/services/cognitive-policy.service";
+import { workspaceInstructionLoader, harnessSkillRegistry } from "@/modules/harness";
+import { resolveMonorepoRoot } from "@/modules/streaming/workspace-tool-executor";
 
 export type { ExecutionStreamState };
 
@@ -175,7 +177,18 @@ class LiveExecutionManager {
     const resolvedMaxSteps = maxSteps ?? policy?.maxExecutionSteps;
     const resolvedTemperature = policy?.temperature;
 
-    const augmentedSystemPrompt = [systemPrompt, memoryContext, ragContext, thinkingGuidelines]
+    // Discover and register workspace instructions, modular rules, and skills
+    const harnessContext = workspaceInstructionLoader.loadContext(resolveMonorepoRoot());
+    harnessSkillRegistry.registerContext(harnessContext);
+    const harnessPrompt = workspaceInstructionLoader.formatPromptContext(harnessContext);
+
+    const augmentedSystemPrompt = [
+      systemPrompt,
+      harnessPrompt,
+      memoryContext,
+      ragContext,
+      thinkingGuidelines,
+    ]
       .filter(Boolean)
       .join("\n\n");
 

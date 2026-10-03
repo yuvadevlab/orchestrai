@@ -24,3 +24,4 @@ export * from "./streaming";
 export * from "./trace";
 export * from "./tenant-resolver";
 export * from "./workspace";
+export * from "./harness";

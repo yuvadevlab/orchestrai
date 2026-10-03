@@ -2,6 +2,51 @@
 
 Chronological log of architecture, engineering decisions, and completed milestones for OrchestrAI.
 
+## Session: 2026-10-03 (Continued) — Milestone 14: Big 3 Agent Harness Engineering
+
+### Summary of Completed Work
+
+#### 1. Centralized Harness Lexical & Diagnostic Regexes (`@orchestrai/regex`)
+
+- Added [`harness.regex.ts`](packages/regex/src/harness.regex.ts):
+  - `YAML_FRONTMATTER_REGEX`: Extracts markdown YAML frontmatter blocks delimited by `---`.
+  - `YAML_KEY_VALUE_REGEX`: Parses YAML key-value pairs without heavy external dependencies.
+  - `TSC_DIAGNOSTIC_REGEX`: Parses TypeScript compiler output (`file(line,col): error TS...`).
+  - `ESLINT_DIAGNOSTIC_REGEX`: Parses ESLint compact output (`line:col error message rule`).
+  - `RUFF_DIAGNOSTIC_REGEX`: Parses Python Ruff linter output (`file:line:col: rule message`).
+  - `TOOL_CALL_BLOCK_REGEX`: Reusable fenced tool-calling block matcher.
+
+#### 2. Universal Harness Type Contracts (`@orchestrai/shared-types`)
+
+- Added [`harness.ts`](packages/shared-types/src/harness.ts):
+  - `DiagnosticSeverity` (`ERROR`, `WARNING`, `INFO`).
+  - `DiagnosticToolType` (`TSC`, `ESLINT`, `RUFF`, `PRETTIER`, `SYNTAX`, `WORKSPACE_RULE`).
+  - `WorkspaceInstructionType` (`AGENTS_MD`, `RULE`, `SKILL`, `COPILOT`, `CLAUDE`, `CURSOR`).
+  - `HarnessDiagnosticItem` & `HarnessDiagnosticReport` interfaces.
+  - `WorkspaceSkillMetadata`, `WorkspaceRuleMetadata`, and `WorkspaceHarnessContext`.
+- Expanded `WorkspaceTool` enum with `VERIFY_CODE`, `READ_SKILL`, and `LIST_SKILLS`.
+
+#### 3. Gateway Harness Subsystem (`apps/gateway/src/modules/harness/`)
+
+- Implemented modular harness services (< 250 LOC each):
+  - **`workspace-instruction-loader.ts`**: Automatically scans for root instructions (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`), modular rulebooks (`.agents/rules/*.md`, `.cursor/rules/*.md`), and on-demand skills (`.agents/skills/**/SKILL.md`, `skills/**/SKILL.md`). Ingests YAML frontmatter and formats structured prompt context blocks.
+  - **`workspace-diagnostic-runner.ts`**: Language-aware diagnostic execution running `eslint` and `tsc` for TypeScript/JavaScript and `ruff` for Python. Enforces the Hard 250-Line Maximum Rule invariant directly on modified files.
+  - **`code-standards-gate.ts`**: Post-write evaluation gate. Enriches tool outputs with structured error summaries and instructs the model to analyze, formulate a diff, and request HITL clearance before applying fixes.
+  - **`harness-skill-registry.ts`**: In-memory cache for dynamic skill and rule retrieval.
+
+#### 4. Sandbox Tool Integration (`apps/gateway/src/modules/streaming/`)
+
+- **`workspace-tool-executor.ts`**:
+  - Hooked `codeStandardsGate.evaluateWrittenFile` directly into `WorkspaceTool.WRITE_FILE`. If diagnostics fail, returns structured violations and marks `isError: true` to prevent unvalidated completions.
+  - Added `WorkspaceTool.VERIFY_CODE` for explicit on-demand diagnostic checks.
+  - Added `WorkspaceTool.READ_SKILL` to let agents read full skill instructions.
+  - Added `WorkspaceTool.LIST_SKILLS` to let agents inspect available capabilities.
+- **`live-execution.manager.ts`**:
+  - Integrated dynamic workspace discovery at execution bootstrap (`workspaceInstructionLoader.loadContext()`).
+  - Injects discovered rules and available skills directly into `augmentedSystemPrompt`.
+
+---
+
 ## Session: 2026-10-03 (Continued) — Console Lib Folder Modularization & Architectural Cleanup
 
 ### Summary of Completed Work

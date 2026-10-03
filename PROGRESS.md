@@ -571,3 +571,29 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] **Accessible UI Skeletons (`skeleton.tsx`)**: Replaced raw `"Loading..."` text spinners with layout-preserving animated Skeletons (`Skeleton`, `CardGridSkeleton`, `TableSkeleton`, `DetailPageSkeleton`) across all 8 dashboard routes to eliminate cumulative layout shift (CLS).
 - [x] **Centralized Type-Safe UI Copy Dictionary (`ui-copy.ts`)**: Created unified dictionary `UI_COPY` (< 200 LOC) standardizing all page headings, descriptions, stats, breadcrumbs, search empty states, and modal workbenches (`AGENTS`, `EXECUTIONS`, `MODELS`, `KNOWLEDGE`, `MEMORY`, `EVALUATIONS`, `TOOLS`, `CONTEXT`, `STUDIO`, and `COMMON`).
 - [x] **Developer Workbenches Adherence**: Migrated interactive developer test workbenches (`MemoryRecallDialog`, `KnowledgeQueryDialog`) and trace waterfall components to use centralized `UI_COPY` tokens while strictly preserving their role as production operator tools (distinct from automated test cases).
+
+---
+
+### Milestone 14: Big 3 Agent Harness Engineering
+
+#### [x] Dynamic Workspace Context & Markdown Discovery (`apps/gateway/src/modules/harness/`)
+
+- [x] **Workspace Instruction Loader (`workspace-instruction-loader.ts`)**: Automatically scans and parses root markdown instructions (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`), modular rulebooks (`.agents/rules/*.md`, `.cursor/rules/*.md`), and on-demand skills (`.agents/skills/**/SKILL.md`, `skills/**/SKILL.md`).
+- [x] **Centralized Lexical Parsers (`@orchestrai/regex`)**: Uses zero-dependency regular expressions (`YAML_FRONTMATTER_REGEX`, `YAML_KEY_VALUE_REGEX`, `TOOL_CALL_BLOCK_REGEX`) to parse frontmatter and instructions.
+- [x] **In-Memory Skill Registry (`harness-skill-registry.ts`)**: Caches discovered skills and modular rules for instant retrieval during agent execution.
+- [x] **Context Injection (`live-execution.manager.ts`)**: Injects discovered rules, invariants, and available on-demand skills directly into the agent's augmented system prompt on execution bootstrap.
+
+#### [x] Automated Post-Write Code Standards & Diagnostic Verification Gate
+
+- [x] **Diagnostic Runner (`workspace-diagnostic-runner.ts`)**: Language-aware verification executing `eslint` and `tsc` for TypeScript/JavaScript, and `ruff` for Python. Enforces the Hard 250-Line Maximum Rule invariant directly on modified files.
+- [x] **Code Standards Gate (`code-standards-gate.ts`)**: Post-write evaluation hook invoked automatically on `WorkspaceTool.WRITE_FILE`. Formats structured error reports with line numbers, error codes, and actionable repair instructions.
+- [x] **Tool Executor Integration (`workspace-tool-executor.ts`)**:
+  - `WRITE_FILE`: Executes verification immediately; if diagnostics fail, embeds violations in tool feedback and returns `isError: true` to prevent unvalidated completions.
+  - `VERIFY_CODE`: Exposes on-demand diagnostic evaluation for any file or directory.
+  - `READ_SKILL`: Allows the agent to read full skill documentation on demand.
+  - `LIST_SKILLS`: Allows the agent to discover all registered workspace skills.
+
+#### [x] Semi-Autonomous HITL Self-Repair Loop
+
+- [x] **Diagnostic Feedback Protocol**: Injects clean, actionable error logs into the agent turn loop.
+- [x] **HITL Repair Gate**: Requires the agent to analyze violations, explain the root cause, formulate a minimal diff, and request Human-in-the-Loop (HITL) approval before applying corrective file modifications.

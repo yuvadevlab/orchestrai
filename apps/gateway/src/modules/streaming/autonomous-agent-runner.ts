@@ -9,6 +9,7 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { buildAutonomousSystemPrompt } from "@orchestrai/prompts";
 import { ArtifactType, ArtifactStatus, WorkspaceTool } from "@orchestrai/shared-types";
+import { TOOL_CALL_BLOCK_REGEX } from "@orchestrai/regex";
 import { resolveMonorepoRoot, executeWorkspaceTool } from "./workspace-tool-executor";
 
 export { buildAutonomousSystemPrompt, resolveMonorepoRoot, executeWorkspaceTool };
@@ -34,7 +35,7 @@ export interface ToolArtifact {
 export function extractToolCall(
   text: string,
 ): { tool: string; args: Record<string, unknown> } | null {
-  const match = /```(?:tool_call|json)\s*\n?([\s\S]*?)\n?```/.exec(text);
+  const match = TOOL_CALL_BLOCK_REGEX.exec(text);
   if (!match || !match[1]) return null;
 
   try {
