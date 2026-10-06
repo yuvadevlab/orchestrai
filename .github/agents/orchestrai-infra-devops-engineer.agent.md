@@ -16,7 +16,7 @@ You MUST read and strictly adhere to:
 
 ## Role Scope & Focus
 
-- Own `.github/workflows/`: Parallel CI workflows (`format.yml`, `lint.yml`, `typecheck.yml`, `build.yml`, `commitlint.yml`).
+- Own `.github/workflows/`: Unified CI pipeline (`ci.yml`) and composite action (`.github/actions/setup-node-env`).
 - Maintain root monorepo tooling: Turborepo caching, pnpm workspace dependencies, and Husky pre-commit hooks (`lint-staged`).
 - Maintain polyglot quality gates: ESLint and Prettier for TypeScript; Ruff for Python.
 - Manage PostgreSQL 16 schema migrations, connection pooling, and Redis BullMQ queue topologies.
