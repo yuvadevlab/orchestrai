@@ -1,5 +1,6 @@
 import React from "react";
 import { Switch } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { ToolDefinition } from "../types";
 
 /**
@@ -9,12 +10,12 @@ import type { ToolDefinition } from "../types";
  * @returns Human-friendly permission policy label
  */
 function formatPermissionLabel(permissionLevel?: string): string {
-  if (!permissionLevel) return "Auto-run";
+  if (!permissionLevel) return UI_COPY.TOOLS.CARD.POLICY_AUTO_RUN;
   const normalized = permissionLevel.toLowerCase().trim();
 
   // Read-only operations can execute autonomously without interruption
   if (normalized === "read_only" || normalized === "auto_run" || normalized === "auto-run") {
-    return "Auto-run";
+    return UI_COPY.TOOLS.CARD.POLICY_AUTO_RUN;
   }
 
   // Mutating or sensitive actions require explicit human operator confirmation
@@ -25,7 +26,7 @@ function formatPermissionLabel(permissionLevel?: string): string {
     normalized === "ask_first" ||
     normalized === "ask first"
   ) {
-    return "Ask first";
+    return UI_COPY.TOOLS.CARD.POLICY_ASK_FIRST;
   }
 
   return permissionLevel;
@@ -41,20 +42,26 @@ function formatPermissionLabel(permissionLevel?: string): string {
 function formatSandboxLabel(sandbox?: string, category?: string): string {
   if (sandbox) {
     const s = sandbox.toLowerCase().trim();
-    if (s === "network_read" || s === "network read") return "Network read";
-    if (s === "read_only" || s === "read only") return "Read only";
-    if (s === "workspace_write" || s === "workspace write") return "Workspace write";
-    if (s === "ephemeral_vm" || s === "ephemeral vm") return "Ephemeral VM";
-    if (s === "network_write" || s === "network write") return "Network write";
+    if (s === "network_read" || s === "network read")
+      return UI_COPY.TOOLS.CARD.SANDBOX_NETWORK_READ;
+    if (s === "read_only" || s === "read only") return UI_COPY.TOOLS.CARD.SANDBOX_READ_ONLY;
+    if (s === "workspace_write" || s === "workspace write")
+      return UI_COPY.TOOLS.CARD.SANDBOX_WORKSPACE_WRITE;
+    if (s === "ephemeral_vm" || s === "ephemeral vm")
+      return UI_COPY.TOOLS.CARD.SANDBOX_EPHEMERAL_VM;
+    if (s === "network_write" || s === "network write")
+      return UI_COPY.TOOLS.CARD.SANDBOX_NETWORK_WRITE;
     return sandbox;
   }
 
   // Derive contextual sandbox from category if sandbox field is empty
   const cat = (category ?? "").toLowerCase();
-  if (cat.includes("web") || cat.includes("search")) return "Network read";
-  if (cat.includes("file") || cat.includes("workspace")) return "Workspace write";
-  if (cat.includes("computation") || cat.includes("api")) return "Ephemeral VM";
-  return "Read only";
+  if (cat.includes("web") || cat.includes("search")) return UI_COPY.TOOLS.CARD.SANDBOX_NETWORK_READ;
+  if (cat.includes("file") || cat.includes("workspace"))
+    return UI_COPY.TOOLS.CARD.SANDBOX_WORKSPACE_WRITE;
+  if (cat.includes("computation") || cat.includes("api"))
+    return UI_COPY.TOOLS.CARD.SANDBOX_EPHEMERAL_VM;
+  return UI_COPY.TOOLS.CARD.SANDBOX_READ_ONLY;
 }
 
 /**
@@ -91,11 +98,11 @@ export function ToolCard({ tool, onToggle, isPending = false }: ToolCardProps): 
               // Dispatch toggle handler to synchronize with live database
               onToggle?.(checked);
             }}
-            aria-label={`Toggle ${tool.name}`}
+            aria-label={UI_COPY.TOOLS.CARD.TOGGLE_A11Y(tool.name)}
           />
         </div>
         <p className="text-muted-foreground mt-1.5 line-clamp-2 text-xs leading-relaxed">
-          {tool.description || "Configured agent capability with granular isolation."}
+          {tool.description || UI_COPY.TOOLS.CARD.DEFAULT_DESCRIPTION}
         </p>
       </div>
 

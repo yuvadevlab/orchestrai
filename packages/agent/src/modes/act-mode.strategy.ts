@@ -4,6 +4,7 @@
  */
 
 import { AgentMode } from "@orchestrai/shared-types";
+import { ACT_MODE_SYSTEM_PROMPT } from "@orchestrai/prompts";
 import type { ITool } from "@orchestrai/tools";
 import type { IModeStrategy } from "./mode-strategy.interface";
 
@@ -15,14 +16,10 @@ export class ActModeStrategy implements IModeStrategy {
   public readonly mode = AgentMode.ACT;
 
   /**
-   * System guidance for ACT mode.
+   * Returns canonical system guidance for ACT mode from @orchestrai/prompts.
    */
   public getSystemInstructions(): string {
-    return (
-      "Operating Mode: ACT.\n" +
-      "You are an autonomous action engine. Prioritize direct tool execution over conversational explanation. " +
-      "Perform the necessary operations sequentially and conclude when the goal is achieved."
-    );
+    return ACT_MODE_SYSTEM_PROMPT;
   }
 
   /**

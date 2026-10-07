@@ -1,9 +1,9 @@
 {
   "name": "orchestrai",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "A reusable, local-first AI agent platform for agent orchestration, tools, memory, RAG, realtime execution, and event-driven workflows",
+  "description": "Enterprise-grade distributed AI agent orchestration platform for autonomous swarms, sandboxed tools, multi-tier memory, Conversational RAG, realtime streaming, and event-driven execution DAGs",
   "packageManager": "pnpm@12.5.1+sha512.e3f305bc784a2bc89f5ad3b6138889470fae8d2af5f36b61216ec91c2c3d64089775f9de38aac331044ea40f245cb0d5666392dfdf65824e1907ef6a2c62de5f",
   "engines": {
     "node": ">=20.0.0"
@@ -15,13 +15,17 @@
     "db:generate": "pnpm --filter @orchestrai/database db:generate",
     "db:migrate": "pnpm --filter @orchestrai/database db:migrate",
     "db:studio": "pnpm --filter @orchestrai/database db:studio",
-    "lint": "eslint . --max-warnings=0",
+    "lint": "eslint . --max-warnings=0 && ruff check apps/intelligence apps/crawler",
+    "lint:fix": "eslint . --fix --max-warnings=0 && ruff check --fix apps/intelligence apps/crawler",
     "lint:turbo": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "prettier --write . && ruff format apps/intelligence apps/crawler",
+    "format:check": "prettier --check . && ruff format --check apps/intelligence apps/crawler",
+    "py:setup": "python3 -m venv apps/intelligence/.venv && apps/intelligence/.venv/bin/pip install -r apps/intelligence/requirements.txt && python3 -m venv apps/crawler/.venv && apps/crawler/.venv/bin/pip install -r apps/crawler/requirements.txt",
+    "py:intelligence": "apps/intelligence/.venv/bin/python -m uvicorn src.server:app --app-dir apps/intelligence --host 0.0.0.0 --port 8082",
+    "py:crawler": "apps/crawler/.venv/bin/python -m uvicorn src.server:app --app-dir apps/crawler --host 0.0.0.0 --port 8083",
     "prepare": "husky",
     "postinstall": "pnpm db:generate"
   },
@@ -51,6 +55,10 @@
     "*.{js,jsx,mjs,cjs,ts,tsx}": [
       "eslint --fix --max-warnings=0 --no-warn-ignored",
       "prettier --write"
+    ],
+    "*.py": [
+      "ruff check --fix",
+      "ruff format"
     ],
     "*.{json,md,yml,yaml,css,scss}": [
       "prettier --write"

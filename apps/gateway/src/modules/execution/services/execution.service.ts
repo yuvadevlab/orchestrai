@@ -9,7 +9,7 @@
  */
 
 import { getPrismaClient, type PrismaClient } from "@orchestrai/database";
-import { ExecutionStatus } from "@orchestrai/shared-types";
+import { ExecutionStatus, MessageRole } from "@orchestrai/shared-types";
 import type { IExecutionRepository, IQueueProducer } from "@orchestrai/core";
 import type { CreateExecutionDto, ExecutionFilterDto, ResumeExecutionDto } from "@/validation";
 import type { GatewayResponse } from "@/routes/http-types";
@@ -104,7 +104,7 @@ export class ExecutionService {
       conversationId: validConvId || undefined,
       input: dto.input || "",
       status: ExecutionStatus.RUNNING,
-      metadata: { model: modelName || "gemma4:31b-cloud", ...(dto.variables || {}) },
+      metadata: { ...(modelName ? { model: modelName } : {}), ...(dto.variables || {}) },
     });
 
     logger.info("Execution persisted via repository port", {
@@ -118,7 +118,7 @@ export class ExecutionService {
         data: {
           executionId: row.id,
           conversationId: validConvId,
-          role: "user" as never,
+          role: MessageRole.USER,
           content: dto.input,
         },
       });

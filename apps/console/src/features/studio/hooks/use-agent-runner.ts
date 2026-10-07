@@ -22,6 +22,7 @@ export interface UseAgentRunnerOptions {
   selectedModel: string;
   activeSessionId?: string;
   existingMessages?: CoworkMessage[];
+  workspacePath?: string;
   onUpdateMessages: (updater: (prev: CoworkMessage[]) => CoworkMessage[]) => void;
 }
 
@@ -45,21 +46,15 @@ export function useAgentRunner({
   selectedModel,
   activeSessionId,
   existingMessages = [],
+  workspacePath,
   onUpdateMessages,
 }: UseAgentRunnerOptions): UseAgentRunnerResult {
   const [isRunning, setIsRunning] = useState(false);
   const [events, setEvents] = useState<StudioEvent[]>([]);
   const [activeExecutionId, setActiveExecutionId] = useState("");
 
-  /**
-   * Mutable ref shared between triggerRun and stopExecution.
-   * When true, the SSE iterator loop in consumeExecutionStream exits on next tick.
-   */
   const cancelledRef = useRef(false);
-
-  /** Ref storing the latest execution ID so stopExecution always has the current one. */
   const executionIdRef = useRef("");
-
   const resolveMutation = useResolveApproval();
 
   const resolveApproval = useCallback(
@@ -69,31 +64,18 @@ export function useAgentRunner({
     [resolveMutation],
   );
 
-  /**
-   * Appends a StudioEvent to the local events array for the Inspector Rail.
-   * Kept as a stable callback so it can be passed to consumeExecutionStream.
-   */
   const addEvent = useCallback((event: StudioEvent): void => {
     setEvents((prev) => [...prev, event]);
   }, []);
 
-  /**
-   * Stops the current execution:
-   *  1. Sets cancelledRef so the SSE loop exits on next iteration
-   *  2. Calls the Gateway cancel API to terminate the server-side loop
-   *  3. Resets local running state
-   */
   const stopExecution = useCallback((): void => {
     cancelledRef.current = true;
     setIsRunning(false);
     const idToCancel = executionIdRef.current;
     if (idToCancel) {
-      // Fire-and-forget — we don't block the UI on the API call completing
       getApiClient()
         .executions.cancel(idToCancel)
-        .catch(() => {
-          // Gateway may already have terminated; ignore cancellation errors
-        });
+        .catch(() => {});
     }
   }, []);
 
@@ -105,7 +87,6 @@ export function useAgentRunner({
         throw new Error("No active specialist agent available in database.");
       }
 
-      // Reset cancellation signal for this new run
       cancelledRef.current = false;
       setIsRunning(true);
 
@@ -113,7 +94,6 @@ export function useAgentRunner({
       const userMsgId = `user_${Date.now()}`;
       const agentMsgId = `agent_${Date.now()}`;
 
-      // Build previous turn history for continuous multi-turn LLM context
       const history = (existingMessages || [])
         .filter((m) => m.content && !m.isStreaming)
         .map((m) => ({
@@ -135,11 +115,7 @@ export function useAgentRunner({
           model: selectedModel,
           isStreaming: true,
           artifacts: [],
-          thinking: {
-            text: thinkingText,
-            durationSeconds: 1.2,
-            collapsed: false,
-          },
+          thinking: { text: thinkingText, durationSeconds: 1.2, collapsed: false },
           segments: createInitialAgentSegments(agentMsgId, thinkingText, 1.2),
         },
       ]);
@@ -163,7 +139,11 @@ export function useAgentRunner({
           input: text,
           conversationId: activeSessionId,
           history,
-          variables: { model: selectedModel, systemPrompt: activeSpecialist.description },
+          variables: {
+            model: selectedModel,
+            systemPrompt: activeSpecialist.description,
+            ...(workspacePath ? { workspacePath } : {}),
+          },
         });
 
         setActiveExecutionId(handle.id);
@@ -181,7 +161,6 @@ export function useAgentRunner({
             onAddEvent: addEvent,
           });
         } catch {
-          // Stream failed — fall back to polling the execution result
           const finalRecord = await handle.wait(1500, 30000);
           const fallbackOutput = (finalRecord as { result?: { output?: string } })?.result?.output;
           const fallbackText =
@@ -231,6 +210,7 @@ export function useAgentRunner({
       activeSpecialist,
       selectedModel,
       existingMessages,
+      workspacePath,
       onUpdateMessages,
       activeSessionId,
       addEvent,

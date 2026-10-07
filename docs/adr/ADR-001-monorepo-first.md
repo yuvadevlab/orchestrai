@@ -8,8 +8,8 @@
 
 OrchestrAI consists of multiple interrelated components:
 
-- Several operational applications (`gateway`, `worker`, `realtime`, `console`)
-- Reusable domain libraries (`core`, `models`, `tools`, `agent`, `runtime`, `queue`, `events`, `memory`, `rag`, `observability`, `sdk`)
+- Operational applications and sidecars (`gateway`, `worker`, `realtime`, `console`, `orchestrator`, `admin`, `intelligence`, `crawler`)
+- Reusable domain libraries (`core`, `shared-types`, `database`, `models`, `tools`, `agent`, `runtime`, `memory`, `rag`, `semantic-cache`, `model-router`, `eval`, `prompts`, `billing`, `resilience`, `events`, `queue`, `grpc`, `observability`, `sdk`)
 
 We must decide between:
 

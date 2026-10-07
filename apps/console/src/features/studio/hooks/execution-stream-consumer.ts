@@ -12,6 +12,7 @@ import {
   StudioEventType,
 } from "@orchestrai/shared-types";
 import { useConsoleStore } from "@/lib/stores";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkArtifact, CoworkMessage, StudioApprovalRequest, StudioEvent } from "../types";
 import {
   appendArtifactSegment,
@@ -87,7 +88,8 @@ export async function consumeExecutionStream({
     if (sse.event === SseStreamEvent.TOOL_CALL) {
       try {
         const tc = typeof sse.data === "string" ? JSON.parse(sse.data) : sse.data;
-        const toolName = String(tc?.tool ?? "unknown");
+        // Fall back to a catalog constant when SSE payload has no tool name
+        const toolName = String(tc?.tool ?? UI_COPY.STUDIO.STREAM.UNKNOWN_TOOL);
         const toolArgs = tc?.args ? JSON.stringify(tc.args).slice(0, 80) : "";
         onAddEvent(makeEvent(StudioEventType.TOOL, `Tool: ${toolName}`, toolArgs, specialistName));
         useConsoleStore.getState().appendExecutionStep({
@@ -120,7 +122,8 @@ export async function consumeExecutionStream({
         useConsoleStore.getState().setActiveArtifact({
           id: art.id,
           title: art.title,
-          language: art.language ?? "typescript",
+          // Fall back to catalog default when artifact has no explicit language
+          language: art.language ?? UI_COPY.STUDIO.STREAM.DEFAULT_ARTIFACT_LANGUAGE,
           code: art.content,
         });
         if (art.type === ArtifactType.TERMINAL) {
@@ -163,7 +166,10 @@ export async function consumeExecutionStream({
         onAddEvent(
           makeEvent(
             StudioEventType.APPROVAL,
-            `Clearance required: ${String(req.target ?? "resource")}`,
+            // Use catalog template so the clearance label is centrally managed
+            UI_COPY.STUDIO.STREAM.CLEARANCE_REQUIRED(
+              String(req.target ?? UI_COPY.STUDIO.STREAM.DEFAULT_RESOURCE_TARGET),
+            ),
             req.reason ?? "",
             specialistName,
           ),

@@ -4,6 +4,8 @@
  * @module apps/console/lib
  */
 
+import { UI_COPY } from "./ui-copy";
+
 /**
  * Normalizes unknown exceptions, network errors, and API error payloads into clear, actionable UI messages.
  *
@@ -13,7 +15,7 @@
  */
 export function formatApiError(
   err: unknown,
-  defaultFallback: string = "An unexpected error occurred",
+  defaultFallback: string = UI_COPY.COMMON.API_ERRORS.DEFAULT_FALLBACK,
 ): string {
   // If no error provided, return fallback directly
   if (!err) {
@@ -30,7 +32,7 @@ export function formatApiError(
       lower.includes("fetch failed") ||
       lower.includes("load failed")
     ) {
-      return "Unable to connect to the server. Please check your network connection or verify that the gateway is running.";
+      return UI_COPY.COMMON.API_ERRORS.NETWORK_CONNECTION;
     }
     return err;
   }
@@ -49,12 +51,12 @@ export function formatApiError(
       lower.includes("econnrefused") ||
       lower.includes("err_connection_refused")
     ) {
-      return "Unable to connect to the authentication server. Please ensure the backend is running and try again.";
+      return UI_COPY.COMMON.API_ERRORS.AUTH_CONNECTION;
     }
 
     // Intercept JSON parsing errors from HTML error pages
     if (lower.includes("unexpected token") || lower.includes("not valid json")) {
-      return "Received an invalid response from the server. Please try again in a moment.";
+      return UI_COPY.COMMON.API_ERRORS.INVALID_RESPONSE;
     }
 
     // Return the specific business error message if available

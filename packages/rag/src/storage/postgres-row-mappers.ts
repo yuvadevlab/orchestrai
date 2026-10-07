@@ -7,6 +7,7 @@
 import { DocumentSchema, DocumentChunkSchema } from "../contracts";
 import type { Document, DocumentChunk } from "../contracts";
 import type { PostgresDocumentRow, PostgresChunkRow } from "./postgres-queries";
+import { EMBEDDING_ARRAY_REGEX } from "@orchestrai/regex";
 
 /**
  * Maps a relational database row from the `documents` table to a validated Document entity.
@@ -39,10 +40,7 @@ export function mapDocumentRow(r: PostgresDocumentRow | Record<string, unknown>)
 export function mapChunkRow(r: PostgresChunkRow | Record<string, unknown>): DocumentChunk {
   let embedding: number[] | undefined;
   if (typeof r.embedding === "string" && r.embedding) {
-    embedding = r.embedding
-      .replace(/^\[|\]$/g, "")
-      .split(",")
-      .map(Number);
+    embedding = r.embedding.replace(EMBEDDING_ARRAY_REGEX, "").split(",").map(Number);
   }
 
   const mapped = {

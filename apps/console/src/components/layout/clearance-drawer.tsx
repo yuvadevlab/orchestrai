@@ -10,6 +10,7 @@ import React, { useEffect } from "react";
 import { ShieldAlert, Check, X, AlertTriangle, FileWarning, Terminal } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
 import { useConsoleStore } from "@/lib/stores";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /**
  * Slide-out Human-In-The-Loop (HITL) Security Clearance Drawer.
@@ -61,16 +62,18 @@ export function ClearanceDrawer(): React.JSX.Element | null {
               <ShieldAlert className="size-4.5" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold tracking-tight">Security Clearance Required</h2>
+              <h2 className="text-sm font-semibold tracking-tight">
+                {UI_COPY.STUDIO.CLEARANCE.DRAWER.TITLE}
+              </h2>
               <span className="text-muted-foreground font-mono text-[11px]">
-                {pendingTickets.length} pending approval{" "}
-                {pendingTickets.length === 1 ? "ticket" : "tickets"}
+                {UI_COPY.STUDIO.CLEARANCE.DRAWER.PENDING_COUNT(pendingTickets.length)}
               </span>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setOpen(false)}
+            aria-label={UI_COPY.COMMON.ACTIONS.CLOSE}
             className="text-muted-foreground hover:text-foreground rounded p-1"
           >
             <X className="size-4" />
@@ -84,10 +87,10 @@ export function ClearanceDrawer(): React.JSX.Element | null {
             <div className="bg-destructive/5 border-destructive/30 rounded-md border p-3">
               <div className="flex items-center justify-between">
                 <span className="text-destructive font-mono text-xs font-semibold uppercase">
-                  Risk Level: {String(activeTicket.riskLevel)}
+                  {UI_COPY.STUDIO.CLEARANCE.DRAWER.RISK_LEVEL(String(activeTicket.riskLevel))}
                 </span>
                 <span className="text-muted-foreground font-mono text-[10px]">
-                  ID: {activeTicket.ticketId.slice(0, 8)}
+                  {UI_COPY.STUDIO.CLEARANCE.DRAWER.TICKET_ID(activeTicket.ticketId.slice(0, 8))}
                 </span>
               </div>
               <p className="text-foreground mt-2 text-xs font-medium">{activeTicket.description}</p>
@@ -96,7 +99,7 @@ export function ClearanceDrawer(): React.JSX.Element | null {
             {/* Target Tool */}
             <div className="space-y-1">
               <span className="text-muted-foreground block text-[11px] font-medium">
-                Invoking Tool
+                {UI_COPY.STUDIO.CLEARANCE.DRAWER.INVOKING_TOOL}
               </span>
               <div className="border-border/60 bg-muted/30 flex items-center gap-2 rounded border px-3 py-2">
                 <Terminal className="text-primary size-4" />
@@ -110,7 +113,8 @@ export function ClearanceDrawer(): React.JSX.Element | null {
             {activeTicket.sensitivePaths && activeTicket.sensitivePaths.length > 0 && (
               <div className="space-y-1">
                 <span className="text-muted-foreground flex items-center gap-1 text-[11px] font-medium">
-                  <FileWarning className="text-destructive size-3" /> Blast-Radius Target Resources
+                  <FileWarning className="text-destructive size-3" />{" "}
+                  {UI_COPY.STUDIO.CLEARANCE.DRAWER.BLAST_RADIUS}
                 </span>
                 <div className="border-destructive/20 bg-destructive/5 rounded border p-2 font-mono text-xs">
                   {activeTicket.sensitivePaths.map((path) => (
@@ -126,7 +130,7 @@ export function ClearanceDrawer(): React.JSX.Element | null {
             {activeTicket.inputParams && (
               <div className="space-y-1">
                 <span className="text-muted-foreground block text-[11px] font-medium">
-                  Payload Parameters
+                  {UI_COPY.STUDIO.CLEARANCE.DRAWER.PAYLOAD_PARAMS}
                 </span>
                 <pre className="border-border/60 bg-muted/30 text-muted-foreground max-h-48 overflow-y-auto rounded border p-3 font-mono text-[11px] leading-relaxed">
                   {JSON.stringify(activeTicket.inputParams, null, 2)}
@@ -138,7 +142,7 @@ export function ClearanceDrawer(): React.JSX.Element | null {
           <div className="flex flex-1 flex-col items-center justify-center text-center">
             <AlertTriangle className="text-muted-foreground mb-2 size-8" />
             <p className="text-muted-foreground text-xs">
-              No pending clearance tickets require intervention.
+              {UI_COPY.STUDIO.CLEARANCE.DRAWER.EMPTY_DESC}
             </p>
           </div>
         )}
@@ -153,7 +157,7 @@ export function ClearanceDrawer(): React.JSX.Element | null {
                 onClick={() => resolveTicket(activeTicket.ticketId, "REJECTED")}
               >
                 <X className="size-3.5" />
-                <span>Deny Action</span>
+                <span>{UI_COPY.STUDIO.CLEARANCE.DRAWER.DENY_ACTION}</span>
               </Button>
               <Button
                 variant="default"
@@ -161,7 +165,7 @@ export function ClearanceDrawer(): React.JSX.Element | null {
                 onClick={() => resolveTicket(activeTicket.ticketId, "APPROVED")}
               >
                 <Check className="size-3.5" />
-                <span>Approve (⌘+Enter)</span>
+                <span>{UI_COPY.STUDIO.CLEARANCE.DRAWER.APPROVE_ACTION}</span>
               </Button>
             </div>
             <button
@@ -169,7 +173,7 @@ export function ClearanceDrawer(): React.JSX.Element | null {
               onClick={() => dismissTicket(activeTicket.ticketId)}
               className="text-muted-foreground hover:text-foreground text-center text-[11px]"
             >
-              Dismiss ticket from queue
+              {UI_COPY.STUDIO.CLEARANCE.DRAWER.DISMISS}
             </button>
           </div>
         )}

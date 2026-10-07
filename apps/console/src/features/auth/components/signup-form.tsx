@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button, Input, toast } from "@yuva-devlab/ui";
 import { formatApiError } from "@/lib/error-utils";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useSignupMutation } from "../api/use-auth-mutations";
 import { AuthErrorBanner } from "./auth-error-banner";
 import type { SignupFormValues } from "../types";
@@ -40,18 +41,18 @@ export function SignupForm(): React.JSX.Element {
 
     // Guard: Validate name presence
     if (!form.name.trim()) {
-      setValidationError("Please enter your name");
+      setValidationError(UI_COPY.AUTH.SIGNUP.NAME_REQUIRED);
       return;
     }
 
     // Guard: Validate password confirmation match
     if (form.password !== form.confirmPassword) {
-      setValidationError("Passwords do not match");
+      setValidationError(UI_COPY.AUTH.SIGNUP.MISMATCH_ERROR);
       return;
     }
 
     if (form.password.length < 6) {
-      setValidationError("Password must contain at least 6 characters");
+      setValidationError(UI_COPY.AUTH.SIGNUP.PASSWORD_MIN_LENGTH);
       return;
     }
 
@@ -62,9 +63,9 @@ export function SignupForm(): React.JSX.Element {
     });
 
     toast.promise(signupPromise, {
-      loading: "Creating operator account...",
-      success: "Account created successfully!",
-      error: (err) => formatApiError(err, "Registration failed. Please try again."),
+      loading: UI_COPY.AUTH.SIGNUP.TOAST_LOADING,
+      success: UI_COPY.AUTH.SIGNUP.TOAST_SUCCESS,
+      error: (err) => formatApiError(err, UI_COPY.AUTH.SIGNUP.TOAST_ERROR),
     });
 
     try {
@@ -83,11 +84,13 @@ export function SignupForm(): React.JSX.Element {
 
       {/* Name / Display Name Field */}
       <div className="space-y-1.5">
-        <label className="text-foreground block text-xs font-medium">Your Name</label>
+        <label className="text-foreground block text-xs font-medium">
+          {UI_COPY.AUTH.SIGNUP.NAME_LABEL}
+        </label>
         <div className="relative">
           <Input
             type="text"
-            placeholder="John Doe"
+            placeholder={UI_COPY.AUTH.SIGNUP.NAME_PLACEHOLDER}
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -98,10 +101,12 @@ export function SignupForm(): React.JSX.Element {
 
       {/* Email Field */}
       <div className="space-y-1.5">
-        <label className="text-foreground block text-xs font-medium">Work Email</label>
+        <label className="text-foreground block text-xs font-medium">
+          {UI_COPY.AUTH.SIGNUP.EMAIL_LABEL}
+        </label>
         <Input
           type="email"
-          placeholder="john.doe@example.com"
+          placeholder={UI_COPY.AUTH.SIGNUP.EMAIL_PLACEHOLDER}
           required
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -111,10 +116,12 @@ export function SignupForm(): React.JSX.Element {
 
       {/* Password Field */}
       <div className="space-y-1.5">
-        <label className="text-foreground block text-xs font-medium">Password</label>
+        <label className="text-foreground block text-xs font-medium">
+          {UI_COPY.AUTH.SIGNUP.PASSWORD_LABEL}
+        </label>
         <Input
           type="password"
-          placeholder="••••••••"
+          placeholder={UI_COPY.AUTH.SIGNUP.PASSWORD_PLACEHOLDER}
           required
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -124,10 +131,12 @@ export function SignupForm(): React.JSX.Element {
 
       {/* Confirm Password Field */}
       <div className="space-y-1.5">
-        <label className="text-foreground block text-xs font-medium">Confirm Password</label>
+        <label className="text-foreground block text-xs font-medium">
+          {UI_COPY.AUTH.SIGNUP.CONFIRM_PASSWORD_LABEL}
+        </label>
         <Input
           type="password"
-          placeholder="••••••••"
+          placeholder={UI_COPY.AUTH.SIGNUP.CONFIRM_PASSWORD_PLACEHOLDER}
           required
           value={form.confirmPassword}
           onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
@@ -145,10 +154,10 @@ export function SignupForm(): React.JSX.Element {
         {signupMutation.isPending ? (
           <>
             <Loader2 className="mr-2 size-4 animate-spin" />
-            <span>Creating account...</span>
+            <span>{UI_COPY.AUTH.SIGNUP.SIGNING_UP}</span>
           </>
         ) : (
-          <span>Create Account</span>
+          <span>{UI_COPY.AUTH.SIGNUP.SIGN_UP_BUTTON}</span>
         )}
       </Button>
     </form>

@@ -15,17 +15,7 @@
  */
 
 import { OrchestrAIError } from "@orchestrai/core";
-
-/** Built-in blocked private/link-local IP patterns preventing SSRF */
-const BLOCKED_IP_PATTERNS: ReadonlyArray<RegExp> = [
-  /^127\./, // Loopback
-  /^10\./, // RFC1918 private A
-  /^172\.(1[6-9]|2\d|3[01])\./, // RFC1918 private B
-  /^192\.168\./, // RFC1918 private C
-  /^169\.254\./, // Link-local (AWS metadata endpoint)
-  /^::1$/, // IPv6 loopback
-  /^fc00:/, // IPv6 unique local
-];
+import { BLOCKED_IP_PATTERNS } from "@orchestrai/regex";
 
 /**
  * Validates an outbound URL against the configured domain allowlist.

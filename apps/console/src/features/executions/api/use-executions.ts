@@ -6,10 +6,10 @@
  * @module apps/console/features/executions/api
  */
 
-import { useApiData, type UseApiDataResult } from "@/lib/use-api-data";
+import { useApiData, type UseApiDataResult } from "@/lib/hooks";
 import { ExecutionStatus, type ExecutionRun, type ExecutionStepTrace } from "../types";
 import type { Agent, Execution } from "@orchestrai/sdk";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/lib/auth";
 
 /**
  * Converts an ISO date string into a friendly relative human duration (e.g. '2m ago').

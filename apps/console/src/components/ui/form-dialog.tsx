@@ -19,6 +19,7 @@ import {
   Button,
 } from "@yuva-devlab/ui";
 import { Loader2 } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 import { FormDialogField, type FormFieldConfig } from "./form-dialog-field";
 
 export type { FormFieldConfig };
@@ -140,7 +141,7 @@ export function FormDialog({
               onClick={onClose}
               className="h-8 cursor-pointer text-xs"
             >
-              Cancel
+              {UI_COPY.COMMON.ACTIONS.CANCEL}
             </Button>
             <Button
               type="submit"
@@ -152,7 +153,7 @@ export function FormDialog({
               {isSubmitting ? (
                 <>
                   <Loader2 className="size-3.5 animate-spin" />
-                  <span>Saving...</span>
+                  <span>{UI_COPY.COMMON.ACTIONS.SAVING}</span>
                 </>
               ) : (
                 <span>{submitText}</span>

@@ -6,3 +6,8 @@
 
 export * from "./use-upload-document";
 export * from "./use-resolve-approval";
+export * from "./use-workspace-files";
+export * from "./use-platform-commands";
+export * from "./use-platform-suggestions";
+export * from "./use-platform-welcome";
+export * from "./use-workspace-harness";

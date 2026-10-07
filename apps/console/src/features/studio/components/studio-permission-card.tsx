@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { ShieldAlert, Check, X, ShieldCheck, Clock, CheckCheck } from "lucide-react";
 import { Button, Badge } from "@yuva-devlab/ui";
 import { PermissionScope, ApprovalRiskLevel } from "@orchestrai/shared-types";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { StudioApprovalRequest } from "../types";
 
 export interface StudioPermissionCardProps {
@@ -47,7 +48,9 @@ export function StudioPermissionCard({
           <Check className="text-primary size-3.5" />
         )}
         <span className="text-foreground font-semibold">
-          {isDeny ? "Permission Denied" : `Clearance Granted (${resolvedScope})`}
+          {isDeny
+            ? UI_COPY.STUDIO.CLEARANCE.DENIED_LABEL
+            : UI_COPY.STUDIO.CLEARANCE.GRANTED_LABEL(resolvedScope)}
         </span>
         <span className="text-muted-foreground/40">•</span>
         <span className="text-muted-foreground/80 max-w-sm truncate text-[10px]">
@@ -78,7 +81,9 @@ export function StudioPermissionCard({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-foreground text-sm font-semibold">
-                {isCritical ? "Sensitive Clearance Required" : "Security Clearance Required"}
+                {isCritical
+                  ? UI_COPY.STUDIO.CLEARANCE.TITLE_SENSITIVE
+                  : UI_COPY.STUDIO.CLEARANCE.TITLE_SECURITY}
               </span>
               <Badge
                 variant="outline"
@@ -92,7 +97,7 @@ export function StudioPermissionCard({
               </Badge>
               {isCritical && (
                 <Badge variant="destructive" className="text-[10px] font-semibold uppercase">
-                  Protected File
+                  {UI_COPY.STUDIO.CLEARANCE.PROTECTED_FILE}
                 </Badge>
               )}
             </div>
@@ -104,7 +109,7 @@ export function StudioPermissionCard({
       {/* Target Path or Command Display */}
       <div className="border-border/60 bg-background/80 my-3 rounded-md border p-2.5 font-mono text-xs">
         <div className="text-muted-foreground text-[10px] font-semibold uppercase">
-          Requested Target
+          {UI_COPY.STUDIO.CLEARANCE.REQUESTED_TARGET}
         </div>
         <div className="text-foreground mt-1 font-mono font-medium break-all select-all">
           {request.target}
@@ -121,7 +126,7 @@ export function StudioPermissionCard({
           className="h-7 gap-1.5 text-xs"
         >
           <Clock className="size-3" />
-          <span>Allow Once</span>
+          <span>{UI_COPY.STUDIO.CLEARANCE.ALLOW_ONCE}</span>
         </Button>
 
         <Button
@@ -132,7 +137,7 @@ export function StudioPermissionCard({
           className="border-primary/40 hover:bg-primary/10 h-7 gap-1.5 text-xs"
         >
           <ShieldCheck className="text-primary size-3" />
-          <span>Allow for this Chat</span>
+          <span>{UI_COPY.STUDIO.CLEARANCE.ALLOW_THIS_CHAT}</span>
         </Button>
 
         <Button
@@ -143,7 +148,7 @@ export function StudioPermissionCard({
           className="h-7 gap-1.5 text-xs"
         >
           <CheckCheck className="size-3" />
-          <span>Always Allow</span>
+          <span>{UI_COPY.STUDIO.CLEARANCE.ALWAYS_ALLOW}</span>
         </Button>
 
         <Button
@@ -154,7 +159,7 @@ export function StudioPermissionCard({
           className="text-destructive hover:bg-destructive/10 ml-auto h-7 gap-1.5 text-xs"
         >
           <X className="size-3" />
-          <span>Deny</span>
+          <span>{UI_COPY.STUDIO.CLEARANCE.DENY}</span>
         </Button>
       </div>
     </div>

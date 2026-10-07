@@ -6,7 +6,7 @@
  */
 
 import { type PrismaClient, type Prisma, type Agent } from "@orchestrai/database";
-import { QUEUE_NAMES } from "@orchestrai/shared-types";
+import { QUEUE_NAMES, MessageRole, AgentMode } from "@orchestrai/shared-types";
 import {
   ExecutionIdSchema,
   AgentIdSchema,
@@ -18,10 +18,9 @@ import type { CreateExecutionDto } from "@/validation";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { liveExecutionManager } from "@/modules/streaming/live-execution.manager";
 import { toSharedStatus } from "../repositories/execution-status.mapper";
+import { UUID_REGEX } from "@orchestrai/regex";
 
 const logger = loggerWithConfig(new Logger("ExecutionDispatcher"));
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Coordinates dispatching agent execution runs either to async BullMQ or live SSE.
@@ -44,18 +43,15 @@ export class ExecutionDispatcher {
       : null;
 
     if (!target) {
-      target =
-        (await this.db.agent.findFirst({
-          where: { tenantId, deletedAt: null },
-        })) ||
-        (await this.db.agent.create({
-          data: {
-            tenantId,
-            name: "Lead Orchestrator",
-            systemPrompt: "You are the Lead Orchestrator.",
-            modelConfig: { model: "gemma4:31b-cloud" },
-          },
-        }));
+      target = await this.db.agent.findFirst({
+        where: { tenantId, deletedAt: null },
+      });
+    }
+
+    if (!target) {
+      throw new Error(
+        "No agent found for tenant. Please create an agent in Studio or via API before dispatching execution.",
+      );
     }
 
     return target;
@@ -99,12 +95,24 @@ export class ExecutionDispatcher {
    */
   public dispatch(
     executionId: string,
-    targetAgent: { agentId: string; systemPrompt: string; maxSteps?: number | null },
+    targetAgent: {
+      agentId: string;
+      systemPrompt: string;
+      maxSteps?: number | null;
+      /** Agent persona role (e.g. "developer", "researcher") from DB agent record */
+      role?: string | null;
+      /** Operational mode (e.g. "chat", "plan", "act", "auto") from DB agent record */
+      mode?: string | null;
+    },
     resolvedTenantId: string,
     validConvId: string | null,
     dto: CreateExecutionDto,
     modelName?: string,
     systemPrompt?: string,
+    /** Context window size from DB model record — never hardcoded */
+    contextWindow?: number,
+    /** Cost per token from DB model record (0 for Ollama local models) */
+    costPerTokenUsd?: number,
   ): void {
     if (!dto.input) return;
 
@@ -137,7 +145,9 @@ export class ExecutionDispatcher {
         variables: dto.variables,
       });
     } else {
-      logger.debug("Starting live SSE execution", { executionId, model: modelName });
+      const workspacePath =
+        typeof dto.variables?.workspacePath === "string" ? dto.variables.workspacePath : undefined;
+      logger.debug("Starting live SSE execution", { executionId, model: modelName, workspacePath });
       void liveExecutionManager
         .startExecution(
           executionId,
@@ -148,6 +158,15 @@ export class ExecutionDispatcher {
           dto.history,
           // Pass per-agent maxSteps from DB record; falls back to ABSOLUTE_MAX_TURNS if unset
           typeof targetAgent.maxSteps === "number" ? targetAgent.maxSteps : undefined,
+          resolvedTenantId,
+          targetAgent.agentId,
+          // Pass DB model record values — never hardcoded in the executor
+          contextWindow,
+          costPerTokenUsd,
+          // Persona role drives system prompt template selection in @orchestrai/prompts
+          targetAgent.role ?? undefined,
+          (dto.mode as AgentMode) || (targetAgent.mode as AgentMode) || AgentMode.AUTO,
+          workspacePath,
         )
         .then(async () => {
           await this.handleExecutionCompletion(executionId, validConvId, modelName);
@@ -192,7 +211,7 @@ export class ExecutionDispatcher {
         data: {
           executionId,
           conversationId: validConvId,
-          role: "assistant" as never,
+          role: MessageRole.ASSISTANT as never,
           content: state.fullOutput,
           metadata: {
             ...(state.artifacts?.length ? { artifacts: state.artifacts } : {}),

@@ -8,8 +8,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAgents } from "@/features/agents/api";
 import { useModels } from "@/features/models/api";
-import { usePlatformModes } from "@/lib/use-modes";
-import { getStoredSession } from "@/lib/auth-client";
+import { usePlatformModes } from "@/lib/hooks";
+import { getStoredSession } from "@/lib/auth";
 import { useConsoleStore } from "@/lib/stores";
 import { useSessionStore } from "./use-session-store";
 import { useAgentRunner } from "./use-agent-runner";
@@ -33,6 +33,7 @@ export function useStudioWorkspaceState({
 
   // Canvas reset action — used to clear stale artifacts when switching sessions
   const setActiveArtifact = useConsoleStore((s) => s.setActiveArtifact);
+  const activeWorkspace = useConsoleStore((s) => s.activeWorkspace);
 
   const { data: dbAgents = [] } = useAgents();
   const { data: models } = useModels();
@@ -96,6 +97,7 @@ export function useStudioWorkspaceState({
     selectedModel: activeSession.model || "",
     activeSessionId,
     existingMessages: activeSession.messages,
+    workspacePath: activeWorkspace?.path,
     onUpdateMessages: updateActiveMessages,
   });
 

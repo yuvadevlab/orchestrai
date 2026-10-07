@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronRight, ExternalLink, Globe, Search } from "lucide-react";
 import { Badge } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkArtifact } from "../../types";
 
 export interface ArtifactSearchCardProps {
@@ -39,14 +40,14 @@ export function ArtifactSearchCard({ artifact }: ArtifactSearchCardProps): React
           <Search className="size-4 shrink-0 text-cyan-400" />
           <span className="truncate">{artifact.title}</span>
           <span className="text-muted-foreground ml-1 flex items-center gap-0.5 text-[10px]">
-            <span>{isExpanded ? "Hide" : "Show"}</span>
+            <span>{isExpanded ? UI_COPY.COMMON.ACTIONS.HIDE : UI_COPY.COMMON.ACTIONS.SHOW}</span>
             {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
           </span>
         </button>
 
         {sources.length > 0 && (
           <Badge variant="outline" className="px-1.5 py-0 font-mono text-[10px]">
-            {sources.length} sources
+            {UI_COPY.STUDIO.ARTIFACTS.SOURCES_COUNT(sources.length)}
           </Badge>
         )}
       </div>

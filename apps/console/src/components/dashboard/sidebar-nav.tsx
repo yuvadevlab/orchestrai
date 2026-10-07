@@ -10,8 +10,9 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Layers } from "lucide-react";
-import { useNavItems } from "@/lib/use-nav";
-import { getNavIcon } from "@/lib/nav-icon-mapper";
+import { useNavItems, usePlatformBranding } from "@/lib/hooks";
+import { getNavIcon } from "@/lib/navigation";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /**
  * Sidebar Navigation component for OrchestrAI Console.
@@ -20,6 +21,10 @@ import { getNavIcon } from "@/lib/nav-icon-mapper";
 export function SidebarNav(): React.JSX.Element {
   const pathname = usePathname();
   const { data: navItems = [] } = useNavItems();
+  const { data: branding } = usePlatformBranding();
+
+  const brandName = branding?.brandName ?? UI_COPY.COMMON.BRAND.DEFAULT_NAME;
+  const brandVersion = branding?.brandVersion ?? UI_COPY.COMMON.SIDEBAR.DEFAULT_BRAND_VERSION;
 
   return (
     <aside className="border-border bg-sidebar flex h-screen w-64 shrink-0 flex-col border-r">
@@ -29,16 +34,16 @@ export function SidebarNav(): React.JSX.Element {
         </div>
         <div className="flex flex-col">
           <span className="text-sidebar-foreground text-sm font-bold tracking-tight">
-            OrchestrAI
+            {brandName}
           </span>
-          <span className="text-muted-foreground font-mono text-[10px]">v0.1.0 • local-first</span>
+          <span className="text-muted-foreground font-mono text-[10px]">{brandVersion}</span>
         </div>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navItems.length === 0 ? (
           <div className="text-muted-foreground/60 px-3 py-4 text-xs italic">
-            No navigation items configured.
+            {UI_COPY.COMMON.SIDEBAR.NO_NAV_ITEMS}
           </div>
         ) : (
           navItems.map((item) => {
@@ -69,12 +74,12 @@ export function SidebarNav(): React.JSX.Element {
 
       <div className="border-sidebar-border bg-sidebar/50 text-muted-foreground space-y-1 border-t p-3 font-mono text-[11px]">
         <div className="flex items-center justify-between">
-          <span>Worker Daemon</span>
-          <span className="text-primary font-semibold">ONLINE</span>
+          <span>{UI_COPY.COMMON.SIDEBAR.WORKER_DAEMON}</span>
+          <span className="text-primary font-semibold">{UI_COPY.COMMON.STATUS.ONLINE}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span>Redis Queue</span>
-          <span className="text-primary font-semibold">CONNECTED</span>
+          <span>{UI_COPY.COMMON.SIDEBAR.REDIS_QUEUE}</span>
+          <span className="text-primary font-semibold">{UI_COPY.COMMON.STATUS.CONNECTED}</span>
         </div>
       </div>
     </aside>

@@ -21,6 +21,7 @@ import {
 import { ExternalLink, Copy, Check, Bug } from "lucide-react";
 import type { ExecutionRun } from "../types";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface ExecutionTableProps {
   executions: ExecutionRun[];
@@ -79,7 +80,8 @@ export function ExecutionTable({
                       type="button"
                       onClick={(e) => handleCopy(ex.id, e)}
                       className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-                      title="Copy full Execution ID"
+                      title={UI_COPY.EXECUTIONS.TABLE.COPY_ID_TOOLTIP}
+                      aria-label={UI_COPY.EXECUTIONS.TABLE.COPY_ID_TOOLTIP}
                     >
                       {copiedId === ex.id ? (
                         <Check className="text-success size-3" />
@@ -161,10 +163,11 @@ export function ExecutionTable({
                       size="sm"
                       onClick={() => onSelectDebug(ex)}
                       className="h-7 gap-1 px-2 text-xs"
-                      title="Open developer debug trace"
+                      title={UI_COPY.EXECUTIONS.TABLE.DEBUG_TOOLTIP}
+                      aria-label={UI_COPY.EXECUTIONS.TABLE.DEBUG_TOOLTIP}
                     >
                       <Bug className="size-3 text-amber-400" />
-                      <span>Debug</span>
+                      <span>{UI_COPY.EXECUTIONS.TABLE.DEBUG_BTN}</span>
                     </Button>
                   )}
                   {ex.conversationId && (
@@ -173,10 +176,11 @@ export function ExecutionTable({
                       variant="ghost"
                       size="sm"
                       className="h-7 gap-1 px-2 font-mono text-xs"
-                      title="Open live session thread"
+                      title={UI_COPY.EXECUTIONS.TABLE.SESSION_TOOLTIP}
+                      aria-label={UI_COPY.EXECUTIONS.TABLE.SESSION_TOOLTIP}
                     >
                       <Link href={`/session/${ex.conversationId}`}>
-                        <span>Session</span>
+                        <span>{UI_COPY.EXECUTIONS.TABLE.SESSION_BTN}</span>
                         <ExternalLink className="size-3" />
                       </Link>
                     </Button>

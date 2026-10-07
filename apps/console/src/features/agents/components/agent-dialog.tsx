@@ -10,11 +10,12 @@ import React from "react";
 import { toast } from "@yuva-devlab/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { FormDialog } from "@/components/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { buildAgentFields } from "./agent-form-fields";
 import { useCreateAgentMutation } from "../api";
 import { useAgentRoles } from "../api/use-agent-roles";
 import { useModels } from "@/features/models/api";
-import { usePlatformModes } from "@/lib/use-modes";
+import { usePlatformModes } from "@/lib/hooks";
 import { useTools } from "@/features/tools/api";
 
 export interface AgentDialogProps {
@@ -67,21 +68,21 @@ export function AgentDialog({
       "AUTO";
 
     const agentPromise = createAgentMutation.mutateAsync({
-      name: formData.name || "New Agent",
-      role: formData.role || "Research",
-      description: formData.description || "Registered specialist agent",
+      name: formData.name || UI_COPY.AGENTS.PROVISION_DIALOG.FALLBACK_NAME,
+      role: formData.role || UI_COPY.AGENTS.PROVISION_DIALOG.FALLBACK_ROLE,
+      description: formData.description || UI_COPY.AGENTS.PROVISION_DIALOG.FALLBACK_DESC,
       model: formData.model || defaultModel,
       mode: formData.mode || defaultMode,
-      systemPrompt: formData.systemPrompt || "Agent instructions",
+      systemPrompt: formData.systemPrompt || UI_COPY.AGENTS.PROVISION_DIALOG.FALLBACK_PROMPT,
       enabledTools,
       capabilities,
       maxSteps,
     });
 
     toast.promise(agentPromise, {
-      loading: "Provisioning cluster agent...",
-      success: "Agent provisioned successfully!",
-      error: (err) => formatApiError(err, "Failed to provision agent"),
+      loading: UI_COPY.AGENTS.PROVISION_DIALOG.TOAST_LOADING,
+      success: UI_COPY.AGENTS.PROVISION_DIALOG.TOAST_SUCCESS,
+      error: (err) => formatApiError(err, UI_COPY.AGENTS.PROVISION_DIALOG.TOAST_ERROR),
     });
 
     await agentPromise;
@@ -93,11 +94,11 @@ export function AgentDialog({
   return (
     <FormDialog
       isOpen={isOpen}
-      title="Provision New Agent"
-      description="Register a new autonomous specialist or orchestrator into the cluster control plane."
+      title={UI_COPY.AGENTS.PROVISION_DIALOG.TITLE}
+      description={UI_COPY.AGENTS.PROVISION_DIALOG.DESCRIPTION}
       fields={fields}
       maxWidth="2xl"
-      submitText="Register Agent"
+      submitText={UI_COPY.AGENTS.PROVISION_DIALOG.SUBMIT_BUTTON}
       onClose={onClose}
       onSubmit={handleCreateAgent}
     />

@@ -5,7 +5,14 @@
  */
 
 import { EventEmitter } from "node:events";
-import { ExecutionStatus, SseStreamEvent } from "@orchestrai/shared-types";
+import {
+  ExecutionStatus,
+  SseStreamEvent,
+  AgentMode,
+  FeatureFlagKey,
+  CognitivePolicySlug,
+} from "@orchestrai/shared-types";
+import { autoDetectMode } from "@orchestrai/agent";
 import type { GatewayResponse } from "@/routes/http-types";
 import {
   attachExecutionSseStream,
@@ -15,6 +22,12 @@ import { liveExecutionRedisPublisher } from "@/modules/streaming/live-execution-
 import { buildInitialConversationHistory } from "@/modules/streaming/live-message-history";
 import { executeAutonomousTurns } from "@/modules/streaming/live-turn-executor";
 import { memoryService } from "@/modules/memory/memory.service";
+import { ragService } from "@/modules/rag/rag.service";
+import { checkSemanticCache, storeSemanticCache } from "@/modules/cache/semantic-cache.service";
+import { featureFlagService } from "@/modules/platform/services/feature-flag.service";
+import { cognitivePolicyService } from "@/modules/platform/services/cognitive-policy.service";
+import { workspaceInstructionLoader, harnessSkillRegistry } from "@/modules/harness";
+import { resolveMonorepoRoot } from "@/modules/streaming/workspace-tool-executor";
 
 export type { ExecutionStreamState };
 
@@ -44,6 +57,20 @@ class LiveExecutionManager {
 
   /**
    * Starts autonomous execution with memory recall, conversation history, and live tool execution.
+   *
+   * @param executionId - Unique execution identifier
+   * @param inputPrompt - User prompt instruction
+   * @param modelName - Selected model identifier
+   * @param systemPrompt - Caller/DB system prompt
+   * @param conversationId - Session/conversation identifier
+   * @param history - Prior conversation turns
+   * @param maxSteps - Maximum autonomous turns allowed
+   * @param tenantId - Tenant identifier partition
+   * @param agentId - Executing agent identifier
+   * @param contextWindow - Model context window size in tokens
+   * @param costPerTokenUsd - Cost per token from model record
+   * @param personaRole - Agent persona role (e.g., developer, researcher)
+   * @param mode - Operational autonomy mode (CHAT, PLAN, ACT, AUTO)
    */
   public async startExecution(
     executionId: string,
@@ -52,12 +79,27 @@ class LiveExecutionManager {
     systemPrompt?: string,
     conversationId?: string,
     history?: Array<{ role: string; content: string }>,
-    /** Max autonomous tool-calling turns from the agent DB record (defaults to ABSOLUTE_MAX_TURNS) */
     maxSteps?: number,
+    tenantId?: string,
+    agentId?: string,
+    contextWindow?: number,
+    costPerTokenUsd?: number,
+    personaRole?: string,
+    mode?: AgentMode,
+    workspacePath?: string,
   ): Promise<void> {
     const host = process.env.OLLAMA_HOST || "http://localhost:11434";
-    const selectedModel = modelName || process.env.DEFAULT_MODEL_NAME || "gemma4:31b-cloud";
+    const selectedModel =
+      modelName ||
+      process.env.DEFAULT_MODEL_NAME ||
+      (() => {
+        throw new Error("No model specified and DEFAULT_MODEL_NAME is not configured");
+      })();
     const sessionId = conversationId || executionId;
+
+    // Automatically detect operational mode when AUTO or omitted
+    const effectiveMode =
+      mode && mode !== AgentMode.AUTO ? mode : autoDetectMode(inputPrompt, AgentMode.ACT);
 
     const state: ExecutionStreamState = {
       executionId,
@@ -68,14 +110,96 @@ class LiveExecutionManager {
     };
     this.states.set(executionId, state);
 
-    // Recall cross-session episodic & semantic memories
-    const memoryContext = await memoryService.recallContext(inputPrompt, "default");
-    const augmentedSystemPrompt = [systemPrompt, memoryContext].filter(Boolean).join("\n\n");
+    // Check semantic vector cache for identical or near-duplicate queries
+    const cachedResponse = await checkSemanticCache(inputPrompt);
+    if (cachedResponse) {
+      state.chunks.push(cachedResponse);
+      state.fullOutput = cachedResponse;
+      state.status = ExecutionStatus.COMPLETED;
+      state.completedAt = new Date().toISOString();
+      this.emitEvent(executionId, SseStreamEvent.CHUNK, cachedResponse);
+      this.emitEvent(executionId, SseStreamEvent.DONE, cachedResponse);
+      return;
+    }
+
+    // Recall cross-session episodic & semantic memories using tenant partition
+    const memoryContext = await memoryService.recallContext(inputPrompt, tenantId ?? "default");
+
+    // Auto-inject top-3 relevant knowledge base documents via RAG
+    let ragContext = "";
+    try {
+      const ragResult = await ragService.query(
+        { query: inputPrompt, limit: 3, minScore: 0.35, alpha: 0.5 },
+        tenantId ?? "default",
+      );
+      if (ragResult.context) {
+        ragContext = `\n\n[Knowledge Base Context]:\n${ragResult.context}`;
+      }
+    } catch {
+      // Non-critical: continue without knowledge base documents
+    }
+
+    // Maintenance mode circuit breaker check
+    const isMaintenance = await featureFlagService.isEnabled(
+      FeatureFlagKey.MAINTENANCE_MODE,
+      false,
+    );
+    if (isMaintenance) {
+      const maintenanceState: ExecutionStreamState = {
+        executionId,
+        chunks: [],
+        fullOutput: "",
+        artifacts: [],
+        status: ExecutionStatus.FAILED,
+      };
+      this.states.set(executionId, maintenanceState);
+      this.emitEvent(
+        executionId,
+        SseStreamEvent.ERROR,
+        "System is currently in maintenance mode. Please try again later.",
+      );
+      return;
+    }
+
+    // Resolve dynamic cognitive policy from database
+    const policySlug =
+      effectiveMode === AgentMode.PLAN
+        ? CognitivePolicySlug.DEEP_REASONING
+        : effectiveMode === AgentMode.CHAT
+          ? CognitivePolicySlug.FAST_CHAT
+          : CognitivePolicySlug.AUTONOMOUS_ACT;
+
+    const policy = await cognitivePolicyService.getPolicy(policySlug);
+    const thinkingGuidelines =
+      policy?.enableThinking && policy.thinkingGuidelines
+        ? `\n\n[Cognitive Thinking Guidelines]:\n${policy.thinkingGuidelines}`
+        : "";
+
+    const resolvedMaxSteps = maxSteps ?? policy?.maxExecutionSteps;
+    const resolvedTemperature = policy?.temperature;
+
+    // Discover and register workspace instructions, modular rules, and skills
+    const targetWorkspace = workspacePath || resolveMonorepoRoot();
+    const harnessContext = workspaceInstructionLoader.loadContext(targetWorkspace);
+    harnessSkillRegistry.registerContext(harnessContext);
+    const harnessPrompt = workspaceInstructionLoader.formatPromptContext(harnessContext);
+
+    const augmentedSystemPrompt = [
+      systemPrompt,
+      harnessPrompt,
+      memoryContext,
+      ragContext,
+      thinkingGuidelines,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     const conversationHistory = buildInitialConversationHistory(
       inputPrompt,
+      personaRole,
       augmentedSystemPrompt || undefined,
       history,
+      effectiveMode,
     );
 
     await executeAutonomousTurns(
@@ -89,8 +213,18 @@ class LiveExecutionManager {
       {
         emitEvent: (event, data) => this.emitEvent(executionId, event, data),
       },
-      maxSteps,
+      resolvedMaxSteps,
+      tenantId,
+      agentId,
+      contextWindow,
+      costPerTokenUsd,
+      resolvedTemperature,
     );
+
+    // Cache successful execution output for semantic query deduplication
+    if (state.status === ExecutionStatus.COMPLETED && state.fullOutput) {
+      void storeSemanticCache(inputPrompt, state.fullOutput);
+    }
   }
 
   /**

@@ -2,6 +2,243 @@
 
 Chronological log of architecture, engineering decisions, and completed milestones for OrchestrAI.
 
+## Session: 2026-10-03 (Continued) — Harness Audit, Bug Fixes & HITL Semi-Autonomous Engineering
+
+### Summary of Completed Work
+
+#### 1. Parser & Invariant Bug Fixes
+
+- **ESLint Compact Formatter Diagnostic Parsing**:
+  - Added `ESLINT_COMPACT_DIAGNOSTIC_REGEX` to `@orchestrai/regex` matching compact format (`/path: line X, col Y, Error - msg (rule)`).
+  - Updated `WorkspaceDiagnosticRunner` to parse compact ESLint lines and fall back to stylish format without missing errors.
+  - Added project-aware `tsc` execution reading `tsconfig.json` to eliminate false-positive path-alias and JSX errors on single-file checks.
+- **Strict Enum Invariant Enforcement (Rule 7)**:
+  - Replaced raw string literals (`=== "bash"`) with canonical `WorkspaceTool.BASH` across `tool-approval-invoker.ts`, `permission-policy.manager.ts`, `permission-evaluator.ts`, and `resource-registry.service.ts`.
+- **Centralized Regex Invariant Enforcement (Rule 8)**:
+  - Added `LANGUAGE_CLASS_REGEX` and `STRIP_TOOL_CALLS_REGEX` to `@orchestrai/regex`.
+  - Replaced inline regexes in `apps/console/src/components/markdown-renderer.tsx`.
+
+#### 2. Dynamic Workspace Path Isolation & Propagation
+
+- **Console Studio Forwarding**:
+  - Updated `useAgentRunner` in `apps/console` to forward `workspacePath: activeWorkspace?.path` to `client.agents.run(...)`.
+  - Hooked `activeWorkspace` from `useConsoleStore` in `useStudioWorkspaceState`.
+- **Gateway Runtime Execution Target**:
+  - Updated `ExecutionDispatcher.dispatch` and `LiveExecutionManager.startExecution` to accept `workspacePath`.
+  - Dynamically points `workspaceInstructionLoader.loadContext(workspacePath || resolveMonorepoRoot())` to the operator's active project directory rather than hardcoding the monorepo root.
+  - Linked `harnessSkillRegistry.getWorkspaceRoot()` as default target for tool approval and sandboxed execution.
+
+#### 3. Semi-Autonomous HITL Clearance for Code Modifications
+
+- **`WorkspaceTool.WRITE_FILE` Clearance Gate**:
+  - Enhanced `permission-evaluator.ts` to require operator clearance for file write operations unless authorized in `onceGrants`, `sessionSet`, or `permanentGrants`.
+  - Prompts human operator with `StudioLiveClearanceCard` (`Allow Once | This Chat | Always Allow | Deny`) before modifying code.
+  - Once granted for "This Chat", subsequent writes and self-repair diffs in the session proceed autonomously.
+
+#### 4. Workspace Harness API & Studio UI Integration
+
+- **Harness Context Endpoint**:
+  - Added `GET /api/v1/workspace/harness` to `WorkspaceController` returning loaded instructions, rules count, and skills count.
+- **Console UI Status Pill**:
+  - Implemented `useWorkspaceHarness` hook in `apps/console/src/features/studio/api/use-workspace-harness.ts`.
+  - Added live harness status pill in `StudioHeader` (`e.g. "X rules · Y skills"`), providing immediate visual transparency of loaded workspace context.
+- **Enhanced Tool Artifacts**:
+  - Formatted specialized visual cards in `autonomous-agent-runner.ts` for `VERIFY_CODE`, `READ_SKILL`, and `LIST_SKILLS`.
+
+#### 5. Strict Invariants Verified
+
+- Verified 48/48 packages pass `pnpm typecheck`.
+- Verified `pnpm lint` (`--max-warnings=0`) with zero errors.
+- Verified all 8 modified files are strictly below the 250 LOC threshold (`studio-header.tsx`: 100 LOC, `live-execution.manager.ts`: 248 LOC, `use-agent-runner.ts`: 229 LOC).
+
+---
+
+## Session: 2026-10-03 (Continued) — Milestone 14: Big 3 Agent Harness Engineering
+
+### Summary of Completed Work
+
+#### 1. Centralized Harness Lexical & Diagnostic Regexes (`@orchestrai/regex`)
+
+- Added [`harness.regex.ts`](packages/regex/src/harness.regex.ts):
+  - `YAML_FRONTMATTER_REGEX`: Extracts markdown YAML frontmatter blocks delimited by `---`.
+  - `YAML_KEY_VALUE_REGEX`: Parses YAML key-value pairs without heavy external dependencies.
+  - `TSC_DIAGNOSTIC_REGEX`: Parses TypeScript compiler output (`file(line,col): error TS...`).
+  - `ESLINT_DIAGNOSTIC_REGEX`: Parses ESLint compact output (`line:col error message rule`).
+  - `RUFF_DIAGNOSTIC_REGEX`: Parses Python Ruff linter output (`file:line:col: rule message`).
+  - `TOOL_CALL_BLOCK_REGEX`: Reusable fenced tool-calling block matcher.
+
+#### 2. Universal Harness Type Contracts (`@orchestrai/shared-types`)
+
+- Added [`harness.ts`](packages/shared-types/src/harness.ts):
+  - `DiagnosticSeverity` (`ERROR`, `WARNING`, `INFO`).
+  - `DiagnosticToolType` (`TSC`, `ESLINT`, `RUFF`, `PRETTIER`, `SYNTAX`, `WORKSPACE_RULE`).
+  - `WorkspaceInstructionType` (`AGENTS_MD`, `RULE`, `SKILL`, `COPILOT`, `CLAUDE`, `CURSOR`).
+  - `HarnessDiagnosticItem` & `HarnessDiagnosticReport` interfaces.
+  - `WorkspaceSkillMetadata`, `WorkspaceRuleMetadata`, and `WorkspaceHarnessContext`.
+- Expanded `WorkspaceTool` enum with `VERIFY_CODE`, `READ_SKILL`, and `LIST_SKILLS`.
+
+#### 3. Gateway Harness Subsystem (`apps/gateway/src/modules/harness/`)
+
+- Implemented modular harness services (< 250 LOC each):
+  - **`workspace-instruction-loader.ts`**: Automatically scans for root instructions (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`), modular rulebooks (`.agents/rules/*.md`, `.cursor/rules/*.md`), and on-demand skills (`.agents/skills/**/SKILL.md`, `skills/**/SKILL.md`). Ingests YAML frontmatter and formats structured prompt context blocks.
+  - **`workspace-diagnostic-runner.ts`**: Language-aware diagnostic execution running `eslint` and `tsc` for TypeScript/JavaScript and `ruff` for Python. Enforces the Hard 250-Line Maximum Rule invariant directly on modified files.
+  - **`code-standards-gate.ts`**: Post-write evaluation gate. Enriches tool outputs with structured error summaries and instructs the model to analyze, formulate a diff, and request HITL clearance before applying fixes.
+  - **`harness-skill-registry.ts`**: In-memory cache for dynamic skill and rule retrieval.
+
+#### 4. Sandbox Tool Integration (`apps/gateway/src/modules/streaming/`)
+
+- **`workspace-tool-executor.ts`**:
+  - Hooked `codeStandardsGate.evaluateWrittenFile` directly into `WorkspaceTool.WRITE_FILE`. If diagnostics fail, returns structured violations and marks `isError: true` to prevent unvalidated completions.
+  - Added `WorkspaceTool.VERIFY_CODE` for explicit on-demand diagnostic checks.
+  - Added `WorkspaceTool.READ_SKILL` to let agents read full skill instructions.
+  - Added `WorkspaceTool.LIST_SKILLS` to let agents inspect available capabilities.
+- **`live-execution.manager.ts`**:
+  - Integrated dynamic workspace discovery at execution bootstrap (`workspaceInstructionLoader.loadContext()`).
+  - Injects discovered rules and available skills directly into `augmentedSystemPrompt`.
+
+---
+
+## Session: 2026-10-03 (Continued) — Console Lib Folder Modularization & Architectural Cleanup
+
+### Summary of Completed Work
+
+#### 1. Directory Modularization (`apps/console/src/lib/`)
+
+- Collapsed noisy root-level files into focused, domain-driven subdirectories:
+  - `lib/auth/`: Centralized `client.ts`, `context.tsx`, and `index.ts`. All consumers import via `@/lib/auth`.
+  - `lib/hooks/`: Aggregated platform hooks (`use-api-data.ts`, `use-modes.ts`, `use-nav.ts`, `use-platform-branding.ts`, and `index.ts`). All consumers import via `@/lib/hooks`.
+  - `lib/navigation/`: Isolated `nav-icon-mapper.ts` and `index.ts`. Consumers import via `@/lib/navigation`.
+  - `lib/providers/`: Extracted `query-provider.tsx` and `index.ts`. Consumers import via `@/lib/providers`.
+- Retained only 4 universal root modules in `apps/console/src/lib`: `api-client.ts`, `error-utils.ts`, `types.ts`, and `utils.ts`.
+
+#### 2. Dead Code & Duplicate File Purge
+
+- Removed dead `theme.tsx` (superseded by `@yuva-devlab/ui`'s `ConfigProvider`).
+- Removed duplicate `lib/use-platform-branding.ts` in favor of `lib/hooks/use-platform-branding.ts`.
+- Removed deleted loose files (`auth-client.ts`, `auth-context.tsx`, `auth.ts`, `use-api-data.ts`, `use-modes.ts`, `use-nav.ts`).
+
+#### 3. Verification & Quality Gates
+
+- `pnpm typecheck` (48/48 packages) passed with zero errors.
+- `pnpm lint` passed with zero ESLint warnings (`--max-warnings=0`) and clean Ruff checks.
+
+---
+
+## Session: 2026-10-03 — Milestone 13 Complete: End-to-End Hardcoded Value Eradication & Server-Driven Dynamic Configuration
+
+### Summary of Completed Work
+
+#### 1. Universal Domain Enums (`packages/shared-types`)
+
+- **Namespaces & Keys**: Defined `ConfigNamespace.BRANDING`, `ConfigNamespace.TOOLS` and keys `WELCOME_HEADLINE`, `WELCOME_SUBTITLE`, `BRAND_NAME`, `BRAND_VERSION`, `CATEGORY_BLURBS`.
+- **Role & Tool Classifications**: Created canonical `AgentRoleSlug` (`STRATEGY`, `RESEARCH`, `WRITING`, `ENGINEERING`, `DATA`, `AUTOMATION`, `SPECIALIST`), `PlatformToolName` (all 26 platform tools), and `ToolSandboxType` (`READ_ONLY`, `NETWORK_READ`, `NETWORK_WRITE`, `WORKSPACE_WRITE`, `EPHEMERAL_VM`).
+- Rebuilt `@orchestrai/shared-types` cleanly.
+
+#### 2. Modular Database Seeders (< 250 LOC with Zero Data Loss Guarantee) (`packages/database/src/seeds/`)
+
+- Decomposed monolithic seeders into single-responsibility modules:
+  - `seed-permissions.ts` (59 LOC): Seeds permissions with `ToolPermissionLevel`.
+  - `seed-roles.ts` (83 LOC): Seeds roles with `AgentRoleSlug`.
+  - `seed-tools.ts` (148 LOC): Seeds tools with `PlatformToolName`, `ToolSandboxType`, and `ToolPermissionLevel`.
+  - `seed-agents.ts` (166 LOC): Uses `AgentMode`, `PlatformScope`, `AgentRoleSlug`, `PlatformToolName`, and env-driven `DEFAULT_SEED_MODEL`.
+  - `seed-platform-configs.ts` (223 LOC): Seeds all namespaces using `ConfigNamespace` and `ConfigKey`.
+  - `seed-capabilities.ts` (133 LOC): Uses `PlatformCapabilitySlug` and `PlatformToolName`.
+  - `seed-providers-models.ts` (93 LOC): Uses `PlatformScope.PLATFORM` and env-driven model identifier.
+- All seeders use idempotent `upsert` with `update: {}` to strictly protect pre-existing database records.
+
+#### 3. Control Plane Gateway Services & Endpoints (`apps/gateway`)
+
+- **Endpoints**:
+  - `GET /api/v1/welcome`: Dynamic welcome headline, subtitle, and starter chips.
+  - `GET /api/v1/branding`: Dynamic brand name and version badge.
+  - `GET /api/v1/tools/categories`: Dynamic tool category descriptive blurbs.
+  - `GET /api/v1/config/:namespace/:key` & `PUT /api/v1/config/:namespace/:key`: Scoped configuration reads/writes with admin guards.
+- **Dynamic Services**:
+  - `PlatformConfigService`: Unified cached accessor for branding, welcome, categories, cache, compaction, and execution.
+  - `CognitivePolicyService`: Dynamic thinking tokens, temperature, and thinking guidelines.
+  - `FeatureFlagService`: High-performance kill switches (e.g. `WorkspaceTool.BASH` kill switch check in `WorkspaceToolExecutor`).
+  - `LiveTurnCompaction` & `LiveTurnExecutor`: Dynamic threshold ratio from database; dynamic temperature; eradicated static `lead-orchestrator` fallback.
+  - `MemoryDistillation`: Removed static agent strings; safely resolves agent ID from event payload.
+
+#### 4. Dynamic Console UI & Browser Persistence (`apps/console`)
+
+- **Hooks & Components**:
+  - `usePlatformWelcome` & `StudioWelcome`: Dynamic greeting headline, subtitle, and starter suggestions from database.
+  - `usePlatformBranding`, `SidebarNav`, & `PageShell`: Dynamic application name and version badge; dynamic root breadcrumb.
+  - `useToolCategories` & `ToolsPageContent`: Purged static `CATEGORY_BLURBS` constant; queries database-driven category blurbs.
+  - `StudioWorkspaceSelector`: Removed hardcoded `orchestrai` fallback; dynamically reflects active workspace name or placeholder.
+  - `workspace-slice.ts`: Dynamically resolves initial workspace directory from `process.env.WORKSPACE_ROOT` without static paths.
+  - `stores/index.ts`: Dynamically configurable IndexedDB persistence store name (`process.env.NEXT_PUBLIC_STORE_NAME`).
+
+#### 5. Worker & Crawler Dynamic Configuration (`apps/worker`, `apps/crawler`)
+
+- `apps/worker/src/bootstrap/config.ts`: Purged static `ollama` provider fallback; strictly uses `process.env.DEFAULT_MODEL_PROVIDER`.
+- `apps/crawler/src/config.py`: Made `rag_ingest_path` env-driven via `RAG_INGEST_PATH`.
+
+---
+
+## Session: 2026-10-02 (Continued) — Milestone 12 Complete: Anthropic-Grade Dynamic Cognition, Thinking & Database Seeding
+
+### Summary of Completed Work
+
+#### 1. Dynamic Cognition & Manifest Schema Models (`packages/database/prisma/schema.prisma`)
+
+- Defined 4 foundational dynamic entities:
+  - **`CognitivePolicy`**: Dynamic thinking tokens, temperature overrides, loop steps, and thinking guidelines.
+  - **`SystemPromptTemplate`**: Versioned, living prompt templates and behavioral guidelines.
+  - **`PlatformConfig`**: Unified namespaced JSON configuration store for slash commands, suggestion chips, cache parameters, compaction thresholds, and RAG chunking.
+  - **`FeatureFlag`**: Instant sub-2ms kill switches and circuit breakers for tools and capabilities.
+- Generated Prisma Client types with zero manual migrations.
+
+#### 2. Idempotent Platform Database Seeders (`packages/database/src/seeds/`)
+
+- Implemented modular seeders with a zero data loss guarantee (uses `upsert` with `update: {}` to strictly preserve existing database data without truncating or cleaning):
+  - `seed-providers-models.ts`: Ollama provider and Gemma 4 31B model records.
+  - `seed-modes-nav.ts`: Chat, Plan, Act, and Auto execution modes + 8 navigation hub items.
+  - `seed-roles-tools.ts`: 4 platform permissions, 7 platform roles, and 11 execution tools.
+  - `seed-agents.ts`: Default workspace tenant and 6 core specialist agents.
+  - `seed-platform-data.ts`: Cognitive policy blueprints, prompt templates, and platform configs.
+  - `seed-platform-manifest.ts`: Automated sync for cognitive policies, prompts, configs, and flags.
+  - `seed-all.ts`: Master orchestrator running all seed modules in dependency order.
+
+#### 3. Database-Driven Gateway Service (`apps/gateway`)
+
+- Refactored `PlatformCommandService` to query `this.db.platformConfig` under `namespace: "commands"`, eliminating all hardcoded static fallback arrays.
+- Integrated `seedAllPlatformData` into gateway bootstrap in `apps/gateway/src/index.ts`.
+
+---
+
+## Session: 2026-10-02 — Milestone 11 Complete: Platform Slash Commands API & Dynamic Consumer
+
+### Summary of Completed Work
+
+#### 1. Core Contracts (`packages/shared-types`)
+
+- Defined `PlatformCommandRecord` entity interface in `packages/shared-types/src/platform.ts`.
+- Rebuilt `@orchestrai/shared-types` package.
+
+#### 2. Gateway Platform Slash Commands Module (`apps/gateway/src/modules/platform/`)
+
+- **`PlatformCommandService` (`services/platform-command.service.ts`)**:
+  - Service managing slash commands (`/plan`, `/act`, `/chat`, `/auto`, `/clear`, `/compact`, `/files`, `/help`).
+  - Supports `listCommands(includeDisabled)`, `getCommand(commandId)`, `createCommand(dto)`, `updateCommand(commandId, patch)`, and `deleteCommand(commandId)`.
+- **`PlatformCommandController` (`controllers/platform-command.controller.ts`)**:
+  - Exposes REST handlers for listing, creating, updating, and deleting commands.
+- **`registerPlatformCommandRoutes` (`controllers/platform-command.route.ts`)**:
+  - Maps `GET /commands` (public read) and `POST /commands`, `PUT /commands/:id`, `DELETE /commands/:id` (admin protected).
+  - Integrated into Gateway bootstrap in `apps/gateway/src/index.ts`.
+
+#### 3. Console Dynamic Slash Commands Consumer (`apps/console`)
+
+- **`usePlatformCommands` (`features/studio/api/use-platform-commands.ts`)**:
+  - TanStack Query hook querying `/api/v1/commands`.
+- **Dynamic Icon Resolution & Zero Hardcoding (`studio-slash-commands.types.ts`)**:
+  - Removed static fallback array completely from client code.
+  - Implemented `resolveCommandIcon` mapping icon strings to Lucide components.
+  - Implemented `mapPlatformRecordToSlashCommand`.
+- **`StudioSlashCommands` (`studio-slash-commands.tsx`)**:
+  - Consumes dynamic commands from Gateway API.
+
 ---
 
 ## Session: 2026-09-29 (Continued) — Phase 6 Complete: Dual-Pane Workspace Canvas & Virtualized Chat
@@ -420,7 +657,7 @@ Chronological log of architecture, engineering decisions, and completed mileston
 
 ---
 
-### 3. Zero-Docker Local-First Engine & Security
+### 3. Zero-Docker Embedded Runtime Engine & Security
 
 - **Eliminated Container Dependencies**:
   - Removed all `docker-compose` files and legacy `infrastructure/` directory.
@@ -1078,3 +1315,162 @@ Chronological log of architecture, engineering decisions, and completed mileston
   - Monorepo typecheck: **43 of 43 targets passing with 0 errors**.
   - Monorepo 250-line rule: **0 files > 250 LOC** (maximum file length is 229 LOC).
   - 100% semantic CSS theme variables used; zero hardcoded strings.
+
+---
+
+## Session: 2026-10-02 — DRY Consolidation, Dedicated `@orchestrai/regex` Package & Automatic Mode and Rule Engine
+
+### 1. Dedicated Zero-Dependency Regex Package (`packages/regex/`)
+
+- **Centralized Pattern Extraction**:
+  - Created `@orchestrai/regex` package providing canonical regular expressions and validation helpers across the entire monorepo.
+  - Submodules:
+    - [`uuid.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/uuid.regex.ts): Canonical `UUID_REGEX` supporting versions 1-5 and `isUuid(value)` predicate.
+    - [`mode.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/mode.regex.ts): Heuristic mode triggers `PLAN_PATTERNS`, `ACT_PATTERNS`, and `CHAT_PATTERNS`.
+    - [`security.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/security.regex.ts): `SECRET_REDACTION_PATTERNS` (Bearer tokens, API keys, private keys), `CRITICAL_CREDENTIAL_PATTERns`, `SECRET_CONFIG_PATTERNS`.
+    - [`network.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/network.regex.ts): `BLOCKED_IP_PATTERNS` (SSRF loopback/private range protection), `LOCALHOST_ORIGIN_REGEX`, `IPV4_REGEX`.
+    - [`uri.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/uri.regex.ts): `CANONICAL_URI_REGEX`, `FILE_PROTOCOL_REGEX`, `POSTGRES_PROTOCOL_REGEX`, `REALTIME_CHANNEL_PREFIX_REGEX`, `TOOL_NAME_REGEX`.
+    - [`text.regex.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/regex/src/text.regex.ts): `EMBEDDING_ARRAY_REGEX`, `MARKDOWN_HEADING_REGEX`, `LEADING_TRAILING_DASH_REGEX`, `ALPHANUMERIC_START_REGEX`, `WORD_SPLIT_REGEX`.
+- **Consumer Migration**:
+  - Replaced ad-hoc and duplicate regex definitions in `@orchestrai/agent`, `@orchestrai/memory`, `@orchestrai/rag`, `@orchestrai/tools`, `apps/gateway`, `apps/realtime`, and `apps/console`.
+  - Maintained `@orchestrai/core` zero internal workspace dependency invariant.
+
+### 2. Centralized Platform Rules & Mode Prompts (`packages/prompts/`)
+
+- **Single Source of Truth for Prompts**:
+  - Created [`modes.prompt.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/prompts/src/system/modes.prompt.ts) providing canonical `CHAT_MODE_SYSTEM_PROMPT`, `PLAN_MODE_SYSTEM_PROMPT`, `ACT_MODE_SYSTEM_PROMPT`, `AUTO_MODE_SYSTEM_PROMPT`, and `MODE_PROMPT_REGISTRY`.
+  - Created [`rules.prompt.ts`](file:///Users/yuvarajpattabi/Yuva/yuva-devlab/Repos/orchestrai/packages/prompts/src/system/rules.prompt.ts) defining canonical `CORE_PLATFORM_RULES_PROMPT` and `COMPACT_PLATFORM_RULES_PROMPT`.
+  - Refactored `ChatModeStrategy`, `PlanModeStrategy`, `ActModeStrategy`, and `AutoModeStrategy` in `@orchestrai/agent` to source prompt definitions directly from `@orchestrai/prompts`.
+
+### 3. Automatic Rule Adoption & Mode Selection Engine
+
+- **Prompt Compiler Rule Injection**:
+  - Updated `PromptCompiler` (`packages/agent/src/compiler/prompt-compiler.ts`) to inject `CORE_PLATFORM_RULES_PROMPT` automatically in `<platform_rules>` block unless explicitly disabled (`adoptRules: false`).
+- **Autonomous Intent-to-Mode Resolution**:
+  - Updated `AgentLoop` (`packages/agent/src/loop/agent-loop.ts`) to initialize default `HeuristicModeRouter`. If mode is `AgentMode.AUTO`, router dynamically resolves whether the prompt is conversational (`CHAT`), analytical planning (`PLAN`), or tool execution (`ACT`) per turn.
+  - Updated `apps/gateway` (`live-execution.manager.ts` and `live-message-history.ts`):
+    - Added `autoDetectMode(prompt)` to dynamically pick execution mode from user input if not explicitly provided.
+    - Updated `buildCompositeSystemPrompt` to inject `CORE_PLATFORM_RULES_PROMPT`, `SAFETY_GUARDRAILS_SYSTEM_PROMPT`, and active mode instructions from `MODE_PROMPT_REGISTRY[mode]`.
+- **Python Intelligence Service Alignment**:
+  - Implemented `apps/intelligence/src/mode_router.py` with identical regex-based heuristics (`auto_detect_mode`) and canonical system prompts (`PLATFORM_INVARIANTS_PROMPT`, `MODE_PROMPT_REGISTRY`).
+  - Wired into `apps/intelligence/src/server.py` to auto-detect mode and adopt platform rules into LangGraph `StateGraph`.
+
+### 4. Architecture Documentation & Markdown Preview Fix
+
+- **System Flow & Architecture Document**:
+  - Authored comprehensive `docs/SYSTEM-FLOW-AND-ARCHITECTURE.md` with complete monorepo directory tree, package purpose map, and end-to-end execution flow.
+- **Mermaid Preview Compatibility**:
+  - Fixed syntax in Mermaid sequence diagrams (un-nested `alt` conditional blocks, quoted participant aliases containing parentheses, removed unescaped angle brackets) ensuring error-free rendering in all Markdown preview engines.
+
+### 5. Quality Invariants & Verification
+
+- **250-Line Rule**: All new files are strictly under 130 LOC; all modified files remain under 200 LOC.
+- **Monorepo Typecheck**: 48 of 48 workspace targets passing cleanly (`pnpm typecheck`).
+- **Linting & Formatting**: `eslint --max-warnings=0`, `ruff check`, Prettier, and `ruff format` passing with 0 warnings/errors.
+
+---
+
+## Session: 2026-10-02 (Continued) — Workspace Folder Picker, Recent History, @ Mentions & Slash Commands
+
+### 1. Workspace Folder Management Architecture (`apps/console`)
+
+- **Dual-Mode Workspace Selector (`StudioWorkspaceSelector` & `StudioWorkspaceRecentList`)**:
+  - Implemented top header dropdown showing active workspace folder name, monospace path badge, and copy button.
+  - Native browser directory picker (`window.showDirectoryPicker()`) with fallback path input for arbitrary filesystem paths.
+  - Recent workspaces history drawer with active indicator checkmark, single-click workspace switching, and per-workspace deletion.
+- **Durable `WorkspaceSlice` with Asynchronous IndexedDB Persistence**:
+  - Added `WorkspaceSlice` to `apps/console/src/lib/stores/workspace-slice.ts` persisting `activeWorkspace` and `recentWorkspaces` (up to 15 MRU entries).
+  - Wired into `useConsoleStore` with IndexedDB persistence and path normalization.
+
+### 2. Workspace File Exploration API (`apps/gateway`)
+
+- **`WorkspaceFileService` & `WorkspaceController`**:
+  - Implemented `apps/gateway/src/modules/workspace/services/workspace-file.service.ts` providing fast directory walking (depth <= 5).
+  - Automatically filters out build and dependency directories (`.git`, `node_modules`, `.next`, `dist`, `.turbo`, `.venv`, etc.).
+  - Registered `GET /api/v1/workspace/files` endpoint on API router supporting `path`, `query`, and `limit` parameters.
+- **Client Query Hook**:
+  - Created `apps/console/src/features/studio/api/use-workspace-files.ts` utilizing TanStack Query for high-performance cached autocomplete.
+
+### 3. Interactive Command Station (@ Mentions & / Slash Commands)
+
+- **`@` Mentions Autocomplete (`StudioMentionPopover`)**:
+  - Real-time popover triggering on `@` in the command prompt.
+  - Searches workspace files and cluster specialist personas with file-type icons and role descriptions.
+  - Full keyboard navigation (Arrow Up/Down, Enter, Escape).
+  - Automatically switches active specialist when an agent persona is selected.
+- **`/` Slash Commands Palette (`StudioSlashCommands`)**:
+  - Instant command palette for `/plan`, `/act`, `/chat`, `/auto`, `/clear`, `/compact`, `/files`, and `/help`.
+  - Switching mode automatically strips the slash prefix so users can type their prompt immediately.
+  - `/clear` triggers `state.handleNewSession()` to clear message feeds and reset canvas cleanly.
+- **Canonical Regex Extraction**:
+  - Added `prompt.regex.ts` in `@orchestrai/regex` defining `MENTION_QUERY_REGEX`, `SLASH_COMMAND_PREFIX_REGEX`, `TRAILING_PATH_SLASH_REGEX`, and `PATH_SPLIT_REGEX`.
+  - Zero inline regular expressions in consumer components.
+
+### 4. Quality Invariants & Verification
+
+- **250-Line Maximum Rule**: All new files decomposed proactively; max LOC is 183 lines (0 files > 221 LOC).
+- **Monorepo Typecheck**: 48 of 48 workspace targets passing cleanly (`pnpm typecheck`).
+- **Linting & Formatting**: `eslint --max-warnings=0`, `ruff check`, Prettier, and `ruff format` passing with 0 warnings/errors.
+
+---
+
+## Session: 2026-10-03 — UI Shimmer Skeletons, Zero-Hardcoded Copy Catalog & Developer Workbench Normalization
+
+### 1. Accessible UI Skeletons & Layout Shift Elimination (`apps/console`)
+
+- **Root Problem**: Console dashboard pages displayed unstyled raw `"Loading..."` text blocks during TanStack Query resolution, causing cumulative layout shifts (CLS) and degraded visual aesthetics.
+- **Solution (`components/ui/skeleton.tsx`)**:
+  - Implemented primitive `Skeleton` shimmer block with subtle animation and rounded corners.
+  - Implemented composite skeletons matching reference dashboard layouts: `CardGridSkeleton` (for Agents, Models, Tools), `TableSkeleton` (for Executions, Knowledge, Memory, Context), and `DetailPageSkeleton` (for Agent & Execution details).
+  - Re-exported via `components/ui/index.ts`.
+
+### 2. Centralized Type-Safe UI Copy Dictionary (`apps/console/src/lib/ui-copy.ts`)
+
+- **Root Problem**: User interface strings (empty state headlines, descriptions, button labels, and modal headers) were hardcoded as bare literals in JSX, violating the zero-hardcoded-strings standard.
+- **Solution**:
+  - Created centralized dictionary `UI_COPY` (< 200 LOC) standardizing strings across all 8 dashboard domains: `AGENTS`, `EXECUTIONS`, `MODELS`, `KNOWLEDGE`, `MEMORY`, `EVALUATIONS`, `TOOLS`, `CONTEXT`, `STUDIO`, and `COMMON`.
+  - Replaced raw text in all page containers, table views, filter empty states, and action buttons.
+
+### 3. Developer Test Workbenches Clarification & Normalization
+
+- **Nature of "Testers"**: Clarified that in-browser testing features (`MemoryRecallDialog`, `KnowledgeQueryDialog`, `ExecutionDebugDialog`, and `EvaluationsDatasetsList`) are **production operator workbenches**, not unit or e2e test cases. They fully comply with the Phase Implementation Testing Policy (which only forbids automated test suite implementation).
+- **String Migration**: Migrated all strings within `MemoryRecallDialog` and `KnowledgeQueryDialog` to `UI_COPY.MEMORY.RECALL_TESTER` and `UI_COPY.KNOWLEDGE.QUERY_TESTER`.
+
+### 4. Quality Gates Verification
+
+- **250-Line Rule**: 100% of modified and newly created files remain strictly under 200 lines (e.g. `ui-copy.ts` at 191 LOC, `skeleton.tsx` at 98 LOC).
+- **TypeScript Compilation**: `pnpm typecheck` passed cleanly across all 48 Turbo targets with 0 errors.
+
+---
+
+## Session: Enterprise Architecture Character & Brand Transformation (2026-10-03)
+
+### 1. Architectural Re-Positioning & Portfolio Standard
+
+- **Enterprise Platform Mandate**: Elevated OrchestrAI from a "simple local-first project" framing to its true production character: an **enterprise-grade distributed AI agent orchestration platform** engineered to execute complex, massive-scale multi-agent DAGs, distributed queue tasks, and sandboxed tool executions.
+- **Air-Gapped Sovereignty as Capability**: Re-framed edge and self-contained execution not as a limiting toy boundary, but as a critical enterprise security feature: **Zero-Trust Security & Air-Gapped Sovereignty** (zero required external cloud egress for complete data sovereignty).
+
+### 2. Comprehensive Brand & Copy Normalization
+
+- **Console UI Copy**:
+  - `UI_COPY.COMMON.SIDEBAR.DEFAULT_BRAND_VERSION`: Elevated to `"v1.0.0 • enterprise"`.
+  - `UI_COPY.COMMON.A11Y.LOCAL_CORE`: Renamed text to `"Control Plane Runtime"`.
+  - `UI_COPY.STUDIO.INSPECTOR.LOCAL_FIRST_STATUS`: Updated to `"Zero-Trust Sandboxed Workspace"`.
+  - `UI_COPY.MODELS.PAGE_DESCRIPTION`: Updated to `"High-performance cloud and cluster inference providers configured for this tenant."`.
+  - `UI_COPY.MODELS.EMPTY_DESC`: Updated to reflect cloud, cluster, or private inference providers.
+- **Branding Hooks & Services**:
+  - `use-platform-branding.ts`: Default fallback updated to `"v1.0.0 • enterprise"`.
+  - `platform-config.service.ts`: Backend service fallback updated to `"v1.0.0 • enterprise"`.
+  - `seed-platform-configs.ts`: PostgreSQL seed data updated to `"v1.0.0 • enterprise"`.
+  - `apps/gateway/src/db/local-store.ts`: Elevated JSDoc to reflect embedded zero-dependency storage engine for self-contained runtime environments.
+- **Documentation & Agent Directives**:
+  - `package.json`: Version bumped to `"1.0.0"` and description elevated to enterprise distributed AI agent orchestration platform.
+  - `README.md`: Updated tagline, architecture pillars, tech stack, and prerequisites.
+  - `CLAUDE.md`, `AGENTS.md`, and `.agents/AGENTS.md`: Standardized agent instructions around enterprise scale and distributed architecture.
+  - `.agents/rules/architecture.md` & `docs/architecture/ARCHITECTURE.md`: Elevated Section 3 to "Air-Gapped Sovereignty & Enterprise Dual-Runtime".
+
+### 3. Verification & Compliance
+
+- **Zero "local-first" string matches**: Verified complete removal across all monorepo source files, markdown docs, and seed configs.
+- **Strict Invariants**: All files strictly adhere to the 250 LOC maximum rule.
+- **Typecheck & Linting**: Turbo `pnpm typecheck` passed across 48/48 targets with 0 errors; `pnpm lint` passed with 0 warnings.

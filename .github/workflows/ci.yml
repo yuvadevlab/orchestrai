@@ -1,52 +1,88 @@
-name: 🛡️ Build & Quality Validation
+name: 🛡️ CI Pipeline
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
+      - dev
       - main
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: 🔍 Lint, Typecheck & Build
+  lint:
+    name: 🧹 ESLint & Ruff Code Check
     runs-on: ubuntu-latest
-
     steps:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: ⚡ Setup pnpm Package Manager
-        uses: pnpm/action-setup@v4
-
-      - name: 🟢 Setup Node.js 24
-        uses: actions/setup-node@v4
+      - name: ⚙️ Setup Environment
+        uses: ./.github/actions/setup-node-env
         with:
-          node-version: 24
-          cache: "pnpm"
+          setup-python: "true"
 
-      - name: 📥 Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 🗄️ Generate Prisma Client
-        run: pnpm db:generate
-
-      - name: 🎨 Verify Code Formatting (Prettier)
-        run: pnpm format:check
-
-      - name: 🧹 Execute ESLint Code Check
+      - name: 🧹 Execute Lint Checks
         run: pnpm lint
 
-      - name: 🔎 Execute TypeScript Type Check
+  format:
+    name: 🎨 Prettier & Ruff Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Environment
+        uses: ./.github/actions/setup-node-env
+        with:
+          setup-python: "true"
+
+      - name: 🎨 Verify Formatting
+        run: pnpm format:check
+
+  typecheck:
+    name: 🔎 TypeScript Strict Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Environment
+        uses: ./.github/actions/setup-node-env
+
+      - name: 🔎 Execute Type Check
         run: pnpm typecheck
 
-      - name: 🏗️ Execute Monorepo Turbo Build
+  build:
+    name: 🏗️ Turbo Monorepo Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Environment
+        uses: ./.github/actions/setup-node-env
+
+      - name: 🏗️ Execute Monorepo Build
         run: pnpm build
+
+  commitlint:
+    name: 📝 Validate PR Commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⚙️ Setup Environment
+        uses: ./.github/actions/setup-node-env
+
+      - name: 📝 Validate Commits with Commitlint
+        run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose

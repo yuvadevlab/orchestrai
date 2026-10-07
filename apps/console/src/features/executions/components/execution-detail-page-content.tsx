@@ -10,8 +10,10 @@ import React from "react";
 import { Panel } from "@yuva-devlab/ui";
 import { useExecutions } from "../api";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DetailPageSkeleton } from "@/components/ui/skeleton";
 import { Play } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
+import { UI_COPY } from "@/lib/ui-copy";
 
 import { ExecutionTraceWaterfall } from "./execution-trace-waterfall";
 import { DagVisualizer } from "./dag-visualizer";
@@ -48,40 +50,51 @@ export function ExecutionDetailPageContent({
 
   return (
     <PageShell
-      title={`Execution / ${executionId}`}
-      breadcrumb="Executions"
-      stats={execution ? `${execution.status} · ${execution.latencyMs}ms` : undefined}
-      description="Replayable execution session record with step checkpoints and recovery metadata."
+      title={UI_COPY.EXECUTIONS.DETAIL.TITLE_WITH_ID(executionId)}
+      breadcrumb={UI_COPY.EXECUTIONS.DETAIL.BREADCRUMB}
+      stats={
+        execution
+          ? UI_COPY.EXECUTIONS.DETAIL.STATS_FORMAT(execution.status, execution.latencyMs)
+          : undefined
+      }
+      description={UI_COPY.EXECUTIONS.PAGE_DESCRIPTION}
     >
       {isLoading ? (
-        <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
-          <span className="text-muted-foreground animate-pulse font-mono text-xs">
-            Loading execution trace...
-          </span>
-        </div>
+        <DetailPageSkeleton />
       ) : !execution ? (
         <EmptyState
           icon={Play}
-          title="Execution Trace Not Found"
-          description={`No recorded execution run matching ID "${executionId}" was found in cluster memory.`}
+          title={UI_COPY.EXECUTIONS.DETAIL.NOT_FOUND_TITLE}
+          description={UI_COPY.EXECUTIONS.DETAIL.NOT_FOUND_DESC(executionId)}
         />
       ) : (
         <div className="grid gap-3 lg:grid-cols-3">
           {/* Main Column */}
           <div className="space-y-3 lg:col-span-2">
-            <Panel title="Execution Intent">
+            <Panel title={UI_COPY.EXECUTIONS.DETAIL.INTENT_TITLE}>
               <p className="text-sm font-semibold">{execution.intent}</p>
             </Panel>
 
-            <Panel title="Step Trace Summary">
+            <Panel title={UI_COPY.EXECUTIONS.DETAIL.TRACE_SUMMARY_TITLE}>
               <div className="space-y-2 font-mono text-xs">
                 <Row
-                  label="Steps Completed"
-                  value={`${execution.stepsCompleted}/${execution.totalSteps}`}
+                  label={UI_COPY.EXECUTIONS.DETAIL.STEPS_LABEL}
+                  value={UI_COPY.EXECUTIONS.DETAIL.STEPS_VALUE(
+                    execution.stepsCompleted,
+                    execution.totalSteps,
+                  )}
                   mono
                 />
-                <Row label="Latency" value={`${execution.latencyMs}ms`} mono />
-                <Row label="Tokens Billed" value={execution.tokensUsed.toLocaleString()} mono />
+                <Row
+                  label={UI_COPY.EXECUTIONS.DETAIL.LATENCY_LABEL}
+                  value={UI_COPY.EXECUTIONS.DETAIL.LATENCY_VALUE(execution.latencyMs)}
+                  mono
+                />
+                <Row
+                  label={UI_COPY.EXECUTIONS.DETAIL.TOKENS_LABEL}
+                  value={execution.tokensUsed.toLocaleString()}
+                  mono
+                />
               </div>
             </Panel>
 
@@ -95,12 +108,16 @@ export function ExecutionDetailPageContent({
           </div>
 
           {/* Sidebar Column */}
-          <Panel title="Run Metadata">
+          <Panel title={UI_COPY.EXECUTIONS.DETAIL.METADATA_TITLE}>
             <dl className="space-y-2 text-xs">
-              <Row label="Execution ID" value={execution.id} mono />
-              <Row label="Primary Agent" value={execution.primaryAgent} />
-              <Row label="Status" value={execution.status} />
-              <Row label="Dispatched at" value={execution.createdAt} mono />
+              <Row label={UI_COPY.EXECUTIONS.DETAIL.ID_LABEL} value={execution.id} mono />
+              <Row label={UI_COPY.EXECUTIONS.DETAIL.AGENT_LABEL} value={execution.primaryAgent} />
+              <Row label={UI_COPY.EXECUTIONS.DETAIL.STATUS_LABEL} value={execution.status} />
+              <Row
+                label={UI_COPY.EXECUTIONS.DETAIL.DISPATCHED_LABEL}
+                value={execution.createdAt}
+                mono
+              />
             </dl>
           </Panel>
         </div>

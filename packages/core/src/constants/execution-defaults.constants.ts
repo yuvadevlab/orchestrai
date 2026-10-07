@@ -7,10 +7,11 @@
  * Global default execution hyperparameters and safety bounds for autonomous agents.
  */
 export const AGENT_EXECUTION_DEFAULTS = {
-  /** Default platform-wide cloud model name */
-  DEFAULT_MODEL_NAME: "gemma4:31b-cloud",
-  /** Default local model name */
-  DEFAULT_LOCAL_MODEL_NAME: "qwen2.5:7b",
+  /** Default platform-wide cloud model name resolved from environment */
+  DEFAULT_MODEL_NAME: process.env.DEFAULT_MODEL_NAME || "",
+  /** Default local model name resolved from environment */
+  DEFAULT_LOCAL_MODEL_NAME:
+    process.env.DEFAULT_LOCAL_MODEL_NAME || process.env.DEFAULT_MODEL_NAME || "",
   /** Standard sampling temperature for balanced creativity and reasoning */
   DEFAULT_TEMPERATURE: 0.7,
   /** Deterministic sampling temperature for coding and exact syntax tasks */

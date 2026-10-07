@@ -6,6 +6,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Logger, loggerWithConfig, requestLogger } from "@yuva-devlab/logger";
 import { handleExecutionSseStream, handleGlobalSseStream } from "@/sse";
+import { LOCALHOST_ORIGIN_REGEX } from "@orchestrai/regex";
 import type { ConnectionRegistry } from "@/connection";
 import type { SubscriptionManager } from "@/subscriptions";
 
@@ -99,7 +100,7 @@ export function createHttpRouter(deps: RouterDeps) {
       if (
         deps.corsOrigins.includes(requestOrigin) ||
         deps.corsOrigins.includes("*") ||
-        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(requestOrigin)
+        LOCALHOST_ORIGIN_REGEX.test(requestOrigin)
       ) {
         corsOrigin = requestOrigin;
       } else {

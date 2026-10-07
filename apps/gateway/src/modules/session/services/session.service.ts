@@ -20,8 +20,7 @@ import {
   type MessageListResult,
 } from "./session-query.service";
 import { ConversationMessageService, type AppendedMessageRecord } from "./session-message.service";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID_REGEX } from "@orchestrai/regex";
 
 export interface ConversationRecord {
   conversationId: string;

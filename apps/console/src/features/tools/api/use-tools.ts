@@ -17,6 +17,7 @@ import {
 import { toast } from "@yuva-devlab/ui";
 import { getApiClient } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { ToolDefinition } from "../types";
 
 /**
@@ -66,9 +67,9 @@ export function useToggleTool(): UseMutationResult<
       });
 
       toast.promise(promise, {
-        loading: `Updating ${name}...`,
-        success: `${name} ${isEnabled ? "enabled" : "disabled"}`,
-        error: (err: Error) => `Failed to update tool: ${err.message}`,
+        loading: UI_COPY.TOOLS.CARD.TOAST_UPDATING(name),
+        success: UI_COPY.TOOLS.CARD.TOAST_UPDATED(name, isEnabled),
+        error: (err: Error) => UI_COPY.TOOLS.CARD.TOAST_UPDATE_ERROR(err.message),
       });
 
       return promise;

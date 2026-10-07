@@ -10,13 +10,15 @@ import React from "react";
 import { FileText, Trash2, Globe, Database, Calendar } from "lucide-react";
 import { Button, toast } from "@yuva-devlab/ui";
 import { EmptyState } from "@/components/ui";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useDeleteDocument } from "../api";
 import type { KnowledgeDocument } from "../types";
 
 export interface KnowledgeDocumentsTableProps {
-  documents: KnowledgeDocument[];
-  isLoading: boolean;
-  onOpenUpload: () => void;
+  readonly documents: KnowledgeDocument[];
+  readonly isLoading: boolean;
+  readonly onOpenUpload: () => void;
 }
 
 /**
@@ -32,32 +34,26 @@ export function KnowledgeDocumentsTable({
   const handleDelete = async (doc: KnowledgeDocument): Promise<void> => {
     try {
       await deleteMutation.mutateAsync(doc.documentId);
-      toast.success(`Removed "${doc.title}" from knowledge base`);
+      toast.success(UI_COPY.KNOWLEDGE.TABLE.FEEDBACK_REMOVED(doc.title));
     } catch {
-      toast.error(`Failed to delete document "${doc.title}"`);
+      toast.error(UI_COPY.KNOWLEDGE.TABLE.FEEDBACK_ERROR(doc.title));
     }
   };
 
   if (isLoading) {
-    return (
-      <div className="border-border bg-card/30 flex min-h-48 items-center justify-center rounded-md border backdrop-blur">
-        <span className="text-muted-foreground animate-pulse text-xs">
-          Loading knowledge repository...
-        </span>
-      </div>
-    );
+    return <TableSkeleton rows={4} />;
   }
 
   if (documents.length === 0) {
     return (
       <EmptyState
         icon={Database}
-        title="No documents indexed"
-        description="Index documents, APIs, or manuals to empower autonomous swarms with domain grounding."
+        title={UI_COPY.KNOWLEDGE.EMPTY_TITLE}
+        description={UI_COPY.KNOWLEDGE.EMPTY_DESC}
         action={
           <Button size="sm" onClick={onOpenUpload} className="h-8 gap-1.5 text-xs font-medium">
             <FileText className="size-3.5" />
-            <span>Add first document</span>
+            <span>{UI_COPY.KNOWLEDGE.UPLOAD_BUTTON}</span>
           </Button>
         }
       />
@@ -99,7 +95,8 @@ export function KnowledgeDocumentsTable({
                 onClick={() => handleDelete(doc)}
                 disabled={deleteMutation.isPending}
                 className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground size-7 rounded"
-                title="Delete document and chunks"
+                title={UI_COPY.KNOWLEDGE.TABLE.DELETE_TOOLTIP}
+                aria-label={UI_COPY.KNOWLEDGE.TABLE.DELETE_TOOLTIP}
               >
                 <Trash2 className="size-3.5" />
               </Button>

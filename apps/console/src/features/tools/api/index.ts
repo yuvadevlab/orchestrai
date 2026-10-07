@@ -6,3 +6,4 @@
 
 export * from "./use-tools";
 export * from "./use-tool-mutations";
+export * from "./use-tool-categories";

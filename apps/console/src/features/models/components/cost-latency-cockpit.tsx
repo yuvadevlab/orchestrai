@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { Gauge, Zap, DollarSign, ShieldAlert, Cpu } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 
 interface ProviderTelemetry {
   providerId: string;
@@ -70,42 +71,54 @@ export function CostLatencyCockpit(): React.JSX.Element {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="border-border/60 bg-card/60 rounded-md border p-3 backdrop-blur">
           <div className="text-muted-foreground flex items-center justify-between text-xs">
-            <span>Cluster P95 Latency</span>
+            <span>{UI_COPY.MODELS.COCKPIT.CLUSTER_P95_TITLE}</span>
             <Zap className="text-primary size-3.5" />
           </div>
-          <span className="text-foreground mt-1 block font-mono text-xl font-bold">720 ms</span>
-          <span className="text-primary text-[10px]">Dynamic Lowest-Latency Routing Active</span>
+          <span className="text-foreground mt-1 block font-mono text-xl font-bold">
+            {UI_COPY.MODELS.COCKPIT.LATENCY_MS(720)}
+          </span>
+          <span className="text-primary text-[10px]">
+            {UI_COPY.MODELS.COCKPIT.CLUSTER_P95_ROUTING}
+          </span>
         </div>
 
         <div className="border-border/60 bg-card/60 rounded-md border p-3 backdrop-blur">
           <div className="text-muted-foreground flex items-center justify-between text-xs">
-            <span>Current Month Token Spend</span>
+            <span>{UI_COPY.MODELS.COCKPIT.TOKEN_SPEND_TITLE}</span>
             <DollarSign className="text-primary size-3.5" />
           </div>
           <span className="text-foreground mt-1 block font-mono text-xl font-bold">
             ${currentMonthSpend}
           </span>
           <span className="text-muted-foreground text-[10px]">
-            {spendPercent}% of ${monthlyBudgetLimit} cap
+            {UI_COPY.MODELS.COCKPIT.TOKEN_SPEND_CAP(spendPercent, monthlyBudgetLimit)}
           </span>
         </div>
 
         <div className="border-border/60 bg-card/60 rounded-md border p-3 backdrop-blur">
           <div className="text-muted-foreground flex items-center justify-between text-xs">
-            <span>Quota Enforcement Status</span>
+            <span>{UI_COPY.MODELS.COCKPIT.QUOTA_STATUS_TITLE}</span>
             <Gauge className="text-primary size-3.5" />
           </div>
-          <span className="text-primary mt-1 block font-mono text-xl font-bold">NORMAL</span>
-          <span className="text-muted-foreground text-[10px]">Threshold warning at 80%</span>
+          <span className="text-primary mt-1 block font-mono text-xl font-bold">
+            {UI_COPY.MODELS.COCKPIT.QUOTA_STATUS_NORMAL}
+          </span>
+          <span className="text-muted-foreground text-[10px]">
+            {UI_COPY.MODELS.COCKPIT.QUOTA_WARNING(80)}
+          </span>
         </div>
 
         <div className="border-border/60 bg-card/60 rounded-md border p-3 backdrop-blur">
           <div className="text-muted-foreground flex items-center justify-between text-xs">
-            <span>Fallback Cascade</span>
+            <span>{UI_COPY.MODELS.COCKPIT.FALLBACK_CASCADE_TITLE}</span>
             <ShieldAlert className="text-primary size-3.5" />
           </div>
-          <span className="text-foreground mt-1 block font-mono text-xl font-bold">3 Tiers</span>
-          <span className="text-muted-foreground text-[10px]">Google → Anthropic → OpenAI</span>
+          <span className="text-foreground mt-1 block font-mono text-xl font-bold">
+            {UI_COPY.MODELS.COCKPIT.FALLBACK_CASCADE_TIERS(3)}
+          </span>
+          <span className="text-muted-foreground text-[10px]">
+            {UI_COPY.MODELS.COCKPIT.FALLBACK_CASCADE_PATH}
+          </span>
         </div>
       </div>
 
@@ -114,7 +127,9 @@ export function CostLatencyCockpit(): React.JSX.Element {
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Cpu className="text-primary size-4" />
-            <h3 className="text-sm font-semibold tracking-tight">Provider Latency & Rate Matrix</h3>
+            <h3 className="text-sm font-semibold tracking-tight">
+              {UI_COPY.MODELS.COCKPIT.TABLE_TITLE}
+            </h3>
           </div>
           <div className="flex items-center gap-1">
             {(["LOWEST_LATENCY", "LEAST_EXPENSIVE", "ROUND_ROBIN"] as const).map((s) => (
@@ -125,7 +140,7 @@ export function CostLatencyCockpit(): React.JSX.Element {
                 onClick={() => setActiveStrategy(s)}
                 className="h-7 font-mono text-[10px]"
               >
-                {s.replace("_", " ")}
+                {UI_COPY.MODELS.COCKPIT.STRATEGIES[s] ?? s}
               </Button>
             ))}
           </div>
@@ -135,25 +150,33 @@ export function CostLatencyCockpit(): React.JSX.Element {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-border/40 text-muted-foreground border-b font-mono text-[11px]">
-                <th className="pb-2 font-normal">Provider Engine</th>
-                <th className="pb-2 font-normal">P50</th>
-                <th className="pb-2 font-normal">P95</th>
-                <th className="pb-2 font-normal">P99</th>
-                <th className="pb-2 font-normal">Prompt / 1k</th>
-                <th className="pb-2 font-normal">Compl / 1k</th>
-                <th className="pb-2 font-normal">Availability</th>
+                <th className="pb-2 font-normal">{UI_COPY.MODELS.COCKPIT.HEADERS.ENGINE}</th>
+                <th className="pb-2 font-normal">{UI_COPY.MODELS.COCKPIT.HEADERS.P50}</th>
+                <th className="pb-2 font-normal">{UI_COPY.MODELS.COCKPIT.HEADERS.P95}</th>
+                <th className="pb-2 font-normal">{UI_COPY.MODELS.COCKPIT.HEADERS.P99}</th>
+                <th className="pb-2 font-normal">{UI_COPY.MODELS.COCKPIT.HEADERS.PROMPT_1K}</th>
+                <th className="pb-2 font-normal">{UI_COPY.MODELS.COCKPIT.HEADERS.COMPL_1K}</th>
+                <th className="pb-2 font-normal">{UI_COPY.MODELS.COCKPIT.HEADERS.AVAILABILITY}</th>
               </tr>
             </thead>
             <tbody className="divide-border/20 divide-y font-mono text-[11px]">
               {TELEMETRY_MOCK.map((row) => (
                 <tr key={row.providerId} className="hover:bg-muted/10 transition-colors">
                   <td className="text-foreground py-2.5 font-sans font-medium">{row.name}</td>
-                  <td className="py-2.5">{row.p50Ms}ms</td>
-                  <td className="text-primary py-2.5">{row.p95Ms}ms</td>
-                  <td className="py-2.5">{row.p99Ms}ms</td>
-                  <td className="py-2.5">${row.costPer1kPrompt.toFixed(4)}</td>
-                  <td className="py-2.5">${row.costPer1kCompletion.toFixed(4)}</td>
-                  <td className="text-primary py-2.5">{row.availabilityPercent}%</td>
+                  <td className="py-2.5">{UI_COPY.MODELS.COCKPIT.LATENCY_MS(row.p50Ms)}</td>
+                  <td className="text-primary py-2.5">
+                    {UI_COPY.MODELS.COCKPIT.LATENCY_MS(row.p95Ms)}
+                  </td>
+                  <td className="py-2.5">{UI_COPY.MODELS.COCKPIT.LATENCY_MS(row.p99Ms)}</td>
+                  <td className="py-2.5">
+                    {UI_COPY.MODELS.COCKPIT.COST_FORMAT(row.costPer1kPrompt)}
+                  </td>
+                  <td className="py-2.5">
+                    {UI_COPY.MODELS.COCKPIT.COST_FORMAT(row.costPer1kCompletion)}
+                  </td>
+                  <td className="text-primary py-2.5">
+                    {UI_COPY.MODELS.COCKPIT.PERCENTAGE(row.availabilityPercent)}
+                  </td>
                 </tr>
               ))}
             </tbody>

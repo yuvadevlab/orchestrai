@@ -411,6 +411,84 @@ model PlatformMode {
 }
 
 /**
+ * CognitivePolicy — Dynamic thinking, reasoning budgets, and cognitive hyperparameters (Anthropic standard).
+ * Governs dynamic thinking tokens, temperature overrides, loop steps, and thinking guidelines.
+ */
+model CognitivePolicy {
+  policyId             String   @id @default(dbgenerated("gen_random_uuid()")) @map("policy_id") @db.Uuid
+  slug                 String   @unique @db.VarChar(64)
+  name                 String   @db.VarChar(120)
+  description          String?  @db.VarChar(500)
+  enableThinking       Boolean  @default(true) @map("enable_thinking")
+  thinkingBudgetTokens Int      @default(4096) @map("thinking_budget_tokens")
+  maxExecutionSteps    Int      @default(25) @map("max_execution_steps")
+  temperature          Float    @default(0.7)
+  timeoutMs            Int      @default(300000) @map("timeout_ms")
+  thinkingGuidelines   String?  @db.Text @map("thinking_guidelines")
+  isDefault            Boolean  @default(false) @map("is_default")
+  isEnabled            Boolean  @default(true) @map("is_enabled")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("cognitive_policies")
+}
+
+/**
+ * SystemPromptTemplate — Living prompts, behavioral guidelines, and constitutional rules.
+ * All system prompts live in the database as versioned, hot-updatable templates.
+ */
+model SystemPromptTemplate {
+  templateId  String   @id @default(dbgenerated("gen_random_uuid()")) @map("template_id") @db.Uuid
+  slug        String   @unique @db.VarChar(64)
+  name        String   @db.VarChar(120)
+  description String?  @db.VarChar(500)
+  version     Int      @default(1)
+  content     String   @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("system_prompt_templates")
+}
+
+/**
+ * PlatformConfig — Universal namespaced JSON configuration store (Big 3 Standard).
+ * Replaces hardcoded operational parameters (commands, suggestions, cache, compaction, RAG).
+ */
+model PlatformConfig {
+  configId    String        @id @default(dbgenerated("gen_random_uuid()")) @map("config_id") @db.Uuid
+  namespace   String        @db.VarChar(64)
+  key         String        @db.VarChar(128)
+  value       Json
+  description String?       @db.VarChar(500)
+  scope       PlatformScope @default(platform)
+  tenantId    String?       @map("tenant_id") @db.Uuid
+  version     Int           @default(1)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([namespace, key])
+  @@map("platform_configs")
+}
+
+/**
+ * FeatureFlag — Real-time feature toggles, emergency kill switches, and circuit breakers.
+ * Enables instantaneous sub-2ms deactivation of compromised tools or unstable capabilities.
+ */
+model FeatureFlag {
+  flagId       String    @id @default(dbgenerated("gen_random_uuid()")) @map("flag_id") @db.Uuid
+  key          String    @unique @db.VarChar(128)
+  isEnabled    Boolean   @default(true) @map("is_enabled")
+  description  String?   @db.VarChar(500)
+  rolloutRatio Float     @default(1.0) @map("rollout_ratio")
+  rules        Json      @default("{}")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("feature_flags")
+}
+
+/**
  * NavItem — A navigation entry managed by platform admins.
  * Supports role-based visibility so the same nav config drives all tenants.
  */

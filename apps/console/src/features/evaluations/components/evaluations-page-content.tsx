@@ -9,11 +9,12 @@
 import React from "react";
 import { BarChart2 } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, DetailPageSkeleton } from "@/components/ui";
 import { useEvaluationDatasets } from "../api";
 import { EvaluationsRunnerCard } from "./evaluations-runner-card";
 import { EvaluationsDatasetsList } from "./evaluations-datasets-list";
 import { RubricGradingCard } from "./rubric-grading-card";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /**
  * Capability evaluations and model benchmark suite dashboard.
@@ -25,26 +26,20 @@ export function EvaluationsPageContent(): React.JSX.Element {
 
   return (
     <PageShell
-      title="Capability Evaluations"
-      breadcrumb="Evaluations"
+      title={UI_COPY.EVALUATIONS.PAGE_TITLE}
+      breadcrumb={UI_COPY.EVALUATIONS.BREADCRUMB}
       stats={
-        isLoading
-          ? "Loading suites..."
-          : `${datasets.length} benchmark suites (${totalTestCases} test cases)`
+        isLoading ? undefined : UI_COPY.EVALUATIONS.STATS_DETAIL(datasets.length, totalTestCases)
       }
-      description="Score model reasoning, tool invocation accuracy, and response latency against standardized test suites."
+      description={UI_COPY.EVALUATIONS.PAGE_DESCRIPTION}
     >
       {isLoading ? (
-        <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
-          <span className="text-muted-foreground animate-pulse text-xs">
-            Loading benchmark suites from gateway...
-          </span>
-        </div>
+        <DetailPageSkeleton />
       ) : datasets.length === 0 ? (
         <EmptyState
           icon={BarChart2}
-          title="No Benchmark Suites Available"
-          description="Registered benchmark datasets evaluate model reasoning, tool JSON calling, and multi-step plans."
+          title={UI_COPY.EVALUATIONS.EMPTY_TITLE}
+          description={UI_COPY.EVALUATIONS.EMPTY_DESC}
         />
       ) : (
         <div className="space-y-6">
@@ -57,9 +52,11 @@ export function EvaluationsPageContent(): React.JSX.Element {
           {/* Registered Benchmark Datasets */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold tracking-tight">Available Benchmark Suites</h3>
+              <h3 className="text-sm font-semibold tracking-tight">
+                {UI_COPY.EVALUATIONS.SUITES_TITLE}
+              </h3>
               <span className="text-muted-foreground text-xs">
-                {datasets.length} suites registered
+                {UI_COPY.EVALUATIONS.SUITES_REGISTERED(datasets.length)}
               </span>
             </div>
 

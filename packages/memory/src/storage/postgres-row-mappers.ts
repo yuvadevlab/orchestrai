@@ -7,6 +7,7 @@
 import { MemoryType } from "@orchestrai/shared-types";
 import { MemoryItemSchema, type MemoryItem } from "../contracts";
 import type { MemoryDbRow } from "./postgres-queries";
+import { EMBEDDING_ARRAY_REGEX } from "@orchestrai/regex";
 
 /**
  * Maps a relational database row from `memory_items` to a validated MemoryItem entity.
@@ -28,7 +29,7 @@ export function mapMemoryRow(row: MemoryDbRow): MemoryItem {
 
   let embeddingArray: number[] | undefined;
   if (typeof row.embedding === "string") {
-    const cleaned = row.embedding.replace(/^\[|\]$/g, "").trim();
+    const cleaned = row.embedding.replace(EMBEDDING_ARRAY_REGEX, "").trim();
     if (cleaned.length > 0) {
       embeddingArray = cleaned.split(",").map(Number);
     }

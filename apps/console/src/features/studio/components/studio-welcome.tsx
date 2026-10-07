@@ -3,23 +3,13 @@
 /**
  * @file studio-welcome.tsx
  * @description Welcome hero screen shown when a session has no messages yet.
- *
- * Per user request: the 4 feature starter cards (Deep Research, Author Documents,
- * Build & Automate, Data Analysis) are intentionally omitted. The prompt bar
- * (StudioPromptBar) already floats below this component inside the workspace.
+ * Consumes dynamic suggestions from the platform suggestions API.
  * @module apps/console/features/studio/components
  */
 
 import React from "react";
-
-/** Suggestion chips — quick-select prompts that populate the composer. */
-const SUGGESTION_CHIPS = [
-  "Analyze market competitors",
-  "Draft product requirements",
-  "Automate data pipeline",
-  "Review this codebase",
-  "Build a 90-day roadmap",
-] as const;
+import { usePlatformWelcome } from "../api";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface StudioWelcomeProps {
   /** Optional first name to personalise the greeting. */
@@ -31,29 +21,43 @@ export interface StudioWelcomeProps {
 /**
  * Welcome hero for OrchestrAI Cowork Studio.
  * Displayed in the center feed when the active session has no messages.
+ * Uses dynamic server-driven headline, subtitle, and starter chips.
  */
 export function StudioWelcome({
   userFirstName,
   onSelectPrompt,
 }: StudioWelcomeProps): React.JSX.Element {
+  const { data: welcome } = usePlatformWelcome();
+  const chips = welcome?.suggestions ?? [];
+
+  const headline = React.useMemo(() => {
+    if (welcome?.headline?.includes("{name}")) {
+      // Substitute the {name} token from server-driven headline with first name
+      return welcome.headline.replace(
+        "{name}",
+        userFirstName ?? UI_COPY.STUDIO.WELCOME.GREETING_FALLBACK_NAME,
+      );
+    }
+    if (userFirstName) {
+      return UI_COPY.STUDIO.WELCOME.GREETING(userFirstName);
+    }
+    return welcome?.headline ?? UI_COPY.STUDIO.WELCOME.FALLBACK_HEADLINE;
+  }, [welcome?.headline, userFirstName]);
+
+  const subtitle = welcome?.subtitle ?? UI_COPY.STUDIO.WELCOME.FALLBACK_SUBTITLE;
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-6 py-10 text-center">
       {/* ── Gradient Headline ── */}
-      <h1 className="text-gradient font-display text-4xl font-bold tracking-tight">
-        {userFirstName
-          ? `What should we tackle, ${userFirstName}?`
-          : "What should your agents take on?"}
-      </h1>
+      <h1 className="text-gradient font-display text-4xl font-bold tracking-tight">{headline}</h1>
 
       {/* ── Subtitle ── */}
-      <p className="text-muted-foreground mt-2 text-sm">
-        One objective. A swarm of specialists. Auditable results.
-      </p>
+      <p className="text-muted-foreground mt-2 text-sm">{subtitle}</p>
 
-      {/* ── Suggestion Chips ── */}
-      {onSelectPrompt && (
+      {/* ── Dynamic Suggestion Chips ── */}
+      {onSelectPrompt && chips.length > 0 && (
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          {SUGGESTION_CHIPS.map((chip) => (
+          {chips.map((chip) => (
             <button
               key={chip}
               type="button"

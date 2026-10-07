@@ -16,6 +16,7 @@ import type {
 import type { PaginatedResult } from "@orchestrai/shared-types";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { resolveDbTenantId, resolveOrCreateDefaultAgent } from "@/modules/tenant-resolver";
+import { isUuid } from "@orchestrai/regex";
 import { mapConversationToSessionEntity } from "./session-entity.mapper";
 import { appendSessionMessage, listSessionMessages } from "./session-message-store";
 import { queryConversationSessions } from "./session-query.runner";
@@ -72,9 +73,8 @@ export class PostgresSessionRepository implements ISessionRepository {
     // Resolve tenant ID to ensure referential integrity with tenants table
     const tenantId = await resolveDbTenantId(data.tenantId, this.prisma);
 
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const agentId =
-      data.specialistId && isUuid.test(data.specialistId)
+      data.specialistId && isUuid(data.specialistId)
         ? data.specialistId
         : await resolveOrCreateDefaultAgent(tenantId, this.prisma);
 

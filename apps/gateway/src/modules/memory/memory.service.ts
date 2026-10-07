@@ -82,9 +82,14 @@ export class MemoryService {
         tenantId,
         agentId,
         query: queryText,
-        limit: 3,
+        limit: 5,
         minScore: 0.3,
-        memoryTypes: [MemoryType.EPISODIC, MemoryType.FACT],
+        memoryTypes: [
+          MemoryType.EPISODIC,
+          MemoryType.FACT,
+          MemoryType.USER_PREFERENCE,
+          MemoryType.TASK,
+        ],
       });
 
       if (memories.length === 0) {

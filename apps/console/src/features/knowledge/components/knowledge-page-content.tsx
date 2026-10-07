@@ -10,18 +10,19 @@ import React, { useState } from "react";
 import { Plus, Search, Sparkles, BookOpen } from "lucide-react";
 import { Button, Input } from "@yuva-devlab/ui";
 import { PageShell } from "@/components/layout/page-shell";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, TableSkeleton } from "@/components/ui";
 import { useKnowledgeDocuments } from "../api";
+import { UI_COPY } from "@/lib/ui-copy";
 import { KnowledgeUploadDialog } from "./knowledge-upload-dialog";
 import { KnowledgeQueryDialog } from "./knowledge-query-dialog";
 import { KnowledgeDocumentsTable } from "./knowledge-documents-table";
 
 const MIME_FILTER_PILLS = [
-  { id: "all", label: "All Formats" },
-  { id: "markdown", label: "Markdown" },
-  { id: "plain", label: "Plain Text" },
-  { id: "json", label: "JSON" },
-  { id: "csv", label: "CSV" },
+  { id: "all", label: UI_COPY.KNOWLEDGE.MIME_FILTERS.ALL },
+  { id: "markdown", label: UI_COPY.KNOWLEDGE.MIME_FILTERS.MARKDOWN },
+  { id: "plain", label: UI_COPY.KNOWLEDGE.MIME_FILTERS.PLAIN },
+  { id: "json", label: UI_COPY.KNOWLEDGE.MIME_FILTERS.JSON },
+  { id: "csv", label: UI_COPY.KNOWLEDGE.MIME_FILTERS.CSV },
 ];
 
 /**
@@ -45,10 +46,10 @@ export function KnowledgePageContent(): React.JSX.Element {
 
   return (
     <PageShell
-      title="Knowledge Base (RAG)"
-      breadcrumb="Knowledge"
-      stats={`${documents.length} documents indexed`}
-      description="Ground your autonomous agent swarms with dense semantic embeddings and sparse keyword retrieval."
+      title={UI_COPY.KNOWLEDGE.PAGE_TITLE}
+      breadcrumb={UI_COPY.KNOWLEDGE.BREADCRUMB}
+      stats={UI_COPY.KNOWLEDGE.STATS(documents.length)}
+      description={UI_COPY.KNOWLEDGE.PAGE_DESCRIPTION}
       actions={
         <div className="flex items-center gap-2">
           <Button
@@ -58,7 +59,7 @@ export function KnowledgePageContent(): React.JSX.Element {
             className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
           >
             <Sparkles className="size-3.5" />
-            <span>Test query</span>
+            <span>{UI_COPY.KNOWLEDGE.QUERY_TESTER.TRIGGER_BUTTON}</span>
           </Button>
           <Button
             variant="default"
@@ -67,7 +68,7 @@ export function KnowledgePageContent(): React.JSX.Element {
             className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
           >
             <Plus className="size-3.5" />
-            <span>Add document</span>
+            <span>{UI_COPY.KNOWLEDGE.UPLOAD_BUTTON}</span>
           </Button>
         </div>
       }
@@ -79,7 +80,7 @@ export function KnowledgePageContent(): React.JSX.Element {
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
-              placeholder="Search documents by title, URI..."
+              placeholder={UI_COPY.KNOWLEDGE.SEARCH_PLACEHOLDER}
               startIcon={<Search className="size-3.5" />}
               className="bg-card h-8 text-xs"
             />
@@ -102,14 +103,10 @@ export function KnowledgePageContent(): React.JSX.Element {
 
         {/* Ingested Documents List */}
         {isLoading ? (
-          <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
-            <span className="text-muted-foreground animate-pulse text-xs">
-              Loading indexed documents from gateway...
-            </span>
-          </div>
+          <TableSkeleton rows={5} />
         ) : error ? (
           <div className="border-border bg-card flex flex-col items-center justify-center gap-2 rounded-md border p-6 text-center">
-            <p className="text-foreground text-xs font-medium">Failed to load documents</p>
+            <p className="text-foreground text-xs font-medium">{UI_COPY.KNOWLEDGE.ERROR_TITLE}</p>
             <p className="text-muted-foreground max-w-md text-xs">{error.message}</p>
             <Button
               size="sm"
@@ -117,14 +114,14 @@ export function KnowledgePageContent(): React.JSX.Element {
               onClick={() => void refetch()}
               className="mt-2 h-7 cursor-pointer text-xs"
             >
-              Retry
+              {UI_COPY.KNOWLEDGE.RETRY_BUTTON}
             </Button>
           </div>
         ) : documents.length === 0 ? (
           <EmptyState
             icon={BookOpen}
-            title="No Documents Indexed"
-            description="Ground your autonomous agents with documents, API specs, and project knowledge."
+            title={UI_COPY.KNOWLEDGE.EMPTY_TITLE}
+            description={UI_COPY.KNOWLEDGE.EMPTY_DESC}
             action={
               <Button
                 size="sm"
@@ -132,15 +129,15 @@ export function KnowledgePageContent(): React.JSX.Element {
                 onClick={() => setIsUploadOpen(true)}
                 className="h-8 cursor-pointer text-xs"
               >
-                <Plus className="mr-1.5 size-3.5" /> Ingest First Document
+                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.KNOWLEDGE.UPLOAD_BUTTON}
               </Button>
             }
           />
         ) : filteredDocuments.length === 0 ? (
           <EmptyState
             icon={Search}
-            title="No Documents Matched"
-            description={`No documents in the knowledge base matched your search query "${search}".`}
+            title={UI_COPY.KNOWLEDGE.NO_MATCH_TITLE}
+            description={UI_COPY.KNOWLEDGE.NO_MATCH_DESC(search)}
           />
         ) : (
           <KnowledgeDocumentsTable

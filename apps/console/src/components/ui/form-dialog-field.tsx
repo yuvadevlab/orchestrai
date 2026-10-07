@@ -18,6 +18,7 @@ import {
   SelectValue,
   Textarea,
 } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /** Option specification for select fields. */
 export interface FormFieldOption {
@@ -65,7 +66,10 @@ export function FormDialogField({
   return (
     <div className={`space-y-1.5 ${colSpan === 2 ? "sm:col-span-2" : "sm:col-span-1"}`}>
       <Label htmlFor={name} className="text-foreground block text-xs font-semibold tracking-wide">
-        {label} {required ? <span className="text-destructive">*</span> : null}
+        {label}{" "}
+        {required ? (
+          <span className="text-destructive">{UI_COPY.COMMON.FORM.REQUIRED_MARKER}</span>
+        ) : null}
       </Label>
 
       {type === "textarea" ? (
@@ -80,7 +84,10 @@ export function FormDialogField({
       ) : type === "select" ? (
         <Select value={selectedValue} onValueChange={(val): void => onChange(name, val)}>
           <SelectTrigger className="bg-background/70 border-border/80 h-9 w-full min-w-0 text-xs">
-            <SelectValue placeholder={placeholder || "Select option..."} className="truncate" />
+            <SelectValue
+              placeholder={placeholder || UI_COPY.COMMON.ACTIONS.SELECT_OPTION}
+              className="truncate"
+            />
           </SelectTrigger>
           <SelectContent className="bg-popover border-border text-foreground max-h-60 w-(--radix-select-trigger-width) min-w-50 overflow-y-auto rounded-md p-1 shadow-xl">
             {options?.map((opt) => (
@@ -121,14 +128,16 @@ export function FormDialogField({
                       : "border-border/70 bg-background/60 text-muted-foreground hover:border-border hover:text-foreground"
                   }`}
                 >
-                  {isSelected ? "✓ " : "+ "}
+                  {isSelected
+                    ? UI_COPY.COMMON.FORM.PREFIX_SELECTED
+                    : UI_COPY.COMMON.FORM.PREFIX_UNSELECTED}
                   {opt.label}
                 </button>
               );
             })
           ) : (
             <span className="text-muted-foreground text-xs italic">
-              No options available in database
+              {UI_COPY.COMMON.FORM.NO_OPTIONS}
             </span>
           )}
         </div>

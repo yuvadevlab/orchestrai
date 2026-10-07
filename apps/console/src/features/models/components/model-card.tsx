@@ -10,6 +10,7 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@yuva-devlab/ui";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { LlmModel } from "../types";
 
 export interface ModelCardProps {
@@ -41,27 +42,33 @@ export function ModelCard({ model, providerName }: ModelCardProps): React.JSX.El
                 {model.name}
               </CardTitle>
               <div className="text-muted-foreground mt-0.5 text-xs">
-                {providerName || "LLM Engine"} · {model.modelIdentifier}
+                {providerName || UI_COPY.MODELS.CARD.FALLBACK_PROVIDER} · {model.modelIdentifier}
               </div>
             </div>
-            <StatusBadge status={model.isEnabled ? "Operational" : "Offline"} />
+            <StatusBadge
+              status={
+                model.isEnabled
+                  ? UI_COPY.MODELS.CARD.STATUS_OPERATIONAL
+                  : UI_COPY.MODELS.CARD.STATUS_OFFLINE
+              }
+            />
           </div>
         </CardHeader>
 
         <CardContent className="p-0">
           <dl className="mt-2 grid grid-cols-3 gap-2 font-mono text-xs">
             <div>
-              <dt className="text-muted-foreground">Latency</dt>
+              <dt className="text-muted-foreground">{UI_COPY.MODELS.CARD.LATENCY_LABEL}</dt>
               <dd className="text-foreground mt-0.5 font-medium">
-                {latency > 0 ? `${latency}ms` : "—"}
+                {latency > 0 ? UI_COPY.MODELS.CARD.MS_FORMAT(latency) : "—"}
               </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Context</dt>
+              <dt className="text-muted-foreground">{UI_COPY.MODELS.CARD.CONTEXT_LABEL}</dt>
               <dd className="text-foreground mt-0.5 font-medium">{contextFormatted}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Cost</dt>
+              <dt className="text-muted-foreground">{UI_COPY.MODELS.CARD.COST_LABEL}</dt>
               <dd className="text-foreground mt-0.5 font-medium">{cost}</dd>
             </div>
           </dl>
@@ -70,13 +77,13 @@ export function ModelCard({ model, providerName }: ModelCardProps): React.JSX.El
 
       <div className="border-border/50 mt-4 flex items-center justify-between border-t pt-3 text-xs">
         {model.isEnabled ? (
-          <span className="text-success font-medium">API key connected</span>
+          <span className="text-success font-medium">{UI_COPY.MODELS.CARD.KEY_CONNECTED}</span>
         ) : (
-          <span className="text-muted-foreground">No key configured</span>
+          <span className="text-muted-foreground">{UI_COPY.MODELS.CARD.NO_KEY}</span>
         )}
         {model.isDefault && (
           <span className="bg-primary/10 text-primary rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold">
-            Default
+            {UI_COPY.MODELS.CARD.DEFAULT_BADGE}
           </span>
         )}
       </div>

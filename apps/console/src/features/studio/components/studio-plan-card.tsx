@@ -9,6 +9,7 @@
 import React from "react";
 import { CheckCircle2, Circle, ListTodo, Loader2 } from "lucide-react";
 import { PlanStepStatus } from "@orchestrai/shared-types";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { PlanStep } from "../types";
 
 export interface StudioPlanCardProps {
@@ -29,10 +30,10 @@ export function StudioPlanCard({ steps }: StudioPlanCardProps): React.JSX.Elemen
       <div className="mb-2.5 flex items-center justify-between font-mono text-xs">
         <div className="text-foreground flex items-center gap-1.5 font-semibold">
           <ListTodo className="text-primary size-4" />
-          <span>Execution Plan</span>
+          <span>{UI_COPY.STUDIO.PLAN.TITLE}</span>
         </div>
         <span className="text-muted-foreground text-[11px]">
-          {completedCount}/{steps.length} Tasks ({progressPercent}%)
+          {UI_COPY.STUDIO.PLAN.PROGRESS(completedCount, steps.length, progressPercent)}
         </span>
       </div>
 

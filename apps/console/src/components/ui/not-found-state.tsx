@@ -9,6 +9,7 @@
 import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface NotFoundStateProps {
   /** Title text */
@@ -25,9 +26,9 @@ export interface NotFoundStateProps {
  * Universal 404 Not Found component matching reference typography and button layout.
  */
 export function NotFoundState({
-  title = "Page not found",
-  description = "The page you're looking for doesn't exist or has been moved.",
-  homeHref = "/",
+  title = UI_COPY.COMMON.NOT_FOUND.DEFAULT_TITLE,
+  description = UI_COPY.COMMON.NOT_FOUND.DEFAULT_DESCRIPTION,
+  homeHref = UI_COPY.COMMON.NOT_FOUND.HOME_HREF,
   className,
 }: NotFoundStateProps): React.JSX.Element {
   return (
@@ -38,7 +39,9 @@ export function NotFoundState({
       )}
     >
       <div className="max-w-md text-center">
-        <h1 className="text-foreground text-7xl font-bold tracking-tight sm:text-8xl">404</h1>
+        <h1 className="text-foreground text-7xl font-bold tracking-tight sm:text-8xl">
+          {UI_COPY.COMMON.NOT_FOUND.CODE}
+        </h1>
         <h2 className="text-foreground mt-4 text-xl font-semibold tracking-tight sm:text-2xl">
           {title}
         </h2>
@@ -48,7 +51,7 @@ export function NotFoundState({
             href={homeHref}
             className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-xs transition-colors"
           >
-            Go home
+            {UI_COPY.COMMON.NOT_FOUND.GO_HOME}
           </Link>
         </div>
       </div>

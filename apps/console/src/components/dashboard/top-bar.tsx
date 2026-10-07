@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Badge, useTheme } from "@yuva-devlab/ui";
 import { Sun, Moon, Cpu, Zap, LogIn, LogOut, User } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useAuth } from "@/lib/auth";
 
 /**
@@ -31,8 +32,8 @@ export function TopBar(): React.JSX.Element {
           className="border-primary/40 bg-primary/5 flex items-center gap-1.5 px-2.5 py-1 font-mono text-xs"
         >
           <span className="bg-primary size-2 animate-pulse rounded-full" />
-          <span className="text-primary font-semibold">Gateway Active</span>
-          <span className="text-muted-foreground">· Local Core</span>
+          <span className="text-primary font-semibold">{UI_COPY.COMMON.A11Y.GATEWAY_ACTIVE}</span>
+          <span className="text-muted-foreground">· {UI_COPY.COMMON.A11Y.LOCAL_CORE}</span>
         </Badge>
 
         <Badge
@@ -40,7 +41,7 @@ export function TopBar(): React.JSX.Element {
           className="hidden items-center gap-1.5 px-2.5 py-1 font-mono text-xs sm:flex"
         >
           <Cpu className="text-muted-foreground size-3.5" />
-          <span>Outbox Bus: Connected</span>
+          <span>{UI_COPY.COMMON.A11Y.OUTBOX_BUS_CONNECTED}</span>
         </Badge>
 
         {isAuthenticated && user && (
@@ -60,17 +61,22 @@ export function TopBar(): React.JSX.Element {
           variant="outline"
           size="sm"
           onClick={(): void => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          aria-label={
+            resolvedTheme === "dark"
+              ? UI_COPY.COMMON.A11Y.SWITCH_LIGHT
+              : UI_COPY.COMMON.A11Y.SWITCH_DARK
+          }
           className="h-8 cursor-pointer gap-1.5 px-2.5 font-mono text-xs"
         >
           {resolvedTheme === "dark" ? (
             <>
               <Sun className="size-3.5" />
-              <span className="hidden sm:inline">Light</span>
+              <span className="hidden sm:inline">{UI_COPY.COMMON.THEME.LIGHT}</span>
             </>
           ) : (
             <>
               <Moon className="size-3.5" />
-              <span className="hidden sm:inline">Dark</span>
+              <span className="hidden sm:inline">{UI_COPY.COMMON.THEME.DARK}</span>
             </>
           )}
         </Button>
@@ -82,7 +88,7 @@ export function TopBar(): React.JSX.Element {
           className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
         >
           <Zap className="size-3.5" />
-          <span>New Execution</span>
+          <span>{UI_COPY.COMMON.A11Y.NEW_EXECUTION}</span>
         </Button>
 
         {isAuthenticated ? (
@@ -91,10 +97,11 @@ export function TopBar(): React.JSX.Element {
             size="sm"
             onClick={logout}
             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 cursor-pointer gap-1.5 font-mono text-xs"
-            title="Sign out of current session"
+            title={UI_COPY.COMMON.A11Y.SIGN_OUT_SESSION}
+            aria-label={UI_COPY.COMMON.A11Y.SIGN_OUT_SESSION}
           >
             <LogOut className="size-3.5" />
-            <span className="hidden sm:inline">Sign Out</span>
+            <span className="hidden sm:inline">{UI_COPY.COMMON.A11Y.SIGN_OUT_BTN}</span>
           </Button>
         ) : (
           <Link href="/login">
@@ -104,7 +111,7 @@ export function TopBar(): React.JSX.Element {
               className="border-border hover:bg-accent h-8 cursor-pointer gap-1.5 font-mono text-xs"
             >
               <LogIn className="size-3.5" />
-              <span>Sign In</span>
+              <span>{UI_COPY.COMMON.A11Y.SIGN_IN}</span>
             </Button>
           </Link>
         )}

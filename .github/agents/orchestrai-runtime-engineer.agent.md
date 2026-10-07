@@ -27,3 +27,5 @@ You MUST read and strictly adhere to:
 - Prevent dual writes: use the transactional outbox pattern for distributed events.
 - Never exceed 250 lines per file (decompose proactively at 200 lines).
 - Provide detailed JSDoc and explanatory inline comments on all state transition branches.
+- Compare states and events exclusively with canonical `Enum.KEY` without raw string literals.
+- Zero hardcoded fallback models or synthetic agents across orchestrator and runtime.

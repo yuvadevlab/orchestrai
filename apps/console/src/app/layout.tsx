@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import React from "react";
 import { JetBrains_Mono, Manrope, Sora } from "next/font/google";
 import { ConfigProvider, Toaster } from "@yuva-devlab/ui";
-import { AppQueryProvider } from "@/lib/query-provider";
+import { AppQueryProvider } from "@/lib/providers";
 import { AuthProvider } from "@/lib/auth";
 import "./globals.css";
 

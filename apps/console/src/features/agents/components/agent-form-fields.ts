@@ -8,6 +8,7 @@
 
 import type { FormFieldSpec } from "@/components/ui/action-dialog";
 import type { LlmModelRecord, PlatformModeRecord } from "@orchestrai/shared-types";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { AgentRoleRecord } from "../api/use-agent-roles";
 import type { ToolDefinition } from "@/features/tools/types";
 
@@ -74,14 +75,14 @@ export function buildAgentFields(
   return [
     {
       name: "name",
-      label: "Agent Name",
-      placeholder: "e.g. Data Analysis Specialist",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.NAME_LABEL,
+      placeholder: UI_COPY.AGENTS.PROVISION_DIALOG.NAME_PLACEHOLDER,
       required: true,
       colSpan: 1,
     },
     {
       name: "role",
-      label: "Role / Domain",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.ROLE_LABEL,
       type: "select",
       options: roleOptions,
       defaultValue: defaultRole,
@@ -90,14 +91,14 @@ export function buildAgentFields(
     },
     {
       name: "description",
-      label: "Role Description",
-      placeholder: "e.g. Cleans datasets, runs SQL, builds charts and reads out insights.",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.DESC_LABEL,
+      placeholder: UI_COPY.AGENTS.PROVISION_DIALOG.DESC_PLACEHOLDER,
       required: true,
       colSpan: 2,
     },
     {
       name: "model",
-      label: "Model Engine",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.MODEL_LABEL,
       type: "select",
       options: modelOptions,
       defaultValue: defaultModel,
@@ -106,7 +107,7 @@ export function buildAgentFields(
     },
     {
       name: "mode",
-      label: "Autonomy Mode",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.MODE_LABEL,
       type: "select",
       options: modeOptions,
       defaultValue: defaultMode,
@@ -115,33 +116,32 @@ export function buildAgentFields(
     },
     {
       name: "tools",
-      label: "Enabled Tools",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.TOOLS_LABEL,
       type: "multiselect",
       options: toolOptions,
-      helperText: "Select authorized execution tools fetched directly from database",
+      helperText: UI_COPY.AGENTS.PROVISION_DIALOG.TOOLS_HELPER,
       colSpan: 2,
     },
     {
       name: "capabilities",
-      label: "Capabilities",
-      placeholder: "e.g. Planning, Synthesis, Web Search",
-      helperText: "Comma-separated list of agent capability tags",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.CAPABILITIES_LABEL,
+      placeholder: UI_COPY.AGENTS.PROVISION_DIALOG.CAPABILITIES_PLACEHOLDER,
+      helperText: UI_COPY.AGENTS.PROVISION_DIALOG.CAPABILITIES_HELPER,
       colSpan: 1,
     },
     {
       name: "maxSteps",
-      label: "Max Step Budget",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.MAX_STEPS_LABEL,
       type: "number",
       placeholder: "25",
       defaultValue: "25",
-      helperText: "Maximum execution loops allowed before halting",
+      helperText: UI_COPY.AGENTS.PROVISION_DIALOG.MAX_STEPS_HELPER,
       colSpan: 1,
     },
     {
       name: "systemPrompt",
-      label: "System Instructions / Persona",
-      placeholder:
-        "Define the core instructions, behavioral constraints, and specialist persona...",
+      label: UI_COPY.AGENTS.PROVISION_DIALOG.SYSTEM_PROMPT_LABEL,
+      placeholder: UI_COPY.AGENTS.PROVISION_DIALOG.SYSTEM_PROMPT_PLACEHOLDER,
       type: "textarea",
       required: true,
       colSpan: 2,

@@ -5,16 +5,17 @@
  */
 
 import { getPrismaClient, type PrismaClient } from "./client";
+import { PlatformCapabilitySlug, PlatformToolName } from "@orchestrai/shared-types";
 
 /**
  * Capability seed blueprint definition.
  */
 export interface DefaultCapabilityBlueprint {
-  slug: string;
+  slug: PlatformCapabilitySlug;
   name: string;
   description: string;
   category: string;
-  tools: string[];
+  tools: PlatformToolName[];
 }
 
 /**
@@ -22,46 +23,61 @@ export interface DefaultCapabilityBlueprint {
  */
 export const DEFAULT_PLATFORM_CAPABILITIES: readonly DefaultCapabilityBlueprint[] = [
   {
-    slug: "filesystem_access",
+    slug: PlatformCapabilitySlug.FILESYSTEM_ACCESS,
     name: "Filesystem Access",
     description: "Read, write, edit, and search files across authorized filesystem directories",
     category: "System",
-    tools: ["read_file", "write_file", "list_directory", "search_files", "edit_file"],
+    tools: [
+      PlatformToolName.READ_FILE,
+      PlatformToolName.WRITE_FILE,
+      PlatformToolName.LIST_DIRECTORY,
+      PlatformToolName.SEARCH_FILES,
+      PlatformToolName.EDIT_FILE,
+    ],
   },
   {
-    slug: "repository_management",
+    slug: PlatformCapabilitySlug.REPOSITORY_MANAGEMENT,
     name: "Repository & Workspace Management",
     description: "Inspect git status, branches, commits, and multi-workspace repo topologies",
     category: "Development",
-    tools: ["git_status", "git_commit", "search_repo", "create_repo"],
+    tools: [
+      PlatformToolName.GIT_STATUS,
+      PlatformToolName.GIT_COMMIT,
+      PlatformToolName.SEARCH_REPO,
+      PlatformToolName.CREATE_REPO,
+    ],
   },
   {
-    slug: "system_execution",
+    slug: PlatformCapabilitySlug.SYSTEM_EXECUTION,
     name: "Command Line & Shell Execution",
     description: "Execute shell commands, process automation, and build tasks within sandboxes",
     category: "System",
-    tools: ["bash"],
+    tools: [PlatformToolName.BASH],
   },
   {
-    slug: "database_access",
+    slug: PlatformCapabilitySlug.DATABASE_ACCESS,
     name: "Database Querying & Inspection",
     description: "Query databases, inspect schemas, and validate data migrations",
     category: "Data",
-    tools: ["query_database", "inspect_schema"],
+    tools: [PlatformToolName.QUERY_DATABASE, PlatformToolName.INSPECT_SCHEMA],
   },
   {
-    slug: "api_integration",
+    slug: PlatformCapabilitySlug.API_INTEGRATION,
     name: "External API & Web Integration",
     description: "Perform authorized HTTP requests, API calls, and webhook invocations",
     category: "Network",
-    tools: ["call_api", "fetch_url"],
+    tools: [PlatformToolName.CALL_API, PlatformToolName.FETCH_URL],
   },
   {
-    slug: "memory_and_rag",
+    slug: PlatformCapabilitySlug.MEMORY_AND_RAG,
     name: "Long-Term Memory & RAG Retrieval",
     description: "Record episodic facts, recall past sessions, and query vector knowledge bases",
     category: "Intelligence",
-    tools: ["record_memory", "recall_memory", "search_rag"],
+    tools: [
+      PlatformToolName.RECORD_MEMORY,
+      PlatformToolName.RECALL_MEMORY,
+      PlatformToolName.SEARCH_RAG,
+    ],
   },
 ];
 
