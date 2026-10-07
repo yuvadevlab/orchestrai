@@ -4,7 +4,9 @@ Context compaction node that compresses intermediate conversation history when n
 """
 
 from typing import Any
+
 import httpx
+
 from ..config import settings
 from ..state import AgentState
 
@@ -53,7 +55,8 @@ async def compact_node(state: AgentState) -> dict[str, Any]:
                 summary_content = resp.json().get(
                     "response", "Intermediate history summarized."
                 )
-        except Exception:
+        except Exception:  # noqa: BLE001
+            # Fall back to heuristic message count summary if Ollama compaction fails
             summary_content = f"Summary of {len(middle_msgs)} prior intermediate steps."
 
     compacted_middle = {

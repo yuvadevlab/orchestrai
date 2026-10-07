@@ -37,6 +37,19 @@
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "always",
+      "source.organizeImports.ruff": "always"
+    }
+  },
+
+  "ruff.enable": true,
+  "ruff.lint.enable": true,
+  "ruff.organizeImports": true,
 
   "prettier.useEditorConfig": true,
   "prettier.requireConfig": true,

@@ -4,8 +4,9 @@ Configuration settings for the Playwright crawler and RAG ingestion service.
 """
 
 import os
-from pydantic_settings import BaseSettings
+
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class CrawlerSettings(BaseSettings):

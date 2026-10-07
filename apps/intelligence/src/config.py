@@ -5,8 +5,9 @@ Enforces zero hardcoded models by requiring environment or request-level definit
 """
 
 import os
-from pydantic_settings import BaseSettings
+
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class IntelligenceSettings(BaseSettings):

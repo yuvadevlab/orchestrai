@@ -6,7 +6,9 @@ Supports parallel tool execution and forwarding to the OrchestrAI Gateway.
 
 import json
 from typing import Any
+
 import httpx
+
 from ..config import settings
 from ..state import AgentState
 
@@ -27,7 +29,7 @@ async def _execute_single_tool(
     if isinstance(raw_args, str):
         try:
             parsed_args = json.loads(raw_args)
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             parsed_args = {"raw": raw_args}
     else:
         parsed_args = raw_args
@@ -53,8 +55,9 @@ async def _execute_single_tool(
                 output = (
                     f"Tool execution failed with status {resp.status_code}: {resp.text}"
                 )
-        except Exception as exc:
-            output = f"Tool dispatch exception: {str(exc)}"
+        except Exception as exc:  # noqa: BLE001
+            # Catch network or transport exceptions from gateway execution
+            output = f"Tool dispatch exception: {exc!s}"
 
     return {
         "tool_call_id": tool_call.get("id", tool_name),

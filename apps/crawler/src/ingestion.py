@@ -3,10 +3,15 @@ apps/crawler/src/ingestion.py
 Document chunking and automated RAG ingestion client for the OrchestrAI knowledge base.
 """
 
+import logging
 from typing import Any
+
 import httpx
-from .parser import ParsedPage
+
 from .config import settings
+from .parser import ParsedPage
+
+logger = logging.getLogger(__name__)
 
 
 def chunk_markdown_text(
@@ -94,8 +99,11 @@ async def ingest_page_to_rag(
                 resp = await client.post(endpoint, headers=headers, json=payload)
                 if resp.status_code in (200, 201):
                     successful_chunks += 1
-            except Exception:
-                # Continue uploading subsequent chunks on isolated chunk network failures
+            except Exception as exc:  # noqa: BLE001
+                # Log and continue uploading subsequent chunks on isolated chunk network failures
+                logger.warning(
+                    "Failed to ingest chunk %d for %s: %s", idx, page.url, exc
+                )
                 continue
 
     return {

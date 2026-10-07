@@ -4,8 +4,8 @@ State definitions for the LangGraph agent graph.
 Provides append-only message reducers, context budgeting, and node coordination.
 """
 
-from typing import TypedDict, Annotated, Optional, Any
 import operator
+from typing import Annotated, Any, TypedDict
 
 
 def merge_dicts(a: dict[str, Any], b: dict[str, Any]) -> dict[str, Any]:
@@ -27,7 +27,7 @@ class AgentState(TypedDict):
     # Identifiers and metadata
     execution_id: str
     agent_id: str
-    tenant_id: Optional[str]
+    tenant_id: str | None
     model_name: str
     system_prompt: str
 
@@ -50,5 +50,5 @@ class AgentState(TypedDict):
 
     # Terminal flags
     is_complete: bool
-    final_output: Optional[str]
-    error: Optional[str]
+    final_output: str | None
+    error: str | None

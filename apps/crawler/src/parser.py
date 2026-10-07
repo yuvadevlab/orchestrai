@@ -4,8 +4,9 @@ HTML cleaning, metadata extraction, and Markdown transformation engine.
 """
 
 import re
-from urllib.parse import urljoin, urlparse
 from typing import Any
+from urllib.parse import urljoin, urlparse
+
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
@@ -68,11 +69,7 @@ def parse_html_document(html_content: str, base_url: str) -> ParsedPage:
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
         # Filter out javascript and anchor fragment links
-        if (
-            href.startswith("javascript:")
-            or href.startswith("#")
-            or href.startswith("mailto:")
-        ):
+        if href.startswith(("javascript:", "#", "mailto:")):
             continue
 
         resolved = urljoin(base_url, href)

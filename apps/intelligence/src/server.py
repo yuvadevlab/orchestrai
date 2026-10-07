@@ -3,18 +3,20 @@ apps/intelligence/src/server.py
 FastAPI HTTP and streaming server exposing LangGraph execution and Conversational RAG.
 """
 
-from typing import Any, Optional
+from typing import Any
+
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+
 from .config import settings
 from .graph import create_agent_graph
-from .retrieval import retrieve_selective_history
 from .mode_router import (
+    PLATFORM_INVARIANTS_PROMPT,
     detect_mode,
     get_mode_instructions,
-    PLATFORM_INVARIANTS_PROMPT,
 )
+from .retrieval import retrieve_selective_history
 
 app = FastAPI(
     title="OrchestrAI Intelligence Service",
@@ -30,11 +32,11 @@ class ExecuteRequest(BaseModel):
 
     execution_id: str = Field(..., description="Unique execution UUID")
     agent_id: str = Field(..., description="Agent identifier")
-    tenant_id: Optional[str] = Field(None, description="Optional tenant ID")
+    tenant_id: str | None = Field(None, description="Optional tenant ID")
     input_prompt: str = Field(..., description="Incoming user query")
-    model_name: Optional[str] = Field(None, description="Model to execute")
-    system_prompt: Optional[str] = Field(None, description="System instructions")
-    mode: Optional[str] = Field(
+    model_name: str | None = Field(None, description="Model to execute")
+    system_prompt: str | None = Field(None, description="System instructions")
+    mode: str | None = Field(
         default="auto", description="Operational autonomy mode (chat, plan, act, auto)"
     )
     tools: list[dict[str, Any]] = Field(
@@ -52,12 +54,12 @@ class ExecuteResponse(BaseModel):
 
     execution_id: str
     status: str
-    mode: Optional[str] = None
-    final_output: Optional[str] = None
+    mode: str | None = None
+    final_output: str | None = None
     turn_count: int
     context_tokens: int
     evaluation_score: float
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class SelectiveContextRequest(BaseModel):
@@ -144,9 +146,10 @@ async def execute_agent(req: ExecuteRequest):
     try:
         final_state = await compiled_graph.ainvoke(initial_state)
     except Exception as exc:
+        # Top-level safety boundary catching execution failures from LangGraph invocation
         raise HTTPException(
-            status_code=500, detail=f"LangGraph execution error: {str(exc)}"
-        )
+            status_code=500, detail=f"LangGraph execution error: {exc!s}"
+        ) from exc
 
     status = "failed" if final_state.get("error") else "completed"
 

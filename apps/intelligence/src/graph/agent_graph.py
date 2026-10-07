@@ -4,10 +4,12 @@ LangGraph StateGraph constructor defining node topology, conditional edges, and 
 """
 
 from typing import Literal
-from langgraph.graph import StateGraph, START, END
-from ..state import AgentState
-from ..nodes import reason_node, tool_node, evaluate_node, compact_node
+
+from langgraph.graph import END, START, StateGraph
+
 from ..config import settings
+from ..nodes import compact_node, evaluate_node, reason_node, tool_node
+from ..state import AgentState
 
 
 def route_after_reason(state: AgentState) -> Literal["tools", "__end__"]:
