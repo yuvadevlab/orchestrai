@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@yuva-devlab/ui";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ALPHANUMERIC_START_REGEX } from "@orchestrai/regex";
+import { ALPHANUMERIC_START_REGEX, WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
 import type { AgentDefinition } from "../types";
 
 export interface AgentCardProps {
@@ -19,7 +19,7 @@ function getInitials(name: string): string {
   // Split on whitespace and filter out standalone symbols (e.g. "&", "-", "/")
   const words = name
     .trim()
-    .split(/\s+/)
+    .split(WHITESPACE_GLOBAL_REGEX)
     .filter((word) => ALPHANUMERIC_START_REGEX.test(word));
 
   // If two or more meaningful words exist, take the first letter of each of the first two words

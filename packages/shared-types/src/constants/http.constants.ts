@@ -127,9 +127,55 @@ export const API_ROUTES = {
     SIGNUP: "/api/v1/auth/signup",
     FORGOT_PASSWORD: "/api/v1/auth/forgot-password",
     RESET_PASSWORD: "/api/v1/auth/reset-password",
+    SESSION: "/api/v1/auth/session",
     ME: "/api/v1/auth/me",
+    LOGOUT: "/api/v1/auth/logout",
+    REFRESH: "/api/v1/auth/refresh",
   },
 } as const;
+
+/**
+ * Standard HTTP response status codes utilized across gateways, services, and error classes.
+ */
+export const HttpStatus = {
+  /** Success: 200 OK */
+  OK: 200,
+  /** Success: 201 Created */
+  CREATED: 201,
+  /** Success: 202 Accepted */
+  ACCEPTED: 202,
+  /** Success: 204 No Content */
+  NO_CONTENT: 204,
+  /** Client Error: 400 Bad Request */
+  BAD_REQUEST: 400,
+  /** Client Error: 401 Unauthorized */
+  UNAUTHORIZED: 401,
+  /** Client Error: 403 Forbidden */
+  FORBIDDEN: 403,
+  /** Client Error: 404 Not Found */
+  NOT_FOUND: 404,
+  /** Client Error: 408 Request Timeout */
+  REQUEST_TIMEOUT: 408,
+  /** Client Error: 409 Conflict */
+  CONFLICT: 409,
+  /** Client Error: 422 Unprocessable Entity */
+  UNPROCESSABLE_ENTITY: 422,
+  /** Client Error: 429 Too Many Requests */
+  TOO_MANY_REQUESTS: 429,
+  /** Server Error: 500 Internal Server Error */
+  INTERNAL_SERVER_ERROR: 500,
+  /** Server Error: 502 Bad Gateway */
+  BAD_GATEWAY: 502,
+  /** Server Error: 503 Service Unavailable */
+  SERVICE_UNAVAILABLE: 503,
+  /** Server Error: 504 Gateway Timeout */
+  GATEWAY_TIMEOUT: 504,
+} as const;
+
+/**
+ * Derived TypeScript union type of HTTP status codes.
+ */
+export type HttpStatus = (typeof HttpStatus)[keyof typeof HttpStatus];
 
 /**
  * Dedicated Operator Control Plane Admin API routing patterns.

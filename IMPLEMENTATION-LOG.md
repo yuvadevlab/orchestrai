@@ -27,11 +27,25 @@ Chronological log of architecture, engineering decisions, and completed mileston
 - **Standardized Logger Patterns (`@yuva-devlab/logger`)**:
   - Normalized log strings to `"methodName: description of action"` with structured metadata as second argument across controllers, services, handlers, and servers.
 
-#### 3. Invariants & Quality Gates
+#### 3. Complete Regular Expression Centralization (`@orchestrai/regex`)
+
+- **Zero Inline Regular Expressions (Rule 10 Invariant)**:
+  - Centralized all regex literals across `apps/*` and `packages/*` into `@orchestrai/regex` barrels (`text.regex.ts`, `uri.regex.ts`, `mode.regex.ts`).
+  - Added shared patterns: `WHITESPACE_GLOBAL_REGEX`, `NON_ALPHANUMERIC_GLOBAL_REGEX`, `NON_ALPHANUMERIC_CHAR_REGEX`, `TRAILING_NEWLINE_REGEX`, `QUOTE_WRAPPER_REGEX`, `BACKSLASH_GLOBAL_REGEX`, `HEX_GENERATOR_CHAR_REGEX`, `ROUTE_PARAM_TOKEN_REGEX`, `DB_PASSWORD_MASK_REGEX`, `TRAILING_SLASH_REGEX`, `TRAILING_SLASHES_GLOBAL_REGEX`, `LEADING_SLASH_REGEX`, `NEWLINE_SPLIT_REGEX`, `NEWLINE_UNIVERSAL_SPLIT_REGEX`, `CRLF_GLOBAL_REGEX`, `DOUBLE_NEWLINE_SPLIT_REGEX`, `PARAGRAPH_SPLIT_REGEX`, `SENTENCE_SPLIT_REGEX`, `DASH_UNDERSCORE_GLOBAL_REGEX`, `NAME_SPLIT_REGEX`, `DOUBLE_QUOTE_GLOBAL_REGEX`, `NON_ALPHA_WHITESPACE_REGEX`, `MARKDOWN_JSON_BLOCK_REGEX`, `XML_PLAN_TAG_REGEX`.
+  - Replaced inline regex literals in `apps/console`, `apps/gateway`, `apps/admin`, `packages/rag`, `packages/tools`, `packages/memory`, `packages/agent`, `packages/sdk`, `packages/database`, and `packages/observability`.
+
+#### 4. Canonical HTTP Status Codes & Routing Constants (`@orchestrai/shared-types`)
+
+- **HttpStatus Enum/Constant Map (Rule 7 Invariant)**:
+  - Created typed `HttpStatus` constants (`OK: 200`, `CREATED: 201`, `ACCEPTED: 202`, `NO_CONTENT: 204`, `BAD_REQUEST: 400`, `UNAUTHORIZED: 401`, `FORBIDDEN: 403`, `NOT_FOUND: 404`, `CONFLICT: 409`, `TOO_MANY_REQUESTS: 429`, `INTERNAL_SERVER_ERROR: 500`, etc.) and union type `HttpStatus`.
+  - Replaced all magic status code numbers across gateway controllers, admin router/middleware, error handlers, and client fetch response validation.
+  - Added `API_ROUTES.AUTH.SESSION`, `LOGOUT`, and `REFRESH` endpoints and replaced hardcoded `/api/v1/auth/*` strings in `apps/console/src/lib/auth/client.ts`.
+
+#### 5. Invariants & Quality Gates
 
 - Confirmed 0 lines of code exceed the 250 LOC threshold across all modified files.
 - Maintained zero test generation policy during roadmap phase implementation.
-- All packages build and typecheck with zero errors.
+- Monorepo-wide typecheck passed (48/48 turbo tasks successful).
 
 ---
 

@@ -4,6 +4,7 @@
  */
 
 import type { GatewayRequest, GatewayResponse } from "@/routes";
+import { ErrorCode, HEADER_NAMES, HttpStatus } from "@orchestrai/shared-types";
 
 interface RateLimitRecord {
   count: number;
@@ -57,13 +58,13 @@ export class RateLimiter {
 
     // Check if limit exceeded
     if (record.count > this.maxRequests) {
-      res.statusCode = 429;
+      res.statusCode = HttpStatus.TOO_MANY_REQUESTS;
       res.setHeader("Retry-After", resetSeconds.toString());
-      res.setHeader("Content-Type", "application/json");
+      res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
       res.end(
         JSON.stringify({
           error: {
-            code: "RATE_LIMIT_EXCEEDED",
+            code: ErrorCode.RATE_LIMIT_EXCEEDED,
             message: `Rate limit quota of ${this.maxRequests} requests per ${this.windowMs / 1000}s exceeded.`,
             retryAfterSeconds: resetSeconds,
             requestId: req.context.requestId,

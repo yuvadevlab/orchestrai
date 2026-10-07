@@ -629,3 +629,10 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] **Standardized Logger Formatting (`@yuva-devlab/logger`)**:
   - Standardized logger messages to `"methodName: description of action"` with metadata as second parameter across gateway controllers, admin server, realtime gateway, and worker jobs.
   - Removed duplicate class prefixes (e.g. `[Auth]`, `[ConversationController]`) from message strings.
+- [x] **Zero Inline Regular Expressions (`@orchestrai/regex`)**:
+  - Centralized all text, URI, route token, credential mask, newline delimiter, and code fence regular expressions into `@orchestrai/regex`.
+  - Eradicated 100% of inline regex literals across `apps/console`, `apps/gateway`, `apps/admin`, `packages/rag`, `packages/tools`, `packages/memory`, `packages/agent`, `packages/sdk`, `packages/database`, and `packages/observability`.
+- [x] **Canonical HttpStatus Mapping (`@orchestrai/shared-types`)**:
+  - Defined comprehensive, typed `HttpStatus` constants map (`OK: 200`, `CREATED: 201`, `ACCEPTED: 202`, `NO_CONTENT: 204`, `BAD_REQUEST: 400`, `UNAUTHORIZED: 401`, `FORBIDDEN: 403`, `NOT_FOUND: 404`, `CONFLICT: 409`, `TOO_MANY_REQUESTS: 429`, `INTERNAL_SERVER_ERROR: 500`, etc.).
+  - Replaced numeric status code literals across gateways, admin service, middleware, controllers, and console authentication clients.
+  - Replaced raw `/api/v1/auth/*` endpoints and HTTP method strings in `apps/console/src/lib/auth/client.ts` with `API_ROUTES.AUTH.*` and `HttpMethod.*`.

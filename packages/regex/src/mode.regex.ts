@@ -27,3 +27,13 @@ export const CHAT_PATTERNS: readonly RegExp[] = [
   /\b(hi|hello|hey|greetings|thanks|thank you|who are you|what can you do)\b/i,
   /\b(explain|what is|tell me about|summarize|why does|describe|difference between)\b/i,
 ];
+
+/**
+ * Matches fenced ```json code blocks and extracts their inner JSON content.
+ */
+export const MARKDOWN_JSON_BLOCK_REGEX: RegExp = /```json\s*([\s\S]*?)\s*```/;
+
+/**
+ * Matches XML <plan> tags and extracts their inner plan body.
+ */
+export const XML_PLAN_TAG_REGEX: RegExp = /<plan>([\s\S]*?)<\/plan>/;

@@ -9,6 +9,7 @@ import path from "node:path";
 import dotenv from "dotenv";
 import { Pool } from "pg";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
+import { DB_PASSWORD_MASK_REGEX } from "@orchestrai/regex";
 import type { DatabaseConfig } from "./types";
 
 const logger = loggerWithConfig(new Logger("DatabasePool"));
@@ -73,13 +74,13 @@ export function getOrCreatePool(config: DatabaseConfig = {}): Pool {
 
   // Guard against unhandled idle client errors terminating the process
   activePool.on("error", (err) => {
-    logger.error("[DatabasePool] Unexpected client error on idle connection", {
+    logger.error("getPool: unexpected client error on idle connection", {
       error: err.message,
     });
   });
 
-  logger.info("[DatabasePool] PostgreSQL pool initialized successfully", {
-    url: connectionString.replace(/:[^:@]+@/, ":****@"),
+  logger.info("getPool: PostgreSQL pool initialized successfully", {
+    url: connectionString.replace(DB_PASSWORD_MASK_REGEX, ":****@"),
   });
 
   return activePool;
@@ -91,7 +92,7 @@ export function getOrCreatePool(config: DatabaseConfig = {}): Pool {
 export async function closePool(): Promise<void> {
   // Check if active pool exists before calling end
   if (activePool) {
-    logger.info("[DatabasePool] Draining connection pool");
+    logger.info("closePool: draining connection pool");
     await activePool.end();
     activePool = null;
   }

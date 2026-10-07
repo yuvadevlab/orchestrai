@@ -6,6 +6,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { BACKSLASH_GLOBAL_REGEX } from "@orchestrai/regex";
 import { resolveMonorepoRoot } from "@/modules/streaming/autonomous-agent-runner";
 
 /**
@@ -56,7 +57,7 @@ async function scanDirectory(
       if (collected.length >= maxFiles) break;
 
       const fullPath = path.join(currentDir, entry.name);
-      const relativePath = path.relative(rootPath, fullPath).replace(/\\/g, "/");
+      const relativePath = path.relative(rootPath, fullPath).replace(BACKSLASH_GLOBAL_REGEX, "/");
 
       if (entry.isDirectory()) {
         if (!IGNORED_DIRECTORIES.has(entry.name) && !entry.name.startsWith(".")) {

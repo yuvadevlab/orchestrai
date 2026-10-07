@@ -4,6 +4,7 @@
  */
 
 import { RagError } from "@orchestrai/core";
+import { TRAILING_SLASHES_GLOBAL_REGEX } from "@orchestrai/regex";
 import type { IEmbeddingProvider } from "./embedding-provider.interface";
 
 /**
@@ -30,7 +31,10 @@ export class OllamaEmbeddingProvider implements IEmbeddingProvider {
   private readonly timeoutMs: number;
 
   constructor(config: OllamaEmbeddingConfig = {}) {
-    this.baseUrl = (config.baseUrl ?? "http://localhost:11434").replace(/\/+$/, "");
+    this.baseUrl = (config.baseUrl ?? "http://localhost:11434").replace(
+      TRAILING_SLASHES_GLOBAL_REGEX,
+      "",
+    );
     this.model = config.model ?? "nomic-embed-text";
     this.dimension = config.dimension ?? 1536;
     this.timeoutMs = config.timeoutMs ?? 30000;

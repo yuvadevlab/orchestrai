@@ -4,6 +4,7 @@
  * @module apps/console/lib/auth
  */
 
+import { API_ROUTES, HEADER_NAMES, HttpMethod, HttpStatus } from "@orchestrai/shared-types";
 import { formatApiError } from "../error-utils";
 
 export interface AuthUser {
@@ -78,11 +79,11 @@ async function safeAuthFetch<T>(
     }
   } catch {
     // Non-JSON response body received
-    if (res.status === 401) {
+    if (res.status === HttpStatus.UNAUTHORIZED) {
       errorMessage = "Invalid email or password. Please try again.";
-    } else if (res.status === 404) {
+    } else if (res.status === HttpStatus.NOT_FOUND) {
       errorMessage = "No account found with this email address.";
-    } else if (res.status === 409) {
+    } else if (res.status === HttpStatus.CONFLICT) {
       errorMessage = "An account with this email address already exists.";
     }
   }
@@ -156,10 +157,10 @@ export function clearSession(): void {
  */
 export async function apiLogin(payload: LoginPayload): Promise<AuthSession> {
   const data = await safeAuthFetch<{ token: string; user: AuthUser }>(
-    "/api/v1/auth/login",
+    API_ROUTES.AUTH.LOGIN,
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: HttpMethod.POST,
+      headers: { [HEADER_NAMES.CONTENT_TYPE]: "application/json" },
       body: JSON.stringify(payload),
     },
     "Invalid email or password",
@@ -175,10 +176,10 @@ export async function apiLogin(payload: LoginPayload): Promise<AuthSession> {
  */
 export async function apiSignup(payload: SignupPayload): Promise<AuthSession> {
   const data = await safeAuthFetch<{ token: string; user: AuthUser }>(
-    "/api/v1/auth/signup",
+    API_ROUTES.AUTH.SIGNUP,
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: HttpMethod.POST,
+      headers: { [HEADER_NAMES.CONTENT_TYPE]: "application/json" },
       body: JSON.stringify(payload),
     },
     "Registration failed. Please try again.",
@@ -196,10 +197,10 @@ export async function apiForgotPassword(
   payload: ForgotPasswordPayload,
 ): Promise<{ message: string }> {
   return safeAuthFetch<{ message: string }>(
-    "/api/v1/auth/forgot-password",
+    API_ROUTES.AUTH.FORGOT_PASSWORD,
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: HttpMethod.POST,
+      headers: { [HEADER_NAMES.CONTENT_TYPE]: "application/json" },
       body: JSON.stringify(payload),
     },
     "Failed to process password recovery request",
@@ -211,9 +212,9 @@ export async function apiForgotPassword(
  */
 export async function apiFetchSession(token: string): Promise<AuthUser> {
   const data = await safeAuthFetch<{ user: AuthUser }>(
-    "/api/v1/auth/session",
+    API_ROUTES.AUTH.SESSION,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { [HEADER_NAMES.AUTHORIZATION]: `Bearer ${token}` },
     },
     "Session expired or invalid",
   );

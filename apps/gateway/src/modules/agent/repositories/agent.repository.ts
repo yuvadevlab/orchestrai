@@ -12,6 +12,7 @@ import type {
   ListAgentsFilter,
 } from "@orchestrai/core";
 import type { PaginatedResult } from "@orchestrai/shared-types";
+import { WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
 
 /**
  * PostgreSQL Prisma adapter implementing IAgentRepository.
@@ -48,7 +49,8 @@ export class PostgresAgentRepository implements IAgentRepository {
 
     const match = records.find((r) => {
       const meta = (r.metadata as Record<string, unknown>) || {};
-      const recordSlug = (meta.slug as string) || r.name.toLowerCase().replace(/\s+/g, "-");
+      const recordSlug =
+        (meta.slug as string) || r.name.toLowerCase().replace(WHITESPACE_GLOBAL_REGEX, "-");
       return recordSlug === slug;
     });
 
@@ -182,7 +184,8 @@ export class PostgresAgentRepository implements IAgentRepository {
   }): AgentEntity {
     const meta = (record.metadata as Record<string, unknown>) || {};
     const modelCfg = (record.modelConfig as Record<string, unknown>) || {};
-    const slug = (meta.slug as string) || record.name.toLowerCase().replace(/\s+/g, "-");
+    const slug =
+      (meta.slug as string) || record.name.toLowerCase().replace(WHITESPACE_GLOBAL_REGEX, "-");
 
     return {
       id: record.agentId,

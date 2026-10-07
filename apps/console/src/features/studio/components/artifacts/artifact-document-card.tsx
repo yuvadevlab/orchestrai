@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { Check, ChevronDown, ChevronRight, Copy, Download, FileText } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
+import { WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkArtifact } from "../../types";
 
@@ -23,7 +24,7 @@ export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): R
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const wordCount = artifact.content.trim().split(/\s+/).length;
+  const wordCount = artifact.content.trim().split(WHITESPACE_GLOBAL_REGEX).length;
 
   const handleCopy = (): void => {
     navigator.clipboard.writeText(artifact.content);
@@ -36,7 +37,9 @@ export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): R
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = artifact.filePath || `${artifact.title.toLowerCase().replace(/\s+/g, "_")}.md`;
+    a.download =
+      artifact.filePath ||
+      `${artifact.title.toLowerCase().replace(WHITESPACE_GLOBAL_REGEX, "_")}.md`;
     a.click();
     URL.revokeObjectURL(url);
   };

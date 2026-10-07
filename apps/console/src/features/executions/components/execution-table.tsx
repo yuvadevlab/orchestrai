@@ -22,6 +22,7 @@ import { ExternalLink, Copy, Check, Bug } from "lucide-react";
 import type { ExecutionRun } from "../types";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { UI_COPY } from "@/lib/ui-copy";
+import { NAME_SPLIT_REGEX } from "@orchestrai/regex";
 
 export interface ExecutionTableProps {
   executions: ExecutionRun[];
@@ -32,7 +33,7 @@ export interface ExecutionTableProps {
  * Extracts 2-letter uppercase initials for an agent name.
  */
 function getAgentInitials(name: string): string {
-  const parts = name.split(/[\s_-]+/).filter(Boolean);
+  const parts = name.split(NAME_SPLIT_REGEX).filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[0]?.[0] || ""}${parts[1]?.[0] || ""}`.toUpperCase();
   }

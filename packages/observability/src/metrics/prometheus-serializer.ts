@@ -3,6 +3,7 @@
  * @description Serializer formatting in-memory metrics into Prometheus text exposition format.
  */
 
+import { DOUBLE_QUOTE_GLOBAL_REGEX } from "@orchestrai/regex";
 import type { MetricRegistry } from "./metric-registry";
 import type { MetricLabels } from "./metric.types";
 
@@ -10,7 +11,9 @@ function formatLabels(labels: MetricLabels, extra?: Record<string, string>): str
   const merged = { ...labels, ...extra };
   const keys = Object.keys(merged).sort();
   if (keys.length === 0) return "";
-  const parts = keys.map((k) => `${k}="${String(merged[k]).replace(/"/g, '\\"')}"`);
+  const parts = keys.map(
+    (k) => `${k}="${String(merged[k]).replace(DOUBLE_QUOTE_GLOBAL_REGEX, '\\"')}"`,
+  );
   return `{${parts.join(",")}}`;
 }
 

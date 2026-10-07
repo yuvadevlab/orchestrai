@@ -5,7 +5,7 @@
  */
 
 import { Logger } from "@yuva-devlab/logger";
-import { ADMIN_ROUTES, HealthStatus } from "@orchestrai/shared-types";
+import { ADMIN_ROUTES, HealthStatus, HEADER_NAMES, HttpStatus } from "@orchestrai/shared-types";
 import type { AdminRouter } from "./router";
 
 const logger = new Logger("HealthRoutes");
@@ -18,8 +18,8 @@ const logger = new Logger("HealthRoutes");
 export function registerHealthRoutes(router: AdminRouter): void {
   router.get(ADMIN_ROUTES.HEALTH, (_req, res) => {
     logger.debug("health: liveness probe checked");
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "application/json");
+    res.statusCode = HttpStatus.OK;
+    res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
     res.end(
       JSON.stringify({
         status: HealthStatus.OK,
@@ -32,8 +32,8 @@ export function registerHealthRoutes(router: AdminRouter): void {
 
   router.get(ADMIN_ROUTES.READY, (_req, res) => {
     logger.debug("ready: readiness probe checked");
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "application/json");
+    res.statusCode = HttpStatus.OK;
+    res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
     res.end(
       JSON.stringify({
         status: HealthStatus.READY,

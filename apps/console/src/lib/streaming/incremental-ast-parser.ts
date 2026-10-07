@@ -5,6 +5,8 @@
  * @module apps/console/lib/streaming
  */
 
+import { DOUBLE_NEWLINE_SPLIT_REGEX } from "@orchestrai/regex";
+
 /**
  * Structural segment of a streaming markdown document.
  */
@@ -102,7 +104,7 @@ export class IncrementalAstParser {
    * Splits prose text by double newlines into completed paragraph blocks.
    */
   private splitParagraphs(text: string): MarkdownChunk[] {
-    const parts = text.split(/\n\n+/);
+    const parts = text.split(DOUBLE_NEWLINE_SPLIT_REGEX);
     return parts.map((part, index) => ({
       id: `prose-${index}-${part.slice(0, 10)}`,
       content: part,

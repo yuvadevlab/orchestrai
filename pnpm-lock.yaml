@@ -238,6 +238,9 @@ importers:
       '@orchestrai/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@orchestrai/regex':
+        specifier: workspace:*
+        version: link:../../packages/regex
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
@@ -688,6 +691,9 @@ importers:
       '@orchestrai/core':
         specifier: workspace:*
         version: link:../core
+      '@orchestrai/regex':
+        specifier: workspace:*
+        version: link:../regex
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
@@ -884,6 +890,9 @@ importers:
 
   packages/observability:
     dependencies:
+      '@orchestrai/regex':
+        specifier: workspace:*
+        version: link:../regex
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types
@@ -1040,6 +1049,9 @@ importers:
 
   packages/sdk:
     dependencies:
+      '@orchestrai/regex':
+        specifier: workspace:*
+        version: link:../regex
       '@orchestrai/shared-types':
         specifier: workspace:*
         version: link:../shared-types

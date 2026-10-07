@@ -6,7 +6,7 @@
 
 import { sendJson, type GatewayRequest, type GatewayResponse } from "@/routes";
 import { memoryService } from "./memory.service";
-import { ErrorCode, ROUTE_PARAMS } from "@orchestrai/shared-types";
+import { ErrorCode, HttpStatus, ROUTE_PARAMS } from "@orchestrai/shared-types";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 
 const logger = loggerWithConfig(new Logger("MemoryController"));
@@ -29,7 +29,7 @@ export class MemoryController {
 
     // Retrieve active memory records for tenant
     const memories = await memoryService.listMemories(req.context.tenantId);
-    sendJson(res, 200, { items: memories, total: (memories as unknown[]).length });
+    sendJson(res, HttpStatus.OK, { items: memories, total: (memories as unknown[]).length });
   }
 
   /**
@@ -50,7 +50,7 @@ export class MemoryController {
 
     // Execute semantic vector and keyword search
     const results = await memoryService.searchMemories(query, req.context.tenantId);
-    sendJson(res, 200, { items: results, total: (results as unknown[]).length });
+    sendJson(res, HttpStatus.OK, { items: results, total: (results as unknown[]).length });
   }
 
   /**
@@ -70,7 +70,7 @@ export class MemoryController {
     // Guard: Verify content payload is present
     if (!body.content) {
       logger.warn("create: memory content is required");
-      sendJson(res, 400, {
+      sendJson(res, HttpStatus.BAD_REQUEST, {
         error: { code: ErrorCode.VALIDATION_ERROR, message: "Content is required" },
       });
       return;
@@ -89,7 +89,7 @@ export class MemoryController {
       body.content,
       body.importanceScore ?? 0.7,
     );
-    sendJson(res, 201, { success: true });
+    sendJson(res, HttpStatus.CREATED, { success: true });
   }
 
   /**
@@ -105,7 +105,9 @@ export class MemoryController {
     // Guard: Validate memory ID parameter
     if (!memoryId) {
       logger.warn("delete: memory ID parameter is required");
-      sendJson(res, 400, { error: { code: ErrorCode.BAD_REQUEST, message: "Memory ID required" } });
+      sendJson(res, HttpStatus.BAD_REQUEST, {
+        error: { code: ErrorCode.BAD_REQUEST, message: "Memory ID required" },
+      });
       return;
     }
 
@@ -113,6 +115,6 @@ export class MemoryController {
 
     // Execute memory record deletion
     const success = await memoryService.deleteMemory(memoryId);
-    sendJson(res, 200, { success, memoryId });
+    sendJson(res, HttpStatus.OK, { success, memoryId });
   }
 }

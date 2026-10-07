@@ -5,7 +5,8 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { ErrorCode } from "@orchestrai/shared-types";
+import { ErrorCode, HttpStatus, HEADER_NAMES, HttpMethod } from "@orchestrai/shared-types";
+import { ROUTE_PARAM_TOKEN_REGEX } from "@orchestrai/regex";
 import type { AdminRequestContext } from "@/context";
 
 /**
@@ -49,7 +50,7 @@ export class AdminRouter {
    */
   public add(method: string, path: string, handler: AdminRouteHandler): void {
     const paramNames: string[] = [];
-    const regexPath = path.replace(/:([a-zA-Z0-9_]+)/g, (_, name) => {
+    const regexPath = path.replace(ROUTE_PARAM_TOKEN_REGEX, (_, name) => {
       paramNames.push(name);
       return "([^/]+)";
     });
@@ -64,19 +65,19 @@ export class AdminRouter {
   }
 
   public get(path: string, handler: AdminRouteHandler): void {
-    this.add("GET", path, handler);
+    this.add(HttpMethod.GET, path, handler);
   }
 
   public post(path: string, handler: AdminRouteHandler): void {
-    this.add("POST", path, handler);
+    this.add(HttpMethod.POST, path, handler);
   }
 
   public put(path: string, handler: AdminRouteHandler): void {
-    this.add("PUT", path, handler);
+    this.add(HttpMethod.PUT, path, handler);
   }
 
   public delete(path: string, handler: AdminRouteHandler): void {
-    this.add("DELETE", path, handler);
+    this.add(HttpMethod.DELETE, path, handler);
   }
 
   /**
@@ -85,7 +86,7 @@ export class AdminRouter {
   public async handle(req: AdminRequest, res: AdminResponse): Promise<void> {
     const [pathname, search] = (req.url || "/").split("?");
     const cleanPath = pathname || "/";
-    const method = (req.method || "GET").toUpperCase();
+    const method = (req.method || HttpMethod.GET).toUpperCase();
 
     // Parse URL query parameters
     const query: Record<string, string> = {};
@@ -112,7 +113,11 @@ export class AdminRouter {
         req.params = params;
 
         // Parse JSON body for mutation methods
-        if (method === "POST" || method === "PUT" || method === "PATCH") {
+        if (
+          method === HttpMethod.POST ||
+          method === HttpMethod.PUT ||
+          method === HttpMethod.PATCH
+        ) {
           req.body = await this.parseJsonBody(req);
         }
 
@@ -122,8 +127,8 @@ export class AdminRouter {
     }
 
     // Unmatched path returns 404
-    res.statusCode = 404;
-    res.setHeader("Content-Type", "application/json");
+    res.statusCode = HttpStatus.NOT_FOUND;
+    res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
     res.end(
       JSON.stringify({
         error: {

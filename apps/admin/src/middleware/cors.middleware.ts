@@ -5,6 +5,7 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { HEADER_NAMES, HttpMethod, HttpStatus } from "@orchestrai/shared-types";
 
 /**
  * Handles CORS headers and HTTP OPTIONS preflight checks.
@@ -27,7 +28,13 @@ export function handleAdminCors(
     res.setHeader("Access-Control-Allow-Origin", origin || "*");
   }
 
-  const baseHeaders = ["Content-Type", "Authorization", "X-Request-Id", "X-Tenant-Id", "X-API-Key"];
+  const baseHeaders = [
+    HEADER_NAMES.CONTENT_TYPE,
+    HEADER_NAMES.AUTHORIZATION,
+    HEADER_NAMES.X_REQUEST_ID,
+    HEADER_NAMES.X_TENANT_ID,
+    HEADER_NAMES.X_API_KEY,
+  ];
   const allHeaders = Array.from(new Set([...baseHeaders, ...extraHeaders])).join(", ");
 
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -35,8 +42,8 @@ export function handleAdminCors(
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
   // Intercept and resolve preflight immediately
-  if (req.method === "OPTIONS") {
-    res.statusCode = 204;
+  if (req.method === HttpMethod.OPTIONS) {
+    res.statusCode = HttpStatus.NO_CONTENT;
     res.end();
     return true;
   }

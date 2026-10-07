@@ -16,6 +16,7 @@
 import fs from "node:fs/promises";
 import { z } from "zod";
 import { ToolPermissionLevel } from "@orchestrai/shared-types";
+import { NEWLINE_SPLIT_REGEX } from "@orchestrai/regex";
 import type { ToolDefinition } from "@orchestrai/core";
 import type { ITool, ToolExecutionContext } from "@/interfaces";
 import { sanitizePath } from "@/security";
@@ -96,7 +97,7 @@ export class ReadFileTool implements ITool<ReadFileInput, ReadFileOutput> {
     const safePath = sanitizePath(args.path, roots);
 
     const raw = await fs.readFile(safePath, "utf8");
-    const lines = raw.split(/\r?\n/);
+    const lines = raw.split(NEWLINE_SPLIT_REGEX);
     const totalLines = lines.length;
 
     let sliced = lines;

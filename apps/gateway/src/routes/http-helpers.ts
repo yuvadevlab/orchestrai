@@ -5,6 +5,7 @@
 
 import type { IncomingMessage } from "node:http";
 import type { GatewayResponse } from "./http-types";
+import { HEADER_NAMES, type HttpStatus } from "@orchestrai/shared-types";
 
 /**
  * Sends a structured JSON payload with Content-Type header.
@@ -13,9 +14,13 @@ import type { GatewayResponse } from "./http-types";
  * @param statusCode - HTTP status code
  * @param data - Serialisable data object
  */
-export function sendJson(res: GatewayResponse, statusCode: number, data: unknown): void {
+export function sendJson(
+  res: GatewayResponse,
+  statusCode: HttpStatus | number,
+  data: unknown,
+): void {
   res.statusCode = statusCode;
-  res.setHeader("Content-Type", "application/json");
+  res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
   res.end(JSON.stringify(data));
 }
 

@@ -7,7 +7,13 @@
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
-import { OperatorRole } from "@orchestrai/shared-types";
+import {
+  ADMIN_ROUTES,
+  ErrorCode,
+  HEADER_NAMES,
+  HttpStatus,
+  OperatorRole,
+} from "@orchestrai/shared-types";
 import { getPrismaClient } from "@orchestrai/database";
 import type { AdminConfig } from "@/config";
 import type { AdminRequestContext } from "@/context";
@@ -15,7 +21,7 @@ import type { AdminRequestContext } from "@/context";
 const logger = loggerWithConfig(new Logger("OperatorAuthGuard"));
 
 /** Public endpoints bypassing operator credentials */
-const PUBLIC_PATHS = new Set(["/health", "/ready"]);
+const PUBLIC_PATHS = new Set<string>([ADMIN_ROUTES.HEALTH, ADMIN_ROUTES.READY]);
 
 /**
  * Validates inbound request credentials against dedicated Operator secret keys or DB roles.
@@ -99,12 +105,12 @@ export async function authenticateOperator(
           role: user.role,
         });
 
-        res.statusCode = 403;
-        res.setHeader("Content-Type", "application/json");
+        res.statusCode = HttpStatus.FORBIDDEN;
+        res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
         res.end(
           JSON.stringify({
             error: {
-              code: "FORBIDDEN",
+              code: ErrorCode.FORBIDDEN,
               message: "Operator clearance required for control plane endpoints",
               requestId: context.requestId,
             },
@@ -113,23 +119,23 @@ export async function authenticateOperator(
         return false;
       }
     } catch (dbErr) {
-      logger.error("[OperatorAuth] Database verification error", { error: String(dbErr) });
+      logger.error("authenticateOperator: database verification error", { error: String(dbErr) });
     }
   }
 
   // 4. Deny unauthenticated caller with 401
-  logger.warn("[OperatorAuth] Unauthorized access attempt", {
+  logger.warn("authenticateOperator: unauthorized access attempt", {
     path: urlPath,
     method: req.method,
     requestId: context.requestId,
   });
 
-  res.statusCode = 401;
-  res.setHeader("Content-Type", "application/json");
+  res.statusCode = HttpStatus.UNAUTHORIZED;
+  res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
   res.end(
     JSON.stringify({
       error: {
-        code: "UNAUTHORIZED",
+        code: ErrorCode.UNAUTHORIZED,
         message: "Missing or invalid operator credentials",
         requestId: context.requestId,
       },

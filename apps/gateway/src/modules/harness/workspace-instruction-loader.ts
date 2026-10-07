@@ -7,7 +7,11 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { YAML_FRONTMATTER_REGEX, YAML_KEY_VALUE_REGEX } from "@orchestrai/regex";
+import {
+  QUOTE_WRAPPER_REGEX,
+  YAML_FRONTMATTER_REGEX,
+  YAML_KEY_VALUE_REGEX,
+} from "@orchestrai/regex";
 import type {
   WorkspaceSkillMetadata,
   WorkspaceRuleMetadata,
@@ -45,7 +49,7 @@ function parseYamlFrontmatter(content: string): {
     const kvMatch = YAML_KEY_VALUE_REGEX.exec(line.trim());
     if (kvMatch && kvMatch[1]) {
       const key = kvMatch[1].trim();
-      const val = (kvMatch[2] || "").trim().replace(/^["']|["']$/g, "");
+      const val = (kvMatch[2] || "").trim().replace(QUOTE_WRAPPER_REGEX, "");
       frontmatter[key] = val;
     }
   }

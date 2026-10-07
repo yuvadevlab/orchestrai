@@ -3,6 +3,8 @@
  * @description Gates memory ingestion to prevent trivial, low-entropy noise from polluting stores.
  */
 
+import { NON_ALPHA_WHITESPACE_REGEX, WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
+
 const TRIVIAL_PHRASES = new Set([
   "ok",
   "okay",
@@ -46,13 +48,13 @@ export class RelevanceFilter {
     }
 
     // 2. Exact match against trivial pleasantries
-    const normalized = trimmed.toLowerCase().replace(/[^a-z\s]/g, "");
+    const normalized = trimmed.toLowerCase().replace(NON_ALPHA_WHITESPACE_REGEX, "");
     if (TRIVIAL_PHRASES.has(normalized)) {
       return false;
     }
 
     // 3. Low-entropy heuristic (e.g. repeated single characters "aaaaaa")
-    const uniqueChars = new Set(normalized.replace(/\s/g, ""));
+    const uniqueChars = new Set(normalized.replace(WHITESPACE_GLOBAL_REGEX, ""));
     if (uniqueChars.size <= 2 && trimmed.length > 20) {
       return false;
     }

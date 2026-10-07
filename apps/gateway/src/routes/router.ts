@@ -10,7 +10,8 @@ import {
   type RouteHandler,
 } from "./http-types";
 import { parseJsonBody, sendJson } from "./http-helpers";
-import { ErrorCode } from "@orchestrai/shared-types";
+import { ErrorCode, HttpStatus } from "@orchestrai/shared-types";
+import { ROUTE_PARAM_TOKEN_REGEX } from "@orchestrai/regex";
 
 interface RegisteredRoute {
   method: HttpMethod;
@@ -87,7 +88,7 @@ export class Router {
   public register(method: HttpMethod, path: string, handler: RouteHandler): void {
     const paramNames: string[] = [];
     // Convert parameterized tokens (:param) to capturing regex groups
-    const regexPath = path.replace(/:([a-zA-Z0-9_]+)/g, (_, paramName) => {
+    const regexPath = path.replace(ROUTE_PARAM_TOKEN_REGEX, (_, paramName) => {
       paramNames.push(paramName);
       return "([^/]+)";
     });
@@ -163,7 +164,7 @@ export class Router {
     }
 
     // No matching route registered
-    sendJson(res, 404, {
+    sendJson(res, HttpStatus.NOT_FOUND, {
       error: {
         code: ErrorCode.NOT_FOUND,
         message: `Endpoint ${method} ${urlPath} not found`,

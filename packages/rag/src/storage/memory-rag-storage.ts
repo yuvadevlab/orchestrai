@@ -4,6 +4,7 @@
  */
 
 import { randomUUID } from "node:crypto";
+import { WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
 import type {
   IRagStorage,
   Document,
@@ -125,7 +126,7 @@ export class MemoryRagStorage implements IRagStorage {
     const scored: ScoredDocumentChunk[] = [];
     const terms = options.query
       .toLowerCase()
-      .split(/\s+/)
+      .split(WHITESPACE_GLOBAL_REGEX)
       .filter((t) => t.length > 0);
 
     for (const chunk of this.chunks.values()) {

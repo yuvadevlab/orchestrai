@@ -4,6 +4,7 @@
  */
 
 import type { StreamEvent } from "@/types";
+import { NEWLINE_UNIVERSAL_SPLIT_REGEX } from "@orchestrai/regex";
 
 /**
  * Parses raw Uint8Array stream chunks into discrete Server-Sent Events.
@@ -24,7 +25,7 @@ export async function* parseSseStream(
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split(/\r\n|\r|\n/);
+      const lines = buffer.split(NEWLINE_UNIVERSAL_SPLIT_REGEX);
       buffer = lines.pop() || "";
 
       let currentEvent: string = "message";

@@ -6,7 +6,8 @@
 import type { Execution, StreamEvent } from "@/types";
 import type { HttpClient } from "@/transport";
 import { StreamIterator } from "@/streaming";
-import { ExecutionStatus } from "@orchestrai/shared-types";
+import { API_ROUTES, ExecutionStatus, QUERY_PARAMS } from "@orchestrai/shared-types";
+import { TRAILING_SLASH_REGEX } from "@orchestrai/regex";
 
 /**
  * Ergonomic controller handle returned when an agent execution is launched.
@@ -39,9 +40,9 @@ export class ExecutionHandle {
    * Connects to the SSE event stream for live tokens and state transitions.
    */
   public async stream(): Promise<StreamIterator<StreamEvent>> {
-    const streamPath = `/api/v1/stream?executionId=${encodeURIComponent(this.id)}`;
+    const streamPath = `/api/v1/stream?${QUERY_PARAMS.EXECUTION_ID}=${encodeURIComponent(this.id)}`;
     const streamEndpoint = this.realtimeUrl
-      ? `${this.realtimeUrl.replace(/\/$/, "")}${streamPath}`
+      ? `${this.realtimeUrl.replace(TRAILING_SLASH_REGEX, "")}${streamPath}`
       : streamPath;
 
     const rawStream = await this.http.requestStream(streamEndpoint);
@@ -55,7 +56,7 @@ export class ExecutionHandle {
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeoutMs) {
-      const record = await this.http.request<Execution>(`/api/v1/executions/${this.id}`);
+      const record = await this.http.request<Execution>(`${API_ROUTES.EXECUTIONS}/${this.id}`);
       this.currentStatus = record.status;
 
       if (

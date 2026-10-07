@@ -3,6 +3,11 @@
  * @description Boundary-aware sliding-window text chunker with configurable token overlap.
  */
 
+import {
+  PARAGRAPH_SPLIT_REGEX,
+  SENTENCE_SPLIT_REGEX,
+  WHITESPACE_GLOBAL_REGEX,
+} from "@orchestrai/regex";
 import type { ITextChunker, ChunkOptions, TextChunkResult } from "./chunker.interface";
 import { estimateTokenCount } from "./token-estimator";
 
@@ -42,21 +47,21 @@ export class TextChunker implements ITextChunker {
     if (strategy === "paragraph") {
       // Split on double newlines for paragraph boundaries
       return text
-        .split(/\n\s*\n/)
+        .split(PARAGRAPH_SPLIT_REGEX)
         .map((p) => p.trim())
         .filter((p) => p.length > 0);
     }
 
     if (strategy === "sentence") {
       // Regex matches sentence terminal punctuation followed by space or newline
-      const matches = text.match(/[^.!?\n]+(?:[.!?]+|\n+|$)/g);
+      const matches = text.match(SENTENCE_SPLIT_REGEX);
       if (matches && matches.length > 0) {
         return matches.map((s) => s.trim()).filter((s) => s.length > 0);
       }
     }
 
     // Default "fixed" strategy: split by whitespace into words
-    return text.split(/\s+/).filter((w) => w.length > 0);
+    return text.split(WHITESPACE_GLOBAL_REGEX).filter((w) => w.length > 0);
   }
 
   /**

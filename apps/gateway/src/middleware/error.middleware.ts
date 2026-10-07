@@ -5,7 +5,7 @@
 
 import { ZodError } from "zod";
 import { OrchestrAIError } from "@orchestrai/core";
-import { ErrorCode } from "@orchestrai/shared-types";
+import { ErrorCode, HEADER_NAMES, HttpStatus } from "@orchestrai/shared-types";
 import type { GatewayRequest, GatewayResponse } from "@/routes";
 
 /**
@@ -23,11 +23,11 @@ export function handleError(error: unknown, res: GatewayResponse, requestId?: st
     return;
   }
 
-  res.setHeader("Content-Type", "application/json");
+  res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
 
   // Handle Zod schema validation errors
   if (error instanceof ZodError) {
-    res.statusCode = 400;
+    res.statusCode = HttpStatus.BAD_REQUEST;
     res.end(
       JSON.stringify({
         error: {
@@ -62,7 +62,7 @@ export function handleError(error: unknown, res: GatewayResponse, requestId?: st
 
   // Handle JSON parse errors
   if (error instanceof SyntaxError && "body" in error) {
-    res.statusCode = 400;
+    res.statusCode = HttpStatus.BAD_REQUEST;
     res.end(
       JSON.stringify({
         error: {
@@ -77,7 +77,7 @@ export function handleError(error: unknown, res: GatewayResponse, requestId?: st
 
   // Fallback 500 Internal Server Error
   const message = error instanceof Error ? error.message : "An unexpected server error occurred";
-  res.statusCode = 500;
+  res.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
   res.end(
     JSON.stringify({
       error: {

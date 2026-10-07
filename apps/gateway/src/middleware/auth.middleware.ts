@@ -5,7 +5,13 @@
  */
 
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
-import { ErrorCode, OperatorRole } from "@orchestrai/shared-types";
+import {
+  API_ROUTES,
+  ErrorCode,
+  HEADER_NAMES,
+  HttpStatus,
+  OperatorRole,
+} from "@orchestrai/shared-types";
 import type { GatewayRequest, GatewayResponse } from "@/routes";
 import type { GatewayConfig } from "@/config";
 import { AuthService } from "@/modules/auth";
@@ -13,13 +19,13 @@ import { AuthService } from "@/modules/auth";
 const logger = loggerWithConfig(new Logger("AuthMiddleware"));
 
 /** Whitelisted public endpoints bypassing mandatory API key / token authentication */
-const PUBLIC_PATHS = new Set([
+const PUBLIC_PATHS = new Set<string>([
   "/health",
   "/ready",
-  "/api/v1/auth/login",
-  "/api/v1/auth/signup",
-  "/api/v1/auth/forgot-password",
-  "/api/v1/auth/reset-password",
+  API_ROUTES.AUTH.LOGIN,
+  API_ROUTES.AUTH.SIGNUP,
+  API_ROUTES.AUTH.FORGOT_PASSWORD,
+  API_ROUTES.AUTH.RESET_PASSWORD,
 ]);
 
 /**
@@ -97,8 +103,8 @@ export async function authenticateRequest(
     requestId: req.context?.requestId,
   });
 
-  res.statusCode = 401;
-  res.setHeader("Content-Type", "application/json");
+  res.statusCode = HttpStatus.UNAUTHORIZED;
+  res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
   res.end(
     JSON.stringify({
       error: {

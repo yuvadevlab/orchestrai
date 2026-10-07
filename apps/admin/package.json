@@ -16,6 +16,7 @@
   "dependencies": {
     "@orchestrai/core": "workspace:*",
     "@orchestrai/database": "workspace:*",
+    "@orchestrai/regex": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
     "@yuva-devlab/logger": "1.1.0",
     "dotenv": "^16.4.7",

@@ -11,7 +11,7 @@ import { toast } from "@yuva-devlab/ui";
 import { FormDialog, type FormFieldConfig } from "@/components/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { DocumentMimeType } from "@orchestrai/shared-types";
-import { LEADING_TRAILING_DASH_REGEX } from "@orchestrai/regex";
+import { LEADING_TRAILING_DASH_REGEX, NON_ALPHANUMERIC_GLOBAL_REGEX } from "@orchestrai/regex";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useIngestDocument } from "../api";
 
@@ -76,7 +76,7 @@ export function KnowledgeUploadDialog({
     try {
       const derivedSlug = (formData.title || UI_COPY.KNOWLEDGE.UPLOAD_DIALOG.DEFAULT_SLUG)
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
+        .replace(NON_ALPHANUMERIC_GLOBAL_REGEX, "-")
         .replace(LEADING_TRAILING_DASH_REGEX, "");
       await ingestMutation.mutateAsync({
         title: formData.title || UI_COPY.KNOWLEDGE.UPLOAD_DIALOG.UNTITLED_DOC,

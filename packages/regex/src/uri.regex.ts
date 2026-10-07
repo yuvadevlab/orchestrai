@@ -38,3 +38,28 @@ export const REALTIME_CHANNEL_PREFIX_REGEX: RegExp = /^orchestrai:(realtime|even
  * Route pattern matching execution SSE stream path: /api/v1/executions/:executionId/stream
  */
 export const EXECUTION_STREAM_ROUTE_REGEX: RegExp = /^\/api\/v1\/executions\/([^/]+)\/stream$/;
+
+/**
+ * Route parameter token pattern for extracting named parameters (e.g. :id, :executionId) from URL route paths.
+ */
+export const ROUTE_PARAM_TOKEN_REGEX: RegExp = /:([a-zA-Z0-9_]+)/g;
+
+/**
+ * Matches raw password credentials in database connection URI strings for structured log masking.
+ */
+export const DB_PASSWORD_MASK_REGEX: RegExp = /:[^:@]+@/;
+
+/**
+ * Matches a trailing forward slash at the end of a URI or path string.
+ */
+export const TRAILING_SLASH_REGEX: RegExp = /\/$/;
+
+/**
+ * Matches one or more trailing forward slashes at the end of a base URL.
+ */
+export const TRAILING_SLASHES_GLOBAL_REGEX: RegExp = /\/+$/;
+
+/**
+ * Matches a leading forward slash at the start of a URI path string.
+ */
+export const LEADING_SLASH_REGEX: RegExp = /^\//;

@@ -3,6 +3,8 @@
  * @description Resilient HTTP client managing HMAC signing, idempotency, retries, and streaming.
  */
 
+import { HEADER_NAMES, HttpMethod } from "@orchestrai/shared-types";
+import { LEADING_SLASH_REGEX, TRAILING_SLASH_REGEX } from "@orchestrai/regex";
 import { signRequest } from "@/security";
 import type { OrchestrAIClientOptions } from "@/types";
 import { RetryPolicy } from "./retry-policy";
@@ -27,7 +29,7 @@ export class HttpClient {
   private readonly retryPolicy: RetryPolicy;
 
   constructor(private readonly options: OrchestrAIClientOptions = {}) {
-    this.baseUrl = (options.baseUrl || "http://localhost:8000").replace(/\/$/, "");
+    this.baseUrl = (options.baseUrl || "http://localhost:8000").replace(TRAILING_SLASH_REGEX, "");
     this.tenantId = options.tenantId;
     this.retryPolicy = new RetryPolicy({ maxRetries: options.maxRetries ?? 3 });
   }
@@ -37,7 +39,7 @@ export class HttpClient {
    */
   public async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const url = this.buildUrl(this.baseUrl, path, options.params);
-    const method = options.method || "GET";
+    const method = options.method || HttpMethod.GET;
     const bodyStr = options.body ? JSON.stringify(options.body) : "";
 
     let attempt = 0;
@@ -150,16 +152,16 @@ export class HttpClient {
       );
       Object.assign(headers, signed);
     } else if (this.options.apiKey) {
-      headers["X-API-Key"] = this.options.apiKey;
+      headers[HEADER_NAMES.X_API_KEY] = this.options.apiKey;
     } else if (this.options.token) {
-      headers["Authorization"] = `Bearer ${this.options.token}`;
+      headers[HEADER_NAMES.AUTHORIZATION] = `Bearer ${this.options.token}`;
     }
 
     return headers;
   }
 
   private buildUrl(base: string, path: string, params?: Record<string, unknown>): string {
-    const url = new URL(path.replace(/^\//, ""), `${base}/`);
+    const url = new URL(path.replace(LEADING_SLASH_REGEX, ""), `${base}/`);
     if (params) {
       for (const [k, v] of Object.entries(params)) {
         if (v !== undefined && v !== null) {

@@ -7,7 +7,7 @@ import type { GatewayRequest, GatewayResponse } from "@/routes/http-types";
 import { sendJson, parseQueryParams } from "@/routes/http-helpers";
 import { CreateAgentSchema, UpdateAgentSchema, AgentFilterSchema } from "@/validation";
 import { AgentService } from "../services/agent.service";
-import { ErrorCode, ROUTE_PARAMS } from "@orchestrai/shared-types";
+import { ErrorCode, HttpStatus, ROUTE_PARAMS } from "@orchestrai/shared-types";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 
 const logger = loggerWithConfig(new Logger("AgentController"));
@@ -35,7 +35,7 @@ export class AgentController {
 
     // Query agents through domain service
     const result = await this.service.listAgents(query, req.context.tenantId);
-    sendJson(res, 200, result);
+    sendJson(res, HttpStatus.OK, result);
   }
 
   /**
@@ -56,7 +56,7 @@ export class AgentController {
 
     // Delegate creation to domain service
     const result = await this.service.createAgent(dto, req.context.tenantId);
-    sendJson(res, 201, result);
+    sendJson(res, HttpStatus.CREATED, result);
   }
 
   /**
@@ -82,13 +82,13 @@ export class AgentController {
         agentId,
         tenantId: req.context.tenantId,
       });
-      sendJson(res, 404, {
+      sendJson(res, HttpStatus.NOT_FOUND, {
         error: { code: ErrorCode.NOT_FOUND, message: `Agent ${agentId} not found` },
       });
       return;
     }
 
-    sendJson(res, 200, result);
+    sendJson(res, HttpStatus.OK, result);
   }
 
   /**
@@ -109,7 +109,7 @@ export class AgentController {
 
     // Execute update through domain service
     const result = await this.service.updateAgent(agentId, dto, req.context.tenantId);
-    sendJson(res, 200, result);
+    sendJson(res, HttpStatus.OK, result);
   }
 
   /**
@@ -128,6 +128,6 @@ export class AgentController {
 
     // Perform deletion scoped to tenant
     await this.service.deleteAgent(agentId, req.context.tenantId);
-    sendJson(res, 200, { success: true, agentId });
+    sendJson(res, HttpStatus.OK, { success: true, agentId });
   }
 }

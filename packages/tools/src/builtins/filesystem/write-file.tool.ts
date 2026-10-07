@@ -15,6 +15,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { z } from "zod";
 import { ToolPermissionLevel } from "@orchestrai/shared-types";
+import { NEWLINE_SPLIT_REGEX } from "@orchestrai/regex";
 import type { ToolDefinition } from "@orchestrai/core";
 import type { ITool, ToolExecutionContext } from "@/interfaces";
 import { sanitizePath } from "@/security";
@@ -103,7 +104,7 @@ export class WriteFileTool implements ITool<WriteFileInput, WriteFileOutput> {
     await fs.writeFile(safePath, args.content, "utf8");
 
     const byteSize = Buffer.byteLength(args.content, "utf8");
-    const linesWritten = args.content.split(/\r?\n/).length;
+    const linesWritten = args.content.split(NEWLINE_SPLIT_REGEX).length;
 
     return {
       path: safePath,

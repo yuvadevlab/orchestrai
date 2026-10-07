@@ -10,6 +10,7 @@ import { prisma, type Prisma } from "@orchestrai/database";
 import { LocalStore } from "@/db/local-store";
 import { hashPassword } from "./crypto";
 import { issueSessionToken } from "./token.service";
+import { NON_ALPHANUMERIC_GLOBAL_REGEX } from "@orchestrai/regex";
 import type { SignupRequest } from "@/validation/auth.schema";
 import type { AuthResponsePayload } from "./auth-login.service";
 
@@ -28,7 +29,7 @@ export async function registerSignup(req: SignupRequest): Promise<AuthResponsePa
   const tenantName = `${rawName}'s Workspace`;
   const tenantSlug = `${rawName
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, "-")
+    .replace(NON_ALPHANUMERIC_GLOBAL_REGEX, "-")
     .slice(0, 30)}-${randomBytes(4).toString("hex")}`;
 
   try {

@@ -3,6 +3,8 @@
  * @description Fast, zero-dependency token estimation utility for text segmentation.
  */
 
+import { WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
+
 /**
  * Average character-to-token ratio in English text (approx. 4 chars per token).
  */
@@ -20,7 +22,7 @@ export function estimateTokenCount(text: string): number {
   }
 
   // Count words and punctuation clusters
-  const words = text.trim().split(/\s+/);
+  const words = text.trim().split(WHITESPACE_GLOBAL_REGEX);
   const wordBasedEstimate = Math.ceil(words.length * 1.33);
 
   // Cross-verify against rough character heuristic (chars / 4)

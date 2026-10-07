@@ -7,6 +7,7 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
+import { NON_ALPHANUMERIC_GLOBAL_REGEX } from "@orchestrai/regex";
 import { ToolPermissionLevel } from "@orchestrai/shared-types";
 import { getApiClient } from "@/lib/api-client";
 import type { ToolDefinition } from "../types";
@@ -34,10 +35,7 @@ export function useRegisterToolMutation(): UseMutationResult<
   return useMutation({
     mutationFn: async (input: RegisterToolInput): Promise<ToolDefinition> => {
       const client = getApiClient();
-      const slug = input.name
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "_");
+      const slug = input.name.toLowerCase().trim().replace(NON_ALPHANUMERIC_GLOBAL_REGEX, "_");
       return client.http.request<ToolDefinition>(API_ROUTES.TOOLS, {
         method: HttpMethod.POST,
         body: {

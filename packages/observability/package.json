@@ -21,6 +21,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@orchestrai/regex": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
     "@yuva-devlab/logger": "1.1.0"
   },

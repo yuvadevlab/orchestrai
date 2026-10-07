@@ -14,7 +14,7 @@ import {
   UpdateConversationSchema,
 } from "@/validation";
 import { ConversationService } from "../services/session.service";
-import { ErrorCode, ROUTE_PARAMS } from "@orchestrai/shared-types";
+import { ErrorCode, HttpStatus, ROUTE_PARAMS } from "@orchestrai/shared-types";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 
 const logger = loggerWithConfig(new Logger("ConversationController"));
@@ -42,7 +42,7 @@ export class ConversationController {
 
     // Delegate session query to domain service
     const result = await this.service.listConversations(query, req.context.tenantId);
-    sendJson(res, 200, result);
+    sendJson(res, HttpStatus.OK, result);
   }
 
   /**
@@ -68,13 +68,13 @@ export class ConversationController {
         conversationId,
         tenantId: req.context.tenantId,
       });
-      sendJson(res, 404, {
+      sendJson(res, HttpStatus.NOT_FOUND, {
         error: { code: ErrorCode.NOT_FOUND, message: `Conversation ${conversationId} not found` },
       });
       return;
     }
 
-    sendJson(res, 200, result);
+    sendJson(res, HttpStatus.OK, result);
   }
 
   /**
@@ -94,7 +94,7 @@ export class ConversationController {
 
     // Persist new conversation record
     const result = await this.service.createConversation(dto, req.context.tenantId);
-    sendJson(res, 201, result);
+    sendJson(res, HttpStatus.CREATED, result);
   }
 
   /**
@@ -115,7 +115,7 @@ export class ConversationController {
 
     // Execute update through domain service
     const result = await this.service.updateConversation(conversationId, dto, req.context.tenantId);
-    sendJson(res, 200, result);
+    sendJson(res, HttpStatus.OK, result);
   }
 
   /**
@@ -134,7 +134,7 @@ export class ConversationController {
 
     // Perform deletion scoped to tenant
     const result = await this.service.deleteConversation(conversationId, req.context.tenantId);
-    sendJson(res, 200, result);
+    sendJson(res, HttpStatus.OK, result);
   }
 
   /**
@@ -156,7 +156,7 @@ export class ConversationController {
 
     // Fetch conversation message turns
     const result = await this.service.getMessages(conversationId, query, req.context.tenantId);
-    sendJson(res, 200, result);
+    sendJson(res, HttpStatus.OK, result);
   }
 
   /**
@@ -178,6 +178,6 @@ export class ConversationController {
 
     // Persist message turn and broadcast events
     const result = await this.service.addMessage(conversationId, dto, req.context.tenantId);
-    sendJson(res, 201, result);
+    sendJson(res, HttpStatus.CREATED, result);
   }
 }

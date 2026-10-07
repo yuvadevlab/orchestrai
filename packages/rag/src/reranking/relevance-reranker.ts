@@ -3,6 +3,7 @@
  * @description Relevance reranker scoring candidates via lexical density and document diversity.
  */
 
+import { WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
 import type { ScoredDocumentChunk } from "../contracts/chunk.schema";
 import type { IReranker, RerankOptions } from "./reranker.interface";
 
@@ -26,7 +27,7 @@ export class RelevanceReranker implements IReranker {
     const minScore = options.minScore ?? 0.0;
     const queryTerms = query
       .toLowerCase()
-      .split(/\s+/)
+      .split(WHITESPACE_GLOBAL_REGEX)
       .filter((t) => t.length > 2);
 
     // Track seen document IDs to penalize duplicate chunks from identical docs (diversity)

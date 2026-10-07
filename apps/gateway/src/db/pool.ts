@@ -6,6 +6,7 @@
 
 import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
+import { DB_PASSWORD_MASK_REGEX } from "@orchestrai/regex";
 import { loadGatewayConfig } from "@/config";
 
 const logger = loggerWithConfig(new Logger("DatabasePool"));
@@ -36,11 +37,11 @@ export function getDbPool(): Pool {
     });
 
     poolInstance.on("error", (err) => {
-      logger.error("[DatabasePool] Unexpected idle client error", { error: err.message });
+      logger.error("getDbPool: unexpected idle client error", { error: err.message });
     });
 
-    logger.info("[DatabasePool] Initialized PostgreSQL connection pool", {
-      connectionString: connectionString.replace(/:[^:@]+@/, ":****@"),
+    logger.info("getDbPool: initialized PostgreSQL connection pool", {
+      connectionString: connectionString.replace(DB_PASSWORD_MASK_REGEX, ":****@"),
     });
   }
 

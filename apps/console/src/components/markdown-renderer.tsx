@@ -11,7 +11,11 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
-import { LANGUAGE_CLASS_REGEX, STRIP_TOOL_CALLS_REGEX } from "@orchestrai/regex";
+import {
+  LANGUAGE_CLASS_REGEX,
+  STRIP_TOOL_CALLS_REGEX,
+  TRAILING_NEWLINE_REGEX,
+} from "@orchestrai/regex";
 
 export interface MarkdownRendererProps {
   content: string;
@@ -25,7 +29,7 @@ interface CodeBlockProps {
 
 function CodeBlock({ children, className }: CodeBlockProps): React.JSX.Element | null {
   const [copied, setCopied] = useState(false);
-  const codeString = String(children).replace(/\n$/, "");
+  const codeString = String(children).replace(TRAILING_NEWLINE_REGEX, "");
   const match = LANGUAGE_CLASS_REGEX.exec(className || "");
   const language = match ? match[1] : "";
 

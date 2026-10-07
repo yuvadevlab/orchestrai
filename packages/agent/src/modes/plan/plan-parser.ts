@@ -3,6 +3,7 @@
  * @description Extracts and parses structured Plan objects from model outputs.
  */
 
+import { MARKDOWN_JSON_BLOCK_REGEX, XML_PLAN_TAG_REGEX } from "@orchestrai/regex";
 import { PlanSchema, PlanStepStatus, PlanOverallStatus, type Plan } from "./plan.schema";
 
 /**
@@ -18,7 +19,7 @@ import { PlanSchema, PlanStepStatus, PlanOverallStatus, type Plan } from "./plan
  */
 export function parsePlanFromResponse(content: string, defaultGoal = "Execute Goal"): Plan | null {
   // Strategy 1: Look for ```json ... ``` code fence
-  const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+  const jsonMatch = content.match(MARKDOWN_JSON_BLOCK_REGEX);
   if (jsonMatch?.[1]) {
     const plan = tryParseJsonPlan(jsonMatch[1], defaultGoal);
     // Guard: Return immediately if valid JSON block found
@@ -26,7 +27,7 @@ export function parsePlanFromResponse(content: string, defaultGoal = "Execute Go
   }
 
   // Strategy 2: Look for `<plan>...</plan>` XML tags
-  const xmlMatch = content.match(/<plan>([\s\S]*?)<\/plan>/);
+  const xmlMatch = content.match(XML_PLAN_TAG_REGEX);
   if (xmlMatch?.[1]) {
     const plan = tryParseJsonPlan(xmlMatch[1], defaultGoal);
     // Guard: Return immediately if valid plan XML block found

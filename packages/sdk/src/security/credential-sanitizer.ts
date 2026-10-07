@@ -3,6 +3,8 @@
  * @description Masking and redaction utilities preventing credential leaks in logs and traces.
  */
 
+import { DASH_UNDERSCORE_GLOBAL_REGEX } from "@orchestrai/regex";
+
 const SENSITIVE_KEYS = new Set([
   "authorization",
   "x-api-key",
@@ -37,7 +39,7 @@ export function sanitizeHeaders(headers: Record<string, string>): Record<string,
   const sanitized: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(headers)) {
-    const normalized = key.toLowerCase().replace(/[-_]/g, "");
+    const normalized = key.toLowerCase().replace(DASH_UNDERSCORE_GLOBAL_REGEX, "");
     if (SENSITIVE_KEYS.has(normalized)) {
       sanitized[key] = maskSecret(value);
     } else {

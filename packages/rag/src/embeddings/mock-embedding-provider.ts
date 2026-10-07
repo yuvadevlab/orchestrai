@@ -3,6 +3,7 @@
  * @description Deterministic pseudo-embedding provider for local development, testing, and offline runs.
  */
 
+import { WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
 import type { IEmbeddingProvider } from "./embedding-provider.interface";
 
 /**
@@ -37,7 +38,7 @@ export class MockEmbeddingProvider implements IEmbeddingProvider {
     }
 
     // Include word-level seed distribution
-    const words = normalized.split(/\s+/);
+    const words = normalized.split(WHITESPACE_GLOBAL_REGEX);
     for (const word of words) {
       if (!word) {
         continue;

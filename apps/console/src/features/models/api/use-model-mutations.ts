@@ -7,6 +7,7 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
+import { WHITESPACE_GLOBAL_REGEX } from "@orchestrai/regex";
 import { getApiClient } from "@/lib/api-client";
 import type { LlmModel } from "../types";
 import { QUERY_KEYS, API_ROUTES, HttpMethod } from "@/lib/query-keys";
@@ -35,7 +36,8 @@ export function useRegisterModelMutation(): UseMutationResult<LlmModel, Error, R
         body: {
           name: input.name,
           providerId: input.providerId,
-          modelIdentifier: input.modelIdentifier || input.name.toLowerCase().replace(/\s+/g, "-"),
+          modelIdentifier:
+            input.modelIdentifier || input.name.toLowerCase().replace(WHITESPACE_GLOBAL_REGEX, "-"),
           description: input.description,
           contextWindow: input.contextWindow || 8192,
           isDefault: input.isDefault ?? false,

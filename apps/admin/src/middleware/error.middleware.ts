@@ -6,6 +6,7 @@
 
 import type { ServerResponse } from "node:http";
 import { ZodError } from "zod";
+import { ErrorCode, HEADER_NAMES, HttpStatus } from "@orchestrai/shared-types";
 
 /**
  * Serializes application or validation errors into RFC 7807 compatible JSON format.
@@ -20,15 +21,15 @@ export function handleAdminError(err: unknown, res: ServerResponse, requestId: s
     return;
   }
 
-  res.setHeader("Content-Type", "application/json");
+  res.setHeader(HEADER_NAMES.CONTENT_TYPE, "application/json");
 
   // Handle schema validation failures
   if (err instanceof ZodError) {
-    res.statusCode = 400;
+    res.statusCode = HttpStatus.BAD_REQUEST;
     res.end(
       JSON.stringify({
         error: {
-          code: "VALIDATION_ERROR",
+          code: ErrorCode.VALIDATION_ERROR,
           message: "Request payload failed schema validation",
           details: err.issues,
           requestId,
@@ -40,11 +41,11 @@ export function handleAdminError(err: unknown, res: ServerResponse, requestId: s
 
   // Handle standard HTTP / operational exceptions
   const message = err instanceof Error ? err.message : "Internal operator service error";
-  res.statusCode = 500;
+  res.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
   res.end(
     JSON.stringify({
       error: {
-        code: "INTERNAL_ERROR",
+        code: ErrorCode.INTERNAL_SERVER_ERROR,
         message,
         requestId,
       },

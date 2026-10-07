@@ -4,7 +4,7 @@
  */
 
 import type { ITextExtractor, ExtractedDocument } from "./extractor.interface";
-import { MARKDOWN_HEADING_REGEX } from "@orchestrai/regex";
+import { CRLF_GLOBAL_REGEX, MARKDOWN_HEADING_REGEX } from "@orchestrai/regex";
 
 /**
  * Supported text MIME types handled by this extractor.
@@ -38,7 +38,7 @@ export class TextExtractor implements ITextExtractor {
     const textContent = typeof rawContent === "string" ? rawContent : rawContent.toString("utf-8");
 
     // Normalize Windows carriage returns (\r\n) to standard UNIX newlines (\n)
-    const normalizedText = textContent.replace(/\r\n/g, "\n").trim();
+    const normalizedText = textContent.replace(CRLF_GLOBAL_REGEX, "\n").trim();
 
     let inferredTitle: string | undefined;
     const lines = normalizedText.split("\n");

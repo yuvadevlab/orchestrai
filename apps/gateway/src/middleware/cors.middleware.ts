@@ -4,6 +4,7 @@
  */
 
 import type { GatewayRequest, GatewayResponse } from "@/routes";
+import { HttpMethod, HttpStatus } from "@orchestrai/shared-types";
 
 /**
  * Handles CORS headers and responds immediately to preflight OPTIONS requests.
@@ -49,8 +50,8 @@ export function handleCors(
   );
 
   // If preflight request, immediately acknowledge with 204 No Content
-  if (req.method === "OPTIONS") {
-    res.statusCode = 204;
+  if (req.method === HttpMethod.OPTIONS) {
+    res.statusCode = HttpStatus.NO_CONTENT;
     res.end();
     return true;
   }

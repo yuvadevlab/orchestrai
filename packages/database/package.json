@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@orchestrai/core": "workspace:*",
+    "@orchestrai/regex": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
