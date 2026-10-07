@@ -4,10 +4,9 @@
  */
 
 import { ServerMessageType, ChannelTopics } from "@/contracts";
+import { PresenceEvent } from "@orchestrai/shared-types";
 import type { ConnectionRegistry } from "@/connection";
 import type { SubscriptionManager } from "@/subscriptions";
-
-export type PresenceEvent = "JOIN" | "LEAVE";
 
 export interface PresenceState {
   readonly executionId: string;
@@ -44,7 +43,7 @@ export class PresenceManager {
       const payload = JSON.stringify({
         type: ServerMessageType.PRESENCE,
         timestamp: Date.now(),
-        payload: { event: "JOIN" as PresenceEvent, ...state },
+        payload: { event: PresenceEvent.JOIN, ...state },
       });
       subscriptions.broadcastToTopic(ChannelTopics.execution(executionId), payload, registry);
     }
@@ -75,7 +74,7 @@ export class PresenceManager {
     const payload = JSON.stringify({
       type: ServerMessageType.PRESENCE,
       timestamp: Date.now(),
-      payload: { event: "LEAVE" as PresenceEvent, ...state },
+      payload: { event: PresenceEvent.LEAVE, ...state },
     });
     subscriptions.broadcastToTopic(ChannelTopics.execution(executionId), payload, registry);
   }

@@ -8,6 +8,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
+import { QUERY_KEYS, QUERY_PARAMS, API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 /** File entry returned by the gateway workspace exploration endpoint. */
 export interface WorkspaceFileItem {
@@ -37,22 +38,28 @@ export function useWorkspaceFiles(
   const client = getApiClient();
 
   return useQuery({
-    queryKey: ["workspace-files", workspacePath || "root", searchQuery || ""],
+    queryKey: QUERY_KEYS.WORKSPACE.FILES(workspacePath, searchQuery),
     queryFn: async (): Promise<WorkspaceFileItem[]> => {
       const params = new URLSearchParams();
-      if (workspacePath) params.set("path", workspacePath);
-      if (searchQuery) params.set("query", searchQuery);
-      params.set("limit", "100");
+      // Apply path filter if provided
+      if (workspacePath) {
+        params.set(QUERY_PARAMS.PATH, workspacePath);
+      }
+      // Apply fuzzy query search term if provided
+      if (searchQuery) {
+        params.set(QUERY_PARAMS.QUERY, searchQuery);
+      }
+      params.set(QUERY_PARAMS.LIMIT, "100");
 
       const res = await client.http.request<WorkspaceFilesResponse>(
-        `/api/v1/workspace/files?${params.toString()}`,
-        { method: "GET" },
+        `${API_ROUTES.WORKSPACE_FILES}?${params.toString()}`,
+        { method: HttpMethod.GET },
       );
 
       return res?.data ?? [];
     },
     enabled: enabled && typeof window !== "undefined",
-    staleTime: 10_000, // 10 seconds cache
+    staleTime: 10_000,
     placeholderData: (prev) => prev,
   });
 }

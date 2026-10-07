@@ -15,7 +15,7 @@
  */
 
 import { OrchestrAIError } from "@orchestrai/core";
-import { ToolPermissionLevel } from "@orchestrai/shared-types";
+import { ToolPermissionLevel, ErrorCode } from "@orchestrai/shared-types";
 import type { ITool } from "@/interfaces";
 import type { AnthropicToolFormat, OpenAiFunctionToolFormat } from "./tool-registry.types";
 
@@ -39,7 +39,7 @@ export class ToolRegistry {
     if (!allowOverwrite && this.tools.has(name)) {
       throw new OrchestrAIError(
         `Tool with name "${name}" is already registered in this registry`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         409,
         { toolName: name },
       );
@@ -71,7 +71,7 @@ export class ToolRegistry {
     if (!tool) {
       throw new OrchestrAIError(
         `Tool "${name}" is not registered in this registry`,
-        "NOT_FOUND",
+        ErrorCode.NOT_FOUND,
         404,
         { toolName: name },
       );

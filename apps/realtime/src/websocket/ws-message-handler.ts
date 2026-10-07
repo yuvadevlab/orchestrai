@@ -4,7 +4,13 @@
  */
 
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
-import { ChannelTopics, ClientMessageSchema, ServerMessageType } from "@/contracts";
+import { ErrorCode } from "@orchestrai/shared-types";
+import {
+  ChannelTopics,
+  ClientMessageSchema,
+  ServerMessageType,
+  WsClientMessageType,
+} from "@/contracts";
 import type { ClientSession, ConnectionRegistry } from "@/connection";
 import type { SubscriptionManager } from "@/subscriptions";
 import { authenticateSession } from "./ws-authenticator";
@@ -43,7 +49,10 @@ export function handleWsMessage(
   } catch {
     // Guard: Malformed JSON should send a descriptive error frame and stop processing
     session.send(
-      buildServerFrame(ServerMessageType.ERROR, { code: "PARSE_ERROR", message: "Invalid JSON" }),
+      buildServerFrame(ServerMessageType.ERROR, {
+        code: ErrorCode.PARSE_ERROR,
+        message: "Invalid JSON",
+      }),
     );
     return;
   }
@@ -53,7 +62,7 @@ export function handleWsMessage(
     // Guard: Schema validation ensures clients cannot submit unexpected frame shapes
     session.send(
       buildServerFrame(ServerMessageType.ERROR, {
-        code: "VALIDATION_ERROR",
+        code: ErrorCode.VALIDATION_ERROR,
         message: "Invalid message format",
         details: result.error.issues,
       }),
@@ -65,14 +74,14 @@ export function handleWsMessage(
   session.touch();
 
   switch (msg.type) {
-    case "AUTH": {
+    case WsClientMessageType.AUTH: {
       const authResult = authenticateSession(session.id, msg.token, deps.jwtSecret, deps.registry);
       if (authResult.authenticated) {
         session.send(buildServerFrame(ServerMessageType.CONNECTED, { userId: authResult.userId }));
       } else {
         session.send(
           buildServerFrame(ServerMessageType.ERROR, {
-            code: "AUTH_FAILED",
+            code: ErrorCode.UNAUTHORIZED,
             message: authResult.reason,
           }),
         );
@@ -80,7 +89,7 @@ export function handleWsMessage(
       break;
     }
 
-    case "SUBSCRIBE": {
+    case WsClientMessageType.SUBSCRIBE: {
       for (const topic of msg.topics) {
         if (!ChannelTopics.isValid(topic)) {
           // Skip invalid topics to prevent arbitrary channel floods
@@ -93,7 +102,7 @@ export function handleWsMessage(
       break;
     }
 
-    case "UNSUBSCRIBE": {
+    case WsClientMessageType.UNSUBSCRIBE: {
       for (const topic of msg.topics) {
         deps.subscriptions.unsubscribe(session.id, topic);
         session.unsubscribe(topic);
@@ -102,14 +111,14 @@ export function handleWsMessage(
       break;
     }
 
-    case "PING": {
+    case WsClientMessageType.PING: {
       session.send(buildServerFrame(ServerMessageType.PONG, { timestamp: Date.now() }));
       break;
     }
 
-    case "ACTION": {
+    case WsClientMessageType.ACTION: {
       // Phase 12: Log action; actual approval/cancel routing handled by Gateway HTTP API
-      logger.info("WebSocket ACTION received", {
+      logger.info("handleWsMessage: WebSocket action frame received", {
         sessionId: session.id,
         action: msg.action,
         executionId: msg.executionId,
@@ -120,7 +129,7 @@ export function handleWsMessage(
     default: {
       session.send(
         buildServerFrame(ServerMessageType.ERROR, {
-          code: "UNKNOWN_TYPE",
+          code: ErrorCode.BAD_REQUEST,
           message: "Unrecognized message type",
         }),
       );

@@ -6,9 +6,15 @@
 
 import type { GatewayRequest, GatewayResponse, RouteHandler } from "@/routes/http-types";
 import { sendJson } from "@/routes/http-helpers";
+import { ErrorCode, OperatorRole } from "@orchestrai/shared-types";
 
 /** Allowed role identifiers with platform administrative permissions. */
-const ADMIN_ROLES = new Set(["admin", "super_admin", "owner", "system"]);
+const ADMIN_ROLES = new Set<string>([
+  OperatorRole.ADMIN,
+  OperatorRole.SUPER_ADMIN,
+  OperatorRole.OWNER,
+  OperatorRole.SYSTEM,
+]);
 
 /**
  * Validates that the requesting user context holds an administrative role.
@@ -25,7 +31,7 @@ export function requireAdmin(req: GatewayRequest, res: GatewayResponse): boolean
   if (!isAdmin) {
     sendJson(res, 403, {
       error: {
-        code: "FORBIDDEN",
+        code: ErrorCode.FORBIDDEN,
         message: "Admin or super_admin privileges required for this resource",
         requestId: req.context?.requestId,
       },

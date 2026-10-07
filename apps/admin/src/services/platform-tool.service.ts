@@ -4,6 +4,7 @@
  * @module apps/admin/services
  */
 
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { getPrismaClient, type PrismaClient, type PlatformTool } from "@orchestrai/database";
 import { ToolPermissionLevel } from "@orchestrai/shared-types";
 
@@ -38,10 +39,15 @@ export interface UpsertToolDto {
   sortOrder?: number;
 }
 
+/** Default tool category when none is specified by the operator */
+const DEFAULT_TOOL_CATEGORY = "General";
+
 /**
  * Admin service managing platform tool catalog definitions.
  */
 export class PlatformToolAdminService {
+  private readonly logger = loggerWithConfig(new Logger("PlatformToolAdminService"));
+
   private get db(): PrismaClient {
     return getPrismaClient();
   }
@@ -50,6 +56,9 @@ export class PlatformToolAdminService {
    * Retrieves all registered platform tools.
    */
   public async listTools(): Promise<PlatformToolRecord[]> {
+    this.logger.info("listTools: querying registered platform tools");
+
+    // Fetch tool catalog ordered by priority and name
     const tools = await this.db.platformTool.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
@@ -73,11 +82,14 @@ export class PlatformToolAdminService {
    * Registers a new platform tool.
    */
   public async createTool(dto: UpsertToolDto): Promise<PlatformToolRecord> {
+    this.logger.info("createTool: registering new platform tool", { slug: dto.slug });
+
+    // Insert new tool definition with safe permission defaults
     const t = await this.db.platformTool.create({
       data: {
         name: dto.name,
         slug: dto.slug,
-        category: dto.category || "General",
+        category: dto.category || DEFAULT_TOOL_CATEGORY,
         description: dto.description,
         permissionLevel: dto.permissionLevel || ToolPermissionLevel.READ_ONLY,
         sandbox: dto.sandbox || ToolPermissionLevel.READ_ONLY,
@@ -108,6 +120,9 @@ export class PlatformToolAdminService {
     toolId: string,
     dto: Partial<UpsertToolDto>,
   ): Promise<PlatformToolRecord> {
+    this.logger.info("updateTool: updating platform tool", { toolId, slug: dto.slug });
+
+    // Conditionally patch tool catalog fields
     const t = await this.db.platformTool.update({
       where: { toolId },
       data: {
@@ -143,6 +158,8 @@ export class PlatformToolAdminService {
    * Removes a tool from the catalog.
    */
   public async deleteTool(toolId: string): Promise<void> {
+    this.logger.info("deleteTool: removing platform tool from catalog", { toolId });
+    // Cascade delete tool entry
     await this.db.platformTool.delete({ where: { toolId } });
   }
 }

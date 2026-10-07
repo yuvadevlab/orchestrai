@@ -9,8 +9,9 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import type { EvaluationDataset } from "../types";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
-export const EVALUATION_DATASETS_QUERY_KEY = ["eval", "datasets"] as const;
+export const EVALUATION_DATASETS_QUERY_KEY = QUERY_KEYS.EVALUATIONS.DATASETS;
 
 /**
  * Hook to retrieve available benchmark evaluation datasets.
@@ -21,8 +22,9 @@ export function useEvaluationDatasets(): UseQueryResult<EvaluationDataset[], Err
   return useQuery({
     queryKey: EVALUATION_DATASETS_QUERY_KEY,
     queryFn: async (): Promise<EvaluationDataset[]> => {
+      // Query evaluation benchmark datasets from Gateway API
       const res = await client.http.request<{ datasets: EvaluationDataset[] }>(
-        "/api/v1/eval/datasets",
+        API_ROUTES.EVAL_DATASETS,
       );
       return res.datasets || [];
     },

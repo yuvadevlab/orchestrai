@@ -10,6 +10,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/r
 import { getApiClient } from "@/lib/api-client";
 import { KNOWLEDGE_DOCUMENTS_QUERY_KEY } from "./use-knowledge-documents";
 import type { IngestDocumentPayload } from "../types";
+import { API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 /**
  * Hook to ingest and chunk a document into RAG vector storage.
@@ -20,12 +21,14 @@ export function useIngestDocument(): UseMutationResult<unknown, Error, IngestDoc
 
   return useMutation({
     mutationFn: async (payload: IngestDocumentPayload): Promise<unknown> => {
-      return client.http.request("/api/v1/rag/documents", {
-        method: "POST",
+      // Ingest document payload via Gateway API
+      return client.http.request(API_ROUTES.RAG_DOCUMENTS, {
+        method: HttpMethod.POST,
         body: JSON.stringify(payload),
       });
     },
     onSuccess: () => {
+      // Invalidate knowledge documents cache
       queryClient.invalidateQueries({ queryKey: KNOWLEDGE_DOCUMENTS_QUERY_KEY });
     },
   });

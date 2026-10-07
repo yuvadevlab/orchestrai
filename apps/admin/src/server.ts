@@ -73,7 +73,7 @@ export class AdminServer {
           // 3. Dispatch to route handler
           await this.router.handle(req, res);
         } catch (err) {
-          logger.error("[AdminServer] Request failure", {
+          logger.error("handleRequest: request failure", {
             error: String(err),
             url: req.url,
             requestId: context.requestId,
@@ -86,7 +86,7 @@ export class AdminServer {
 
       this.httpServer.once("error", reject);
       this.httpServer.listen(this.config.port, this.config.host, () => {
-        logger.info("Operator Control Plane online", {
+        logger.info("start: operator control plane online", {
           host: this.config.host,
           port: this.config.port,
           env: this.config.nodeEnv,
@@ -104,7 +104,7 @@ export class AdminServer {
       return;
     }
 
-    logger.info("Shutting down Operator Control Plane...", {
+    logger.info("stop: shutting down operator control plane", {
       inFlightRequests: this.inFlightRequests,
     });
 
@@ -114,7 +114,7 @@ export class AdminServer {
           reject(err);
           return;
         }
-        logger.info("Operator Control Plane stopped cleanly");
+        logger.info("stop: operator control plane stopped cleanly");
         resolve();
       });
     });

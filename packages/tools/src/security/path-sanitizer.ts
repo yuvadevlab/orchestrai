@@ -6,6 +6,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import { expandUserHome } from "./sensitive-path.detector";
 
@@ -39,7 +40,7 @@ export function sanitizePath(
   allowedRoots: string | readonly string[],
 ): string {
   if (!candidatePath || candidatePath.trim().length === 0) {
-    throw new OrchestrAIError("Target path must not be empty", "VALIDATION_ERROR", 400, {
+    throw new OrchestrAIError("Target path must not be empty", ErrorCode.VALIDATION_ERROR, 400, {
       candidatePath,
     });
   }
@@ -72,7 +73,7 @@ export function sanitizePath(
   if (!isContained) {
     throw new OrchestrAIError(
       `Access denied: path "${candidatePath}" resolves to "${resolvedTarget}", which is outside all authorized directories: [${rootsList.join(", ")}]`,
-      "POLICY_VIOLATION",
+      ErrorCode.POLICY_VIOLATION,
       403,
       { candidatePath, resolvedTarget, allowedRoots: rootsList },
     );

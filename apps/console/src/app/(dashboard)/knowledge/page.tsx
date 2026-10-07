@@ -6,6 +6,9 @@
 
 import { redirect } from "next/navigation";
 
+/**
+ * Server-side redirect forwarding legacy /knowledge route to consolidated /context hub tab.
+ */
 export default function KnowledgeRedirect(): never {
   redirect("/context?tab=knowledge");
 }

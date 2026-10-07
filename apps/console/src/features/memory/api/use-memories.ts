@@ -9,8 +9,9 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import type { MemoryItem } from "../types";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
-export const MEMORY_QUERY_KEY = ["memory", "list"] as const;
+export const MEMORY_QUERY_KEY = QUERY_KEYS.MEMORY.ALL;
 
 /**
  * Hook to retrieve all agent memories and learned facts.
@@ -21,8 +22,9 @@ export function useMemories(): UseQueryResult<MemoryItem[], Error> {
   return useQuery({
     queryKey: MEMORY_QUERY_KEY,
     queryFn: async (): Promise<MemoryItem[]> => {
+      // Query memories catalog from Gateway API
       const res = await client.http.request<{ items: MemoryItem[]; total: number }>(
-        "/api/v1/memory",
+        API_ROUTES.MEMORY,
       );
       return res.items || [];
     },

@@ -10,6 +10,7 @@ import { useApiData, type UseApiDataResult } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth";
 import { AgentStatus, type AgentDefinition } from "../types";
 import type { Agent } from "@orchestrai/sdk";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 /**
  * Custom React hook querying registered agents from Gateway REST API.
@@ -62,7 +63,7 @@ export function useAgents(): UseApiDataResult<AgentDefinition[]> {
       });
     },
     initialData: [],
-    queryKey: ["agents", tenantId],
+    queryKey: QUERY_KEYS.AGENTS.LIST(tenantId),
     enabled: !isAuthLoading && Boolean(tenantId),
   });
 }

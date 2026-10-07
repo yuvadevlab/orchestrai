@@ -5,6 +5,7 @@
  */
 
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
+import { ErrorCode, OperatorRole } from "@orchestrai/shared-types";
 import type { GatewayRequest, GatewayResponse } from "@/routes";
 import type { GatewayConfig } from "@/config";
 import { AuthService } from "@/modules/auth";
@@ -48,11 +49,13 @@ export async function authenticateRequest(
   const apiKey = typeof rawApiKey === "string" ? rawApiKey.trim() : undefined;
 
   if (apiKey && apiKey === config.gatewayApiKey) {
-    logger.info("[Auth] Request authenticated via Gateway API Key", { path: urlPath });
+    logger.info("authenticateRequest: request authenticated via gateway API key", {
+      path: urlPath,
+    });
     req.context.authenticated = true;
     req.context.apiKeyId = "primary-key";
     req.context.userId = "service-account";
-    req.context.roles = ["admin", "operator"];
+    req.context.roles = [OperatorRole.ADMIN, OperatorRole.OPERATOR];
     return true;
   }
 
@@ -73,20 +76,22 @@ export async function authenticateRequest(
         return true;
       }
     } catch (err) {
-      logger.error("[Auth] Error verifying user token against DB", { error: String(err) });
+      logger.error("authenticateRequest: error verifying user token against DB", {
+        error: String(err),
+      });
     }
 
     // Secondary: Master JWT secret for system-level integrations
     if (token === config.jwtSecret) {
       req.context.authenticated = true;
       req.context.userId = "system-master";
-      req.context.roles = ["admin", "system"];
+      req.context.roles = [OperatorRole.ADMIN, OperatorRole.SYSTEM];
       return true;
     }
   }
 
   // 4. Reject unauthorized request with 401
-  logger.warn("[Auth] Unauthorized request rejected", {
+  logger.warn("authenticateRequest: unauthorized request rejected", {
     path: urlPath,
     method: req.method,
     requestId: req.context?.requestId,
@@ -97,7 +102,7 @@ export async function authenticateRequest(
   res.end(
     JSON.stringify({
       error: {
-        code: "UNAUTHORIZED",
+        code: ErrorCode.UNAUTHORIZED,
         message: "Missing or invalid authentication credentials (Bearer token or API key)",
         requestId: req.context?.requestId,
       },

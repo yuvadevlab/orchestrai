@@ -10,6 +10,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/r
 import { getApiClient } from "@/lib/api-client";
 import { MEMORY_QUERY_KEY } from "./use-memories";
 import type { CreateMemoryPayload } from "../types";
+import { API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 /**
  * Hook to store a new semantic memory or fact.
@@ -20,12 +21,14 @@ export function useCreateMemory(): UseMutationResult<unknown, Error, CreateMemor
 
   return useMutation({
     mutationFn: async (payload: CreateMemoryPayload): Promise<unknown> => {
-      return client.http.request("/api/v1/memory", {
-        method: "POST",
+      // Commit new memory record via Gateway API
+      return client.http.request(API_ROUTES.MEMORY, {
+        method: HttpMethod.POST,
         body: JSON.stringify(payload),
       });
     },
     onSuccess: () => {
+      // Invalidate active memory cache
       queryClient.invalidateQueries({ queryKey: MEMORY_QUERY_KEY });
     },
   });

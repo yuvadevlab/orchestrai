@@ -11,6 +11,11 @@ const ModelsPageContent = dynamic(() =>
   import("@/features/models").then((m) => ({ default: m.ModelsPageContent })),
 );
 
+/**
+ * Models page rendering configured LLM provider integrations, model catalog, and connection health.
+ *
+ * @returns JSX element containing ModelsPageContent
+ */
 export default function ModelsPage(): React.JSX.Element {
   return <ModelsPageContent />;
 }

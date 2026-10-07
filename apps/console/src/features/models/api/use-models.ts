@@ -10,6 +10,7 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { ModelStatus, type LlmModel, type LlmProvider, type ModelDefinition } from "../types";
 import { useAuth } from "@/lib/auth";
+import { QUERY_KEYS, QUERY_PARAMS, API_ROUTES } from "@/lib/query-keys";
 
 /**
  * Custom React hook querying live LLM models from the Gateway API.
@@ -21,11 +22,14 @@ export function useModels(providerId?: string): UseQueryResult<LlmModel[], Error
   const { isAuthenticated, isLoading } = useAuth();
 
   return useQuery<LlmModel[]>({
-    queryKey: ["models", providerId],
+    queryKey: QUERY_KEYS.MODELS.LIST(providerId),
     enabled: isAuthenticated && !isLoading,
     queryFn: async (): Promise<LlmModel[]> => {
       const client = getApiClient();
-      const url = providerId ? `/api/v1/models?providerId=${providerId}` : "/api/v1/models";
+      // Construct dynamic URL leveraging centralized query parameter constant
+      const url = providerId
+        ? `${API_ROUTES.MODELS}?${QUERY_PARAMS.PROVIDER_ID}=${encodeURIComponent(providerId)}`
+        : API_ROUTES.MODELS;
       const response = await client.http.request<LlmModel[]>(url).catch(() => []);
       return Array.isArray(response) ? response : [];
     },
@@ -42,12 +46,12 @@ export function useProviders(): UseQueryResult<LlmProvider[], Error> {
   const { isAuthenticated, isLoading } = useAuth();
 
   return useQuery<LlmProvider[]>({
-    queryKey: ["providers"],
+    queryKey: QUERY_KEYS.PROVIDERS.ALL,
     enabled: isAuthenticated && !isLoading,
     queryFn: async (): Promise<LlmProvider[]> => {
       const client = getApiClient();
       const response = await client.http
-        .request<LlmProvider[]>("/api/v1/providers")
+        .request<LlmProvider[]>(API_ROUTES.PROVIDERS)
         .catch(() => []);
       return Array.isArray(response) ? response : [];
     },

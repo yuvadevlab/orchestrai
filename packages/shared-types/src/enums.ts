@@ -13,4 +13,5 @@ export * from "./enums/cqrs.enums";
 export * from "./enums/orchestrator.enums";
 export * from "./enums/platform.enums";
 export * from "./enums/intelligence.enums";
-export type { ErrorCode } from "./error-codes";
+export * from "./enums/worker.enums";
+export * from "./enums/error-codes.enum";

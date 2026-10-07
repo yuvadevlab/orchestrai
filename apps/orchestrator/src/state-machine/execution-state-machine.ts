@@ -79,7 +79,7 @@ export class ExecutionStateMachine {
   public async transition(event: OrchestratorEvent): Promise<OrchestratorState> {
     const nextState = this.determineNextState(event);
 
-    logger.debug("State transition requested", {
+    logger.debug("transition: state transition requested", {
       executionId: this.executionId,
       from: this.currentState,
       to: nextState,

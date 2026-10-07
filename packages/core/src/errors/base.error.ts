@@ -11,7 +11,7 @@
  *   truth; add new codes there whenever a new subclass is introduced.
  */
 
-import type { ErrorCode } from "@orchestrai/shared-types";
+import { ErrorCode } from "@orchestrai/shared-types";
 
 /**
  * Serialized representation of an OrchestrAI error for API and logging boundaries.
@@ -49,7 +49,7 @@ export class OrchestrAIError<TCode extends ErrorCode = ErrorCode> extends Error 
    */
   constructor(
     message: string,
-    public readonly code: TCode = "INTERNAL_SERVER_ERROR" as TCode,
+    public readonly code: TCode = ErrorCode.INTERNAL_SERVER_ERROR as TCode,
     public readonly statusCode: number = 500,
     public readonly details?: unknown,
   ) {

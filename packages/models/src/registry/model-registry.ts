@@ -10,6 +10,7 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import type { ModelProvider } from "@orchestrai/core";
 import type { ModelRegistryEntry, ModelRegistryKey } from "./model-registry.types";
@@ -84,7 +85,7 @@ export class ModelRegistry {
 
     throw new OrchestrAIError(
       `No model adapter is registered. Call registry.register() at startup.`,
-      "NOT_FOUND",
+      ErrorCode.NOT_FOUND,
       404,
       { provider, modelName },
     );

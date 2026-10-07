@@ -9,7 +9,8 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
-import type { NavItemRecord } from "@orchestrai/shared-types";
+import { NavSection, type NavItemRecord } from "@orchestrai/shared-types";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
 export type DynamicNavItem = NavItemRecord;
 
@@ -24,26 +25,31 @@ export function useNavItems(): UseQueryResult<NavItemRecord[], Error> {
   const userRoles = user?.roles ?? [];
 
   return useQuery<NavItemRecord[]>({
-    queryKey: ["nav-items", user?.id, userRoles],
+    queryKey: QUERY_KEYS.PLATFORM.NAV_ITEMS(user?.id, userRoles),
     enabled: isAuthenticated && !isLoading,
     queryFn: async (): Promise<NavItemRecord[]> => {
       const client = getApiClient();
-      const response = await client.http.request<NavItemRecord[]>("/api/v1/nav").catch(() => []);
+      // Fetch dynamic navigation items catalog from gateway API
+      const response = await client.http.request<NavItemRecord[]>(API_ROUTES.NAV).catch(() => []);
 
+      // Ensure valid array payload from server
       if (!Array.isArray(response) || response.length === 0) {
         return [];
       }
 
-      // Filter visible items, match user roles, and order by section ('main' before 'bottom') then sortOrder
+      // Filter visible items, match user roles, and order by section (main before bottom) then sortOrder
       const filtered = response
         .filter((item) => item.isVisible && item.isEnabled)
         .filter((item) => {
+          // If no roles specified on item, it is visible to all authenticated users
           if (!item.roles || item.roles.length === 0) return true;
+          // Verify user possesses at least one authorized role
           return item.roles.some((role) => userRoles.includes(role));
         })
         .sort((a, b) => {
+          // Prioritize MAIN navigation section over BOTTOM section
           if (a.section !== b.section) {
-            return a.section === "main" ? -1 : 1;
+            return a.section === NavSection.MAIN ? -1 : 1;
           }
           return a.sortOrder - b.sortOrder;
         });

@@ -10,6 +10,7 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
 export interface AgentRoleRecord {
   roleId: string;
@@ -30,12 +31,12 @@ export function useAgentRoles(): UseQueryResult<AgentRoleRecord[], Error> {
   const { isAuthenticated, isLoading } = useAuth();
 
   return useQuery<AgentRoleRecord[]>({
-    queryKey: ["agent-roles"],
+    queryKey: QUERY_KEYS.AGENTS.ROLES,
     enabled: isAuthenticated && !isLoading,
     queryFn: async (): Promise<AgentRoleRecord[]> => {
       const client = getApiClient();
       const response = await client.http
-        .request<AgentRoleRecord[]>("/api/v1/roles")
+        .request<AgentRoleRecord[]>(API_ROUTES.ROLES)
         .catch(() => []);
 
       if (!Array.isArray(response)) {

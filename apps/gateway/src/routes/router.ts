@@ -3,8 +3,14 @@
  * @description Lightweight parameterized HTTP request router with URL pattern matching.
  */
 
-import type { GatewayRequest, GatewayResponse, HttpMethod, RouteHandler } from "./http-types";
+import {
+  HttpMethod,
+  type GatewayRequest,
+  type GatewayResponse,
+  type RouteHandler,
+} from "./http-types";
 import { parseJsonBody, sendJson } from "./http-helpers";
+import { ErrorCode } from "@orchestrai/shared-types";
 
 interface RegisteredRoute {
   method: HttpMethod;
@@ -95,23 +101,23 @@ export class Router {
   }
 
   public get(path: string, handler: RouteHandler): void {
-    this.register("GET", path, handler);
+    this.register(HttpMethod.GET, path, handler);
   }
 
   public post(path: string, handler: RouteHandler): void {
-    this.register("POST", path, handler);
+    this.register(HttpMethod.POST, path, handler);
   }
 
   public put(path: string, handler: RouteHandler): void {
-    this.register("PUT", path, handler);
+    this.register(HttpMethod.PUT, path, handler);
   }
 
   public patch(path: string, handler: RouteHandler): void {
-    this.register("PATCH", path, handler);
+    this.register(HttpMethod.PATCH, path, handler);
   }
 
   public delete(path: string, handler: RouteHandler): void {
-    this.register("DELETE", path, handler);
+    this.register(HttpMethod.DELETE, path, handler);
   }
 
   /**
@@ -144,7 +150,10 @@ export class Router {
         }
 
         // Parse JSON body for mutation verbs if not already parsed
-        if (["POST", "PUT", "PATCH"].includes(method) && req.body === undefined) {
+        if (
+          [HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH].includes(method) &&
+          req.body === undefined
+        ) {
           req.body = await parseJsonBody(req);
         }
 
@@ -156,7 +165,7 @@ export class Router {
     // No matching route registered
     sendJson(res, 404, {
       error: {
-        code: "NOT_FOUND",
+        code: ErrorCode.NOT_FOUND,
         message: `Endpoint ${method} ${urlPath} not found`,
         requestId: req.context.requestId,
       },

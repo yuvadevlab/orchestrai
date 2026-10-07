@@ -3,6 +3,7 @@
  * @description Decision processing coordinator validating operator verdicts and argument overrides.
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import {
   ApprovalResolutionInputSchema,
@@ -40,7 +41,7 @@ export class ApprovalDecisionEngine {
     if (!ticket) {
       throw new OrchestrAIError(
         `Approval decision failed: ticket "${approvalId}" not found`,
-        "NOT_FOUND",
+        ErrorCode.NOT_FOUND,
         404,
         { approvalId },
       );
@@ -55,7 +56,7 @@ export class ApprovalDecisionEngine {
       ) {
         throw new OrchestrAIError(
           "Invalid modified arguments: must be a key-value record object",
-          "VALIDATION_ERROR",
+          ErrorCode.VALIDATION_ERROR,
           400,
           { approvalId },
         );

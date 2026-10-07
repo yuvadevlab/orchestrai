@@ -19,6 +19,7 @@ import { getApiClient } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { ToolDefinition } from "../types";
+import { QUERY_KEYS, API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 /**
  * Custom React hook querying registered agent tools from Gateway REST API.
@@ -30,11 +31,13 @@ export function useTools(): UseQueryResult<ToolDefinition[], Error> {
   const { isAuthenticated, isLoading } = useAuth();
 
   return useQuery<ToolDefinition[]>({
-    queryKey: ["tools"],
+    queryKey: QUERY_KEYS.TOOLS.ALL,
     enabled: isAuthenticated && !isLoading,
     queryFn: async (): Promise<ToolDefinition[]> => {
       const client = getApiClient();
-      const response = await client.http.request<ToolDefinition[]>("/api/v1/tools").catch(() => []);
+      const response = await client.http
+        .request<ToolDefinition[]>(API_ROUTES.TOOLS)
+        .catch(() => []);
 
       if (!Array.isArray(response)) {
         return [];
@@ -61,10 +64,13 @@ export function useToggleTool(): UseMutationResult<
   return useMutation({
     mutationFn: async ({ toolId, isEnabled, name }) => {
       const client = getApiClient();
-      const promise = client.http.request<ToolDefinition>(`/api/v1/tools/${toolId}`, {
-        method: "PUT",
-        body: { isEnabled },
-      });
+      const promise = client.http.request<ToolDefinition>(
+        `${API_ROUTES.TOOLS}/${encodeURIComponent(toolId)}`,
+        {
+          method: HttpMethod.PUT,
+          body: { isEnabled },
+        },
+      );
 
       toast.promise(promise, {
         loading: UI_COPY.TOOLS.CARD.TOAST_UPDATING(name),
@@ -75,7 +81,7 @@ export function useToggleTool(): UseMutationResult<
       return promise;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["tools"] });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TOOLS.ALL });
     },
   });
 }

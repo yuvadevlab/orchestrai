@@ -4,6 +4,7 @@
  * @module apps/admin/services
  */
 
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import {
   getPrismaClient,
   type PrismaClient,
@@ -30,6 +31,8 @@ export interface UpsertProviderDto {
  * Admin service managing LLM provider lifecycle operations.
  */
 export class LlmProviderAdminService {
+  private readonly logger = loggerWithConfig(new Logger("LlmProviderAdminService"));
+
   private get db(): PrismaClient {
     return getPrismaClient();
   }
@@ -38,6 +41,9 @@ export class LlmProviderAdminService {
    * Retrieves all registered LLM providers with associated model counts.
    */
   public async listProviders(): Promise<LlmProviderRecord[]> {
+    this.logger.info("listProviders: querying all registered LLM providers");
+
+    // Fetch providers with associated model counts ordered by priority and name
     const providers = await this.db.llmProvider.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       include: { _count: { select: { models: true } } },
@@ -63,6 +69,12 @@ export class LlmProviderAdminService {
    * Registers a new LLM provider in the platform catalog.
    */
   public async createProvider(dto: UpsertProviderDto): Promise<LlmProviderRecord> {
+    this.logger.info("createProvider: creating new LLM provider", {
+      slug: dto.slug,
+      providerType: dto.providerType,
+    });
+
+    // Insert new provider entity in catalog
     const p = await this.db.llmProvider.create({
       data: {
         name: dto.name,
@@ -99,6 +111,9 @@ export class LlmProviderAdminService {
     providerId: string,
     dto: Partial<UpsertProviderDto>,
   ): Promise<LlmProviderRecord> {
+    this.logger.info("updateProvider: updating LLM provider", { providerId, slug: dto.slug });
+
+    // Patch provider catalog fields conditionally
     const p = await this.db.llmProvider.update({
       where: { providerId },
       data: {
@@ -132,6 +147,8 @@ export class LlmProviderAdminService {
    * Removes an LLM provider from the catalog.
    */
   public async deleteProvider(providerId: string): Promise<void> {
+    this.logger.info("deleteProvider: removing LLM provider from catalog", { providerId });
+    // Cascade delete LLM provider
     await this.db.llmProvider.delete({ where: { providerId } });
   }
 }

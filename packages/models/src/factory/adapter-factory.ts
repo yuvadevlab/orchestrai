@@ -15,6 +15,7 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { ModelProvider, OrchestrAIError } from "@orchestrai/core";
 import { OllamaAdapter, OllamaConfigSchema } from "@/adapters/ollama";
 import { OpenAiAdapter, OpenAiConfigSchema } from "@/adapters/openai";
@@ -79,7 +80,7 @@ export async function createAdapter(
       throw new OrchestrAIError(
         "ModelProvider.CUSTOM requires a manually constructed adapter. " +
           "Implement ILlmAdapter directly and register it via ModelRegistry.register().",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
         { provider },
       );
@@ -91,7 +92,7 @@ export async function createAdapter(
       const _exhaustive: never = provider;
       throw new OrchestrAIError(
         `Unknown ModelProvider: "${String(_exhaustive)}"`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
         { provider: _exhaustive },
       );

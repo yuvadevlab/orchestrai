@@ -13,6 +13,14 @@ export enum PlatformScope {
 }
 
 /**
+ * Navigation section layout grouping.
+ */
+export enum NavSection {
+  MAIN = "main",
+  BOTTOM = "bottom",
+}
+
+/**
  * Standard functional capability identifiers assigned to agents.
  */
 export enum PlatformCapabilitySlug {
@@ -72,9 +80,12 @@ export enum ToolSandboxType {
  */
 export enum OperatorRole {
   ADMIN = "admin",
+  SUPER_ADMIN = "super_admin",
+  OWNER = "owner",
   OPERATOR = "operator",
   DEVELOPER = "developer",
   VIEWER = "viewer",
+  USER = "user",
   SYSTEM = "system",
 }
 
@@ -99,4 +110,14 @@ export enum AgentRoleSlug {
   DATA = "data",
   AUTOMATION = "automation",
   SPECIALIST = "specialist",
+}
+
+/**
+ * Service health and probe readiness indicators.
+ */
+export enum HealthStatus {
+  OK = "ok",
+  READY = "ready",
+  DEGRADED = "degraded",
+  DOWN = "down",
 }

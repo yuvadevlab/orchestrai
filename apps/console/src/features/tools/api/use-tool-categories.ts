@@ -6,6 +6,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
 /**
  * Type representing map of tool category names to descriptive blurb strings.
@@ -20,11 +21,11 @@ export type ToolCategoryBlurbs = Record<string, string>;
  */
 export function useToolCategories(): UseQueryResult<ToolCategoryBlurbs, Error> {
   return useQuery<ToolCategoryBlurbs>({
-    queryKey: ["tools", "categories"],
+    queryKey: QUERY_KEYS.TOOLS.CATEGORIES,
     queryFn: async (): Promise<ToolCategoryBlurbs> => {
       const client = getApiClient();
       const res = await client.http
-        .request<ToolCategoryBlurbs>("/api/v1/tools/categories")
+        .request<ToolCategoryBlurbs>(API_ROUTES.TOOLS_CATEGORIES)
         .catch(() => null);
 
       // Return server-provided blurbs when available and valid object

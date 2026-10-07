@@ -4,6 +4,7 @@
  * @module apps/admin/services
  */
 
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import {
   getPrismaClient,
   type PrismaClient,
@@ -31,6 +32,8 @@ export interface UpsertModeDto {
  * Admin service managing platform execution modes.
  */
 export class PlatformModeAdminService {
+  private readonly logger = loggerWithConfig(new Logger("PlatformModeAdminService"));
+
   private get db(): PrismaClient {
     return getPrismaClient();
   }
@@ -39,6 +42,9 @@ export class PlatformModeAdminService {
    * Lists all execution modes ordered by sort order.
    */
   public async listModes(): Promise<PlatformModeRecord[]> {
+    this.logger.info("listModes: querying platform modes");
+
+    // Fetch execution autonomy modes ordered by sort priority
     const modes = await this.db.platformMode.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
@@ -63,6 +69,9 @@ export class PlatformModeAdminService {
    * Registers a new platform execution mode.
    */
   public async createMode(dto: UpsertModeDto): Promise<PlatformModeRecord> {
+    this.logger.info("createMode: registering new platform mode", { slug: dto.slug });
+
+    // Insert new execution mode record
     const m = await this.db.platformMode.create({
       data: {
         name: dto.name,
@@ -100,6 +109,9 @@ export class PlatformModeAdminService {
     modeId: string,
     dto: Partial<UpsertModeDto>,
   ): Promise<PlatformModeRecord> {
+    this.logger.info("updateMode: updating platform mode", { modeId, slug: dto.slug });
+
+    // Update mode attributes conditionally
     const m = await this.db.platformMode.update({
       where: { modeId },
       data: {
@@ -135,6 +147,8 @@ export class PlatformModeAdminService {
    * Removes an execution mode from the catalog.
    */
   public async deleteMode(modeId: string): Promise<void> {
+    this.logger.info("deleteMode: removing platform mode", { modeId });
+    // Cascade delete platform mode
     await this.db.platformMode.delete({ where: { modeId } });
   }
 }

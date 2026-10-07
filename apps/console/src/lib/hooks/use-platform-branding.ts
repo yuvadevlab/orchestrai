@@ -7,14 +7,15 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
 /**
  * Platform branding configuration structure.
  */
 export interface PlatformBranding {
-  /** Application brand name (e.g. OrchestrAI) */
+  /** Application brand name */
   brandName: string;
-  /** Application version and distribution badge (e.g. v1.0.0 • enterprise) */
+  /** Application version and distribution badge */
   brandVersion: string;
 }
 
@@ -26,18 +27,19 @@ export interface PlatformBranding {
  */
 export function usePlatformBranding(): UseQueryResult<PlatformBranding, Error> {
   return useQuery<PlatformBranding>({
-    queryKey: ["platform", "branding"],
+    queryKey: QUERY_KEYS.PLATFORM.BRANDING,
     queryFn: async (): Promise<PlatformBranding> => {
       const client = getApiClient();
-      const res = await client.http.request<PlatformBranding>("/api/v1/branding").catch(() => null);
+      // Fetch dynamic application branding metadata from Gateway API
+      const res = await client.http.request<PlatformBranding>(API_ROUTES.BRANDING);
 
-      if (res && typeof res.brandName === "string" && typeof res.brandVersion === "string") {
+      if (res && typeof res.brandName === "string") {
         return res;
       }
 
       return {
-        brandName: process.env.NEXT_PUBLIC_APP_NAME || "OrchestrAI",
-        brandVersion: process.env.NEXT_PUBLIC_APP_VERSION || "v1.0.0 • enterprise",
+        brandName: process.env.NEXT_PUBLIC_APP_NAME || "",
+        brandVersion: process.env.NEXT_PUBLIC_APP_VERSION || "",
       };
     },
     staleTime: 300_000,

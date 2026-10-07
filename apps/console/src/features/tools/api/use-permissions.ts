@@ -10,6 +10,7 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
 export interface ToolPermissionRecord {
   permissionId: string;
@@ -30,12 +31,12 @@ export function usePermissions(): UseQueryResult<ToolPermissionRecord[], Error> 
   const { isAuthenticated, isLoading } = useAuth();
 
   return useQuery<ToolPermissionRecord[]>({
-    queryKey: ["tool-permissions"],
+    queryKey: QUERY_KEYS.TOOLS.PERMISSIONS,
     enabled: isAuthenticated && !isLoading,
     queryFn: async (): Promise<ToolPermissionRecord[]> => {
       const client = getApiClient();
       const response = await client.http
-        .request<ToolPermissionRecord[]>("/api/v1/permissions")
+        .request<ToolPermissionRecord[]>(API_ROUTES.PERMISSIONS)
         .catch(() => []);
 
       if (!Array.isArray(response)) {

@@ -6,10 +6,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { RequestContext } from "@/context";
 
-/**
- * Supported HTTP methods for gateway endpoints.
- */
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
+import { HttpMethod } from "@orchestrai/shared-types";
+
+export { HttpMethod };
 
 /**
  * Augmented HTTP IncomingMessage carrying typed context, route parameters, and parsed body.

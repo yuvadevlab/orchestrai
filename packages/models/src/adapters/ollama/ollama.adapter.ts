@@ -18,6 +18,7 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { ModelProvider, OrchestrAIError } from "@orchestrai/core";
 import type { ILlmAdapter, LlmRequest, LlmResponse, LlmStreamChunk } from "@/interfaces";
 import type { OllamaConfig } from "./ollama.config.schema";
@@ -110,7 +111,7 @@ export class OllamaAdapter implements ILlmAdapter {
       throw new OrchestrAIError(
         "The `ollama` npm package is required to use OllamaAdapter. " +
           "Install it: pnpm add ollama",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         500,
         { peerDep: "ollama" },
       );
@@ -132,7 +133,7 @@ export class OllamaAdapter implements ILlmAdapter {
     if (!model) {
       throw new OrchestrAIError(
         "No model identifier specified for Ollama invocation",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
       );
     }
@@ -165,7 +166,7 @@ export class OllamaAdapter implements ILlmAdapter {
       if (err instanceof OrchestrAIError) throw err;
       throw new OrchestrAIError(
         `Ollama invoke failed for model "${model}": ${String(err)}`,
-        "MODEL_TIMEOUT",
+        ErrorCode.MODEL_TIMEOUT,
         503,
         { model, cause: err },
       );
@@ -190,7 +191,7 @@ export class OllamaAdapter implements ILlmAdapter {
     if (!model) {
       throw new OrchestrAIError(
         "No model identifier specified for Ollama streaming",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
       );
     }
@@ -215,7 +216,7 @@ export class OllamaAdapter implements ILlmAdapter {
       if (err instanceof OrchestrAIError) throw err;
       throw new OrchestrAIError(
         `Ollama stream failed for model "${model}": ${String(err)}`,
-        "MODEL_TIMEOUT",
+        ErrorCode.MODEL_TIMEOUT,
         503,
         { model, cause: err },
       );

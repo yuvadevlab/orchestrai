@@ -9,6 +9,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import type { LlmModel } from "../types";
+import { QUERY_KEYS, API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 export interface RegisterModelInput {
   name: string;
@@ -29,8 +30,8 @@ export function useRegisterModelMutation(): UseMutationResult<LlmModel, Error, R
   return useMutation({
     mutationFn: async (input: RegisterModelInput): Promise<LlmModel> => {
       const client = getApiClient();
-      return client.http.request<LlmModel>("/api/v1/models", {
-        method: "POST",
+      return client.http.request<LlmModel>(API_ROUTES.MODELS, {
+        method: HttpMethod.POST,
         body: {
           name: input.name,
           providerId: input.providerId,
@@ -42,7 +43,7 @@ export function useRegisterModelMutation(): UseMutationResult<LlmModel, Error, R
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["models"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MODELS.ALL });
     },
   });
 }

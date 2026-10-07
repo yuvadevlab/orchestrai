@@ -4,6 +4,7 @@
  * @module apps/admin/services
  */
 
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { getPrismaClient, type PrismaClient, type Tenant } from "@orchestrai/database";
 import type { TenantBudgetInfo, TenantRecord } from "@orchestrai/shared-types";
 
@@ -26,6 +27,7 @@ interface TenantBudgetStoreEntry {
  * Admin service managing tenant quotas, spending caps, and tenant listings.
  */
 export class TenantBudgetAdminService {
+  private readonly logger = loggerWithConfig(new Logger("TenantBudgetAdminService"));
   private readonly budgetStore = new Map<string, TenantBudgetStoreEntry>();
 
   private get db(): PrismaClient {
@@ -36,6 +38,8 @@ export class TenantBudgetAdminService {
    * Retrieves or initializes budget quota metrics for a tenant partition.
    */
   public async getTenantBudget(tenantId: string): Promise<TenantBudgetInfo> {
+    this.logger.info("getTenantBudget: fetching tenant budget metrics", { tenantId });
+
     let entry = this.budgetStore.get(tenantId);
 
     // Initialize with healthy defaults if not yet established
@@ -67,6 +71,11 @@ export class TenantBudgetAdminService {
     tenantId: string,
     patch: { maxMonthlySpendUsd: number },
   ): Promise<TenantBudgetInfo> {
+    this.logger.info("updateTenantBudget: updating tenant spending cap", {
+      tenantId,
+      newCap: patch.maxMonthlySpendUsd,
+    });
+
     const existing = await this.getTenantBudget(tenantId);
     const newMaxSpend = patch.maxMonthlySpendUsd;
 
@@ -97,6 +106,9 @@ export class TenantBudgetAdminService {
    * Lists all registered tenant accounts in the cluster.
    */
   public async listTenants(): Promise<TenantRecord[]> {
+    this.logger.info("listTenants: querying all registered tenant accounts");
+
+    // Fetch all tenant partitions ordered alphabetically
     const tenants = await this.db.tenant.findMany({
       orderBy: { name: "asc" },
     });

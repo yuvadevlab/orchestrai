@@ -4,6 +4,7 @@
  * @module apps/admin/services
  */
 
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { getPrismaClient, type PrismaClient, type PlatformPermission } from "@orchestrai/database";
 
 /**
@@ -35,6 +36,8 @@ export interface UpsertPermissionDto {
  * Admin service managing platform execution permissions.
  */
 export class PlatformPermissionAdminService {
+  private readonly logger = loggerWithConfig(new Logger("PlatformPermissionAdminService"));
+
   private get db(): PrismaClient {
     return getPrismaClient();
   }
@@ -43,6 +46,9 @@ export class PlatformPermissionAdminService {
    * Retrieves all platform permission tiers.
    */
   public async listPermissions(): Promise<PlatformPermissionRecord[]> {
+    this.logger.info("listPermissions: querying platform permission tiers");
+
+    // Fetch ordered permission tiers from control plane
     const permissions = await this.db.platformPermission.findMany({
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
@@ -63,6 +69,9 @@ export class PlatformPermissionAdminService {
    * Creates a new platform permission tier.
    */
   public async createPermission(dto: UpsertPermissionDto): Promise<PlatformPermissionRecord> {
+    this.logger.info("createPermission: creating platform permission tier", { level: dto.level });
+
+    // Insert new permission tier record
     const p = await this.db.platformPermission.create({
       data: {
         name: dto.name,
@@ -92,6 +101,9 @@ export class PlatformPermissionAdminService {
     permissionId: string,
     dto: Partial<UpsertPermissionDto>,
   ): Promise<PlatformPermissionRecord> {
+    this.logger.info("updatePermission: updating platform permission tier", { permissionId });
+
+    // Conditionally patch permission fields
     const p = await this.db.platformPermission.update({
       where: { permissionId },
       data: {
@@ -121,6 +133,8 @@ export class PlatformPermissionAdminService {
    * Deletes a platform permission tier by UUID.
    */
   public async deletePermission(permissionId: string): Promise<void> {
+    this.logger.info("deletePermission: removing platform permission tier", { permissionId });
+    // Cascade delete permission tier
     await this.db.platformPermission.delete({ where: { permissionId } });
   }
 }

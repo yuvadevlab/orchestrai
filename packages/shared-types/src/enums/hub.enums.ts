@@ -53,6 +53,15 @@ export enum BenchmarkDatasetName {
 }
 
 /**
+ * Standard performance and capability benchmark evaluation metrics.
+ */
+export enum BenchmarkMetric {
+  ACCURACY = "accuracy",
+  LATENCY = "latency",
+  COST = "cost",
+}
+
+/**
  * Terminal execution episode learning outcome.
  */
 export enum EpisodeOutcome {

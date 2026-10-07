@@ -14,6 +14,7 @@
  * ───────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import type { AgentState } from "@orchestrai/core";
 import { LoopDetector } from "./loop-detector";
@@ -49,7 +50,7 @@ export class AgentStateMachine {
     if (this.state.isTerminated) {
       throw new OrchestrAIError(
         `Cannot advance step: agent execution "${this.state.executionId}" is already terminated`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
         { executionId: this.state.executionId },
       );
@@ -59,7 +60,7 @@ export class AgentStateMachine {
       this.state.isTerminated = true;
       throw new OrchestrAIError(
         `Execution step limit reached: exceeded maximum ${this.state.maxSteps} allowed steps`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
         {
           executionId: this.state.executionId,

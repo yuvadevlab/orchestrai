@@ -4,6 +4,7 @@
  */
 
 import crypto from "node:crypto";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { AgentExecutionJobPayloadSchema, type AgentExecutionJobPayload } from "@orchestrai/queue";
 import {
   ValidationError,
@@ -12,10 +13,13 @@ import {
   type AIMessage,
   type AgentDefinition,
 } from "@orchestrai/core";
-import { MessageRole, ExecutionStatus, ModelProvider } from "@orchestrai/shared-types";
+import { MessageRole, ExecutionStatus, ModelProvider, ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIRuntime, type RuntimeNodeDependencies } from "@orchestrai/runtime";
 import type { ILlmAdapter } from "@orchestrai/models";
 import type { ToolRegistry } from "@orchestrai/tools";
+
+/** Module-level logger for agent execution job handler */
+const logger = loggerWithConfig(new Logger("AgentJobHandler"));
 
 /**
  * Result returned from executing an agent execution job.
@@ -49,9 +53,12 @@ export async function handleAgentExecutionJob(
   rawPayload: unknown,
   deps: AgentJobHandlerDependencies,
 ): Promise<AgentJobExecutionResult> {
-  // 1. Validate payload against contract schema
+  // 1. Validate payload against contract schema — fail fast before any I/O
   const parseResult = AgentExecutionJobPayloadSchema.safeParse(rawPayload);
   if (!parseResult.success) {
+    logger.error("handleAgentExecutionJob: invalid job payload", {
+      issues: parseResult.error.issues,
+    });
     throw new ValidationError(
       "Failed to parse agent execution job payload: " + parseResult.error.message,
       parseResult.error.issues,
@@ -59,8 +66,13 @@ export async function handleAgentExecutionJob(
   }
 
   const payload: AgentExecutionJobPayload = parseResult.data;
+  logger.info("handleAgentExecutionJob: starting agent execution job", {
+    executionId: payload.executionId,
+    agentId: payload.agentId,
+    tenantId: payload.tenantId,
+  });
 
-  // 2. Resolve target agent definition
+  // 2. Resolve target agent definition from registry or DB
   const agent = await deps.resolveAgentDefinition(payload.agentId, payload.tenantId);
 
   // 3. Resolve the configured model adapter
@@ -87,7 +99,7 @@ export async function handleAgentExecutionJob(
   ];
 
   try {
-    // 6. Execute graph DAG via OrchestrAIRuntime
+    // 6. Execute graph DAG via OrchestrAIRuntime — blocking call until DAG resolves
     const finalState = await deps.runtime.start(
       agent,
       initialHistory,
@@ -99,10 +111,16 @@ export async function handleAgentExecutionJob(
     const lastMessage = finalState.history[finalState.history.length - 1];
     const outputText = lastMessage ? extractMessageText(lastMessage) : undefined;
 
-    // Check if execution paused waiting for human approval
+    // Check if execution paused waiting for human approval — surface WAITING status
     const status = finalState.pendingApprovalId
       ? ExecutionStatus.WAITING_FOR_APPROVAL
       : ExecutionStatus.COMPLETED;
+
+    logger.info("handleAgentExecutionJob: agent execution completed", {
+      executionId: payload.executionId,
+      status,
+      stepCount: finalState.history.length,
+    });
 
     return {
       executionId: payload.executionId,
@@ -112,14 +130,25 @@ export async function handleAgentExecutionJob(
       completedAt: new Date().toISOString(),
     };
   } catch (error) {
-    // Wrap unknown failures into OrchestrAIError to maintain domain invariants
+    // Re-throw domain errors as-is to preserve structured error chain
     if (error instanceof OrchestrAIError) {
+      logger.error("handleAgentExecutionJob: domain error during execution", {
+        executionId: payload.executionId,
+        code: error.code,
+        message: error.message,
+      });
       throw error;
     }
+    // Wrap unexpected errors to maintain domain invariants
     const message = error instanceof Error ? error.message : String(error);
+    logger.error("handleAgentExecutionJob: unexpected execution failure", {
+      executionId: payload.executionId,
+      agentId: payload.agentId,
+      message,
+    });
     throw new OrchestrAIError(
       `Execution failed for agent '${payload.agentId}' on execution '${payload.executionId}': ${message}`,
-      "WORKER_ERROR",
+      ErrorCode.WORKER_ERROR,
       500,
       { executionId: payload.executionId, agentId: payload.agentId },
     );

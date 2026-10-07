@@ -3,7 +3,7 @@
  * @description Core step controller and execution engine for autonomous agents.
  */
 
-import { AgentMode, MessageRole, ToolPermissionLevel } from "@orchestrai/shared-types";
+import { AgentMode, MessageRole, ToolPermissionLevel, StepOutcome } from "@orchestrai/shared-types";
 import { AIMessageSchema, type AIMessage, type AgentDefinition } from "@orchestrai/core";
 import type { ILlmAdapter } from "@orchestrai/models";
 import type { ToolRegistry } from "@orchestrai/tools";
@@ -62,7 +62,10 @@ export class AgentLoop {
    */
   public async step(history: readonly AIMessage[]): Promise<AgentStepResult> {
     const stepIndex = this.config.state.advanceStep();
-    this.logger.debug("Entering AgentLoop step", { stepIndex, historyLength: history.length });
+    this.logger.debug("step: entering execution step", {
+      stepIndex,
+      historyLength: history.length,
+    });
 
     // 1. Resolve operational mode (dynamically routed in AUTO mode via router)
     const activeMode =
@@ -117,7 +120,7 @@ export class AgentLoop {
 
       return {
         stepIndex,
-        outcome: isDone ? "HALTED" : "CONTINUE",
+        outcome: isDone ? StepOutcome.HALTED : StepOutcome.CONTINUE,
         assistantMessage,
         toolResults: [],
       };
@@ -137,7 +140,7 @@ export class AgentLoop {
     if (outcome.halted) {
       return {
         stepIndex,
-        outcome: "HALTED",
+        outcome: StepOutcome.HALTED,
         assistantMessage,
         toolResults: outcome.toolResults,
         error: outcome.error,
@@ -147,7 +150,7 @@ export class AgentLoop {
     if (outcome.pendingApproval) {
       return {
         stepIndex,
-        outcome: "WAITING_FOR_APPROVAL",
+        outcome: StepOutcome.WAITING_FOR_APPROVAL,
         assistantMessage,
         toolResults: outcome.toolResults,
         pendingApproval: outcome.pendingApproval,
@@ -156,7 +159,7 @@ export class AgentLoop {
 
     return {
       stepIndex,
-      outcome: "CONTINUE",
+      outcome: StepOutcome.CONTINUE,
       assistantMessage,
       toolResults: outcome.toolResults,
     };

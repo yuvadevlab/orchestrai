@@ -6,6 +6,9 @@
 
 import { redirect } from "next/navigation";
 
+/**
+ * Server-side redirect forwarding legacy /memory route to consolidated /context hub tab.
+ */
 export default function MemoryRedirect(): never {
   redirect("/context?tab=memory");
 }

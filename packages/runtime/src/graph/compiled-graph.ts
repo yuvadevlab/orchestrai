@@ -14,6 +14,7 @@
  */
 
 import crypto from "node:crypto";
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import { START, END, type NodeFunction, type EdgeRouter } from "./graph.types";
 import type { ICheckpointer } from "@/checkpoint";
@@ -83,7 +84,7 @@ export class CompiledGraph<TState extends Record<string, unknown>> {
       if (!nodeFn) {
         throw new OrchestrAIError(
           `Graph execution failed: node "${currentNode}" does not exist`,
-          "VALIDATION_ERROR",
+          ErrorCode.VALIDATION_ERROR,
           500,
           { nodeName: currentNode, executionId },
         );

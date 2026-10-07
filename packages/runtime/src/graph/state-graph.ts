@@ -10,6 +10,7 @@
  * ───────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import { START, END, type NodeFunction, type EdgeRouter } from "./graph.types";
 import { CompiledGraph, type CompiledGraphOptions } from "./compiled-graph";
@@ -33,7 +34,7 @@ export class StateGraph<TState extends Record<string, unknown>> {
     if (name === START || name === END) {
       throw new OrchestrAIError(
         `Cannot add node with reserved name "${name}"`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
         { nodeName: name },
       );
@@ -42,7 +43,7 @@ export class StateGraph<TState extends Record<string, unknown>> {
     if (this.nodes.has(name)) {
       throw new OrchestrAIError(
         `Node "${name}" is already registered in this graph`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         409,
         { nodeName: name },
       );
@@ -62,7 +63,7 @@ export class StateGraph<TState extends Record<string, unknown>> {
     if (this.edges.has(from) || this.conditionalEdges.has(from)) {
       throw new OrchestrAIError(
         `Source node "${from}" already has an outgoing edge defined`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         409,
         { from, to },
       );
@@ -82,7 +83,7 @@ export class StateGraph<TState extends Record<string, unknown>> {
     if (this.edges.has(source) || this.conditionalEdges.has(source)) {
       throw new OrchestrAIError(
         `Source node "${source}" already has an outgoing edge defined`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         409,
         { source },
       );
@@ -103,7 +104,7 @@ export class StateGraph<TState extends Record<string, unknown>> {
     if (!this.edges.has(START) && !this.conditionalEdges.has(START)) {
       throw new OrchestrAIError(
         `Graph compilation failed: missing initial edge from "${START}" entrypoint`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
       );
     }

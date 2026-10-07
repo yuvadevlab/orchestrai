@@ -10,6 +10,7 @@ import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { formatApiError } from "@/lib/error-utils";
+import { QUERY_KEY_SCOPES } from "@/lib/query-keys";
 
 export interface UseApiDataOptions<T> {
   /** Async fetch callback taking initialized OrchestrAIClient */
@@ -17,7 +18,7 @@ export interface UseApiDataOptions<T> {
   /** Default fallback data when loading or when API returns empty */
   initialData: T;
   /** Optional explicit cache key */
-  queryKey?: unknown[];
+  queryKey?: readonly unknown[];
   /** Optional enabled flag to conditionally trigger data fetching */
   enabled?: boolean;
 }
@@ -43,7 +44,7 @@ export function useApiData<T>({
   enabled = true,
 }: UseApiDataOptions<T>): UseApiDataResult<T> {
   const query = useQuery({
-    queryKey: queryKey || ["gateway-data", fetchFn.toString()],
+    queryKey: queryKey || [QUERY_KEY_SCOPES.GATEWAY_DATA, fetchFn.toString()],
     queryFn: async (): Promise<T> => {
       const client = getApiClient();
       const result = await fetchFn(client);

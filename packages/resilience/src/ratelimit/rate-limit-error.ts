@@ -20,7 +20,7 @@ export class RateLimitExceededError extends Error {
    */
   public constructor(retryAfterMs: number) {
     super(`Rate limit exceeded. Try again in ${Math.ceil(retryAfterMs)}ms.`);
-    this.name = "RateLimitExceededError";
+    this.name = this.constructor.name;
     this.retryAfterMs = Math.max(0, retryAfterMs);
 
     Object.setPrototypeOf(this, new.target.prototype);

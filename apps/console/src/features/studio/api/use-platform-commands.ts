@@ -10,6 +10,7 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import type { PlatformCommandRecord } from "@orchestrai/shared-types";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
 /**
  * Queries active platform slash commands from the Gateway API.
@@ -20,12 +21,12 @@ export function usePlatformCommands(): UseQueryResult<PlatformCommandRecord[], E
   const { isAuthenticated, isLoading } = useAuth();
 
   return useQuery<PlatformCommandRecord[]>({
-    queryKey: ["platform-commands"],
+    queryKey: QUERY_KEYS.PLATFORM.COMMANDS,
     enabled: isAuthenticated && !isLoading,
     queryFn: async (): Promise<PlatformCommandRecord[]> => {
       const client = getApiClient();
       const response = await client.http
-        .request<PlatformCommandRecord[]>("/api/v1/commands")
+        .request<PlatformCommandRecord[]>(API_ROUTES.COMMANDS)
         .catch(() => []);
 
       // Ensure response is an array before filtering

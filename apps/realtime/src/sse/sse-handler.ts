@@ -5,6 +5,7 @@
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
+import { RealtimeTransport } from "@orchestrai/shared-types";
 import { ClientSession, ConnectionRegistry } from "@/connection";
 import { SubscriptionManager } from "@/subscriptions";
 import { ChannelTopics } from "@/contracts";
@@ -61,7 +62,7 @@ export function handleExecutionSseStream(
   // Build ClientSession wrapping the SSE response lifecycle
   const session = new ClientSession({
     id: sessionId,
-    transport: "SSE",
+    transport: RealtimeTransport.SSE,
     ipAddress: req.socket.remoteAddress,
     sendFn: (data) => {
       if (!res.writableEnded) {
@@ -119,10 +120,10 @@ export function handleExecutionSseStream(
     deps.subscriptions.unsubscribeAll(sessionId);
     deps.registry.unregister(sessionId);
     closeSseStream(res, "Client disconnected");
-    logger.debug("SSE client disconnected", { sessionId, executionId });
+    logger.debug("handleExecutionSseStream: SSE client disconnected", { sessionId, executionId });
   });
 
-  logger.info("SSE stream established", { sessionId, executionId });
+  logger.info("handleExecutionSseStream: SSE stream established", { sessionId, executionId });
 }
 
 /**
@@ -141,7 +142,7 @@ export function handleGlobalSseStream(
 
   const session = new ClientSession({
     id: sessionId,
-    transport: "SSE",
+    transport: RealtimeTransport.SSE,
     ipAddress: req.socket.remoteAddress,
     sendFn: (data) => {
       if (!res.writableEnded) {
@@ -176,6 +177,6 @@ export function handleGlobalSseStream(
     clearInterval(heartbeat);
     deps.subscriptions.unsubscribeAll(sessionId);
     deps.registry.unregister(sessionId);
-    logger.debug("Global SSE client disconnected", { sessionId });
+    logger.debug("handleGlobalSseStream: global SSE client disconnected", { sessionId });
   });
 }

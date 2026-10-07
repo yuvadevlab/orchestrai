@@ -36,8 +36,9 @@ export class FallbackCascade {
     const attempts: FallbackAttempt[] = [];
 
     for (const candidate of candidates) {
+      // Guard against unhealthy deployments to avoid doomed round-trips
       if (!candidate.isHealthy) {
-        logger.warn("Skipping unhealthy deployment candidate", {
+        logger.warn("executeWithFallback: skipping unhealthy deployment candidate", {
           candidateId: candidate.candidateId,
           model: candidate.modelIdentifier,
         });
@@ -45,7 +46,7 @@ export class FallbackCascade {
       }
 
       try {
-        logger.debug("Attempting inference against deployment candidate", {
+        logger.debug("executeWithFallback: attempting inference against deployment candidate", {
           candidateId: candidate.candidateId,
           model: candidate.modelIdentifier,
           providerId: candidate.providerId,
@@ -57,11 +58,15 @@ export class FallbackCascade {
         const errorMsg = String(err);
         const reason = this.classifyError(errorMsg);
 
-        logger.warn("Deployment candidate invocation failed. Initiating fallback...", {
-          candidateId: candidate.candidateId,
-          reason,
-          error: errorMsg,
-        });
+        // Record failure attempt and initiate next candidate cascade
+        logger.warn(
+          "executeWithFallback: deployment candidate invocation failed, initiating fallback",
+          {
+            candidateId: candidate.candidateId,
+            reason,
+            error: errorMsg,
+          },
+        );
 
         attempts.push({
           candidateId: candidate.candidateId,

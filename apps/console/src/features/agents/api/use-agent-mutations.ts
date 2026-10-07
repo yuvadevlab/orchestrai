@@ -8,7 +8,9 @@
 
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
+import { AgentMode, EXECUTION_LIMITS } from "@orchestrai/shared-types";
 import type { Agent } from "@orchestrai/sdk";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 export interface CreateAgentInput {
   name: string;
@@ -17,8 +19,8 @@ export interface CreateAgentInput {
   systemPrompt?: string;
   enabledTools?: string[];
   capabilities?: string[];
-  /** Execution mode — must be one of CHAT | PLAN | ACT | AUTO (gateway enum). */
-  mode?: string;
+  /** Execution mode — must be one of AgentMode (chat | plan | act | auto). */
+  mode?: AgentMode | string;
   /** Primary model identifier configured by user or catalog default. */
   model?: string;
   modelConfig?: {
@@ -31,18 +33,17 @@ export interface CreateAgentInput {
   maxSteps?: number;
 }
 
-/** Gateway-accepted execution modes. */
-const VALID_MODES = ["chat", "plan", "act", "auto"] as const;
+const VALID_MODES: readonly string[] = Object.values(AgentMode);
 
 /**
- * Normalizes a requested mode to the lowercase snake_case format.
+ * Normalizes a requested mode to standard canonical AgentMode format.
  */
 function normalizeMode(mode?: string): string {
   if (mode) {
     const lower = mode.toLowerCase();
-    if ((VALID_MODES as readonly string[]).includes(lower)) return lower;
+    if (VALID_MODES.includes(lower)) return lower;
   }
-  return "auto";
+  return AgentMode.AUTO;
 }
 
 /**
@@ -56,6 +57,7 @@ export function useCreateAgentMutation(): UseMutationResult<Agent, Error, Create
     mutationFn: async (input: CreateAgentInput): Promise<Agent> => {
       const client = getApiClient();
       const resolvedModel = input.model || input.modelConfig?.modelName;
+
       return client.agents.create({
         name: input.name,
         description: input.description,
@@ -70,11 +72,11 @@ export function useCreateAgentMutation(): UseMutationResult<Agent, Error, Create
                 modelName: resolvedModel,
               }
             : undefined,
-        maxSteps: input.maxSteps ?? 25,
+        maxSteps: input.maxSteps ?? EXECUTION_LIMITS.DEFAULT_MAX_STEPS,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["agents"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AGENTS.ALL });
     },
   });
 }

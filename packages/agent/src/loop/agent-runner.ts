@@ -5,7 +5,7 @@
 
 import type { AIMessage } from "@orchestrai/core";
 import type { AgentLoop } from "./agent-loop";
-import type { StepOutcome } from "./step-result.types";
+import { StepOutcome } from "./step-result.types";
 import { createToolResultMessage } from "./tool-message-converter";
 
 /**
@@ -32,7 +32,7 @@ export async function runAgentUntilHalt(
 ): Promise<AgentRunResult> {
   const currentHistory: AIMessage[] = [...initialHistory];
   let turns = 0;
-  let finalOutcome: StepOutcome = "CONTINUE";
+  let finalOutcome: StepOutcome = StepOutcome.CONTINUE;
 
   while (turns < maxTurns) {
     turns += 1;
@@ -50,9 +50,9 @@ export async function runAgentUntilHalt(
 
     // Terminal or pause state reached
     if (
-      stepResult.outcome === "HALTED" ||
-      stepResult.outcome === "WAITING_FOR_APPROVAL" ||
-      stepResult.outcome === "ERROR"
+      stepResult.outcome === StepOutcome.HALTED ||
+      stepResult.outcome === StepOutcome.WAITING_FOR_APPROVAL ||
+      stepResult.outcome === StepOutcome.ERROR
     ) {
       break;
     }

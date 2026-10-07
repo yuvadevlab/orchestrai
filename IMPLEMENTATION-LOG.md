@@ -2,6 +2,39 @@
 
 Chronological log of architecture, engineering decisions, and completed milestones for OrchestrAI.
 
+## Session: 2026-10-07 — Milestone 15: Universal Zero-Hardcoding, Centralized Enums & Protocol Hardening
+
+### Summary of Completed Work
+
+#### 1. Authoritative Enum Architecture (`packages/shared-types/src/enums/`)
+
+- **Centralized Enum Directory**:
+  - Moved and decomposed domain enums into focused sub-modules under `packages/shared-types/src/enums/` (`error-codes.enum.ts`, `worker.enums.ts`, `platform.enums.ts`, `hub.enums.ts`, `sse.enums.ts`, `core.enums.ts`).
+  - Standardized all `ErrorCode` values to lowercase `snake_case` (e.g. `ErrorCode.NOT_FOUND = "not_found"`, `ErrorCode.VALIDATION_ERROR = "validation_error"`, `ErrorCode.INTERNAL_SERVER_ERROR = "internal_server_error"`).
+  - Defined explicit runtime enum maps for `MaintenanceTaskType`, `WorkerHealthStatus`, `WsClientMessageType`, `WsServerMessageType`, `WsClientAction`, `PresenceEvent`, `RealtimeTransport`, `HealthStatus`, and `BenchmarkMetric`.
+  - Re-exported all enums cleanly through `enums.ts` and package root barrel `index.ts`.
+
+#### 2. Monorepo-Wide Zero-Hardcoding Refactor
+
+- **Domain and HTTP Error Modernization**:
+  - Replaced all raw error string literals with centralized `ErrorCode.*` across `@orchestrai/runtime`, `@orchestrai/models`, `@orchestrai/tools`, `@orchestrai/agent`, `@orchestrai/sdk`, `@orchestrai/core`, `apps/admin`, `apps/gateway`, `apps/realtime`, and `apps/worker`.
+  - Added `ConfigurationError` to `@orchestrai/core` domain error hierarchy.
+  - Dynamically resolved error `name` properties via `this.name = this.constructor.name;` and `new.target.name` in `@orchestrai/sdk` and `@orchestrai/resilience` (`RateLimitExceededError`, `ChaosInjectedError`, `TimeoutError`, `CircuitBreakerOpenError`, `BulkheadRejectedError`), eliminating all hardcoded string names.
+- **Dynamic Routing & Query Cache**:
+  - Centralized route parameters (`ROUTE_PARAMS`) and query parameters (`QUERY_PARAMS`).
+  - Added centralized `QUERY_KEYS` across `@orchestrai/shared-types` and `apps/console/src/lib/query-keys.ts`.
+  - Replaced raw HTTP method strings with `HttpMethod` enum (`HttpMethod.GET`, `HttpMethod.POST`, `HttpMethod.PUT`, `HttpMethod.PATCH`, `HttpMethod.DELETE`).
+- **Standardized Logger Patterns (`@yuva-devlab/logger`)**:
+  - Normalized log strings to `"methodName: description of action"` with structured metadata as second argument across controllers, services, handlers, and servers.
+
+#### 3. Invariants & Quality Gates
+
+- Confirmed 0 lines of code exceed the 250 LOC threshold across all modified files.
+- Maintained zero test generation policy during roadmap phase implementation.
+- All packages build and typecheck with zero errors.
+
+---
+
 ## Session: 2026-10-03 (Continued) — Harness Audit, Bug Fixes & HITL Semi-Autonomous Engineering
 
 ### Summary of Completed Work

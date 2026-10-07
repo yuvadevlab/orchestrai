@@ -11,6 +11,11 @@ const EvaluationsPageContent = dynamic(() =>
   import("@/features/evaluations").then((m) => ({ default: m.EvaluationsPageContent })),
 );
 
+/**
+ * Evaluations page rendering benchmark suites, LLM comparative scoring, and pass-rate metrics.
+ *
+ * @returns JSX element containing EvaluationsPageContent
+ */
 export default function EvaluationsPage(): React.JSX.Element {
   return <EvaluationsPageContent />;
 }

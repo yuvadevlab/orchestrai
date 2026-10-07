@@ -4,6 +4,7 @@
  */
 
 import { randomUUID } from "node:crypto";
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import type { CheckpointRecord } from "../checkpoint.types";
 import type { IPersistentCheckpointer } from "../database-adapter.interface";
@@ -82,7 +83,7 @@ export class StateRewindEngine<TState = unknown> {
     if (!restoredForkCheckpoint) {
       throw new OrchestrAIError(
         `Failed to create execution fork: target step ${targetCheckpoint.stepIndex} was not copied`,
-        "EXECUTION_ERROR",
+        ErrorCode.EXECUTION_ERROR,
         500,
         { executionId, forkId },
       );
@@ -108,7 +109,7 @@ export class StateRewindEngine<TState = unknown> {
       if (!record || record.executionId !== executionId) {
         throw new OrchestrAIError(
           `Checkpoint "${options.targetCheckpointId}" not found for execution "${executionId}"`,
-          "NOT_FOUND",
+          ErrorCode.NOT_FOUND,
           404,
           { executionId, checkpointId: options.targetCheckpointId },
         );
@@ -123,7 +124,7 @@ export class StateRewindEngine<TState = unknown> {
       if (!record) {
         throw new OrchestrAIError(
           `Step index ${options.targetStepIndex} not found for execution "${executionId}"`,
-          "NOT_FOUND",
+          ErrorCode.NOT_FOUND,
           404,
           { executionId, stepIndex: options.targetStepIndex },
         );
@@ -133,7 +134,7 @@ export class StateRewindEngine<TState = unknown> {
 
     throw new OrchestrAIError(
       "Rewind failed: must specify either targetStepIndex or targetCheckpointId",
-      "VALIDATION_ERROR",
+      ErrorCode.VALIDATION_ERROR,
       400,
       { executionId },
     );

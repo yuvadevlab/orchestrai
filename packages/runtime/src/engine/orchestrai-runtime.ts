@@ -4,7 +4,7 @@
  */
 
 import crypto from "node:crypto";
-import { ToolPermissionLevel } from "@orchestrai/shared-types";
+import { ToolPermissionLevel, ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError, type AIMessage, type AgentDefinition } from "@orchestrai/core";
 import { START, type CompiledGraph } from "@/graph";
 import {
@@ -150,7 +150,7 @@ export class OrchestrAIRuntime {
     if (plan.strategy === "FAIL_UNRECOVERABLE") {
       throw new OrchestrAIError(
         `Cannot recover execution "${executionId}": ${plan.reason}`,
-        "EXECUTION_ERROR",
+        ErrorCode.EXECUTION_ERROR,
         422,
         { executionId, plan },
       );

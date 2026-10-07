@@ -4,6 +4,19 @@
  */
 
 /**
+ * Canonical HTTP method verbs.
+ */
+export enum HttpMethod {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT",
+  PATCH = "PATCH",
+  DELETE = "DELETE",
+  OPTIONS = "OPTIONS",
+  HEAD = "HEAD",
+}
+
+/**
  * Operating mode governing agent autonomy, planning, and execution strategy.
  */
 export enum AgentMode {
@@ -44,6 +57,16 @@ export enum StepStatus {
   COMPLETED = "COMPLETED",
   FAILED = "FAILED",
   SKIPPED = "SKIPPED",
+}
+
+/**
+ * High-level outcome of executing an autonomous agent loop step.
+ */
+export enum StepOutcome {
+  CONTINUE = "CONTINUE",
+  WAITING_FOR_APPROVAL = "WAITING_FOR_APPROVAL",
+  HALTED = "HALTED",
+  ERROR = "ERROR",
 }
 
 /**

@@ -24,29 +24,35 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, an enterprise-grade 
    - NO file across `apps/*` or `packages/*` may exceed **250 lines of code**.
    - Whenever a file approaches or reaches **200 lines**, decompose it immediately into focused sub-modules.
    - Every file must have a single, clear responsibility.
-2. **Detailed JSDoc & Explanatory Comments**:
-   - Every exported symbol (function, class, interface, type, schema) MUST have a comprehensive JSDoc block.
-   - Every conditional (`if/else/switch`), guard clause, and state transition MUST have an inline comment explaining **why** it exists and what business invariant or edge case it handles.
-3. **Strict Package Boundaries**:
+2. **Detailed JSDoc & Explanatory Block Comments**:
+   - Every exported symbol (function, class, interface, type, schema, page component) MUST have a comprehensive JSDoc block.
+   - Every conditional (`if/else/switch`), guard clause, async call, calculation, and state transition MUST have an explanatory comment explaining **why** it exists and what edge case it handles to enable manual debugging of AI-generated code.
+3. **Strict Package Boundaries & Authoritative Barrels**:
    - `@orchestrai/core` is the absolute source of truth with ZERO internal workspace dependencies.
-   - All shared contracts, enums, schemas, and event types must originate from `@orchestrai/core`. Never duplicate.
-4. **Conventional Commits & Quality Gates**:
+   - All shared contracts, enums, schemas, and event types must originate from `@orchestrai/core` or `@orchestrai/shared-types`.
+   - **Barrel Imports**: Always import from barrel index files (e.g. `@orchestrai/shared-types`, `@/features/tools/api`) rather than deep sub-paths (e.g. `../folder/**` or `@/folder/sub/sub/file.ts`).
+   - **No Conflicting Barrels**: Every directory has at most one single barrel file (`index.ts`). Never maintain competing files like `constants.ts` next to a `constants/` folder.
+4. **Standardized Logger Formatting (`@yuva-devlab/logger`)**:
+   - Instantiate logger as `new Logger("ClassName")` (or `loggerWithConfig(new Logger("ClassName"))`).
+   - Log message pattern: `"methodName: description of action"` with metadata object as second argument (e.g. `this.logger.info("listProviders: fetching providers", { tenantId })`).
+   - Do NOT duplicate the class name in the message string (avoid `"[ClassName] description"` or `"[MethodName]"`).
+5. **Zero Hardcoded Strings, Keys, Models & Strict Enum Usage**:
+   - NO raw hardcoded string literals or magic numbers for domain entities, statuses, roles, event types, modes, scopes, HTTP methods (`HttpMethod`), outcomes (`StepOutcome`), or state transitions.
+   - Parameter keys, route params, query keys, headers (e.g. `QUERY_PARAMS.PROVIDER_ID`, `ROUTE_PARAMS.AGENT_ID`, `ADMIN_ROUTES.LLM_PROVIDER`) must be centralized constants.
+   - Always compare and branch using `Enum.KEY` (e.g. `status === ExecutionStatus.COMPLETED`).
+   - Zero hardcoded fallback model constants (`DEFAULT_FALLBACK_CANDIDATE`, `"gemma4:31b-cloud"`, `"qwen2.5:7b"`). All models must be DB- or env-driven.
+   - Zero hardcoded fallback responses in API hooks (e.g. `use-platform-welcome.ts` must not return static mock chips; must be server-driven).
+   - Zero synthetic agent auto-seeding (`DEFAULT_SUPERVISOR`, `Lead Orchestrator`). Fail fast if not found.
+6. **Dynamic Server-Driven Configuration (Big 3 Standard) & Centralized Regex**:
+   - All operational parameters, slash commands, system prompts, max execution steps, temperatures, and suggestions must be dynamic and served via Gateway APIs.
+   - All regular expressions across all apps and packages must originate from `@orchestrai/regex`. Zero inline regexes.
+7. **Conventional Commits & Quality Gates**:
    - Commits must pass `commitlint` (format: `<type>(<scope>): <subject>`).
    - Pre-commit hooks run `lint-staged` with zero ESLint warnings (`--max-warnings=0`).
    - Typechecks must pass: `pnpm typecheck`.
-5. **Phase Implementation Testing Policy (Strict)**:
+8. **Phase Implementation Testing Policy (Strict)**:
    - While implementing roadmap phases, **DO NOT** write or implement test cases (unit tests, e2e tests, integration tests) or Storybook stories unless explicitly instructed by the user.
    - Focus strictly on production contracts, domain logic, schemas, adapters, state machines, and UI components.
-6. **Continuous Session Continuity**:
+9. **Continuous Session Continuity**:
    - Leave the codebase in an unambiguous, continuation-ready state at the end of every session.
    - Always update [`PROGRESS.md`](PROGRESS.md) and log in [`IMPLEMENTATION-LOG.md`](IMPLEMENTATION-LOG.md).
-7. **Zero Hardcoded Strings, Models & Strict Enum Usage**:
-   - NO raw hardcoded string literals or magic numbers for domain entities, statuses, roles, event types, modes, scopes, or state transitions.
-   - All statuses, events, roles, and modes must be canonical enums in `@orchestrai/shared-types`.
-   - Always check and compare using `Enum.KEY` (e.g. `status === ExecutionStatus.COMPLETED`, `role === MessageRole.USER`), NEVER bare strings like `"completed"`.
-   - NO hardcoded fallback model constants (e.g. `"gemma4:31b-cloud"`, `"qwen2.5:7b"`) or fallback candidate objects (`DEFAULT_FALLBACK_CANDIDATE`). All models must be DB- or env-driven.
-   - NO synthetic agent auto-seeding (`DEFAULT_SUPERVISOR`, `Lead Orchestrator`). If a tenant has no agent, fail fast and instruct the user to create one in the Studio.
-8. **Dynamic Server-Driven Configuration (Big 3 Standard) & Centralized Regex**:
-   - NO client or worker application may hardcode operational parameters (slash commands, system prompts, max execution steps, sampling temperatures, compaction thresholds, cache similarity/TTL, RAG chunking parameters, retention policies, or starter suggestions).
-   - All operational behaviors must be dynamic, database- or control-plane-driven, served via Gateway APIs (`/api/v1/platform/...`), and cached with stale-while-revalidate IndexedDB persistence.
-   - All regular expressions across all apps and packages must originate from `@orchestrai/regex`. Zero inline regexes.

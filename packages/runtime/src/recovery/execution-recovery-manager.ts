@@ -3,6 +3,7 @@
  * @description Recovery coordinator analyzing interrupted runs, validating checksums, and building resume plans.
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import { END } from "@/graph";
 import type { IPersistentCheckpointer } from "@/checkpoint/database-adapter.interface";
@@ -31,7 +32,7 @@ export class ExecutionRecoveryManager {
     if (!latest) {
       throw new OrchestrAIError(
         `Execution inspection failed: no checkpoints found for "${executionId}"`,
-        "NOT_FOUND",
+        ErrorCode.NOT_FOUND,
         404,
         { executionId },
       );
@@ -64,7 +65,7 @@ export class ExecutionRecoveryManager {
     if (!latest) {
       throw new OrchestrAIError(
         `Recovery planning failed: checkpoint vanished for "${executionId}"`,
-        "NOT_FOUND",
+        ErrorCode.NOT_FOUND,
         404,
         { executionId },
       );

@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import type { KnowledgeQueryResult } from "../types";
+import { API_ROUTES, HttpMethod, QUERY_PARAMS } from "@/lib/query-keys";
 
 export interface UseQueryKnowledgeResult {
   search: (query: string) => Promise<KnowledgeQueryResult>;
@@ -31,11 +32,12 @@ export function useQueryKnowledge(): UseQueryKnowledgeResult {
 
   const mutation = useMutation({
     mutationFn: async (queryText: string): Promise<KnowledgeQueryResult> => {
-      return client.http.request<KnowledgeQueryResult>("/api/v1/rag/query", {
-        method: "POST",
+      // Execute vector similarity search via Gateway API
+      return client.http.request<KnowledgeQueryResult>(API_ROUTES.RAG_QUERY, {
+        method: HttpMethod.POST,
         body: JSON.stringify({
-          query: queryText,
-          limit: DEFAULT_QUERY_LIMIT,
+          [QUERY_PARAMS.QUERY]: queryText,
+          [QUERY_PARAMS.LIMIT]: DEFAULT_QUERY_LIMIT,
           minScore: DEFAULT_MIN_SCORE,
         }),
       });

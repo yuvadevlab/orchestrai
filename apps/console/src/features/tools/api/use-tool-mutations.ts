@@ -10,6 +10,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/r
 import { ToolPermissionLevel } from "@orchestrai/shared-types";
 import { getApiClient } from "@/lib/api-client";
 import type { ToolDefinition } from "../types";
+import { QUERY_KEYS, API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 export interface RegisterToolInput {
   name: string;
@@ -37,8 +38,8 @@ export function useRegisterToolMutation(): UseMutationResult<
         .toLowerCase()
         .trim()
         .replace(/[^a-z0-9]+/g, "_");
-      return client.http.request<ToolDefinition>("/api/v1/tools", {
-        method: "POST",
+      return client.http.request<ToolDefinition>(API_ROUTES.TOOLS, {
+        method: HttpMethod.POST,
         body: {
           name: input.name,
           slug,
@@ -51,7 +52,7 @@ export function useRegisterToolMutation(): UseMutationResult<
       });
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["tools"] });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.TOOLS.ALL });
     },
   });
 }

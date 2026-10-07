@@ -7,6 +7,7 @@
 
 import http from "node:http";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
+import { ADMIN_ROUTES } from "@orchestrai/shared-types";
 import type { OrchestratorConfig } from "./config";
 import { GrpcExecutionService } from "./grpc";
 import { orchestratorRedisPublisher } from "./publisher";
@@ -31,7 +32,8 @@ export class OrchestratorServer {
   public async start(): Promise<void> {
     return new Promise((resolve) => {
       this.httpServer = http.createServer((req, res) => {
-        if (req.url === "/health" || req.url === "/ready") {
+        // Handle standard health and readiness probes
+        if (req.url === ADMIN_ROUTES.HEALTH || req.url === ADMIN_ROUTES.READY) {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(
             JSON.stringify({
@@ -49,7 +51,7 @@ export class OrchestratorServer {
       });
 
       this.httpServer.listen(this.config.httpPort, this.config.host, () => {
-        logger.info("Orchestrator daemon online", {
+        logger.info("start: orchestrator daemon online", {
           httpPort: this.config.httpPort,
           grpcPort: this.config.grpcPort,
           host: this.config.host,
@@ -66,7 +68,7 @@ export class OrchestratorServer {
     if (this.isShuttingDown) return;
     this.isShuttingDown = true;
 
-    logger.info("Stopping orchestrator server...");
+    logger.info("stop: stopping orchestrator server...");
 
     await orchestratorRedisPublisher.close();
 
@@ -76,7 +78,7 @@ export class OrchestratorServer {
       });
     }
 
-    logger.info("Orchestrator server stopped cleanly");
+    logger.info("stop: orchestrator server stopped cleanly");
   }
 }
 
@@ -85,9 +87,9 @@ export class OrchestratorServer {
  */
 export function registerProcessLifecycle(server: OrchestratorServer, timeoutMs: number): void {
   const shutdown = async (signal: string): Promise<void> => {
-    logger.info(`Received ${signal}, initiating graceful shutdown...`);
+    logger.info("registerProcessLifecycle: initiating graceful shutdown", { signal });
     const timer = setTimeout(() => {
-      logger.error("Graceful shutdown timed out, forcing exit");
+      logger.error("registerProcessLifecycle: graceful shutdown timed out, forcing exit");
       process.exit(1);
     }, timeoutMs);
 
@@ -96,7 +98,7 @@ export function registerProcessLifecycle(server: OrchestratorServer, timeoutMs: 
       clearTimeout(timer);
       process.exit(0);
     } catch (err) {
-      logger.error("Error during shutdown", { error: String(err) });
+      logger.error("registerProcessLifecycle: error during shutdown", { error: String(err) });
       clearTimeout(timer);
       process.exit(1);
     }

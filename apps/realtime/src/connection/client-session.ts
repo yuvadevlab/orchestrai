@@ -3,11 +3,14 @@
  * @description Encapsulates an active client connection session across WebSocket or SSE transports.
  */
 
-export type ClientTransportType = "WEBSOCKET" | "SSE";
+import { RealtimeTransport } from "@orchestrai/shared-types";
+
+export type ClientTransportType = RealtimeTransport;
+export { RealtimeTransport };
 
 export interface ClientSessionOptions {
   readonly id: string;
-  readonly transport: ClientTransportType;
+  readonly transport: RealtimeTransport;
   readonly ipAddress?: string;
   readonly userAgent?: string;
   readonly sendFn: (data: string) => void;

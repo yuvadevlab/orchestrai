@@ -14,6 +14,7 @@
  * ─────────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import { BLOCKED_IP_PATTERNS } from "@orchestrai/regex";
 
@@ -33,7 +34,7 @@ export function assertNetworkAllowed(rawUrl: string, allowedDomains: ReadonlyArr
   } catch {
     throw new OrchestrAIError(
       `Invalid URL: "${rawUrl}" cannot be parsed`,
-      "VALIDATION_ERROR",
+      ErrorCode.VALIDATION_ERROR,
       400,
       { rawUrl },
     );
@@ -45,7 +46,7 @@ export function assertNetworkAllowed(rawUrl: string, allowedDomains: ReadonlyArr
   if (protocol !== "https:" && hostname !== "localhost" && hostname !== "127.0.0.1") {
     throw new OrchestrAIError(
       `Protocol "${protocol}" is not permitted. Only HTTPS is allowed for non-local hosts`,
-      "POLICY_VIOLATION",
+      ErrorCode.POLICY_VIOLATION,
       403,
       { rawUrl, protocol },
     );
@@ -56,7 +57,7 @@ export function assertNetworkAllowed(rawUrl: string, allowedDomains: ReadonlyArr
   if (isBlockedIp) {
     throw new OrchestrAIError(
       `Access to private or link-local IP "${hostname}" is blocked`,
-      "POLICY_VIOLATION",
+      ErrorCode.POLICY_VIOLATION,
       403,
       { rawUrl, hostname },
     );
@@ -70,7 +71,7 @@ export function assertNetworkAllowed(rawUrl: string, allowedDomains: ReadonlyArr
     if (!permitted) {
       throw new OrchestrAIError(
         `Domain "${hostname}" is not in the network allowlist`,
-        "POLICY_VIOLATION",
+        ErrorCode.POLICY_VIOLATION,
         403,
         { rawUrl, hostname, allowedDomains },
       );

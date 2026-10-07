@@ -1,6 +1,6 @@
 /**
- * @file packages/shared-types/src/constants.ts
- * @description System-wide constant values, network ports, timeouts, and default limits.
+ * @file packages/shared-types/src/constants/network.constants.ts
+ * @description System-wide constant network ports, timeouts, limits, and queue names.
  */
 
 /**
@@ -21,6 +21,16 @@ export const DEFAULT_PORTS = {
   POSTGRES: 5432,
   /** Redis cache and BullMQ broker */
   REDIS: 6379,
+} as const;
+
+/**
+ * Common network defaults and base URLs.
+ */
+export const NETWORK_DEFAULTS = {
+  /** Local loopback HTTP base */
+  LOCAL_HTTP_BASE: "http://localhost",
+  /** Default Ollama model server URL */
+  OLLAMA_DEFAULT_HOST: "http://localhost:11434",
 } as const;
 
 /**
@@ -61,4 +71,15 @@ export const PUBSUB_CHANNELS = {
   EXECUTION_EVENTS: "orchestrai:events:execution",
   /** Realtime token stream channel prefix (appended with executionId) */
   EXECUTION_STREAM_PREFIX: "orchestrai:stream:",
+} as const;
+
+/**
+ * OpenTelemetry semantic trace attribute keys for execution waterfall tracking.
+ */
+export const TRACE_ATTRIBUTES = {
+  EXECUTION_ID: "execution.id",
+  AGENT_ID: "agent.id",
+  TENANT_ID: "tenant.id",
+  STEP_ID: "step.id",
+  TOOL_NAME: "tool.name",
 } as const;

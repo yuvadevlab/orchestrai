@@ -11,6 +11,11 @@ const AgentsPageContent = dynamic(() =>
   import("@/features/agents").then((m) => ({ default: m.AgentsPageContent })),
 );
 
+/**
+ * Agents page rendering cluster agent roster, statuses, models, and creation dialog.
+ *
+ * @returns JSX element containing AgentsPageContent
+ */
 export default function AgentsPage(): React.JSX.Element {
   return <AgentsPageContent />;
 }

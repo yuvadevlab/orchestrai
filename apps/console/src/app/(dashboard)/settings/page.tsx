@@ -11,6 +11,11 @@ const SettingsPageContent = dynamic(() =>
   import("@/features/settings").then((m) => ({ default: m.SettingsPageContent })),
 );
 
+/**
+ * Settings dashboard page rendering control plane configuration and tenant preferences.
+ *
+ * @returns JSX element containing SettingsPageContent
+ */
 export default function SettingsPage(): React.JSX.Element {
   return <SettingsPageContent />;
 }

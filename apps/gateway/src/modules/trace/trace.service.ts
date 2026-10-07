@@ -1,10 +1,11 @@
 /**
- * @file apps/gateway/src/services/trace.service.ts
+ * @file apps/gateway/src/modules/trace/trace.service.ts
  * @description In-memory OpenTelemetry trace collector serving execution waterfall spans.
- * @module apps/gateway/services
+ * @module apps/gateway/modules/trace
  */
 
-import { InMemorySpanExporter, Tracer } from "@orchestrai/observability";
+import { InMemorySpanExporter, Tracer, type Span } from "@orchestrai/observability";
+import { TRACE_ATTRIBUTES } from "@orchestrai/shared-types";
 
 export interface SerializedSpan {
   id: string;
@@ -32,13 +33,13 @@ export class TraceService {
    * Retrieves all spans correlated with an execution identifier.
    */
   public getSpansForExecution(executionId: string): SerializedSpan[] {
-    const finished = this.exporter.getFinishedSpans();
-    const matched = finished.filter((s) => {
+    const finished: readonly Span[] = this.exporter.getFinishedSpans();
+    const matched = finished.filter((s: Span) => {
       const attrs = s.getAttributes();
-      return attrs["execution.id"] === executionId;
+      return attrs[TRACE_ATTRIBUTES.EXECUTION_ID] === executionId;
     });
 
-    return matched.map((s) => ({
+    return matched.map((s: Span) => ({
       id: s.spanContext().spanId,
       name: s.name,
       parentSpanId: s.parentSpanId,
@@ -54,8 +55,8 @@ export class TraceService {
    * Retrieves recent traces across all executions.
    */
   public listRecentSpans(limit = 100): SerializedSpan[] {
-    const finished = this.exporter.getFinishedSpans();
-    return finished.slice(-limit).map((s) => ({
+    const finished: readonly Span[] = this.exporter.getFinishedSpans();
+    return finished.slice(-limit).map((s: Span) => ({
       id: s.spanContext().spanId,
       name: s.name,
       parentSpanId: s.parentSpanId,
@@ -68,4 +69,7 @@ export class TraceService {
   }
 }
 
+/**
+ * Singleton instance of TraceService for application-wide span collection.
+ */
 export const traceService = new TraceService();

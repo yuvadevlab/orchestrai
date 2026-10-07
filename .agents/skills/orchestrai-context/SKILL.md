@@ -28,12 +28,14 @@ Use this skill when developing, refactoring, or planning any feature within Orch
 ## Prime Monorepo Invariants (Zero Exceptions)
 
 1. **250-Line Limit**: NO file across `apps/*` or `packages/*` may exceed 250 LOC (decompose proactively at 200 lines).
-2. **JSDoc & Comments**: Every exported symbol must have JSDoc; every conditional/guard must have an inline explanatory comment.
-3. **Strict Enums**: Strictly compare with `Enum.KEY` from `@orchestrai/shared-types`. Never use raw string literals.
-4. **Zero Hardcoded Models & Synthetic Agents**: All models and agents are DB- or env-driven (`DEFAULT_MODEL_NAME`). Never auto-seed fallback agents.
-5. **Testing Policy**: Never write test cases or Storybook stories during phase implementation unless requested.
-6. **Package Boundaries**: `@orchestrai/core` is pure with zero workspace dependencies. Dependencies flow inward.
-7. **Dynamic Server-Driven Configuration (Big 3 Standard) & Centralized Regex**: Zero hardcoded runtime parameters (commands, prompts, steps, temperatures, cache/RAG limits). All runtime parameters must be database/control-plane-driven. All regexes must come from `@orchestrai/regex`.
+2. **JSDoc & Comments**: Every exported symbol must have comprehensive JSDoc; every conditional/guard/calculation must have inline explanatory block comments for manual debugging of AI-generated code.
+3. **Strict Enums & Dynamic Constants**: Strictly compare with `Enum.KEY` from `@orchestrai/shared-types`. Never use raw string literals. All parameter keys, query keys, route params, and headers must be centralized constants.
+4. **Barrel Imports & Single Authoritative Barrels**: Always import from barrel index files (`@orchestrai/shared-types`, `@/features/tools/api`) rather than deep subpaths. Never create competing barrels (e.g. no `constants.ts` next to a `constants/` folder).
+5. **Standardized Logger Formatting (`@yuva-devlab/logger`)**: Instantiate as `new Logger("ClassName")`. Messages must format as `"methodName: description of action"` with metadata object as second argument. Do not repeat class name in message.
+6. **Zero Hardcoded Models & Synthetic Agents**: All models and agents are DB- or env-driven (`DEFAULT_MODEL_NAME`). Never auto-seed fallback agents. Zero fallback mock responses in API hooks.
+7. **Testing Policy**: Never write test cases or Storybook stories during phase implementation unless requested.
+8. **Package Boundaries**: `@orchestrai/core` is pure with zero workspace dependencies. Dependencies flow inward.
+9. **Dynamic Server-Driven Configuration (Big 3 Standard) & Centralized Regex**: Zero hardcoded runtime parameters (commands, prompts, steps, temperatures, cache/RAG limits). All runtime parameters must be database/control-plane-driven. All regexes must come from `@orchestrai/regex`.
 
 ## Monorepo Directory
 

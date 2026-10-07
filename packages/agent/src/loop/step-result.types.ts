@@ -5,18 +5,8 @@
 
 import type { AIMessage, ToolResult } from "@orchestrai/core";
 
-/**
- * High-level outcome of executing a single agent loop step.
- */
-export type StepOutcome =
-  /** Step completed, tools executed or more dialogue pending; loop continues */
-  | "CONTINUE"
-  /** Agent called a DANGEROUS tool requiring human confirmation before dispatch */
-  | "WAITING_FOR_APPROVAL"
-  /** Agent reached completion, max steps limit, or loop termination */
-  | "HALTED"
-  /** Step encountered an unrecoverable failure */
-  | "ERROR";
+import { StepOutcome } from "@orchestrai/shared-types";
+export { StepOutcome };
 
 /**
  * Information regarding a pending human approval request.

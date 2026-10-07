@@ -14,7 +14,7 @@ export class ChaosInjectedError extends Error {
 
   public constructor(context?: string) {
     super(`Chaos injection triggered synthetic failure${context ? ` in '${context}'` : ""}`);
-    this.name = "ChaosInjectedError";
+    this.name = this.constructor.name;
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }

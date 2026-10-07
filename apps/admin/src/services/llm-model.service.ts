@@ -4,6 +4,7 @@
  * @module apps/admin/services
  */
 
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import {
   getPrismaClient,
   type PrismaClient,
@@ -32,6 +33,8 @@ export interface UpsertModelDto {
  * Admin service managing LLM model registrations.
  */
 export class LlmModelAdminService {
+  private readonly logger = loggerWithConfig(new Logger("LlmModelAdminService"));
+
   private get db(): PrismaClient {
     return getPrismaClient();
   }
@@ -40,6 +43,9 @@ export class LlmModelAdminService {
    * Lists models optionally filtered by provider.
    */
   public async listModels(providerId?: string): Promise<LlmModelRecord[]> {
+    this.logger.info("listModels: querying LLM models", { providerId });
+
+    // Query registered LLM models with optional providerId filtering
     const models = await this.db.llmModel.findMany({
       where: providerId ? { providerId } : undefined,
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -67,6 +73,12 @@ export class LlmModelAdminService {
    * Registers a new LLM model.
    */
   public async createModel(dto: UpsertModelDto): Promise<LlmModelRecord> {
+    this.logger.info("createModel: registering new LLM model", {
+      providerId: dto.providerId,
+      modelIdentifier: dto.modelIdentifier,
+    });
+
+    // Create new LLM model deployment record
     const m = await this.db.llmModel.create({
       data: {
         providerId: dto.providerId,
@@ -103,6 +115,12 @@ export class LlmModelAdminService {
    * Updates an existing LLM model.
    */
   public async updateModel(modelId: string, dto: Partial<UpsertModelDto>): Promise<LlmModelRecord> {
+    this.logger.info("updateModel: updating LLM model", {
+      modelId,
+      modelIdentifier: dto.modelIdentifier,
+    });
+
+    // Update model record in catalog
     const m = await this.db.llmModel.update({
       where: { modelId },
       data: {
@@ -143,6 +161,8 @@ export class LlmModelAdminService {
    * Removes a model deployment from the platform catalog.
    */
   public async deleteModel(modelId: string): Promise<void> {
+    this.logger.info("deleteModel: removing LLM model from catalog", { modelId });
+    // Cascade delete LLM model
     await this.db.llmModel.delete({ where: { modelId } });
   }
 }

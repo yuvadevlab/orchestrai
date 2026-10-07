@@ -4,11 +4,14 @@
  * @module @orchestrai/model-router
  */
 
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { RoutingStrategy } from "@orchestrai/shared-types";
 import type { ModelDeploymentCandidate, RouteRequest, RouteResult } from "./types";
 import { LatencyTracker } from "./latency-tracker";
 import { CostEstimator } from "./cost-estimator";
 import { FallbackCascade } from "./fallback-cascade";
+
+const logger = loggerWithConfig(new Logger("ModelRouter"));
 
 /**
  * Intelligent model router directing prompts across dynamic provider cascades.
@@ -37,6 +40,11 @@ export class ModelRouter {
    * Registers or updates a deployment candidate.
    */
   public registerCandidate(candidate: ModelDeploymentCandidate): void {
+    logger.info("registerCandidate: registering deployment candidate", {
+      candidateId: candidate.candidateId,
+      modelIdentifier: candidate.modelIdentifier,
+      providerId: candidate.providerId,
+    });
     this.candidates.set(candidate.candidateId, candidate);
   }
 
@@ -44,6 +52,7 @@ export class ModelRouter {
    * Removes a candidate deployment.
    */
   public unregisterCandidate(candidateId: string): void {
+    logger.info("unregisterCandidate: unregistering deployment candidate", { candidateId });
     this.candidates.delete(candidateId);
   }
 
@@ -51,6 +60,7 @@ export class ModelRouter {
    * Selects and ranks eligible candidates based on specified routing strategy.
    */
   public rankCandidates(request: RouteRequest): ModelDeploymentCandidate[] {
+    // Filter healthy candidates with sufficient context window for the requested prompt
     const list = Array.from(this.candidates.values()).filter((c) => {
       if (!c.isHealthy) return false;
       if (request.minContextWindow && c.contextWindow < request.minContextWindow) {
@@ -60,11 +70,16 @@ export class ModelRouter {
     });
 
     if (list.length === 0) {
+      logger.warn("rankCandidates: no healthy candidate deployments found matching criteria", {
+        strategy: request.strategy,
+        minContextWindow: request.minContextWindow,
+      });
       return [];
     }
 
     const promptTokens = this.costEstimator.estimateTokens(request.prompt);
 
+    // Apply the configured routing strategy across available candidates
     switch (request.strategy) {
       case RoutingStrategy.LOWEST_LATENCY:
         return list.sort((a, b) => {
@@ -99,7 +114,13 @@ export class ModelRouter {
     request: RouteRequest,
     executeFn: (candidate: ModelDeploymentCandidate) => Promise<T>,
   ): Promise<{ result: T; routeResult: RouteResult }> {
+    logger.info("routeAndExecute: initiating inference request routing", {
+      strategy: request.strategy,
+      maxTokens: request.maxTokens,
+    });
+
     const ranked = this.rankCandidates(request);
+    // Guard against complete absence of candidates to avoid doomed execution
     if (ranked.length === 0) {
       throw new Error("No eligible and healthy model deployment candidates available");
     }
@@ -111,7 +132,7 @@ export class ModelRouter {
     );
     const latencyMs = Date.now() - startTime;
 
-    // Record empirical latency
+    // Record empirical latency for subsequent lowest-latency routing evaluations
     this.latencyTracker.recordLatency(selectedCandidate.candidateId, latencyMs);
 
     const promptTokens = this.costEstimator.estimateTokens(request.prompt);
@@ -120,6 +141,14 @@ export class ModelRouter {
       promptTokens,
       request.maxTokens,
     );
+
+    logger.info("routeAndExecute: inference execution completed successfully", {
+      candidateId: selectedCandidate.candidateId,
+      modelIdentifier: selectedCandidate.modelIdentifier,
+      providerId: selectedCandidate.providerId,
+      latencyMs,
+      estimatedCostUsd,
+    });
 
     return {
       result,

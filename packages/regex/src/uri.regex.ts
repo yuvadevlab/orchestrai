@@ -33,3 +33,8 @@ export const TOOL_NAME_REGEX: RegExp = /^[a-zA-Z0-9_-]+$/;
  * Pattern matching channel prefix for Redis realtime pub/sub topics.
  */
 export const REALTIME_CHANNEL_PREFIX_REGEX: RegExp = /^orchestrai:(realtime|events):/;
+
+/**
+ * Route pattern matching execution SSE stream path: /api/v1/executions/:executionId/stream
+ */
+export const EXECUTION_STREAM_ROUTE_REGEX: RegExp = /^\/api\/v1\/executions\/([^/]+)\/stream$/;

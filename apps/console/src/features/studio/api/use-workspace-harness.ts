@@ -8,6 +8,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
+import { QUERY_KEYS, QUERY_PARAMS, API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 /** Discovered workspace harness metadata summary. */
 export interface WorkspaceHarnessData {
@@ -46,14 +47,17 @@ export function useWorkspaceHarness(
   const client = getApiClient();
 
   return useQuery({
-    queryKey: ["workspace-harness", workspacePath || "root"],
+    queryKey: QUERY_KEYS.WORKSPACE.HARNESS(workspacePath),
     queryFn: async (): Promise<WorkspaceHarnessData> => {
       const params = new URLSearchParams();
-      if (workspacePath) params.set("path", workspacePath);
+      // Apply path filter if provided
+      if (workspacePath) {
+        params.set(QUERY_PARAMS.PATH, workspacePath);
+      }
 
       return client.http.request<WorkspaceHarnessData>(
-        `/api/v1/workspace/harness?${params.toString()}`,
-        { method: "GET" },
+        `${API_ROUTES.WORKSPACE_HARNESS}?${params.toString()}`,
+        { method: HttpMethod.GET },
       );
     },
     enabled: enabled && typeof window !== "undefined",

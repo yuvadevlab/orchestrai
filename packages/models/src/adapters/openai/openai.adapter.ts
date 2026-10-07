@@ -15,6 +15,7 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { ModelProvider, OrchestrAIError } from "@orchestrai/core";
 import type { AIMessage } from "@orchestrai/core";
 import type { ILlmAdapter, LlmRequest, LlmResponse, LlmStreamChunk } from "@/interfaces";
@@ -108,7 +109,7 @@ export class OpenAiAdapter implements ILlmAdapter {
     } catch {
       throw new OrchestrAIError(
         "The `openai` npm package is required to use OpenAiAdapter. Install it: pnpm add openai",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         500,
         { peerDep: "openai" },
       );
@@ -136,7 +137,7 @@ export class OpenAiAdapter implements ILlmAdapter {
     if (!model) {
       throw new OrchestrAIError(
         "No model identifier specified for OpenAI request",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
       );
     }
@@ -153,7 +154,11 @@ export class OpenAiAdapter implements ILlmAdapter {
       const choice = raw.choices[0];
       // Guard: OpenAI always returns at least one choice, but defensive check
       if (choice === undefined) {
-        throw new OrchestrAIError("OpenAI returned empty choices array", "MODEL_TIMEOUT", 502);
+        throw new OrchestrAIError(
+          "OpenAI returned empty choices array",
+          ErrorCode.MODEL_TIMEOUT,
+          502,
+        );
       }
 
       return {
@@ -172,7 +177,7 @@ export class OpenAiAdapter implements ILlmAdapter {
       if (err instanceof OrchestrAIError) throw err;
       throw new OrchestrAIError(
         `OpenAI invoke failed for model "${model}": ${String(err)}`,
-        "MODEL_TIMEOUT",
+        ErrorCode.MODEL_TIMEOUT,
         503,
         { model, cause: err },
       );
@@ -192,7 +197,7 @@ export class OpenAiAdapter implements ILlmAdapter {
     if (!model) {
       throw new OrchestrAIError(
         "No model identifier specified for OpenAI stream",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
       );
     }
@@ -220,7 +225,7 @@ export class OpenAiAdapter implements ILlmAdapter {
       if (err instanceof OrchestrAIError) throw err;
       throw new OrchestrAIError(
         `OpenAI stream failed for model "${request.model}": ${String(err)}`,
-        "MODEL_TIMEOUT",
+        ErrorCode.MODEL_TIMEOUT,
         503,
         { model: request.model, cause: err },
       );

@@ -3,7 +3,7 @@
  * @description Durable PostgreSQL adapter for HITL approvals table with optimistic concurrency control.
  */
 
-import { ApprovalStatus, ApprovalDecisionVerdict } from "@orchestrai/shared-types";
+import { ApprovalStatus, ApprovalDecisionVerdict, ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import type { IDatabaseQueryRunner } from "@/checkpoint/database-adapter.interface";
 import type { ApprovalResolutionInput, ApprovalTicket, IApprovalStorage } from "../contracts";
@@ -104,14 +104,19 @@ export class PostgresApprovalStorage implements IApprovalStorage {
     // If 0 rows updated, verify whether ticket doesn't exist or was already decided
     const existing = await this.getTicket(approvalId);
     if (!existing) {
-      throw new OrchestrAIError(`Approval ticket "${approvalId}" not found`, "NOT_FOUND", 404, {
-        approvalId,
-      });
+      throw new OrchestrAIError(
+        `Approval ticket "${approvalId}" not found`,
+        ErrorCode.NOT_FOUND,
+        404,
+        {
+          approvalId,
+        },
+      );
     }
 
     throw new OrchestrAIError(
       `Cannot resolve ticket "${approvalId}": already in status "${existing.status}"`,
-      "VALIDATION_ERROR",
+      ErrorCode.VALIDATION_ERROR,
       400,
       { approvalId, status: existing.status },
     );

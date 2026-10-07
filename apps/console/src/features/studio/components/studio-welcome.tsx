@@ -10,6 +10,7 @@
 import React from "react";
 import { usePlatformWelcome } from "../api";
 import { UI_COPY } from "@/lib/ui-copy";
+import { TEMPLATE_TOKENS } from "@/lib/query-keys";
 
 export interface StudioWelcomeProps {
   /** Optional first name to personalise the greeting. */
@@ -31,10 +32,11 @@ export function StudioWelcome({
   const chips = welcome?.suggestions ?? [];
 
   const headline = React.useMemo(() => {
-    if (welcome?.headline?.includes("{name}")) {
-      // Substitute the {name} token from server-driven headline with first name
+    // Check if server headline contains substitution placeholder
+    if (welcome?.headline?.includes(TEMPLATE_TOKENS.USER_NAME)) {
+      // Substitute the name placeholder token from server-driven headline with first name
       return welcome.headline.replace(
-        "{name}",
+        TEMPLATE_TOKENS.USER_NAME,
         userFirstName ?? UI_COPY.STUDIO.WELCOME.GREETING_FALLBACK_NAME,
       );
     }

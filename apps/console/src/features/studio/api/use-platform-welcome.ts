@@ -1,12 +1,13 @@
 /**
  * @file apps/console/src/features/studio/api/use-platform-welcome.ts
  * @description Hook querying dynamic welcome screen headline, subtitle, and suggestions.
- * Fully database-driven with zero hardcoded welcome strings.
+ * Fully database-driven with zero hardcoded strings or fallback mock data.
  * @module apps/console/features/studio/api
  */
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
 export interface PlatformWelcomeData {
   headline: string;
@@ -19,28 +20,11 @@ export interface PlatformWelcomeData {
  */
 export function usePlatformWelcome(): UseQueryResult<PlatformWelcomeData, Error> {
   return useQuery<PlatformWelcomeData>({
-    queryKey: ["platform", "welcome"],
+    queryKey: QUERY_KEYS.PLATFORM.WELCOME,
     queryFn: async (): Promise<PlatformWelcomeData> => {
       const client = getApiClient();
-      const res = await client.http
-        .request<PlatformWelcomeData>("/api/v1/welcome")
-        .catch(() => null);
-
-      if (res && typeof res.headline === "string") {
-        return res;
-      }
-
-      return {
-        headline: "What should your agents take on?",
-        subtitle: "One objective. A swarm of specialists. Auditable results.",
-        suggestions: [
-          "Analyze market competitors",
-          "Draft product requirements",
-          "Automate data pipeline",
-          "Review this codebase",
-          "Build a 90-day roadmap",
-        ],
-      };
+      // Fetch dynamic welcome screen configurations directly from Gateway API with zero hardcoded fallbacks
+      return client.http.request<PlatformWelcomeData>(API_ROUTES.WELCOME);
     },
     staleTime: 60_000,
   });

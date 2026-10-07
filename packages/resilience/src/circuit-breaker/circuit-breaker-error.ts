@@ -30,7 +30,7 @@ export class CircuitBreakerOpenError extends Error {
         resetAt,
       ).toISOString()}`,
     );
-    this.name = "CircuitBreakerOpenError";
+    this.name = this.constructor.name;
     this.breakerName = breakerName;
     this.cooldownMs = cooldownMs;
     this.resetAt = resetAt;

@@ -9,8 +9,9 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import type { KnowledgeDocument } from "../types";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
-export const KNOWLEDGE_DOCUMENTS_QUERY_KEY = ["knowledge", "documents"] as const;
+export const KNOWLEDGE_DOCUMENTS_QUERY_KEY = QUERY_KEYS.KNOWLEDGE.DOCUMENTS;
 
 /**
  * Hook to fetch all indexed knowledge documents.
@@ -21,8 +22,9 @@ export function useKnowledgeDocuments(): UseQueryResult<KnowledgeDocument[], Err
   return useQuery({
     queryKey: KNOWLEDGE_DOCUMENTS_QUERY_KEY,
     queryFn: async (): Promise<KnowledgeDocument[]> => {
+      // Query indexed knowledge documents from Gateway API
       const res = await client.http.request<{ documents: KnowledgeDocument[]; total: number }>(
-        "/api/v1/rag/documents",
+        API_ROUTES.RAG_DOCUMENTS,
       );
       return res.documents || [];
     },

@@ -5,6 +5,7 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { ErrorCode } from "@orchestrai/shared-types";
 import type { AdminRequestContext } from "@/context";
 
 /**
@@ -126,7 +127,7 @@ export class AdminRouter {
     res.end(
       JSON.stringify({
         error: {
-          code: "NOT_FOUND",
+          code: ErrorCode.NOT_FOUND,
           message: `Endpoint ${method} ${cleanPath} not found on Admin service`,
           requestId: req.context?.requestId,
         },

@@ -4,8 +4,10 @@
  * @module apps/gateway/modules/platform/controllers
  */
 
-import type { GatewayRequest, GatewayResponse } from "@/routes/http-types";
-import { sendJson } from "@/routes/http-helpers";
+import { Logger } from "@yuva-devlab/logger";
+import { ROUTE_PARAMS } from "@orchestrai/shared-types";
+import type { GatewayRequest, GatewayResponse } from "@/routes";
+import { sendJson } from "@/routes";
 import {
   PlatformCommandService,
   platformCommandService,
@@ -16,6 +18,8 @@ import {
  * Controller handling slash commands (/plan, /act, /chat, /auto, /clear, etc.).
  */
 export class PlatformCommandController {
+  private readonly logger = new Logger("PlatformCommandController");
+
   /**
    * Initializes the controller with the platform command service.
    *
@@ -34,6 +38,8 @@ export class PlatformCommandController {
     // Check if caller requested disabled commands (typically for admin control panel)
     const url = new URL(req.url ?? "/", "http://localhost");
     const includeDisabled = url.searchParams.get("includeDisabled") === "true";
+    this.logger.info("listCommands: querying platform slash commands", { includeDisabled });
+
     const result = await this.service.listCommands(includeDisabled);
     sendJson(res, 200, result);
   }
@@ -47,6 +53,9 @@ export class PlatformCommandController {
    */
   public async createCommand(req: GatewayRequest, res: GatewayResponse): Promise<void> {
     const dto = req.body as UpsertCommandDto;
+    this.logger.info("createCommand: creating slash command", { command: dto.command });
+
+    // Commit command specification to database
     const result = await this.service.createCommand(dto);
     sendJson(res, 201, result);
   }
@@ -59,12 +68,15 @@ export class PlatformCommandController {
    * @param res - Gateway HTTP response
    */
   public async updateCommand(req: GatewayRequest, res: GatewayResponse): Promise<void> {
-    const commandId = req.params.id ?? "";
+    const commandId = req.params[ROUTE_PARAMS.ID] ?? "";
     const patch = req.body as Partial<UpsertCommandDto>;
+    this.logger.info("updateCommand: updating slash command", { commandId });
+
     const result = await this.service.updateCommand(commandId, patch);
 
     // Guard against non-existent command ID
     if (!result) {
+      this.logger.warn("updateCommand: target command not found", { commandId });
       sendJson(res, 404, { error: `Platform command '${commandId}' not found` });
       return;
     }
@@ -80,7 +92,9 @@ export class PlatformCommandController {
    * @param res - Gateway HTTP response
    */
   public async deleteCommand(req: GatewayRequest, res: GatewayResponse): Promise<void> {
-    const commandId = req.params.id ?? "";
+    const commandId = req.params[ROUTE_PARAMS.ID] ?? "";
+    this.logger.info("deleteCommand: removing slash command", { commandId });
+
     const success = await this.service.deleteCommand(commandId);
     sendJson(res, 200, { success, commandId });
   }

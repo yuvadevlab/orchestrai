@@ -3,6 +3,7 @@
  * @description Strongly-typed error subclasses representing distinct HTTP and policy failures.
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAISDKError } from "./sdk-error";
 
 /**
@@ -10,8 +11,8 @@ import { OrchestrAISDKError } from "./sdk-error";
  */
 export class AuthenticationError extends OrchestrAISDKError {
   constructor(message: string, options: { details?: unknown; requestId?: string } = {}) {
-    super(message, { statusCode: 401, code: "UNAUTHORIZED", ...options });
-    this.name = "AuthenticationError";
+    super(message, { statusCode: 401, code: ErrorCode.UNAUTHORIZED, ...options });
+    this.name = this.constructor.name;
   }
 }
 
@@ -20,8 +21,8 @@ export class AuthenticationError extends OrchestrAISDKError {
  */
 export class PermissionDeniedError extends OrchestrAISDKError {
   constructor(message: string, options: { details?: unknown; requestId?: string } = {}) {
-    super(message, { statusCode: 403, code: "PERMISSION_DENIED", ...options });
-    this.name = "PermissionDeniedError";
+    super(message, { statusCode: 403, code: ErrorCode.PERMISSION_DENIED, ...options });
+    this.name = this.constructor.name;
   }
 }
 
@@ -30,8 +31,8 @@ export class PermissionDeniedError extends OrchestrAISDKError {
  */
 export class NotFoundError extends OrchestrAISDKError {
   constructor(message: string, options: { details?: unknown; requestId?: string } = {}) {
-    super(message, { statusCode: 404, code: "NOT_FOUND", ...options });
-    this.name = "NotFoundError";
+    super(message, { statusCode: 404, code: ErrorCode.NOT_FOUND, ...options });
+    this.name = this.constructor.name;
   }
 }
 
@@ -45,8 +46,8 @@ export class RateLimitError extends OrchestrAISDKError {
     message: string,
     options: { details?: unknown; requestId?: string; retryAfterSeconds?: number } = {},
   ) {
-    super(message, { statusCode: 429, code: "RATE_LIMIT_EXCEEDED", ...options });
-    this.name = "RateLimitError";
+    super(message, { statusCode: 429, code: ErrorCode.RATE_LIMIT_EXCEEDED, ...options });
+    this.name = this.constructor.name;
     this.retryAfterSeconds = options.retryAfterSeconds;
   }
 }
@@ -56,8 +57,8 @@ export class RateLimitError extends OrchestrAISDKError {
  */
 export class ValidationError extends OrchestrAISDKError {
   constructor(message: string, options: { details?: unknown; requestId?: string } = {}) {
-    super(message, { statusCode: 400, code: "VALIDATION_ERROR", ...options });
-    this.name = "ValidationError";
+    super(message, { statusCode: 400, code: ErrorCode.VALIDATION_ERROR, ...options });
+    this.name = this.constructor.name;
   }
 }
 
@@ -66,8 +67,8 @@ export class ValidationError extends OrchestrAISDKError {
  */
 export class BudgetExceededError extends OrchestrAISDKError {
   constructor(message: string, options: { details?: unknown; requestId?: string } = {}) {
-    super(message, { statusCode: 402, code: "BUDGET_EXCEEDED", ...options });
-    this.name = "BudgetExceededError";
+    super(message, { statusCode: 402, code: ErrorCode.BUDGET_EXCEEDED, ...options });
+    this.name = this.constructor.name;
   }
 }
 
@@ -76,7 +77,7 @@ export class BudgetExceededError extends OrchestrAISDKError {
  */
 export class GatewayTimeoutError extends OrchestrAISDKError {
   constructor(message: string, options: { details?: unknown; requestId?: string } = {}) {
-    super(message, { statusCode: 504, code: "GATEWAY_TIMEOUT", ...options });
-    this.name = "GatewayTimeoutError";
+    super(message, { statusCode: 504, code: ErrorCode.GATEWAY_TIMEOUT, ...options });
+    this.name = this.constructor.name;
   }
 }

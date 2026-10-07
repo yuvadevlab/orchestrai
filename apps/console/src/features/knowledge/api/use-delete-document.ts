@@ -9,6 +9,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { KNOWLEDGE_DOCUMENTS_QUERY_KEY } from "./use-knowledge-documents";
+import { API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 /**
  * Hook to delete an ingested document and its vector chunks.
@@ -19,11 +20,13 @@ export function useDeleteDocument(): UseMutationResult<unknown, Error, string> {
 
   return useMutation({
     mutationFn: async (documentId: string): Promise<unknown> => {
-      return client.http.request(`/api/v1/rag/documents/${documentId}`, {
-        method: "DELETE",
+      // Delete document record via Gateway API
+      return client.http.request(`${API_ROUTES.RAG_DOCUMENTS}/${documentId}`, {
+        method: HttpMethod.DELETE,
       });
     },
     onSuccess: () => {
+      // Invalidate knowledge documents cache
       queryClient.invalidateQueries({ queryKey: KNOWLEDGE_DOCUMENTS_QUERY_KEY });
     },
   });

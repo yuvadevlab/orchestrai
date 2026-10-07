@@ -10,6 +10,7 @@ import { useApiData, type UseApiDataResult } from "@/lib/hooks";
 import { ExecutionStatus, type ExecutionRun, type ExecutionStepTrace } from "../types";
 import type { Agent, Execution } from "@orchestrai/sdk";
 import { useAuth } from "@/lib/auth";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 /**
  * Converts an ISO date string into a friendly relative human duration (e.g. '2m ago').
@@ -160,7 +161,7 @@ export function useExecutions(): UseApiDataResult<ExecutionRun[]> {
       });
     },
     initialData: [],
-    queryKey: ["executions", tenantId],
+    queryKey: QUERY_KEYS.EXECUTIONS.LIST(tenantId),
     enabled: !isAuthLoading && Boolean(tenantId),
   });
 }

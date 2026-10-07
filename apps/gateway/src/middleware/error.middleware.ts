@@ -5,6 +5,7 @@
 
 import { ZodError } from "zod";
 import { OrchestrAIError } from "@orchestrai/core";
+import { ErrorCode } from "@orchestrai/shared-types";
 import type { GatewayRequest, GatewayResponse } from "@/routes";
 
 /**
@@ -30,7 +31,7 @@ export function handleError(error: unknown, res: GatewayResponse, requestId?: st
     res.end(
       JSON.stringify({
         error: {
-          code: "VALIDATION_ERROR",
+          code: ErrorCode.VALIDATION_ERROR,
           message: "Request payload failed schema validation",
           details: error.issues.map((i) => ({
             path: i.path.join("."),
@@ -65,7 +66,7 @@ export function handleError(error: unknown, res: GatewayResponse, requestId?: st
     res.end(
       JSON.stringify({
         error: {
-          code: "INVALID_JSON",
+          code: ErrorCode.BAD_REQUEST,
           message: "Failed to parse request JSON payload",
           requestId,
         },
@@ -80,7 +81,7 @@ export function handleError(error: unknown, res: GatewayResponse, requestId?: st
   res.end(
     JSON.stringify({
       error: {
-        code: "INTERNAL_SERVER_ERROR",
+        code: ErrorCode.INTERNAL_SERVER_ERROR,
         message,
         requestId,
       },

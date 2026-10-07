@@ -15,6 +15,7 @@ import {
   OrchestratorEventType,
   OrchestratorPubSubEventName,
   PlatformCapabilitySlug,
+  NETWORK_DEFAULTS,
 } from "@orchestrai/shared-types";
 import { AIMessageSchema, AGENT_EXECUTION_DEFAULTS, type AgentDefinition } from "@orchestrai/core";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
@@ -63,7 +64,7 @@ export class DagExecutionEngine {
     agent: AgentDefinition,
     inputPrompt: string,
   ): Promise<DagExecutionRunResult> {
-    logger.info("Executing DAG run", { executionId, agentName: agent.name });
+    logger.info("executeDagRun: executing DAG run", { executionId, agentName: agent.name });
 
     const sm = new ExecutionStateMachine(executionId);
     this.activeMachines.set(executionId, sm);
@@ -99,7 +100,7 @@ export class DagExecutionEngine {
       }
 
       const adapter = await OllamaAdapter.create({
-        host: process.env.OLLAMA_HOST || "http://localhost:11434",
+        host: process.env.OLLAMA_HOST || NETWORK_DEFAULTS.OLLAMA_DEFAULT_HOST,
         timeoutMs: AGENT_EXECUTION_DEFAULTS.DEFAULT_TIMEOUT_MS,
         defaultModel: modelName,
       });
@@ -155,7 +156,7 @@ export class DagExecutionEngine {
       };
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      logger.error("DAG run failed", { executionId, error: errorMsg });
+      logger.error("executeDagRun: DAG run failed", { executionId, error: errorMsg });
 
       if (!sm.isTerminal) {
         await sm.transition({ type: OrchestratorEventType.FAIL, payload: { error: errorMsg } });

@@ -7,6 +7,7 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { TraceSpanStatus } from "@orchestrai/shared-types";
+import { QUERY_KEYS, API_ROUTES } from "@/lib/query-keys";
 
 export interface SpanRecord {
   spanId: string;
@@ -34,10 +35,12 @@ export function useExecutionTrace(
   const client = getApiClient();
 
   return useQuery({
-    queryKey: ["traces", executionId],
+    queryKey: QUERY_KEYS.EXECUTIONS.TRACE(executionId),
     queryFn: async (): Promise<ExecutionTraceResponse> => {
       try {
-        return await client.http.request<ExecutionTraceResponse>(`/api/v1/traces/${executionId}`);
+        return await client.http.request<ExecutionTraceResponse>(
+          `${API_ROUTES.TRACES}/${encodeURIComponent(executionId)}`,
+        );
       } catch {
         return {
           traceId: executionId,

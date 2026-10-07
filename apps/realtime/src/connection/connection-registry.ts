@@ -3,6 +3,7 @@
  * @description Thread-safe in-memory registry tracking concurrent client sessions and capacity limits.
  */
 
+import { ErrorCode, RealtimeTransport } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import type { ClientSession } from "./client-session";
 
@@ -33,7 +34,7 @@ export class ConnectionRegistry {
     if (this.sessions.size >= this.maxConnections) {
       throw new OrchestrAIError(
         `Server connection limit reached (${this.maxConnections})`,
-        "QUEUE_BACKPRESSURE",
+        ErrorCode.QUEUE_BACKPRESSURE,
         503,
         { current: this.sessions.size, max: this.maxConnections },
       );
@@ -125,7 +126,7 @@ export class ConnectionRegistry {
     let authenticatedCount = 0;
 
     for (const session of this.sessions.values()) {
-      if (session.transport === "WEBSOCKET") {
+      if (session.transport === RealtimeTransport.WEBSOCKET) {
         websocketCount++;
       } else {
         sseCount++;

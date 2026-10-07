@@ -9,6 +9,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { DocumentUploadStatus, DocumentMimeType } from "@orchestrai/shared-types";
+import { QUERY_KEYS, API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 export interface UploadDocumentParams {
   file: File;
@@ -48,8 +49,9 @@ export function useUploadDocument(): UseMutationResult<
       const content = await file.text();
       const mimeType = resolveMimeType(file);
 
-      const response = await client.http.request<{ documentId: string }>("/api/v1/rag/documents", {
-        method: "POST",
+      // Ingest document content into RAG vector index via Gateway API
+      const response = await client.http.request<{ documentId: string }>(API_ROUTES.RAG_DOCUMENTS, {
+        method: HttpMethod.POST,
         body: JSON.stringify({
           title: file.name,
           sourceUri: `upload://${file.name}`,
@@ -67,7 +69,8 @@ export function useUploadDocument(): UseMutationResult<
       };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["knowledge"] });
+      // Invalidate knowledge document caches
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.KNOWLEDGE.ALL });
     },
   });
 }

@@ -3,6 +3,8 @@
  * @description Base SDK error class with HTTP status, domain code, and request trace correlation.
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
+
 /**
  * Base exception thrown by the OrchestrAI SDK across all failures.
  */
@@ -27,9 +29,9 @@ export class OrchestrAISDKError extends Error {
     } = {},
   ) {
     super(message);
-    this.name = "OrchestrAISDKError";
+    this.name = new.target.name || this.constructor.name;
     this.statusCode = options.statusCode ?? 500;
-    this.code = options.code ?? "SDK_ERROR";
+    this.code = options.code ?? ErrorCode.INTERNAL_SERVER_ERROR;
     this.details = options.details;
     this.requestId = options.requestId;
 

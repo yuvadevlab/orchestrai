@@ -5,6 +5,7 @@
  */
 
 import { randomUUID } from "node:crypto";
+import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import type { IEmbeddingProvider } from "@orchestrai/rag";
 import { CacheHitStatus } from "@orchestrai/shared-types";
 import type {
@@ -14,6 +15,8 @@ import type {
   SemanticCacheStats,
 } from "./types";
 import { cosineSimilarity } from "./similarity";
+
+const logger = loggerWithConfig(new Logger("SemanticCache"));
 
 /** Default similarity threshold: 0.97 (strictly identical or near-verbatim semantic queries) */
 const DEFAULT_SIMILARITY_THRESHOLD = 0.97;
@@ -40,6 +43,12 @@ export class SemanticCache<T = unknown> {
     this.similarityThreshold = options.similarityThreshold ?? DEFAULT_SIMILARITY_THRESHOLD;
     this.defaultTtlMs = options.defaultTtlMs ?? DEFAULT_TTL_MS;
     this.maxEntries = options.maxEntries ?? DEFAULT_MAX_ENTRIES;
+
+    logger.debug("constructor: semantic cache initialized", {
+      similarityThreshold: this.similarityThreshold,
+      defaultTtlMs: this.defaultTtlMs,
+      maxEntries: this.maxEntries,
+    });
   }
 
   /**
@@ -49,6 +58,7 @@ export class SemanticCache<T = unknown> {
    * @returns CacheLookupResult with match status and value
    */
   public async get(prompt: string): Promise<CacheLookupResult<T>> {
+    // Return early if the query prompt is blank or cache is empty
     if (!prompt.trim() || this.entries.size === 0) {
       this.totalMisses += 1;
       return { status: CacheHitStatus.MISS };
@@ -61,7 +71,7 @@ export class SemanticCache<T = unknown> {
     let bestEntry: SemanticCacheEntry<T> | null = null;
 
     for (const entry of this.entries.values()) {
-      // Check expiration
+      // Evict expired entries encountered during iteration
       if (now > entry.expiresAt) {
         this.entries.delete(entry.id);
         continue;
@@ -78,6 +88,11 @@ export class SemanticCache<T = unknown> {
     if (bestEntry && bestScore >= this.similarityThreshold) {
       bestEntry.hits += 1;
       this.totalHits += 1;
+      logger.info("get: semantic cache hit", {
+        entryId: bestEntry.id,
+        score: bestScore,
+        hits: bestEntry.hits,
+      });
       return {
         status: CacheHitStatus.HIT,
         value: bestEntry.value,
@@ -87,6 +102,10 @@ export class SemanticCache<T = unknown> {
     }
 
     this.totalMisses += 1;
+    logger.debug("get: semantic cache miss", {
+      bestScore: bestScore > 0 ? bestScore : undefined,
+      entriesCount: this.entries.size,
+    });
     return {
       status: CacheHitStatus.MISS,
       similarityScore: bestScore > 0 ? bestScore : undefined,
@@ -109,6 +128,7 @@ export class SemanticCache<T = unknown> {
     if (this.entries.size >= this.maxEntries) {
       const oldestKey = this.entries.keys().next().value;
       if (oldestKey) {
+        logger.debug("set: evicting oldest cache entry due to capacity", { oldestKey });
         this.entries.delete(oldestKey);
       }
     }
@@ -126,6 +146,11 @@ export class SemanticCache<T = unknown> {
     };
 
     this.entries.set(entry.id, entry);
+    logger.info("set: cached semantic entry successfully", {
+      entryId: entry.id,
+      ttlMs,
+      totalEntries: this.entries.size,
+    });
     return entry;
   }
 
@@ -133,7 +158,9 @@ export class SemanticCache<T = unknown> {
    * Clears all cached entries.
    */
   public clear(): void {
+    const prevSize = this.entries.size;
     this.entries.clear();
+    logger.info("clear: cleared all semantic cache entries", { previousSize: prevSize });
   }
 
   /**

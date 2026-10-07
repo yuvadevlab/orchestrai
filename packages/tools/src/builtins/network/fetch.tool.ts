@@ -15,7 +15,7 @@
  */
 
 import { z } from "zod";
-import { ToolPermissionLevel } from "@orchestrai/shared-types";
+import { ToolPermissionLevel, ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError, type ToolDefinition } from "@orchestrai/core";
 import type { ITool, ToolExecutionContext } from "@/interfaces";
 
@@ -93,7 +93,7 @@ export class FetchTool implements ITool<FetchInput, FetchOutput> {
     if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
       throw new OrchestrAIError(
         `Protocol "${parsedUrl.protocol}" is forbidden. Only "http:" and "https:" are allowed.`,
-        "POLICY_VIOLATION",
+        ErrorCode.POLICY_VIOLATION,
         403,
         { url: args.url },
       );

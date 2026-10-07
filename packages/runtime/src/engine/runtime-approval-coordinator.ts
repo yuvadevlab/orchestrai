@@ -4,7 +4,7 @@
  */
 
 import crypto from "node:crypto";
-import { MessageRole, ApprovalDecisionVerdict } from "@orchestrai/shared-types";
+import { MessageRole, ApprovalDecisionVerdict, ErrorCode } from "@orchestrai/shared-types";
 import { AIMessageSchema, OrchestrAIError, type AIMessage } from "@orchestrai/core";
 import type { IPersistentCheckpointer } from "@/checkpoint";
 import {
@@ -37,7 +37,7 @@ export async function resumeApprovalRun(
   if (!latest) {
     throw new OrchestrAIError(
       `Cannot resume execution: no checkpoint found for "${executionId}"`,
-      "NOT_FOUND",
+      ErrorCode.NOT_FOUND,
       404,
       { executionId },
     );
@@ -104,7 +104,7 @@ export async function cancelApprovalRun(
   if (!latest) {
     throw new OrchestrAIError(
       `Cannot cancel execution: no checkpoint found for "${executionId}"`,
-      "NOT_FOUND",
+      ErrorCode.NOT_FOUND,
       404,
       { executionId },
     );

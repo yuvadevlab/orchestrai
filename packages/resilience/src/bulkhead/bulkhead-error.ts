@@ -28,7 +28,7 @@ export class BulkheadRejectedError extends Error {
     super(
       `Bulkhead '${bulkheadName}' is saturated (active: ${maxConcurrent}, queue: ${maxQueueSize}). Request rejected to prevent capacity starvation.`,
     );
-    this.name = "BulkheadRejectedError";
+    this.name = this.constructor.name;
     this.bulkheadName = bulkheadName;
     this.maxConcurrent = maxConcurrent;
     this.maxQueueSize = maxQueueSize;

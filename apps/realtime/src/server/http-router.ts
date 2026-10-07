@@ -6,7 +6,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Logger, loggerWithConfig, requestLogger } from "@yuva-devlab/logger";
 import { handleExecutionSseStream, handleGlobalSseStream } from "@/sse";
-import { LOCALHOST_ORIGIN_REGEX } from "@orchestrai/regex";
+import { LOCALHOST_ORIGIN_REGEX, EXECUTION_STREAM_ROUTE_REGEX } from "@orchestrai/regex";
+import { ADMIN_ROUTES, QUERY_PARAMS } from "@orchestrai/shared-types";
 import type { ConnectionRegistry } from "@/connection";
 import type { SubscriptionManager } from "@/subscriptions";
 
@@ -122,7 +123,7 @@ export function createHttpRouter(deps: RouterDeps) {
       return;
     }
 
-    if (pathname === "/health") {
+    if (pathname === ADMIN_ROUTES.HEALTH) {
       handleHealth(res, deps.registry);
       return;
     }
@@ -137,8 +138,8 @@ export function createHttpRouter(deps: RouterDeps) {
       return;
     }
 
-    // Match /api/v1/executions/:id/stream
-    const execStreamMatch = pathname.match(/^\/api\/v1\/executions\/([^/]+)\/stream$/);
+    // Match /api/v1/executions/:id/stream using centralized regex
+    const execStreamMatch = pathname.match(EXECUTION_STREAM_ROUTE_REGEX);
     if (execStreamMatch) {
       const executionId = execStreamMatch[1] ?? "";
       handleExecutionSseStream(req, res, executionId, deps);
@@ -149,7 +150,7 @@ export function createHttpRouter(deps: RouterDeps) {
     if (pathname === "/api/v1/stream") {
       const queryIdx = url.indexOf("?");
       const params = new URLSearchParams(queryIdx >= 0 ? url.slice(queryIdx) : "");
-      const executionId = params.get("executionId") || "";
+      const executionId = params.get(QUERY_PARAMS.EXECUTION_ID) || "";
       if (executionId) {
         handleExecutionSseStream(req, res, executionId, deps);
         return;

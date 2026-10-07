@@ -55,24 +55,28 @@ export abstract class BaseWorker<TPayload = unknown, TResult = unknown> {
   private attachEventListeners(): void {
     this.worker.on("completed", (job) => {
       // Inline: Trace job completion without noisy logs for fast tasks
-      this.logger.debug(`Job '${job.id}' completed successfully.`);
+      this.logger.debug("onCompleted: job completed successfully", { jobId: job.id });
     });
 
     this.worker.on("failed", (job, error) => {
       // Always log failed jobs for operational diagnostics
       const jobId = job ? job.id : "unknown";
       const attempts = job ? job.attemptsMade : 0;
-      this.logger.error(`Job '${jobId}' failed on attempt ${attempts}: ${error.message}`);
+      this.logger.error("onFailed: job execution failed", {
+        jobId,
+        attempts,
+        error: error.message,
+      });
     });
 
     this.worker.on("error", (error) => {
       // Guard against worker connection failure or unhandled Redis drop
-      this.logger.error(`Internal error encountered: ${error.message}`);
+      this.logger.error("onError: internal worker error encountered", { error: error.message });
     });
 
     this.worker.on("stalled", (jobId) => {
       // Stalled jobs indicate worker starvation, high memory, or unhandled process crash
-      this.logger.warn(`Job '${jobId}' has stalled and will be re-queued.`);
+      this.logger.warn("onStalled: job stalled and queued for retry", { jobId });
     });
   }
 

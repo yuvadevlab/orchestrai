@@ -9,6 +9,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
 import { ApprovalDecisionVerdict, PermissionScope } from "@orchestrai/shared-types";
 import { getApiClient } from "@/lib/api-client";
+import { QUERY_KEYS } from "@/lib/query-keys";
 import type { ApprovalDecisionResult } from "@orchestrai/sdk";
 
 export type ApprovalDecisionScope = PermissionScope;
@@ -36,10 +37,12 @@ export function useResolveApproval(): UseMutationResult<
       scope,
       reason,
     }: ResolveApprovalParams): Promise<ApprovalDecisionResult> => {
+      // Evaluate clearance verdict based on operator decision scope
       const decision =
         scope === PermissionScope.DENY
           ? ApprovalDecisionVerdict.REJECTED
           : ApprovalDecisionVerdict.APPROVED;
+
       return client.approvals.resolve(approvalId, {
         decision,
         scope,
@@ -47,7 +50,8 @@ export function useResolveApproval(): UseMutationResult<
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["approvals"] });
+      // Invalidate active approvals cache to refresh badge counts and feed
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.APPROVALS.ALL });
     },
   });
 }

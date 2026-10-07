@@ -26,7 +26,7 @@ export class TimeoutError extends Error {
    */
   public constructor(operationName: string, timeoutMs: number, elapsedMs = timeoutMs) {
     super(`Operation '${operationName}' timed out after ${timeoutMs}ms (elapsed: ${elapsedMs}ms)`);
-    this.name = "TimeoutError";
+    this.name = this.constructor.name;
     this.operationName = operationName;
     this.timeoutMs = timeoutMs;
     this.elapsedMs = elapsedMs;

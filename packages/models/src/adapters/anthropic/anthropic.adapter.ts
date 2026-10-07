@@ -15,6 +15,7 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { ModelProvider, OrchestrAIError } from "@orchestrai/core";
 import type { ILlmAdapter, LlmRequest, LlmResponse, LlmStreamChunk } from "@/interfaces";
 import type { AnthropicConfig } from "./anthropic.config.schema";
@@ -68,7 +69,7 @@ export class AnthropicAdapter implements ILlmAdapter {
       throw new OrchestrAIError(
         "The `@anthropic-ai/sdk` package is required to use AnthropicAdapter. " +
           "Install it: pnpm add @anthropic-ai/sdk",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         500,
         { peerDep: "@anthropic-ai/sdk" },
       );
@@ -96,7 +97,7 @@ export class AnthropicAdapter implements ILlmAdapter {
     if (!model) {
       throw new OrchestrAIError(
         "No model identifier specified for Anthropic request",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
       );
     }
@@ -133,7 +134,7 @@ export class AnthropicAdapter implements ILlmAdapter {
       if (err instanceof OrchestrAIError) throw err;
       throw new OrchestrAIError(
         `Anthropic invoke failed for model "${model}": ${String(err)}`,
-        "MODEL_TIMEOUT",
+        ErrorCode.MODEL_TIMEOUT,
         503,
         { model, cause: err },
       );
@@ -152,7 +153,7 @@ export class AnthropicAdapter implements ILlmAdapter {
     if (!model) {
       throw new OrchestrAIError(
         "No model identifier specified for Anthropic stream",
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
       );
     }
@@ -183,7 +184,7 @@ export class AnthropicAdapter implements ILlmAdapter {
       if (err instanceof OrchestrAIError) throw err;
       throw new OrchestrAIError(
         `Anthropic stream failed for model "${request.model}": ${String(err)}`,
-        "MODEL_TIMEOUT",
+        ErrorCode.MODEL_TIMEOUT,
         503,
         { model: request.model, cause: err },
       );

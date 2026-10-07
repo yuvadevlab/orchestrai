@@ -6,10 +6,16 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
+
 const ExecutionsPageContent = dynamic(() =>
   import("@/features/executions").then((m) => ({ default: m.ExecutionsPageContent })),
 );
 
+/**
+ * Executions history page rendering swarm execution records, latency metrics, and status badges.
+ *
+ * @returns JSX element containing ExecutionsPageContent
+ */
 export default function ExecutionsPage(): React.JSX.Element {
   return <ExecutionsPageContent />;
 }

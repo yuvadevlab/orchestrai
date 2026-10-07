@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@orchestrai/core": "workspace:*",
+    "@orchestrai/shared-types": "workspace:*",
     "@yuva-devlab/logger": "1.1.0",
     "zod": "^4.6.5"
   },

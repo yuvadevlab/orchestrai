@@ -21,6 +21,8 @@ import {
 import {
   ExecutionIdSchema,
   AGENT_EXECUTION_DEFAULTS,
+  NotFoundError,
+  ConfigurationError,
   type AgentDefinition,
   AgentIdSchema,
 } from "@orchestrai/core";
@@ -44,7 +46,7 @@ export class GrpcExecutionService implements IGrpcExecutionService {
    * @returns Typed gRPC execution response
    */
   public async dispatchExecution(request: GrpcExecutionRequest): Promise<GrpcExecutionResponse> {
-    logger.info("gRPC dispatchExecution invoked", {
+    logger.info("dispatchExecution: dispatching remote execution", {
       executionId: request.executionId,
       agentId: request.agentId,
       traceId: request.traceId,
@@ -60,11 +62,10 @@ export class GrpcExecutionService implements IGrpcExecutionService {
 
     // Guard against missing agent: Fail fast and instruct user to create one
     if (!dbAgent) {
-      const errorMsg = `Agent with ID "${request.agentId}" does not exist. Please create an agent first.`;
-      logger.error("gRPC dispatchExecution failed: agent not found", {
+      logger.error("dispatchExecution: agent not found", {
         agentId: request.agentId,
       });
-      throw new Error(errorMsg);
+      throw new NotFoundError("Agent", request.agentId);
     }
 
     const meta = (dbAgent.metadata as Record<string, unknown>) || {};
@@ -77,7 +78,7 @@ export class GrpcExecutionService implements IGrpcExecutionService {
 
     // Guard against missing model configuration: require DB or env definition
     if (!resolvedModelName) {
-      throw new Error(
+      throw new ConfigurationError(
         `Agent "${dbAgent.name}" has no model configured and DEFAULT_MODEL_NAME environment variable is not set.`,
       );
     }
@@ -113,7 +114,7 @@ export class GrpcExecutionService implements IGrpcExecutionService {
 
     // Run execution asynchronously; return initial running response
     void this.engine.executeDagRun(request.executionId, agent, request.inputPrompt).catch((err) => {
-      logger.error("Async DAG execution error", {
+      logger.error("dispatchExecution: async DAG execution error", {
         executionId: request.executionId,
         error: String(err),
       });
@@ -133,7 +134,7 @@ export class GrpcExecutionService implements IGrpcExecutionService {
    * @returns Typed gRPC execution response
    */
   public async getExecutionStatus(executionId: string): Promise<GrpcExecutionResponse> {
-    logger.debug("gRPC getExecutionStatus invoked", { executionId });
+    logger.debug("getExecutionStatus: querying execution status", { executionId });
 
     const validId = ExecutionIdSchema.parse(executionId);
     const rawState = this.engine.getExecutionState(validId);

@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import type { BenchmarkResult, RunBenchmarkPayload } from "../types";
+import { API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 export interface UseRunBenchmarkResult {
   runBenchmark: (payload: RunBenchmarkPayload) => Promise<BenchmarkResult>;
@@ -28,8 +29,9 @@ export function useRunBenchmark(): UseRunBenchmarkResult {
 
   const mutation = useMutation({
     mutationFn: async (payload: RunBenchmarkPayload): Promise<BenchmarkResult> => {
-      return client.http.request<BenchmarkResult>("/api/v1/eval/run", {
-        method: "POST",
+      // Execute benchmark suite against model via Gateway API
+      return client.http.request<BenchmarkResult>(API_ROUTES.EVAL_RUN, {
+        method: HttpMethod.POST,
         body: JSON.stringify(payload),
       });
     },

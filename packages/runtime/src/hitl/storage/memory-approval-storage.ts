@@ -3,7 +3,7 @@
  * @description In-memory implementation of IApprovalStorage for local development and tests.
  */
 
-import { ApprovalStatus, ApprovalDecisionVerdict } from "@orchestrai/shared-types";
+import { ApprovalStatus, ApprovalDecisionVerdict, ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 import type { ApprovalResolutionInput, ApprovalTicket, IApprovalStorage } from "../contracts";
 
@@ -61,16 +61,21 @@ export class MemoryApprovalStorage implements IApprovalStorage {
   ): Promise<ApprovalTicket> {
     const existing = this.tickets.get(approvalId);
     if (!existing) {
-      throw new OrchestrAIError(`Approval ticket "${approvalId}" not found`, "NOT_FOUND", 404, {
-        approvalId,
-      });
+      throw new OrchestrAIError(
+        `Approval ticket "${approvalId}" not found`,
+        ErrorCode.NOT_FOUND,
+        404,
+        {
+          approvalId,
+        },
+      );
     }
 
     // Guard: Prevent double-resolution if ticket has already been decided or timed out
     if (existing.status !== ApprovalStatus.PENDING) {
       throw new OrchestrAIError(
         `Cannot resolve ticket "${approvalId}": already in status "${existing.status}"`,
-        "VALIDATION_ERROR",
+        ErrorCode.VALIDATION_ERROR,
         400,
         { approvalId, status: existing.status },
       );

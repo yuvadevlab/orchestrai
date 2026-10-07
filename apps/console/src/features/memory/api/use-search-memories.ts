@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import type { ScoredMemoryResult } from "../types";
+import { API_ROUTES, HttpMethod, QUERY_PARAMS } from "@/lib/query-keys";
 
 export interface UseSearchMemoriesResult {
   recall: (query: string) => Promise<ScoredMemoryResult[]>;
@@ -28,11 +29,12 @@ export function useSearchMemories(): UseSearchMemoriesResult {
 
   const mutation = useMutation({
     mutationFn: async (queryText: string): Promise<ScoredMemoryResult[]> => {
+      // Execute semantic recall search via Gateway API
       const res = await client.http.request<{ items: ScoredMemoryResult[] }>(
-        "/api/v1/memory/search",
+        API_ROUTES.MEMORY_SEARCH,
         {
-          method: "POST",
-          body: JSON.stringify({ query: queryText }),
+          method: HttpMethod.POST,
+          body: JSON.stringify({ [QUERY_PARAMS.QUERY]: queryText }),
         },
       );
       return res.items || [];

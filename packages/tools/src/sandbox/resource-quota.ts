@@ -12,6 +12,7 @@
  * ─────────────────────────────────────────────────────────────────────
  */
 
+import { ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError } from "@orchestrai/core";
 
 /**
@@ -62,7 +63,7 @@ export class ResourceQuota {
     if (elapsedMs > this.limits.maxElapsedMs) {
       throw new OrchestrAIError(
         `Execution time quota exceeded: ${elapsedMs}ms > ${this.limits.maxElapsedMs}ms limit`,
-        "POLICY_VIOLATION",
+        ErrorCode.POLICY_VIOLATION,
         429,
         { toolName, elapsedMs, maxElapsedMs: this.limits.maxElapsedMs },
       );
@@ -72,7 +73,7 @@ export class ResourceQuota {
     if (this.toolCallsUsed >= this.limits.maxToolCalls) {
       throw new OrchestrAIError(
         `Tool call quota exceeded: ${this.toolCallsUsed} calls >= ${this.limits.maxToolCalls} limit`,
-        "POLICY_VIOLATION",
+        ErrorCode.POLICY_VIOLATION,
         429,
         { toolName, toolCallsUsed: this.toolCallsUsed, maxToolCalls: this.limits.maxToolCalls },
       );
@@ -82,7 +83,7 @@ export class ResourceQuota {
     if (this.outputBytesUsed >= this.limits.maxOutputBytes) {
       throw new OrchestrAIError(
         `Output byte quota exceeded: ${this.outputBytesUsed} bytes >= ${this.limits.maxOutputBytes} limit`,
-        "POLICY_VIOLATION",
+        ErrorCode.POLICY_VIOLATION,
         429,
         {
           toolName,

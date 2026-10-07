@@ -12,7 +12,7 @@
  * ───────────────────────────────────────────────────────────────────
  */
 
-import { ToolPermissionLevel } from "@orchestrai/shared-types";
+import { ToolPermissionLevel, ErrorCode } from "@orchestrai/shared-types";
 import { OrchestrAIError, requiresHumanApproval } from "@orchestrai/core";
 
 /**
@@ -92,7 +92,7 @@ export function assertToolPermission(
   if (!result.isAllowed) {
     throw new OrchestrAIError(
       `Permission denied for tool "${toolName}": ${result.denialReason}`,
-      "POLICY_VIOLATION",
+      ErrorCode.POLICY_VIOLATION,
       403,
       { toolName, toolLevel, agentClearance },
     );

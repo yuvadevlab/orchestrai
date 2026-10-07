@@ -9,6 +9,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
 import { getApiClient } from "@/lib/api-client";
 import { MEMORY_QUERY_KEY } from "./use-memories";
+import { API_ROUTES, HttpMethod } from "@/lib/query-keys";
 
 /**
  * Hook to delete a memory item by ID.
@@ -19,11 +20,13 @@ export function useDeleteMemory(): UseMutationResult<unknown, Error, string> {
 
   return useMutation({
     mutationFn: async (memoryId: string): Promise<unknown> => {
-      return client.http.request(`/api/v1/memory/${memoryId}`, {
-        method: "DELETE",
+      // Delete target memory record via Gateway API
+      return client.http.request(`${API_ROUTES.MEMORY}/${memoryId}`, {
+        method: HttpMethod.DELETE,
       });
     },
     onSuccess: () => {
+      // Invalidate memory list cache
       queryClient.invalidateQueries({ queryKey: MEMORY_QUERY_KEY });
     },
   });

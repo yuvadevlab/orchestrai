@@ -601,3 +601,31 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] **Compact ESLint & Project-Aware TSC**: Added `ESLINT_COMPACT_DIAGNOSTIC_REGEX` and `tsconfig.json` resolution in `workspace-diagnostic-runner.ts` to ensure 100% accurate diagnostic captures.
 - [x] **Dynamic `workspacePath` Propagation**: Console Studio (`useAgentRunner`) passes active workspace path down to Gateway and harness context.
 - [x] **Workspace Harness API & Studio UI Badge**: Exposes `GET /api/v1/workspace/harness` and displays discovered rules/skills badge in `StudioHeader` (`useWorkspaceHarness`).
+
+---
+
+### Milestone 15: Universal Zero-Hardcoding, Centralized Enums & Protocol Hardening
+
+#### [x] Centralized Enums & Error Codes (`@orchestrai/shared-types`)
+
+- [x] **Authoritative Enum Registry (`packages/shared-types/src/enums/`)**:
+  - Centralized all enums into dedicated files (`error-codes.enum.ts`, `worker.enums.ts`, `platform.enums.ts`, `hub.enums.ts`, `sse.enums.ts`, `core.enums.ts`).
+  - Standardized all `ErrorCode` values strictly to lowercase `snake_case` (e.g. `ErrorCode.NOT_FOUND = "not_found"`, `ErrorCode.VALIDATION_ERROR = "validation_error"`, `ErrorCode.INTERNAL_SERVER_ERROR = "internal_server_error"`).
+  - Added specialized domain enums (`MaintenanceTaskType`, `WorkerHealthStatus`, `WsClientMessageType`, `WsServerMessageType`, `WsClientAction`, `PresenceEvent`, `RealtimeTransport`, `HealthStatus`, `BenchmarkMetric`).
+  - Re-exported all enums through unified barrels (`enums.ts` and `index.ts`).
+
+#### [x] Zero-Hardcoded Strings & Constants Across Monorepo
+
+- [x] **Runtime & Engine Domain Errors**:
+  - Replaced raw string error codes with `ErrorCode.*` in `packages/runtime`, `packages/models`, `packages/tools`, `packages/agent`, `packages/sdk`, and `packages/core`.
+  - Added `ConfigurationError` to `@orchestrai/core` domain error hierarchy.
+  - Replaced raw string error codes in `apps/admin`, `apps/gateway`, `apps/realtime`, and `apps/worker`.
+- [x] **Dynamic Error Class Names**:
+  - Replaced hardcoded `this.name = "..."` assignments with dynamic `this.name = this.constructor.name;` and `new.target.name` across `@orchestrai/sdk` (`AuthenticationError`, `NotFoundError`, `RateLimitError`, `ValidationError`, `BudgetExceededError`, `GatewayTimeoutError`) and `@orchestrai/resilience` (`RateLimitExceededError`, `ChaosInjectedError`, `TimeoutError`, `CircuitBreakerOpenError`, `BulkheadRejectedError`).
+- [x] **Centralized Parameters, Routes & Query Keys**:
+  - Centralized `ROUTE_PARAMS` and `QUERY_PARAMS` constants for gateway and console routing.
+  - Created centralized `QUERY_KEYS` in `apps/console/src/lib/query-keys.ts` and `@orchestrai/shared-types`.
+  - Replaced raw route methods with `HttpMethod` enum (`HttpMethod.GET`, `HttpMethod.POST`, `HttpMethod.PUT`, `HttpMethod.PATCH`, `HttpMethod.DELETE`).
+- [x] **Standardized Logger Formatting (`@yuva-devlab/logger`)**:
+  - Standardized logger messages to `"methodName: description of action"` with metadata as second parameter across gateway controllers, admin server, realtime gateway, and worker jobs.
+  - Removed duplicate class prefixes (e.g. `[Auth]`, `[ConversationController]`) from message strings.
