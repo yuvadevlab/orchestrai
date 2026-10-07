@@ -10,13 +10,15 @@ import React from "react";
 import { Brain, Trash2, Calendar, Star } from "lucide-react";
 import { Button, toast } from "@yuva-devlab/ui";
 import { EmptyState } from "@/components/ui";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useDeleteMemory } from "../api";
 import type { MemoryItem } from "../types";
 
 export interface MemoryItemsListProps {
-  memories: MemoryItem[];
-  isLoading: boolean;
-  onOpenCreate: () => void;
+  readonly memories: MemoryItem[];
+  readonly isLoading: boolean;
+  readonly onOpenCreate: () => void;
 }
 
 /**
@@ -32,32 +34,26 @@ export function MemoryItemsList({
   const handleDelete = async (memory: MemoryItem): Promise<void> => {
     try {
       await deleteMutation.mutateAsync(memory.memoryId);
-      toast.success("Memory deleted from persistent agent storage");
+      toast.success(UI_COPY.MEMORY.LIST.FEEDBACK_REMOVED);
     } catch {
-      toast.error("Failed to delete memory item");
+      toast.error(UI_COPY.MEMORY.LIST.FEEDBACK_ERROR);
     }
   };
 
   if (isLoading) {
-    return (
-      <div className="border-border bg-card/30 flex min-h-48 items-center justify-center rounded-md border backdrop-blur">
-        <span className="text-muted-foreground animate-pulse text-xs">
-          Loading agent memories...
-        </span>
-      </div>
-    );
+    return <TableSkeleton rows={4} />;
   }
 
   if (memories.length === 0) {
     return (
       <EmptyState
         icon={Brain}
-        title="No persistent memories yet"
-        description="Agents record episodic reflections after each execution, or you can record explicit facts manually."
+        title={UI_COPY.MEMORY.EMPTY_TITLE}
+        description={UI_COPY.MEMORY.EMPTY_DESC}
         action={
           <Button size="sm" onClick={onOpenCreate} className="h-8 gap-1.5 text-xs font-medium">
             <Brain className="size-3.5" />
-            <span>Add first memory</span>
+            <span>{UI_COPY.MEMORY.LIST.ADD_FIRST}</span>
           </Button>
         }
       />
@@ -82,7 +78,7 @@ export function MemoryItemsList({
                   <div className="flex items-center gap-1 text-[11px]">
                     <Star className="text-warning size-3" />
                     <span className="text-muted-foreground font-mono text-[10px]">
-                      {importancePct}% priority
+                      {UI_COPY.MEMORY.LIST.PRIORITY_PCT(importancePct)}
                     </span>
                   </div>
                   <div className="text-muted-foreground flex items-center gap-1 text-[11px]">
@@ -103,7 +99,8 @@ export function MemoryItemsList({
                   onClick={() => handleDelete(mem)}
                   disabled={deleteMutation.isPending}
                   className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground size-7 rounded"
-                  title="Delete memory"
+                  title={UI_COPY.MEMORY.LIST.DELETE_TOOLTIP}
+                  aria-label={UI_COPY.MEMORY.LIST.DELETE_TOOLTIP}
                 >
                   <Trash2 className="size-3.5" />
                 </Button>

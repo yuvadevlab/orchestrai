@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { Check, ChevronDown, ChevronRight, Copy, Download, FileText } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkArtifact } from "../../types";
 
 export interface ArtifactDocumentCardProps {
@@ -56,10 +57,10 @@ export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): R
           <FileText className="text-primary size-4 shrink-0" />
           <span className="text-foreground truncate font-semibold">{artifact.title}</span>
           <span className="text-muted-foreground hidden text-[11px] sm:inline">
-            ({wordCount} words)
+            {UI_COPY.STUDIO.ARTIFACTS.WORDS_COUNT(wordCount)}
           </span>
           <span className="text-muted-foreground ml-1 flex items-center gap-0.5 text-[10px]">
-            <span>{isExpanded ? "Hide" : "Show"}</span>
+            <span>{isExpanded ? UI_COPY.COMMON.ACTIONS.HIDE : UI_COPY.COMMON.ACTIONS.SHOW}</span>
             {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
           </span>
         </button>
@@ -67,7 +68,9 @@ export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): R
         <div className="flex shrink-0 items-center gap-1.5">
           <Button variant="ghost" size="sm" onClick={handleCopy} className="h-7 gap-1 px-2 text-xs">
             {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
-            <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+            <span className="hidden sm:inline">
+              {copied ? UI_COPY.COMMON.ACTIONS.COPIED : UI_COPY.COMMON.ACTIONS.COPY}
+            </span>
           </Button>
 
           <Button
@@ -77,7 +80,7 @@ export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): R
             className="h-7 gap-1 px-2 text-xs"
           >
             <Download className="size-3" />
-            <span className="hidden sm:inline">Download</span>
+            <span className="hidden sm:inline">{UI_COPY.STUDIO.ARTIFACTS.DOWNLOAD_BUTTON}</span>
           </Button>
         </div>
       </div>

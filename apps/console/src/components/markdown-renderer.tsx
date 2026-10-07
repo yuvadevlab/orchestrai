@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
+import { LANGUAGE_CLASS_REGEX, STRIP_TOOL_CALLS_REGEX } from "@orchestrai/regex";
 
 export interface MarkdownRendererProps {
   content: string;
@@ -25,7 +26,7 @@ interface CodeBlockProps {
 function CodeBlock({ children, className }: CodeBlockProps): React.JSX.Element | null {
   const [copied, setCopied] = useState(false);
   const codeString = String(children).replace(/\n$/, "");
-  const match = /language-(\w+)/.exec(className || "");
+  const match = LANGUAGE_CLASS_REGEX.exec(className || "");
   const language = match ? match[1] : "";
 
   // Hide raw tool_call blocks as they are rendered via dedicated Artifact Cards
@@ -63,7 +64,7 @@ function CodeBlock({ children, className }: CodeBlockProps): React.JSX.Element |
 function cleanMarkdownContent(raw: string): string {
   if (!raw) return "";
   // Strip raw tool_call markdown blocks
-  return raw.replace(/```(?:tool_call|json)\s*\n?\{[\s\S]*?"tool"[\s\S]*?\}\s*\n?```/g, "").trim();
+  return raw.replace(STRIP_TOOL_CALLS_REGEX, "").trim();
 }
 
 /**

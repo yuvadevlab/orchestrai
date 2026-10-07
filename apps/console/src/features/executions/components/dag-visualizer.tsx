@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { ZoomIn, ZoomOut, RotateCcw, CheckCircle2, AlertCircle, Clock, Play } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
 import { cn } from "@/lib/utils";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { ExecutionRun, ExecutionStepTrace } from "../types";
 
 export interface DagVisualizerProps {
@@ -64,19 +65,42 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
       {/* Visualizer Header & Zoom Controls */}
       <div className="border-border/60 flex items-center justify-between border-b px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold tracking-tight">Execution DAG Graph</span>
+          <span className="text-xs font-semibold tracking-tight">
+            {UI_COPY.EXECUTIONS.DAG.TITLE}
+          </span>
           <span className="text-muted-foreground font-mono text-[11px]">
-            ({steps.length} nodes · zoom {Math.round(zoom * 100)}%)
+            {UI_COPY.EXECUTIONS.DAG.SUBTITLE(steps.length, Math.round(zoom * 100))}
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => handleZoom(0.1)} className="size-7 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleZoom(0.1)}
+            aria-label={UI_COPY.EXECUTIONS.DAG.ZOOM_IN_A11Y}
+            title={UI_COPY.EXECUTIONS.DAG.ZOOM_IN_A11Y}
+            className="size-7 p-0"
+          >
             <ZoomIn className="size-3.5" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => handleZoom(-0.1)} className="size-7 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleZoom(-0.1)}
+            aria-label={UI_COPY.EXECUTIONS.DAG.ZOOM_OUT_A11Y}
+            title={UI_COPY.EXECUTIONS.DAG.ZOOM_OUT_A11Y}
+            className="size-7 p-0"
+          >
             <ZoomOut className="size-3.5" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setZoom(1)} className="size-7 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setZoom(1)}
+            aria-label={UI_COPY.EXECUTIONS.DAG.RESET_ZOOM_A11Y}
+            title={UI_COPY.EXECUTIONS.DAG.RESET_ZOOM_A11Y}
+            className="size-7 p-0"
+          >
             <RotateCcw className="size-3.5" />
           </Button>
         </div>
@@ -116,7 +140,7 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
                 >
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <span className="text-muted-foreground font-mono text-[10px]">
-                      Step {step.stepIndex}
+                      {UI_COPY.EXECUTIONS.DAG.STEP_LABEL(step.stepIndex)}
                     </span>
                     {isCompleted && <CheckCircle2 className="text-primary size-3" />}
                     {isFailed && <AlertCircle className="text-destructive size-3" />}
@@ -129,8 +153,12 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
                     {step.nodeName}
                   </span>
                   <div className="text-muted-foreground mt-2 flex items-center justify-between font-mono text-[10px]">
-                    <span>{step.durationMs ? `${step.durationMs}ms` : "—"}</span>
-                    <span>{step.tokensUsed ? `${step.tokensUsed} tok` : ""}</span>
+                    <span>
+                      {step.durationMs ? UI_COPY.EXECUTIONS.DAG.MS_FORMAT(step.durationMs) : "—"}
+                    </span>
+                    <span>
+                      {step.tokensUsed ? UI_COPY.EXECUTIONS.DAG.TOK_FORMAT(step.tokensUsed) : ""}
+                    </span>
                   </div>
                 </button>
               </React.Fragment>
@@ -144,31 +172,41 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
         <div className="border-border/60 bg-muted/20 border-t p-3 text-xs">
           <div className="flex items-center justify-between">
             <span className="font-medium">
-              Node Details: <span className="text-primary font-mono">{selectedStep.nodeName}</span>
+              {UI_COPY.EXECUTIONS.DAG.NODE_DETAILS}{" "}
+              <span className="text-primary font-mono">{selectedStep.nodeName}</span>
             </span>
             <span className="text-muted-foreground font-mono text-[11px]">
-              Status: <span className="text-foreground uppercase">{selectedStep.status}</span>
+              {UI_COPY.EXECUTIONS.DAG.STATUS_LABEL}{" "}
+              <span className="text-foreground uppercase">{selectedStep.status}</span>
             </span>
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2 font-mono text-[11px] sm:grid-cols-4">
             <div className="bg-card border-border/40 rounded border p-2">
-              <span className="text-muted-foreground block text-[10px]">Step Index</span>
+              <span className="text-muted-foreground block text-[10px]">
+                {UI_COPY.EXECUTIONS.DAG.STEP_INDEX}
+              </span>
               <span>{selectedStep.stepIndex}</span>
             </div>
             <div className="bg-card border-border/40 rounded border p-2">
-              <span className="text-muted-foreground block text-[10px]">Latency</span>
-              <span>{selectedStep.durationMs ?? 0} ms</span>
+              <span className="text-muted-foreground block text-[10px]">
+                {UI_COPY.EXECUTIONS.DAG.LATENCY}
+              </span>
+              <span>{UI_COPY.EXECUTIONS.DAG.MS_FORMAT(selectedStep.durationMs ?? 0)}</span>
             </div>
             <div className="bg-card border-border/40 rounded border p-2">
-              <span className="text-muted-foreground block text-[10px]">Tokens Used</span>
+              <span className="text-muted-foreground block text-[10px]">
+                {UI_COPY.EXECUTIONS.DAG.TOKENS_USED}
+              </span>
               <span>{selectedStep.tokensUsed ?? 0}</span>
             </div>
             <div className="bg-card border-border/40 rounded border p-2">
-              <span className="text-muted-foreground block text-[10px]">Error</span>
+              <span className="text-muted-foreground block text-[10px]">
+                {UI_COPY.EXECUTIONS.DAG.ERROR}
+              </span>
               <span
                 className={selectedStep.errorMessage ? "text-destructive" : "text-muted-foreground"}
               >
-                {selectedStep.errorMessage ?? "None"}
+                {selectedStep.errorMessage ?? UI_COPY.EXECUTIONS.DAG.NONE}
               </span>
             </div>
           </div>

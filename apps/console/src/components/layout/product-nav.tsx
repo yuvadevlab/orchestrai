@@ -13,8 +13,9 @@ import { LogOut } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@yuva-devlab/ui";
 import { cn, getInitials } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
-import { useNavItems } from "@/lib/use-nav";
-import { getNavIcon } from "@/lib/nav-icon-mapper";
+import { useNavItems } from "@/lib/hooks";
+import { getNavIcon } from "@/lib/navigation";
+import { UI_COPY } from "@/lib/ui-copy";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
@@ -24,22 +25,25 @@ import { ThemeToggle } from "./theme-toggle";
 export function ProductNav(): React.JSX.Element {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const userInitials = getInitials(user?.name || user?.email, "OP");
+  const userInitials = getInitials(
+    user?.name || user?.email,
+    UI_COPY.COMMON.BRAND.DEFAULT_INITIALS,
+  );
   const { data: navItems = [] } = useNavItems();
 
   return (
     <TooltipProvider delayDuration={150}>
       <nav
         className="border-border bg-sidebar hidden w-14 shrink-0 flex-col items-center gap-0.5 overflow-y-auto border-r py-3 md:flex"
-        aria-label="Product navigation"
+        aria-label={UI_COPY.COMMON.A11Y.PRODUCT_NAV}
       >
         {/* Brand Monogram */}
         <Link
           href="/"
           className="bg-primary text-primary-foreground mb-3 grid size-8 shrink-0 cursor-pointer place-items-center rounded-md text-sm font-bold shadow-sm"
-          aria-label="OrchestrAI Cowork home"
+          aria-label={UI_COPY.COMMON.A11Y.HOME}
         >
-          O
+          {UI_COPY.COMMON.BRAND.MONOGRAM}
         </Link>
 
         {/* Dynamic Database Navigation Items */}
@@ -84,7 +88,7 @@ export function ProductNav(): React.JSX.Element {
             <TooltipTrigger asChild>
               <Link
                 href="/settings"
-                aria-label="Settings & Profile"
+                aria-label={UI_COPY.COMMON.A11Y.SETTINGS}
                 className={cn(
                   "bg-secondary text-muted-foreground hover:text-foreground grid size-9 shrink-0 cursor-pointer place-items-center rounded-md font-mono text-[10px]",
                   pathname.startsWith("/settings") && "border-primary/40 text-primary border",
@@ -94,7 +98,7 @@ export function ProductNav(): React.JSX.Element {
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right" className="font-mono text-xs">
-              {user?.email || "Settings & Profile"}
+              {user?.email || UI_COPY.COMMON.A11Y.SETTINGS}
             </TooltipContent>
           </Tooltip>
 
@@ -104,14 +108,14 @@ export function ProductNav(): React.JSX.Element {
               <button
                 type="button"
                 onClick={logout}
-                aria-label="Sign out"
+                aria-label={UI_COPY.COMMON.A11Y.SIGN_OUT}
                 className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 grid size-9 shrink-0 cursor-pointer place-items-center rounded-md transition-colors"
               >
                 <LogOut className="size-4" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="right" className="font-mono text-xs">
-              Sign Out
+              {UI_COPY.COMMON.A11Y.SIGN_OUT_BTN}
             </TooltipContent>
           </Tooltip>
         </div>

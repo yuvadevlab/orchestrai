@@ -1,10 +1,11 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { AuthCardWrapper, LoginForm } from "@/features/auth";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export const metadata: Metadata = {
-  title: "Sign In — OrchestrAI",
-  description: "Sign in to access OrchestrAI Console.",
+  title: UI_COPY.AUTH.LOGIN.PAGE_TITLE,
+  description: UI_COPY.AUTH.LOGIN.PAGE_DESCRIPTION,
 };
 
 /**
@@ -13,10 +14,10 @@ export const metadata: Metadata = {
 export default function LoginPage(): React.JSX.Element {
   return (
     <AuthCardWrapper
-      title="Sign in to OrchestrAI"
-      subtitle="Enter your email and password below"
-      footerPrompt="Don't have an account?"
-      footerLinkText="Sign up"
+      title={UI_COPY.AUTH.LOGIN.CARD_TITLE}
+      subtitle={UI_COPY.AUTH.LOGIN.CARD_SUBTITLE}
+      footerPrompt={UI_COPY.AUTH.LOGIN.FOOTER_PROMPT}
+      footerLinkText={UI_COPY.AUTH.LOGIN.FOOTER_LINK}
       footerLinkHref="/signup"
     >
       <Suspense fallback={<div className="bg-muted/20 h-40 animate-pulse rounded-md" />}>

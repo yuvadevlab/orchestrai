@@ -26,3 +26,5 @@ You MUST read and strictly adhere to:
 - Never define inline schemas or prompt strings in API endpoints or consumers.
 - Never exceed 250 lines per file (decompose proactively at 200 lines).
 - Always provide detailed JSDoc blocks and explanatory comments on all conditionals and guards.
+- Strictly compare using canonical `Enum.KEY` with zero raw string literals for statuses, roles, or modes.
+- Zero hardcoded fallback models or synthetic agents; everything must be 100% DB- or env-driven.

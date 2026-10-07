@@ -1,6 +1,6 @@
 /**
  * @file apps/gateway/src/db/local-store.ts
- * @description Local-first embedded in-memory and file-backed database storage engine (Zero-Docker required).
+ * @description Embedded in-memory and file-backed zero-dependency storage engine for self-contained runtime environments.
  * @module apps/gateway/db
  */
 

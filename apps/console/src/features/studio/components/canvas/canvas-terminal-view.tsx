@@ -8,6 +8,7 @@
 
 import React, { useRef, useEffect } from "react";
 import { Terminal, Trash2 } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface CanvasTerminalViewProps {
   logs?: readonly string[];
@@ -39,7 +40,8 @@ export function CanvasTerminalView({
           <button
             type="button"
             onClick={onClear}
-            title="Clear output"
+            title={UI_COPY.COMMON.A11Y.CLEAR_OUTPUT}
+            aria-label={UI_COPY.COMMON.A11Y.CLEAR_OUTPUT}
             className="hover:text-foreground text-muted-foreground/60 transition-colors"
           >
             <Trash2 className="size-3.5" />
@@ -50,7 +52,9 @@ export function CanvasTerminalView({
       {/* Terminal Output Body */}
       <div className="flex-1 space-y-1 overflow-auto p-4">
         {logs.length === 0 ? (
-          <div className="text-muted-foreground/60 italic">No command output available yet...</div>
+          <div className="text-muted-foreground/60 italic">
+            {UI_COPY.STUDIO.CANVAS.TERMINAL_NO_OUTPUT}
+          </div>
         ) : (
           logs.map((line, idx) => (
             <div key={`log-${idx}`} className="leading-5 break-all whitespace-pre-wrap">

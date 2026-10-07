@@ -17,6 +17,7 @@ import { VirtualizedMessageFeed } from "./virtualized-message-feed";
 import { CanvasPane } from "./canvas/canvas-pane";
 import { useStudioWorkspaceState } from "../hooks/use-studio-workspace-state";
 import { useConsoleStore } from "@/lib/stores";
+import { usePlatformSuggestions } from "../api";
 import type { CoworkMode } from "../types";
 
 export interface StudioWorkspaceProps {
@@ -35,6 +36,7 @@ export interface StudioWorkspaceProps {
 export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React.JSX.Element {
   const searchParams = useSearchParams();
   const urlPrompt = searchParams.get("prompt") || "";
+  const { data: dynamicSuggestions } = usePlatformSuggestions();
 
   const state = useStudioWorkspaceState({
     routeSessionId,
@@ -129,6 +131,8 @@ export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React
             modes={state.platformModes}
             mode={state.activeSession.mode}
             onSelectMode={(mode) => state.updateSessionMeta({ mode: mode as CoworkMode })}
+            suggestions={dynamicSuggestions ?? []}
+            onResetThread={state.handleNewSession}
           />
         </main>
 

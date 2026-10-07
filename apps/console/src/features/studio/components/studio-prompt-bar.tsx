@@ -2,26 +2,26 @@
 
 /**
  * @file studio-prompt-bar.tsx
- * @description Floating bottom prompt input bar for universal cowork and task dispatching.
+ * @description Floating bottom prompt input bar with @ file/specialist mentions and / slash commands.
  * @module apps/console/features/studio/components
  */
 
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowUp, Square } from "lucide-react";
-import { Button } from "@yuva-devlab/ui";
 import type { SpecialistPersona, StudioApprovalRequest } from "../types";
 import {
   PermissionScope,
   type LlmModelRecord,
   type PlatformModeRecord,
 } from "@orchestrai/shared-types";
-import {
-  StudioFileAttachment,
-  StudioAttachedFilesList,
-  type AttachedFile,
-} from "./studio-file-attachment";
-import { StudioPromptBarSelectors } from "./studio-prompt-bar-selectors";
+import { useConsoleStore } from "@/lib/stores";
+import { StudioAttachedFilesList, type AttachedFile } from "./studio-file-attachment";
 import { StudioLiveClearanceCard } from "./studio-live-clearance-card";
+import { StudioPromptSuggestions } from "./studio-prompt-suggestions";
+import { StudioPromptActionRow } from "./studio-prompt-action-row";
+import { StudioMentionPopover } from "./studio-mention-popover";
+import { StudioSlashCommands } from "./studio-slash-commands";
+import { usePromptCommands } from "../hooks/use-prompt-commands";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface StudioPromptBarProps {
   prompt: string;
@@ -48,10 +48,11 @@ export interface StudioPromptBarProps {
   onResolveApproval?: (approvalId: string, scope: PermissionScope) => Promise<void>;
   /** Callback after resolution to update the message audit log in the stream */
   onApprovalResolved?: (approvalId: string, scope: PermissionScope, resolvedAt: string) => void;
+  onResetThread?: () => void;
 }
 
 /**
- * Floating bottom command station for the Cowork Studio with ChatGPT-style file attachments.
+ * Floating bottom command station for the Cowork Studio with file attachments, @ mentions, and / slash commands.
  */
 export function StudioPromptBar({
   prompt,
@@ -72,9 +73,26 @@ export function StudioPromptBar({
   pendingApproval,
   onResolveApproval,
   onApprovalResolved,
+  onResetThread,
 }: StudioPromptBarProps): React.JSX.Element {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const activeWorkspace = useConsoleStore((s) => s.activeWorkspace);
+
+  const {
+    mentionQuery,
+    slashQuery,
+    handleSelectMention,
+    handleSelectSlashCommand,
+    closeMention,
+    closeSlash,
+  } = usePromptCommands({
+    prompt,
+    onChange,
+    onSelectMode,
+    onSelectSpecialist,
+    onResetThread,
+  });
 
   // Auto-resize textarea height as user types
   useEffect(() => {
@@ -116,6 +134,8 @@ export function StudioPromptBar({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === "Enter" && !e.shiftKey) {
+      // Don't submit if mention or slash popups are active (they consume Enter)
+      if (mentionQuery !== null || slashQuery !== null) return;
       e.preventDefault();
       if (!isRunning && (prompt.trim() || attachedFiles.length > 0)) {
         handleDispatch();
@@ -138,82 +158,62 @@ export function StudioPromptBar({
         />
       ) : (
         <>
-          {/* Quick Suggestion Pills */}
-          {!isRunning && suggestions && suggestions.length > 0 && (
-            <div className="mb-2 flex flex-wrap items-center gap-1.5 overflow-x-auto py-1">
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => onChange(s)}
-                  className="border-border/60 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground rounded-full border px-2.5 py-1 font-mono text-[11px] transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Uploaded Documents Pills */}
+          <StudioPromptSuggestions
+            suggestions={suggestions}
+            onSelect={onChange}
+            isRunning={isRunning}
+          />
           <StudioAttachedFilesList files={attachedFiles} onRemove={handleFileRemoved} />
 
           {/* Floating Prompt Container */}
           <div className="border-border bg-card/85 relative rounded-md border p-2 shadow-lg backdrop-blur-md">
+            {/* Slash commands popover */}
+            {slashQuery !== null && (
+              <StudioSlashCommands
+                query={slashQuery}
+                onSelect={handleSelectSlashCommand}
+                onClose={closeSlash}
+              />
+            )}
+
+            {/* @ Mention popover for files and specialists */}
+            {mentionQuery !== null && (
+              <StudioMentionPopover
+                query={mentionQuery}
+                workspacePath={activeWorkspace?.path}
+                specialists={specialists}
+                onSelect={handleSelectMention}
+                onClose={closeMention}
+              />
+            )}
+
             <textarea
               ref={textareaRef}
               value={prompt}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Describe any objective — research, write, build, analyze…"
+              placeholder={UI_COPY.STUDIO.PROMPT.PLACEHOLDER}
               rows={3}
               disabled={isRunning}
               className="placeholder:text-muted-foreground max-h-56 min-h-21 w-full resize-none bg-transparent px-3 py-2 text-sm leading-relaxed outline-none disabled:opacity-50"
             />
 
-            {/* Action Controls Bar */}
-            <div className="flex flex-wrap items-center gap-2 px-2 pt-1.5">
-              {/* ChatGPT-style '+' file upload trigger */}
-              <StudioFileAttachment onFileUploaded={handleFileUploaded} disabled={isRunning} />
-
-              {/* Persona, Model, and Mode Selectors */}
-              <StudioPromptBarSelectors
-                specialists={specialists}
-                selectedSpecialistId={selectedSpecialistId}
-                onSelectSpecialist={onSelectSpecialist}
-                models={models}
-                selectedModel={selectedModel}
-                onSelectModel={onSelectModel}
-                modes={modes}
-                mode={mode}
-                onSelectMode={onSelectMode}
-              />
-
-              {/* Run / Stop */}
-              <div className="ml-auto">
-                {isRunning ? (
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={onStop}
-                    className="size-7 rounded-md"
-                    aria-label="Stop execution"
-                  >
-                    <Square className="size-3 fill-current" />
-                  </Button>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="icon"
-                    onClick={handleDispatch}
-                    disabled={!prompt.trim() && attachedFiles.length === 0}
-                    className="size-7 rounded-md"
-                    aria-label="Run"
-                  >
-                    <ArrowUp className="size-3.5" />
-                  </Button>
-                )}
-              </div>
-            </div>
+            <StudioPromptActionRow
+              isRunning={isRunning}
+              canSubmit={Boolean(prompt.trim() || attachedFiles.length > 0)}
+              onFileUploaded={handleFileUploaded}
+              onStop={onStop}
+              onSubmit={handleDispatch}
+              specialists={specialists}
+              selectedSpecialistId={selectedSpecialistId}
+              onSelectSpecialist={onSelectSpecialist}
+              models={models}
+              selectedModel={selectedModel}
+              onSelectModel={onSelectModel}
+              modes={modes}
+              mode={mode}
+              onSelectMode={onSelectMode}
+            />
           </div>
         </>
       )}

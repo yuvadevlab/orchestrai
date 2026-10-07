@@ -17,6 +17,7 @@ import {
   PanelRightOpen,
 } from "lucide-react";
 import { Badge, Button } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useConsoleStore } from "@/lib/stores";
 import type { CoworkArtifact } from "../../types";
 
@@ -66,7 +67,7 @@ export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): R
           <Terminal className="size-3.5 shrink-0 text-amber-400" />
           <span className="truncate font-semibold text-zinc-100">{artifact.title}</span>
           <span className="ml-1 flex items-center gap-0.5 text-[10px] text-zinc-400">
-            <span>{isExpanded ? "Hide" : "Show"}</span>
+            <span>{isExpanded ? UI_COPY.COMMON.ACTIONS.HIDE : UI_COPY.COMMON.ACTIONS.SHOW}</span>
             {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
           </span>
         </button>
@@ -85,10 +86,11 @@ export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): R
             size="sm"
             onClick={handleOpenInCanvas}
             className="h-6 cursor-pointer gap-1 border-zinc-700 bg-zinc-800/80 px-2 text-[10px] text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
-            title="Open in Right-Side Canvas"
+            title={UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS_TOOLTIP}
+            aria-label={UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS_TOOLTIP}
           >
             <PanelRightOpen className="size-3 text-amber-400" />
-            <span className="hidden sm:inline">Canvas</span>
+            <span className="hidden sm:inline">{UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS}</span>
           </Button>
 
           <Button
@@ -96,7 +98,8 @@ export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): R
             size="sm"
             onClick={handleCopy}
             className="size-6 p-0 text-zinc-400 hover:text-zinc-100"
-            title="Copy terminal output"
+            title={UI_COPY.STUDIO.ARTIFACTS.COPY_TERMINAL_TOOLTIP}
+            aria-label={UI_COPY.STUDIO.ARTIFACTS.COPY_TERMINAL_TOOLTIP}
           >
             {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
           </Button>

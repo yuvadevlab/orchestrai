@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { Bot, Check, Copy, Sparkles } from "lucide-react";
 import { Button, Badge } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { StudioThinkingBlock } from "./studio-thinking-block";
 import { StudioPlanCard } from "./studio-plan-card";
@@ -41,7 +42,7 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
       <div className="flex w-full justify-end py-3">
         <div className="border-border/80 bg-secondary/80 max-w-2xl rounded-md rounded-tr-sm border px-4 py-3 shadow-xs">
           <div className="text-muted-foreground mb-1 flex items-center justify-between gap-3 font-mono text-[11px]">
-            <span className="text-foreground font-semibold">You</span>
+            <span className="text-foreground font-semibold">{UI_COPY.STUDIO.FEED.USER_LABEL}</span>
             <span>{message.timestamp}</span>
           </div>
           <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
@@ -61,7 +62,7 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
             <Bot className="size-3.5" />
           </div>
           <span className="text-foreground text-xs font-semibold">
-            {message.specialistName || "Autonomous Specialist"}
+            {message.specialistName || UI_COPY.STUDIO.FEED.DEFAULT_SPECIALIST}
           </span>
           {message.model && (
             <Badge
@@ -81,7 +82,8 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
               size="sm"
               onClick={handleCopy}
               className="text-muted-foreground hover:text-foreground size-6 p-0"
-              title="Copy response"
+              title={UI_COPY.STUDIO.FEED.COPY_RESPONSE}
+              aria-label={UI_COPY.STUDIO.FEED.COPY_RESPONSE}
             >
               {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
             </Button>
@@ -163,7 +165,7 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
         {message.isStreaming && (!message.content || message.content.length === 0) && (
           <div className="text-muted-foreground flex items-center gap-2 py-2 font-mono text-xs">
             <Sparkles className="text-primary size-3.5 animate-spin" />
-            <span>Agent synthesizing and generating outputs...</span>
+            <span>{UI_COPY.STUDIO.FEED.SYNTHESIZING}</span>
           </div>
         )}
 
@@ -171,11 +173,12 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
         {(message.tokensIn || message.tokensOut) && (
           <div className="border-border/40 text-muted-foreground/80 mt-4 flex items-center justify-between border-t pt-2 font-mono text-[10px]">
             <span>
-              Tokens: {(message.tokensIn ?? 0).toLocaleString()} in /{" "}
-              {(message.tokensOut ?? 0).toLocaleString()} out
+              {UI_COPY.STUDIO.FEED.TOKENS_DIAGNOSTIC(message.tokensIn ?? 0, message.tokensOut ?? 0)}
             </span>
             {message.executionId && (
-              <span className="max-w-45 truncate">Exec: {message.executionId}</span>
+              <span className="max-w-45 truncate">
+                {UI_COPY.STUDIO.FEED.EXEC_DIAGNOSTIC(message.executionId)}
+              </span>
             )}
           </div>
         )}

@@ -12,6 +12,7 @@ import {
   NEURAL_PALETTE,
   NEURAL_SYNAPSE_COLOR,
 } from "./ai-world-background.constants";
+import { UI_COPY } from "@/lib/ui-copy";
 
 /**
  * Interactive Neural Synapse Canvas animating glowing interconnected AI nodes,
@@ -168,12 +169,12 @@ export function AiWorldBackground(): React.JSX.Element {
       {/* 4. Cybernetic Telemetry Overlays */}
       <div className="text-primary/80 absolute top-5 left-6 hidden items-center gap-2 font-mono text-[11px] tracking-widest sm:flex">
         <span className="bg-primary size-2 animate-pulse rounded-full" />
-        <span>MULTI-AGENT SWARM // ACTIVE</span>
+        <span>{UI_COPY.AUTH.CARD.SWARM_ACTIVE}</span>
       </div>
 
       <div className="text-muted-foreground/70 absolute right-6 bottom-5 hidden items-center gap-2 font-mono text-[10px] tracking-widest sm:flex">
         <span className="size-1.5 rounded-full bg-teal-400" />
-        <span>AGENT RUNTIME // READY</span>
+        <span>{UI_COPY.AUTH.CARD.RUNTIME_READY}</span>
       </div>
     </div>
   );

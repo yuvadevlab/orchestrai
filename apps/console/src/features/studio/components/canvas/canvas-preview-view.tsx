@@ -8,6 +8,7 @@
 
 import React, { useState } from "react";
 import { RefreshCw, ExternalLink } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface CanvasPreviewViewProps {
   htmlContent: string;
@@ -16,7 +17,7 @@ export interface CanvasPreviewViewProps {
 
 export function CanvasPreviewView({
   htmlContent,
-  title = "HTML Sandbox Preview",
+  title = UI_COPY.STUDIO.CANVAS.DEFAULT_PREVIEW_TITLE,
 }: CanvasPreviewViewProps): React.JSX.Element {
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -52,7 +53,8 @@ export function CanvasPreviewView({
           <button
             type="button"
             onClick={() => setReloadKey((k) => k + 1)}
-            title="Reload Preview"
+            title={UI_COPY.STUDIO.CANVAS.RELOAD_PREVIEW}
+            aria-label={UI_COPY.STUDIO.CANVAS.RELOAD_PREVIEW}
             className="hover:bg-muted rounded p-1 transition-colors"
           >
             <RefreshCw className="size-3.5" />
@@ -63,7 +65,8 @@ export function CanvasPreviewView({
               const win = window.open();
               win?.document.write(fullHtml);
             }}
-            title="Open in new window"
+            title={UI_COPY.STUDIO.CANVAS.OPEN_NEW_WINDOW}
+            aria-label={UI_COPY.STUDIO.CANVAS.OPEN_NEW_WINDOW}
             className="hover:bg-muted rounded p-1 transition-colors"
           >
             <ExternalLink className="size-3.5" />

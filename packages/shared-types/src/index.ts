@@ -11,3 +11,4 @@ export * from "./types";
 export * from "./platform";
 export * from "./sse";
 export * from "./clearance";
+export * from "./harness";

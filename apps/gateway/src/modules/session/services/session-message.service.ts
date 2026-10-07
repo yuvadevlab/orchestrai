@@ -13,8 +13,7 @@ import {
 import { ExecutionStatus } from "@orchestrai/shared-types";
 import type { AddMessageDto } from "@/validation";
 import { resolveDbTenantId, resolveOrCreateDefaultAgent } from "@/modules/tenant-resolver";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID_REGEX } from "@orchestrai/regex";
 
 export interface AppendedMessageRecord {
   messageId: string;

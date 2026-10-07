@@ -7,6 +7,7 @@
  */
 
 import type { FormFieldSpec } from "@/components/ui/action-dialog";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { ToolPermissionRecord } from "../api/use-permissions";
 import type { ToolDefinition } from "../types";
 
@@ -43,14 +44,14 @@ export function buildToolFields(
   return [
     {
       name: "name",
-      label: "Tool Identifier / Name",
-      placeholder: "e.g. web_search_v2",
+      label: UI_COPY.TOOLS.REGISTER_DIALOG.NAME_LABEL,
+      placeholder: UI_COPY.TOOLS.REGISTER_DIALOG.NAME_PLACEHOLDER,
       required: true,
       colSpan: 1,
     },
     {
       name: "category",
-      label: "Functional Category",
+      label: UI_COPY.TOOLS.REGISTER_DIALOG.CATEGORY_LABEL,
       type: "select",
       options: categoryOptions,
       defaultValue: defaultCategory,
@@ -59,7 +60,7 @@ export function buildToolFields(
     },
     {
       name: "permissions",
-      label: "Permission & Safety Tier",
+      label: UI_COPY.TOOLS.REGISTER_DIALOG.PERMISSIONS_LABEL,
       type: "select",
       options: permissionOptions,
       defaultValue: defaultPermission,
@@ -68,8 +69,8 @@ export function buildToolFields(
     },
     {
       name: "description",
-      label: "Capability Specification",
-      placeholder: "Describe what this tool enables and expected parameters...",
+      label: UI_COPY.TOOLS.REGISTER_DIALOG.DESCRIPTION_LABEL,
+      placeholder: UI_COPY.TOOLS.REGISTER_DIALOG.DESCRIPTION_PLACEHOLDER,
       type: "textarea",
       required: true,
       colSpan: 2,

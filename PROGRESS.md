@@ -287,3 +287,317 @@ Master architecture specification documented in [`master-architecture-plan.md`](
 - [x] Zero hardcoded default values / fallback arrays: eliminated `DEFAULT_NAV_ITEMS` in `apps/console`, purged unused static nav files, removed database `seedIfEmpty` from `nav-item.service.ts` and `platform-mode.service.ts` (100% database-driven)
 - [x] Monorepo typecheck validation (`pnpm typecheck`): 43/43 targets passing with 0 errors
 - [x] Clean zero-warning commit quality gate validated with commitlint and lint-staged
+
+---
+
+### [ ] Intelligence Wiring — Activate Orphaned Packages
+
+**Goal**: Every built package actively used. Zero dead code.
+
+#### ✅ Completed — Package Activation (gateway)
+
+- [x] **`@orchestrai/billing`** → `billing.service.ts` (new)
+  - `TokenCounter.countMessageTokens()` → compaction trigger (75% context window)
+  - `BudgetEnforcer.evaluateBudget()` → per-turn hard gate before each LLM call
+  - `CostLedger.recordExpenditure()` → post-turn cost ledger write
+  - All cost rates and context windows sourced from DB model record + env vars (zero hardcodes)
+
+- [x] **`@orchestrai/events`** → `domain-event-publisher.ts` (new)
+  - `EXECUTION_STARTED` emitted on first turn → Inspector Rail initialization
+  - `TOOL_CALLED` / `TOOL_COMPLETED` around every tool dispatch → observability traces
+  - `EXECUTION_COMPLETED` with token totals + duration → memory distillation trigger
+  - `EXECUTION_FAILED` on error exit → failure episode record
+  - `EXECUTION_CANCELLED` on stop signal → worker dequeue
+  - `APPROVAL_REQUESTED` for HITL gate → realtime modal
+
+- [x] **`@orchestrai/resilience`** → wired into `live-turn-executor.ts`
+  - `createModelResiliencePipeline()` wraps every `OllamaAdapter.stream()` call
+  - CircuitBreaker (5 failures → env-configured cooldown)
+  - Retry (2 attempts, exponential backoff + full jitter)
+  - Deadline (120s per turn)
+  - Bulkhead (max 8 concurrent LLM calls)
+
+- [x] **`@orchestrai/prompts`** → wired into `live-message-history.ts`
+  - `AUTONOMOUS_TOOLS_SYSTEM_PROMPT` replaces inline system prompt string
+  - `SPECIALIST_PERSONA_REGISTRY` resolves agent persona from DB agent role field
+  - `buildCompositeSystemPrompt(personaRole, override)` is the single entry point
+
+- [x] **Hardcoded constants eliminated**
+  - `AGENT_MAX_TURNS` → env var (default 20)
+  - `MODEL_DEFAULT_CONTEXT_WINDOW` → env var (default 8192)
+  - `CONTEXT_COMPACTION_THRESHOLD` → env var (default 0.75)
+  - Default model name `gemma4:31b-cloud` removed from agent creation fallback
+  - `contextWindow` and `costPerTokenUsd` threaded from DB model record through dispatch chain
+
+- [x] **`@orchestrai/semantic-cache`** → wired via `semantic-cache.service.ts` into live turn execution
+  - Cosine vector similarity deduplication (threshold 0.97) with `ResilientEmbeddingProvider`
+  - Zero-latency, zero-cost cache HIT returns cached response immediately via SSE
+  - Auto-caches completed execution outputs on `ExecutionStatus.COMPLETED`
+
+- [x] **`@orchestrai/rag`** → auto-inject top-3 knowledge chunks per execution prompt
+  - Hybrid retrieval query (`ragService.query`) auto-appends relevant document context
+  - Transparent fallback from Ollama embeddings to deterministic mock provider
+  - Zero model call bloat when knowledge base is not populated
+
+- [x] **`@orchestrai/model-router`** → `model-router.service.ts`
+  - Real-time empirical per-model turn latency tracking via `LatencyTracker`
+  - Dynamic routing strategies: `LOWEST_LATENCY`, `LEAST_EXPENSIVE`, `PRIORITY_FALLBACK`
+  - Zero hardcoded fallback candidate constants; 100% database & environment driven
+
+- [x] **`@orchestrai/eval`** → auto quality gate on `EXECUTION_COMPLETED` domain event
+  - `initEvalQualityGate()` subscribes to `domainEventBus` on `DomainEventType.EXECUTION_COMPLETED`
+  - Heuristic scoring of output completeness, tool usage, error indicators, and tokens/sec throughput
+  - Non-blocking telemetry metrics emitted for operator cockpit
+
+- [x] **Zero Hardcoded Default Agents & Synthetic Seeding Eliminated**
+  - Purged `DEFAULT_SUPERVISOR` constant and `ensureTenantAgents` auto-seeding
+  - Purged `Lead Orchestrator` fallback creation in `execution-dispatcher.ts`
+  - If a tenant has no configured agent, system fails fast and explicitly informs user to create one
+  - Eradicated all `gemma4:31b-cloud` default constants across the entire monorepo
+
+- [x] **`@orchestrai/runtime`** → wire `StateGraph` into `apps/orchestrator` internals
+  - `DagExecutionEngine` executes compiled `StateGraph` DAG via `OrchestrAIRuntime`
+  - `GrpcExecutionService` resolves real database agent and model configuration
+  - Durable PostgreSQL checkpointer persistence across graph transitions
+  - Zero hardcoded agent definitions or model fallbacks across orchestrator and defaults
+
+#### [x] New Services (Fully Implemented)
+
+- [x] **`apps/intelligence`** (Python) → LangGraph agent loop replacing for-loop
+  - Declarative `StateGraph` topology (`reason` -> `tools` -> `evaluate` -> `compact`)
+  - Conversational RAG selective context injection filtering history to relevant turns
+  - Self-evaluation quality gate and autonomous context compaction at 75% token budget
+  - FastAPI execution and selective context endpoints matching platform schemas
+  - Zero hardcoded model constants; 100% environment- and request-driven
+
+- [x] **`apps/crawler`** (Python) → Playwright browser automation + RAG ingestion
+  - Headless Chromium browser automation with anti-bot headers and resilient HTTP fallback
+  - HTML cleaner, metadata extractor, and clean Markdown transformation engine
+  - Breadth-first recursive domain crawler with depth and page bounds
+  - Automatic semantic chunking and upstream OrchestrAI RAG knowledge base ingestion
+
+#### [x] CI/CD, Polyglot Tooling & Developer Experience
+
+- [x] **Parallel GitHub Actions Architecture**
+  - Unified CI pipeline (`ci.yml`) with parallel jobs powered by composite action `setup-node-env`
+  - Runs in parallel on separate runners to drastically cut CI wait times
+- [x] **Unified Polyglot Tooling Facade**
+  - Single `pnpm lint`, `pnpm format`, and `lint-staged` pre-commit hooks covering both TypeScript and Python
+  - Instant 10ms Ruff Python validation + ESLint & Prettier without manual virtualenv friction
+- [x] **Commitlint Scope Enum Synchronized**
+  - Added all apps (`orchestrator`, `admin`, `intelligence`, `crawler`) and packages (`billing`, `semantic-cache`, `model-router`, `prompts`, `resilience`, `grpc`, `shared-types`, `regex`)
+
+---
+
+### Milestone 9: DRY Consolidation, Regex Package & Automatic Mode & Rule Engine
+
+#### [x] `@orchestrai/regex` Package (`packages/regex/`)
+
+- [x] Centralized all scattered regular expressions into a dedicated, zero-dependency package:
+  - `uuid.regex.ts`: Canonical `UUID_REGEX` (v1-v5) and `isUuid()` validator
+  - `mode.regex.ts`: Canonical `PLAN_PATTERNS`, `ACT_PATTERNS`, `CHAT_PATTERNS`
+  - `security.regex.ts`: `SECRET_REDACTION_PATTERNS`, `CRITICAL_CREDENTIAL_PATTERNS`, `SECRET_CONFIG_PATTERNS`
+  - `network.regex.ts`: `BLOCKED_IP_PATTERNS`, `LOCALHOST_ORIGIN_REGEX`, `IPV4_REGEX`
+  - `uri.regex.ts`: `CANONICAL_URI_REGEX`, `FILE_PROTOCOL_REGEX`, `POSTGRES_PROTOCOL_REGEX`, `REALTIME_CHANNEL_PREFIX_REGEX`, `TOOL_NAME_REGEX`
+  - `text.regex.ts`: `EMBEDDING_ARRAY_REGEX`, `MARKDOWN_HEADING_REGEX`, `LEADING_TRAILING_DASH_REGEX`, `ALPHANUMERIC_START_REGEX`, `WORD_SPLIT_REGEX`
+- [x] Refactored all consumers to import from `@orchestrai/regex`:
+  - `packages/agent`, `packages/memory`, `packages/rag`, `packages/tools`, `apps/gateway`, `apps/realtime`, `apps/console`
+
+#### [x] Centralized System Prompts & Invariant Rules (`@orchestrai/prompts`)
+
+- [x] Extracted mode prompts into `packages/prompts/src/system/modes.prompt.ts`:
+  - `CHAT_MODE_SYSTEM_PROMPT`, `PLAN_MODE_SYSTEM_PROMPT`, `ACT_MODE_SYSTEM_PROMPT`, `AUTO_MODE_SYSTEM_PROMPT`, `MODE_PROMPT_REGISTRY`
+- [x] Extracted platform invariants into `packages/prompts/src/system/rules.prompt.ts`:
+  - `CORE_PLATFORM_RULES_PROMPT`, `COMPACT_PLATFORM_RULES_PROMPT`
+- [x] Refactored `ChatModeStrategy`, `PlanModeStrategy`, `ActModeStrategy`, `AutoModeStrategy` in `@orchestrai/agent` to source prompts directly from `@orchestrai/prompts`
+
+#### [x] Automatic Rule Adoption & Mode Selection Engine
+
+- [x] **Agent Compiler (`packages/agent/src/compiler/prompt-compiler.ts`)**:
+  - Automatically embeds platform rules in `<platform_rules>` block (`adoptRules !== false`)
+- [x] **Agent Loop (`packages/agent/src/loop/agent-loop.ts`)**:
+  - Automatically routes input intent (`HeuristicModeRouter`) when mode is `AgentMode.AUTO`
+- [x] **Gateway Live Execution (`apps/gateway/src/modules/streaming/`)**:
+  - `autoDetectMode(prompt)` resolves execution mode; `buildCompositeSystemPrompt` injects core platform rules, safety guardrails, and dynamic mode instructions
+- [x] **Intelligence Service (`apps/intelligence/`)**:
+  - Implemented Python `mode_router.py` matching regex heuristics, embedding `PLATFORM_INVARIANTS_PROMPT` and detected mode into LangGraph `StateGraph`
+
+#### [x] Architecture Documentation & Diagrams
+
+- [x] Created `docs/SYSTEM-FLOW-AND-ARCHITECTURE.md` comprehensive tree and end-to-end system flow
+- [x] Validated Mermaid sequence diagram syntax for 100% compatibility across markdown previewers
+
+---
+
+### Milestone 10: Workspace Folder Picker, Recent History, @ Mentions & Slash Commands
+
+#### [x] Workspace Folder Management (`apps/console`)
+
+- [x] **`StudioWorkspaceSelector` & `StudioWorkspaceRecentList`**:
+  - Live header selector with active directory name, monospace path badge, and one-click path clipboard copying
+  - Native browser directory picker (`showDirectoryPicker`) with path input fallback
+  - Recent workspaces history drawer with active indicator, single-click switching, and deletion
+- [x] **`WorkspaceSlice` with Asynchronous IndexedDB Persistence**:
+  - Persists active workspace and recent workspaces across page reloads without state loss
+  - Safe path normalization and folder name derivation using `@orchestrai/regex`
+
+#### [x] Workspace File Exploration API (`apps/gateway`)
+
+- [x] **`WorkspaceFileService` & `WorkspaceController`**:
+  - Exposes `GET /api/v1/workspace/files` with query parameters (`path`, `query`, `limit`)
+  - Fast recursive directory walker (up to depth 5) excluding ignored directories (`.git`, `node_modules`, `.next`, `dist`, `.turbo`, `.venv`, etc.)
+  - Registered under public gateway route group
+
+#### [x] Interactive Command Palette (@ Mentions & / Slash Commands)
+
+- [x] **`@` Mention Autocomplete (`StudioMentionPopover`)**:
+  - Triggered dynamically when typing `@`
+  - Searches workspace files via `useWorkspaceFiles` TanStack Query hook
+  - Auto-completes cluster specialist personas, switching active specialist on selection
+- [x] **`/` Slash Commands Palette (`StudioSlashCommands`)**:
+  - Instant mode switching (`/plan`, `/act`, `/chat`, `/auto`)
+  - Quick actions: `/clear` (resets conversation thread), `/compact`, `/files`, `/help`
+  - Full keyboard navigation (Arrow keys, Enter, Escape)
+- [x] **All Regular Expressions Sourced from `@orchestrai/regex`**:
+  - Added `prompt.regex.ts` with `MENTION_QUERY_REGEX`, `SLASH_COMMAND_PREFIX_REGEX`, `TRAILING_PATH_SLASH_REGEX`, `PATH_SPLIT_REGEX`
+
+---
+
+### Milestone 11: Dynamic Platform Configuration & Slash Commands API
+
+#### [x] Dynamic Slash Commands API (`apps/gateway`)
+
+- [x] **Universal Entity Contract (`@orchestrai/shared-types`)**:
+  - Added `PlatformCommandRecord` interface
+- [x] **Gateway Service & Controller (`apps/gateway/src/modules/platform/`)**:
+  - Implemented `PlatformCommandService` managing commands (`listCommands`, `getCommand`, `createCommand`, `updateCommand`, `deleteCommand`)
+  - Implemented `PlatformCommandController` exposing `GET /api/v1/commands`, `POST /api/v1/commands`, `PUT /api/v1/commands/:id`, `DELETE /api/v1/commands/:id`
+  - Registered route group on `/commands` with admin authorization for mutations
+  - Integrated into Gateway bootstrap in `apps/gateway/src/index.ts`
+
+#### [x] Dynamic Slash Commands Consumer (`apps/console`)
+
+- [x] **`usePlatformCommands` API Hook**:
+  - Implemented TanStack Query hook querying `/api/v1/commands`
+  - Re-exported from `@/features/studio/api`
+- [x] **Zero Hardcoded Frontend Commands**:
+  - Removed static fallback commands from client code
+  - Implemented dynamic icon resolution dictionary (`resolveCommandIcon`) mapping icon names to Lucide icons
+  - Updated `StudioSlashCommands` to render commands received from Gateway API
+
+---
+
+### Milestone 12: Anthropic-Grade Dynamic Cognition, Thinking & Idempotent Database Seeding
+
+#### [x] Dynamic Cognition & Operational Models (`packages/database/prisma/schema.prisma`)
+
+- [x] **`CognitivePolicy`**: Dynamic thinking token budgets, temperature overrides, loop steps, and thinking guidelines.
+- [x] **`SystemPromptTemplate`**: Versioned, living prompt templates and platform behavioral rules.
+- [x] **`PlatformConfig`**: Unified namespaced JSON configuration store for slash commands, suggestion chips, cache parameters, compaction thresholds, and RAG chunking.
+- [x] **`FeatureFlag`**: Instant sub-2ms kill switches and circuit breakers for tools and capabilities.
+
+#### [x] Idempotent Platform Database Seeders (`packages/database/src/seeds/`)
+
+- [x] **Zero Data Loss Guarantee**: All seeders execute with idempotent `upsert` and preserve existing records untouched (`update: {}`). Never drops, truncates, or cleans the database.
+- [x] **Decomposed Modular Seeders (< 250 LOC)**:
+  - `seed-providers-models.ts`: Ollama provider and Gemma 4 31B model records.
+  - `seed-modes-nav.ts`: Chat, Plan, Act, and Auto execution modes + 8 navigation hub items.
+  - `seed-roles-tools.ts`: 4 platform permissions, 7 platform roles, and 11 execution tools.
+  - `seed-agents.ts`: Default workspace tenant and 6 core specialist agents.
+  - `seed-platform-data.ts`: Cognitive policy blueprints, prompt templates, and platform configs.
+  - `seed-platform-manifest.ts`: Automated sync for cognitive policies, prompts, configs, and flags.
+  - `seed-all.ts`: Master orchestrator running all seed modules in dependency order.
+- [x] **Gateway Auto-Sync (`apps/gateway/src/index.ts`)**:
+  - Automatically synchronizes platform manifest on gateway bootstrap without manual SQL scripts.
+- [x] **Database-Driven Slash Commands (`apps/gateway/src/modules/platform/services/platform-command.service.ts`)**:
+  - Completely removed in-memory static fallback arrays; commands are stored and queried directly from PostgreSQL `platform_configs`.
+
+---
+
+### Milestone 13: End-to-End Hardcoded Value Eradication & Server-Driven Dynamic Configuration
+
+#### [x] Canonical Shared Enums & Strict Typing (`packages/shared-types`)
+
+- [x] **Dynamic Configuration Enums (`platform.ts`)**:
+  - `ConfigNamespace`: Added `BRANDING`, `TOOLS` alongside `COMMANDS`, `SUGGESTIONS`, `EXECUTION`, `CACHE`, `COMPACTION`, `RAG`.
+  - `ConfigKey`: Added `WELCOME_HEADLINE`, `WELCOME_SUBTITLE`, `BRAND_NAME`, `BRAND_VERSION`, `CATEGORY_BLURBS`.
+- [x] **Canonical Domain & Tool Enums (`enums/platform.enums.ts`)**:
+  - `AgentRoleSlug`: `STRATEGY`, `RESEARCH`, `WRITING`, `ENGINEERING`, `DATA`, `AUTOMATION`, `SPECIALIST`.
+  - `PlatformToolName`: Added all 26 canonical platform tools (`PYTHON_SANDBOX`, `WEB_SEARCH`, `DOCUMENT_READER`, `URL_SCRAPER`, `REST_API_CALLER`, `SQL_ANALYTICS`, `WEBHOOKS`, `PDF_PARSER`, `LIST_DIR`, etc.).
+  - `ToolSandboxType`: `READ_ONLY`, `NETWORK_READ`, `NETWORK_WRITE`, `WORKSPACE_WRITE`, `EPHEMERAL_VM`.
+
+#### [x] Modular Database Seeders (< 250 LOC & Zero Overwrite) (`packages/database/src/seeds/`)
+
+- [x] **Decomposition & Enums**:
+  - `seed-permissions.ts` (59 LOC): Decomposed with `ToolPermissionLevel`.
+  - `seed-roles.ts` (83 LOC): Decomposed with `AgentRoleSlug`.
+  - `seed-tools.ts` (148 LOC): Decomposed with `PlatformToolName`, `ToolSandboxType`, `ToolPermissionLevel`.
+  - `seed-agents.ts` (166 LOC): Uses `AgentMode`, `PlatformScope`, `AgentRoleSlug`, `PlatformToolName`, and dynamic `DEFAULT_SEED_MODEL` from env.
+  - `seed-platform-configs.ts` (223 LOC): Seeds all namespaces using `ConfigNamespace` and `ConfigKey` with `update: {}`.
+  - `seed-capabilities.ts` (133 LOC): Uses `PlatformCapabilitySlug` and `PlatformToolName`.
+  - `seed-providers-models.ts` (93 LOC): Uses `PlatformScope.PLATFORM` and env-driven model identifier.
+
+#### [x] Dynamic Control Plane & Gateway Services (`apps/gateway`)
+
+- [x] **Dynamic Configuration Endpoints**:
+  - `GET /api/v1/welcome`: Dynamic welcome headline, subtitle, and starter chips.
+  - `GET /api/v1/branding`: Dynamic brand name and version badge.
+  - `GET /api/v1/tools/categories`: Dynamic tool category descriptive blurbs.
+  - `GET /api/v1/config/:namespace/:key` & `PUT /api/v1/config/:namespace/:key`: Scoped configuration reads/writes.
+- [x] **Dynamic Execution & Compaction**:
+  - `live-execution.manager.ts`: Injects dynamic thinking guidelines, sets dynamic temperature and maxSteps from DB `CognitivePolicy`.
+  - `live-turn-compaction.ts`: Threshold ratio dynamically resolved from `PlatformConfigService.getCompactionConfig()`.
+  - `live-turn-executor.ts`: Removed hardcoded `lead-orchestrator` fallback; dynamic temperature and runtime parameters.
+  - `workspace-tool-executor.ts`: Feature flag kill switch check for `WorkspaceTool.BASH`.
+  - `memory-distillation.ts`: Removed static agent strings; safely resolves agent ID from event payload.
+
+#### [x] Dynamic Console UI & Browser Persistence (`apps/console`)
+
+- [x] **Server-Driven UI Hooks & Components**:
+  - `usePlatformWelcome` & `StudioWelcome`: Dynamic greeting headline, subtitle, and starter suggestions from database.
+  - `usePlatformBranding`, `SidebarNav`, & `PageShell`: Dynamic application name and version badge; dynamic root breadcrumb.
+  - `useToolCategories` & `ToolsPageContent`: Purged static `CATEGORY_BLURBS` constant; queries database-driven category blurbs.
+  - `StudioWorkspaceSelector`: Removed hardcoded `orchestrai` fallback; dynamically reflects active workspace name or placeholder.
+  - `workspace-slice.ts`: Dynamically resolves initial workspace directory from `process.env.WORKSPACE_ROOT` without static paths.
+  - `stores/index.ts`: Dynamically configurable IndexedDB persistence store name (`process.env.NEXT_PUBLIC_STORE_NAME`).
+
+#### [x] Worker & Crawler Dynamic Configuration (`apps/worker`, `apps/crawler`)
+
+- [x] `apps/worker/src/bootstrap/config.ts`: Purged static `ollama` provider fallback; strictly uses `process.env.DEFAULT_MODEL_PROVIDER`.
+- [x] `apps/crawler/src/config.py`: Made `rag_ingest_path` env-driven via `RAG_INGEST_PATH`.
+
+#### [x] Zero-Hardcoded UI Text & Accessible Shimmer Skeletons (`apps/console`)
+
+- [x] **Accessible UI Skeletons (`skeleton.tsx`)**: Replaced raw `"Loading..."` text spinners with layout-preserving animated Skeletons (`Skeleton`, `CardGridSkeleton`, `TableSkeleton`, `DetailPageSkeleton`) across all 8 dashboard routes to eliminate cumulative layout shift (CLS).
+- [x] **Centralized Type-Safe UI Copy Dictionary (`ui-copy.ts`)**: Created unified dictionary `UI_COPY` (< 200 LOC) standardizing all page headings, descriptions, stats, breadcrumbs, search empty states, and modal workbenches (`AGENTS`, `EXECUTIONS`, `MODELS`, `KNOWLEDGE`, `MEMORY`, `EVALUATIONS`, `TOOLS`, `CONTEXT`, `STUDIO`, and `COMMON`).
+- [x] **Developer Workbenches Adherence**: Migrated interactive developer test workbenches (`MemoryRecallDialog`, `KnowledgeQueryDialog`) and trace waterfall components to use centralized `UI_COPY` tokens while strictly preserving their role as production operator tools (distinct from automated test cases).
+
+---
+
+### Milestone 14: Big 3 Agent Harness Engineering
+
+#### [x] Dynamic Workspace Context & Markdown Discovery (`apps/gateway/src/modules/harness/`)
+
+- [x] **Workspace Instruction Loader (`workspace-instruction-loader.ts`)**: Automatically scans and parses root markdown instructions (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`), modular rulebooks (`.agents/rules/*.md`, `.cursor/rules/*.md`), and on-demand skills (`.agents/skills/**/SKILL.md`, `skills/**/SKILL.md`).
+- [x] **Centralized Lexical Parsers (`@orchestrai/regex`)**: Uses zero-dependency regular expressions (`YAML_FRONTMATTER_REGEX`, `YAML_KEY_VALUE_REGEX`, `TOOL_CALL_BLOCK_REGEX`) to parse frontmatter and instructions.
+- [x] **In-Memory Skill Registry (`harness-skill-registry.ts`)**: Caches discovered skills and modular rules for instant retrieval during agent execution.
+- [x] **Context Injection (`live-execution.manager.ts`)**: Injects discovered rules, invariants, and available on-demand skills directly into the agent's augmented system prompt on execution bootstrap.
+
+#### [x] Automated Post-Write Code Standards & Diagnostic Verification Gate
+
+- [x] **Diagnostic Runner (`workspace-diagnostic-runner.ts`)**: Language-aware verification executing `eslint` and `tsc` for TypeScript/JavaScript, and `ruff` for Python. Enforces the Hard 250-Line Maximum Rule invariant directly on modified files.
+- [x] **Code Standards Gate (`code-standards-gate.ts`)**: Post-write evaluation hook invoked automatically on `WorkspaceTool.WRITE_FILE`. Formats structured error reports with line numbers, error codes, and actionable repair instructions.
+- [x] **Tool Executor Integration (`workspace-tool-executor.ts`)**:
+  - `WRITE_FILE`: Executes verification immediately; if diagnostics fail, embeds violations in tool feedback and returns `isError: true` to prevent unvalidated completions.
+  - `VERIFY_CODE`: Exposes on-demand diagnostic evaluation for any file or directory.
+  - `READ_SKILL`: Allows the agent to read full skill documentation on demand.
+  - `LIST_SKILLS`: Allows the agent to discover all registered workspace skills.
+
+#### [x] Semi-Autonomous HITL Self-Repair Loop
+
+- [x] **Diagnostic Feedback Protocol**: Injects clean, actionable error logs into the agent turn loop.
+- [x] **HITL Repair Gate**: Requires the agent to analyze violations, explain the root cause, formulate a minimal diff, and request Human-in-the-Loop (HITL) approval before applying corrective file modifications.
+- [x] **`WRITE_FILE` Clearance Interception**: Intercepts code modifications in `permission-evaluator.ts` through `StudioLiveClearanceCard` (`Allow Once | This Chat | Always Allow | Deny`).
+- [x] **Compact ESLint & Project-Aware TSC**: Added `ESLINT_COMPACT_DIAGNOSTIC_REGEX` and `tsconfig.json` resolution in `workspace-diagnostic-runner.ts` to ensure 100% accurate diagnostic captures.
+- [x] **Dynamic `workspacePath` Propagation**: Console Studio (`useAgentRunner`) passes active workspace path down to Gateway and harness context.
+- [x] **Workspace Harness API & Studio UI Badge**: Exposes `GET /api/v1/workspace/harness` and displays discovered rules/skills badge in `StudioHeader` (`useWorkspaceHarness`).

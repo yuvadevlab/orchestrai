@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { Activity, X } from "lucide-react";
 import { Button } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { StudioEvent } from "../types";
 
 export interface StudioInspectorRailProps {
@@ -38,9 +39,11 @@ export function StudioInspectorRail({
             <Activity className="size-4" />
           </div>
           <div>
-            <span className="text-foreground text-sm font-semibold tracking-tight">Inspector</span>
+            <span className="text-foreground text-sm font-semibold tracking-tight">
+              {UI_COPY.STUDIO.INSPECTOR.TITLE}
+            </span>
             <p className="text-muted-foreground mt-0.5 font-mono text-[10px] leading-none">
-              Live Stream & Trace
+              {UI_COPY.STUDIO.INSPECTOR.SUBTITLE}
             </p>
           </div>
         </div>
@@ -63,7 +66,7 @@ export function StudioInspectorRail({
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Live Stream ({events.length})
+          {UI_COPY.STUDIO.INSPECTOR.TAB_STREAM(events.length)}
         </button>
         <button
           type="button"
@@ -74,7 +77,7 @@ export function StudioInspectorRail({
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Telemetry
+          {UI_COPY.STUDIO.INSPECTOR.TAB_TELEMETRY}
         </button>
       </div>
 
@@ -85,8 +88,8 @@ export function StudioInspectorRail({
             {events.length === 0 ? (
               <div className="text-muted-foreground/60 py-12 text-center text-[11px]">
                 {isRunning
-                  ? "Awaiting first stream event..."
-                  : "No live events in queue. State a goal to stream."}
+                  ? UI_COPY.STUDIO.INSPECTOR.AWAITING_STREAM
+                  : UI_COPY.STUDIO.INSPECTOR.NO_LIVE_EVENTS}
               </div>
             ) : (
               events.map((evt) => (
@@ -111,22 +114,30 @@ export function StudioInspectorRail({
         ) : (
           <div className="space-y-3">
             <div className="border-border/50 bg-background/50 rounded-md border p-3.5 shadow-2xs">
-              <span className="text-muted-foreground text-[10px] uppercase">Execution Handle</span>
+              <span className="text-muted-foreground text-[10px] uppercase">
+                {UI_COPY.STUDIO.INSPECTOR.HANDLE_LABEL}
+              </span>
               <p className="text-foreground mt-1 truncate font-semibold">
-                {activeExecutionId || "Idle"}
+                {activeExecutionId || UI_COPY.STUDIO.INSPECTOR.IDLE}
               </p>
             </div>
 
             <div className="border-border/50 bg-background/50 rounded-md border p-3.5 shadow-2xs">
-              <span className="text-muted-foreground text-[10px] uppercase">Runtime Engine</span>
+              <span className="text-muted-foreground text-[10px] uppercase">
+                {UI_COPY.STUDIO.INSPECTOR.ENGINE_LABEL}
+              </span>
               <p className="text-foreground mt-1 font-semibold">
                 Universal Swarm Coordinator (v1.0.0)
               </p>
             </div>
 
             <div className="border-border/50 bg-background/50 rounded-md border p-3.5 shadow-2xs">
-              <span className="text-muted-foreground text-[10px] uppercase">Sandbox Status</span>
-              <p className="mt-1 font-semibold text-emerald-400">Local-First Isolated Workspace</p>
+              <span className="text-muted-foreground text-[10px] uppercase">
+                {UI_COPY.STUDIO.INSPECTOR.SANDBOX_LABEL}
+              </span>
+              <p className="mt-1 font-semibold text-emerald-400">
+                {UI_COPY.STUDIO.INSPECTOR.LOCAL_FIRST_STATUS}
+              </p>
             </div>
           </div>
         )}

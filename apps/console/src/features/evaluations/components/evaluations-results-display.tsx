@@ -8,6 +8,7 @@
 
 import React from "react";
 import { CheckCircle2, Clock, Target, Award } from "lucide-react";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { BenchmarkResult } from "../types";
 
 export interface EvaluationsResultsDisplayProps {
@@ -27,7 +28,9 @@ export function EvaluationsResultsDisplay({
       <div className="mb-3 flex items-center justify-between border-b pb-2">
         <div className="flex items-center gap-2">
           <Award className="text-primary size-4" />
-          <h4 className="text-xs font-semibold tracking-tight">Benchmark Results</h4>
+          <h4 className="text-xs font-semibold tracking-tight">
+            {UI_COPY.EVALUATIONS.RESULTS.TITLE}
+          </h4>
         </div>
         <span className="text-muted-foreground font-mono text-[11px]">{result.datasetName}</span>
       </div>
@@ -36,7 +39,9 @@ export function EvaluationsResultsDisplay({
         {/* Accuracy Gauge */}
         <div className="border-border/60 bg-card/60 flex flex-col justify-between rounded border p-3">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px]">Accuracy</span>
+            <span className="text-muted-foreground text-[11px]">
+              {UI_COPY.EVALUATIONS.RESULTS.ACCURACY_LABEL}
+            </span>
             <Target className="text-primary size-3.5" />
           </div>
           <div className="mt-2 flex items-baseline gap-1">
@@ -59,7 +64,9 @@ export function EvaluationsResultsDisplay({
         {/* Test Items Passed */}
         <div className="border-border/60 bg-card/60 flex flex-col justify-between rounded border p-3">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px]">Passed Items</span>
+            <span className="text-muted-foreground text-[11px]">
+              {UI_COPY.EVALUATIONS.RESULTS.PASSED_LABEL}
+            </span>
             <CheckCircle2 className="text-primary size-3.5" />
           </div>
           <div className="mt-2 flex items-baseline gap-1">
@@ -70,25 +77,29 @@ export function EvaluationsResultsDisplay({
           </div>
           <span className="text-muted-foreground mt-2 text-[10px]">
             {result.totalItems - result.passedItems === 0
-              ? "All test cases satisfied"
-              : `${result.totalItems - result.passedItems} failed assertions`}
+              ? UI_COPY.EVALUATIONS.RESULTS.ALL_PASSED
+              : UI_COPY.EVALUATIONS.RESULTS.FAILED_COUNT(result.totalItems - result.passedItems)}
           </span>
         </div>
 
         {/* Mean Latency */}
         <div className="border-border/60 bg-card/60 flex flex-col justify-between rounded border p-3">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px]">Mean Latency</span>
+            <span className="text-muted-foreground text-[11px]">
+              {UI_COPY.EVALUATIONS.RESULTS.LATENCY_LABEL}
+            </span>
             <Clock className="text-muted-foreground size-3.5" />
           </div>
           <div className="mt-2 flex items-baseline gap-1">
             <span className="text-foreground font-mono text-2xl font-bold">
               {result.meanLatencyMs.toFixed(0)}
             </span>
-            <span className="text-muted-foreground font-mono text-xs">ms / item</span>
+            <span className="text-muted-foreground font-mono text-xs">
+              {UI_COPY.EVALUATIONS.RESULTS.MS_PER_ITEM}
+            </span>
           </div>
           <span className="text-muted-foreground mt-2 text-[10px]">
-            Inference & tool dispatch speed
+            {UI_COPY.EVALUATIONS.RESULTS.SPEED_LABEL}
           </span>
         </div>
       </div>

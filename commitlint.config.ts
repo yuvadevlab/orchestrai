@@ -69,6 +69,10 @@ const config: UserConfig = {
         "worker",
         "realtime",
         "console",
+        "orchestrator",
+        "admin",
+        "intelligence",
+        "crawler",
 
         // Packages
         "core",
@@ -84,14 +88,14 @@ const config: UserConfig = {
         "observability",
         "sdk",
         "eval",
-
-        // Phases
-        "phase-0",
-        "phase-1",
-        "phase-2",
-        "phase-3",
-        "phase-4",
-        "phase-5",
+        "billing",
+        "semantic-cache",
+        "model-router",
+        "prompts",
+        "resilience",
+        "grpc",
+        "shared-types",
+        "regex",
 
         // Tooling & CI
         "ci",
@@ -107,15 +111,6 @@ const config: UserConfig = {
         "workspace",
         "deps",
         "docs",
-
-        // Infrastructure
-        "infra",
-        "docker",
-        "postgres",
-        "redis",
-        "ollama",
-        "nginx",
-        "monitoring",
       ],
     ],
 

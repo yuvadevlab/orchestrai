@@ -8,11 +8,13 @@
 
 import React from "react";
 import { Database, Wrench } from "lucide-react";
+import { TableSkeleton } from "@/components/ui/skeleton";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { EvaluationDataset } from "../types";
 
 export interface EvaluationsDatasetsListProps {
-  datasets: EvaluationDataset[];
-  isLoading: boolean;
+  readonly datasets: EvaluationDataset[];
+  readonly isLoading: boolean;
 }
 
 /**
@@ -23,13 +25,7 @@ export function EvaluationsDatasetsList({
   isLoading,
 }: EvaluationsDatasetsListProps): React.JSX.Element {
   if (isLoading) {
-    return (
-      <div className="border-border bg-card/30 flex min-h-48 items-center justify-center rounded-md border backdrop-blur">
-        <span className="text-muted-foreground animate-pulse text-xs">
-          Loading benchmark datasets...
-        </span>
-      </div>
-    );
+    return <TableSkeleton rows={3} />;
   }
 
   return (
@@ -45,7 +41,7 @@ export function EvaluationsDatasetsList({
               <h4 className="text-xs font-semibold">{dataset.name}</h4>
             </div>
             <span className="border-border/80 bg-muted/60 text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]">
-              {dataset.items.length} test cases
+              {UI_COPY.EVALUATIONS.DATASETS.TEST_CASES_BADGE(dataset.items.length)}
             </span>
           </div>
 

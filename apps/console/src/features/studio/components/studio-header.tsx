@@ -7,8 +7,12 @@
  */
 
 import React from "react";
-import { History, Sidebar, Sparkles } from "lucide-react";
+import { BookOpen, History, Sidebar, Sparkles } from "lucide-react";
 import { Button, Badge } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
+import { useConsoleStore } from "@/lib/stores";
+import { useWorkspaceHarness } from "../api";
+import { StudioWorkspaceSelector } from "./studio-workspace-selector";
 
 export interface StudioHeaderProps {
   isRunning: boolean;
@@ -19,8 +23,7 @@ export interface StudioHeaderProps {
 
 /**
  * Slim top bar for the Cowork Studio.
- * Selector controls (specialist/model/mode) live inside the prompt bar's
- * bottom control row; this header only hosts session history, the swarm
+ * Hosts workspace folder switcher, session history threads, the swarm
  * status badge, and the inspector rail toggle.
  */
 export function StudioHeader({
@@ -29,19 +32,39 @@ export function StudioHeader({
   onToggleRail,
   railOpen,
 }: StudioHeaderProps): React.JSX.Element {
+  const activeWorkspace = useConsoleStore((s) => s.activeWorkspace);
+  const { data: harness } = useWorkspaceHarness(activeWorkspace?.path);
+
+  const totalHarnessSpecs = (harness?.rulesCount ?? 0) + (harness?.skillsCount ?? 0);
+
   return (
     <header className="border-border bg-card/60 relative z-20 flex h-13 shrink-0 items-center justify-between border-b px-4 backdrop-blur-md">
-      {/* Left: Session History Drawer Button */}
+      {/* Left: Workspace Folder Picker & Session History Drawer Button */}
       <div className="flex items-center gap-2">
+        <StudioWorkspaceSelector />
+
+        {harness && totalHarnessSpecs > 0 && (
+          <Badge
+            variant="outline"
+            className="border-primary/30 bg-primary/5 text-primary hidden items-center gap-1.5 px-2 py-0.5 font-mono text-[10px] md:inline-flex"
+            title={`Harness active: ${harness.rootInstructionsCount} root specs, ${harness.rulesCount} rules, ${harness.skillsCount} skills loaded from ${harness.workspaceRoot}`}
+          >
+            <BookOpen className="text-primary size-3" />
+            <span>
+              {harness.rulesCount} rules · {harness.skillsCount} skills
+            </span>
+          </Badge>
+        )}
+
         <Button
           variant="outline"
           size="sm"
           onClick={onOpenHistory}
           className="h-8 gap-1.5 px-2.5 font-mono text-xs"
-          title="Open session threads history"
+          title={UI_COPY.STUDIO.HEADER.THREADS_TOOLTIP}
         >
           <History className="size-3.5" />
-          <span className="hidden sm:inline">Threads</span>
+          <span className="hidden sm:inline">{UI_COPY.STUDIO.HEADER.THREADS_BUTTON}</span>
         </Button>
       </div>
 
@@ -56,7 +79,9 @@ export function StudioHeader({
           }`}
         >
           <Sparkles className="size-3" />
-          {isRunning ? "COLLABORATING..." : "SWARM // READY"}
+          {isRunning
+            ? UI_COPY.STUDIO.HEADER.STATUS_COLLABORATING
+            : UI_COPY.STUDIO.HEADER.STATUS_READY}
         </Badge>
 
         <Button
@@ -64,8 +89,8 @@ export function StudioHeader({
           size="sm"
           onClick={onToggleRail}
           className={`size-8 p-0 ${railOpen ? "bg-accent text-primary" : ""}`}
-          title="Toggle inspector rail"
-          aria-label="Toggle inspector rail"
+          title={UI_COPY.STUDIO.HEADER.TOGGLE_INSPECTOR_A11Y}
+          aria-label={UI_COPY.STUDIO.HEADER.TOGGLE_INSPECTOR_A11Y}
         >
           <Sidebar className="size-3.5" />
         </Button>

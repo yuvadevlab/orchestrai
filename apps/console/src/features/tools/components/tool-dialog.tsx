@@ -10,6 +10,7 @@ import React from "react";
 import { toast } from "@yuva-devlab/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { FormDialog } from "@/components/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { buildToolFields } from "./tool-form-fields";
 import { useRegisterToolMutation } from "../api";
 import { usePermissions } from "../api/use-permissions";
@@ -38,16 +39,16 @@ export function ToolDialog({
 
   const handleRegisterTool = async (formData: Record<string, string>): Promise<void> => {
     const toolPromise = registerMutation.mutateAsync({
-      name: formData.name || "Custom Tool",
-      category: formData.category || "General",
-      description: formData.description || "Registered runtime tool",
-      permissions: formData.permissions || "read_only",
+      name: formData.name || UI_COPY.TOOLS.REGISTER_DIALOG.FALLBACK_NAME,
+      category: formData.category || UI_COPY.TOOLS.REGISTER_DIALOG.FALLBACK_CATEGORY,
+      description: formData.description || UI_COPY.TOOLS.REGISTER_DIALOG.FALLBACK_DESCRIPTION,
+      permissions: formData.permissions || UI_COPY.TOOLS.REGISTER_DIALOG.FALLBACK_PERMISSIONS,
     });
 
     toast.promise(toolPromise, {
-      loading: "Registering runtime tool...",
-      success: "Tool registered successfully!",
-      error: (err) => formatApiError(err, "Failed to register tool"),
+      loading: UI_COPY.TOOLS.REGISTER_DIALOG.TOAST_LOADING,
+      success: UI_COPY.TOOLS.REGISTER_DIALOG.TOAST_SUCCESS,
+      error: (err) => formatApiError(err, UI_COPY.TOOLS.REGISTER_DIALOG.TOAST_ERROR),
     });
 
     await toolPromise;
@@ -59,10 +60,10 @@ export function ToolDialog({
   return (
     <FormDialog
       isOpen={isOpen}
-      title="Register Custom Execution Tool"
-      description="Attach a new tool capability schema into the cluster runtime."
+      title={UI_COPY.TOOLS.REGISTER_DIALOG.TITLE}
+      description={UI_COPY.TOOLS.REGISTER_DIALOG.DESCRIPTION}
       fields={fields}
-      submitText="Register Tool"
+      submitText={UI_COPY.TOOLS.REGISTER_DIALOG.SUBMIT_BUTTON}
       onClose={onClose}
       onSubmit={handleRegisterTool}
     />

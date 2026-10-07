@@ -4,6 +4,7 @@
  */
 
 import { AgentMode } from "@orchestrai/shared-types";
+import { AUTO_MODE_SYSTEM_PROMPT } from "@orchestrai/prompts";
 import type { ITool } from "@orchestrai/tools";
 import type { IModeStrategy } from "./mode-strategy.interface";
 
@@ -15,15 +16,10 @@ export class AutoModeStrategy implements IModeStrategy {
   public readonly mode = AgentMode.AUTO;
 
   /**
-   * System guidance for AUTO mode.
+   * Returns canonical system guidance for AUTO mode from @orchestrai/prompts.
    */
   public getSystemInstructions(): string {
-    return (
-      "Operating Mode: AUTO.\n" +
-      "You are an adaptive orchestrator. Assess task complexity dynamically. " +
-      "For complex multi-step workflows, briefly state your intended approach, " +
-      "then execute tools methodically, verify results, and conclude with a concise summary."
-    );
+    return AUTO_MODE_SYSTEM_PROMPT;
   }
 
   /**

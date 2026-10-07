@@ -7,7 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { classifyPathSensitivity, expandUserHome } from "@orchestrai/tools";
-import { ApprovalRiskLevel } from "@orchestrai/shared-types";
+import { ApprovalRiskLevel, WorkspaceTool } from "@orchestrai/shared-types";
 import { findNearestProjectRoot } from "../storage/permission-storage";
 import type { PermissionCheckResult } from "../storage/permission-types";
 
@@ -40,7 +40,7 @@ export function evaluateToolPermission(params: EvaluatePermissionParams): Permis
   ];
 
   // 1. Evaluate shell command execution boundaries
-  if (toolName === "bash") {
+  if (toolName === WorkspaceTool.BASH) {
     const commandStr = String(args.command || "command");
     const isAllowed =
       onceGrants.has("tool:bash") ||
@@ -90,6 +90,39 @@ export function evaluateToolPermission(params: EvaluatePermissionParams): Permis
     const siblingCandidate = path.resolve(path.dirname(workspaceRoot), expanded);
     if (fs.existsSync(siblingCandidate)) {
       resolved = siblingCandidate;
+    }
+  }
+
+  // 3. For file write operations, require operator clearance unless pre-authorized
+  if (toolName === WorkspaceTool.WRITE_FILE) {
+    const isWriteAuthorized =
+      onceGrants.has("tool:write_file") ||
+      onceGrants.has(resolved) ||
+      onceGrants.has(targetPath) ||
+      Boolean(sessionSet?.has("tool:write_file")) ||
+      Boolean(sessionSet?.has(resolved)) ||
+      Boolean(sessionSet?.has(path.dirname(resolved))) ||
+      Boolean(sessionSet && Array.from(sessionSet).some((s) => resolved.startsWith(s))) ||
+      permanentGrants.has("tool:write_file") ||
+      permanentGrants.has(resolved) ||
+      permanentGrants.has(path.dirname(resolved)) ||
+      Array.from(permanentGrants).some((p) => resolved.startsWith(p));
+
+    // Consume single-turn clearance token
+    if (onceGrants.has("tool:write_file")) onceGrants.delete("tool:write_file");
+    if (onceGrants.has(resolved)) onceGrants.delete(resolved);
+    if (onceGrants.has(targetPath)) onceGrants.delete(targetPath);
+
+    if (!isWriteAuthorized) {
+      return {
+        allowed: false,
+        target: resolved,
+        reason: `Operator clearance required to write file: ${path.basename(resolved)}`,
+        suggestedPrefix: path.dirname(resolved),
+        effectiveRoot: workspaceRoot,
+        effectiveRoots,
+        riskLevel: ApprovalRiskLevel.CAUTION,
+      };
     }
   }
 

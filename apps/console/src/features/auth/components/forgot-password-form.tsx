@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { Button, Input, toast } from "@yuva-devlab/ui";
 import { formatApiError } from "@/lib/error-utils";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useForgotPasswordMutation } from "../api/use-auth-mutations";
 import type { ForgotPasswordFormValues } from "../types";
 
@@ -30,9 +31,9 @@ export function ForgotPasswordForm(): React.JSX.Element {
     const forgotPromise = forgotPasswordMutation.mutateAsync({ email: form.email });
 
     toast.promise(forgotPromise, {
-      loading: "Dispatching recovery instructions...",
-      success: "Recovery email dispatched successfully!",
-      error: (err) => formatApiError(err, "Failed to send reset instructions. Please try again."),
+      loading: UI_COPY.AUTH.FORGOT_PASSWORD.TOAST_LOADING,
+      success: UI_COPY.AUTH.FORGOT_PASSWORD.TOAST_SUCCESS,
+      error: (err) => formatApiError(err, UI_COPY.AUTH.FORGOT_PASSWORD.TOAST_ERROR),
     });
 
     try {
@@ -55,7 +56,7 @@ export function ForgotPasswordForm(): React.JSX.Element {
           href="/login"
           className="text-primary block text-xs font-medium transition-colors hover:underline"
         >
-          Return to sign in
+          {UI_COPY.AUTH.FORGOT_PASSWORD.BACK_TO_LOGIN}
         </Link>
       </div>
     );
@@ -65,10 +66,12 @@ export function ForgotPasswordForm(): React.JSX.Element {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Email Field */}
       <div className="space-y-1.5">
-        <label className="text-foreground block text-xs font-medium">Email</label>
+        <label className="text-foreground block text-xs font-medium">
+          {UI_COPY.AUTH.FORGOT_PASSWORD.EMAIL_LABEL}
+        </label>
         <Input
           type="email"
-          placeholder="name@example.com"
+          placeholder={UI_COPY.AUTH.FORGOT_PASSWORD.EMAIL_PLACEHOLDER}
           required
           value={form.email}
           onChange={(e) => setForm({ email: e.target.value })}
@@ -86,10 +89,10 @@ export function ForgotPasswordForm(): React.JSX.Element {
         {forgotPasswordMutation.isPending ? (
           <>
             <Loader2 className="mr-2 size-4 animate-spin" />
-            <span>Sending instructions...</span>
+            <span>{UI_COPY.AUTH.FORGOT_PASSWORD.SUBMITTING}</span>
           </>
         ) : (
-          <span>Send Reset Instructions</span>
+          <span>{UI_COPY.AUTH.FORGOT_PASSWORD.SUBMIT_BUTTON}</span>
         )}
       </Button>
     </form>

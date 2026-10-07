@@ -7,6 +7,7 @@
 import os from "node:os";
 import path from "node:path";
 import { ApprovalRiskLevel } from "@orchestrai/shared-types";
+import { CRITICAL_CREDENTIAL_PATTERNS, SECRET_CONFIG_PATTERNS } from "@orchestrai/regex";
 
 /**
  * Risk classification level for a filesystem path access request.
@@ -31,33 +32,6 @@ export interface PathSensitivityClassification {
   /** Human-readable explanatory warning describing the risk to the operator */
   readonly warning?: string;
 }
-
-/**
- * High-risk credential and authentication token paths (Critical risk).
- */
-const CRITICAL_CREDENTIAL_PATTERNS: readonly RegExp[] = [
-  /[\\/]\.ssh([\\/]|$)/i,
-  /[\\/]\.aws([\\/]|$)/i,
-  /[\\/]\.gnupg([\\/]|$)/i,
-  /[\\/]\.config[\\/]gcloud([\\/]|$)/i,
-  /[\\/]\.azure([\\/]|$)/i,
-  /[\\/]\.kube([\\/]config)?$/i,
-  /[\\/]id_(rsa|ed25519|ecdsa|dsa)(\.pub)?$/i,
-  /\.(pem|key|pkcs12|pfx)$/i,
-  /^\/(etc[\\/](shadow|passwd|sudoers)|System[\\/]|private[\\/])/i,
-];
-
-/**
- * Environment variables and secret token files (Caution risk).
- */
-const SECRET_CONFIG_PATTERNS: readonly RegExp[] = [
-  /(^|[\\/])\.env(\.[a-zA-Z0-9_-]+)?$/i,
-  /(^|[\\/])\.npmrc$/i,
-  /(^|[\\/])\.dockercfg$/i,
-  /(^|[\\/])\.docker[\\/]config\.json$/i,
-  /(^|[\\/])credentials\.json$/i,
-  /(^|[\\/])service-account.*\.json$/i,
-];
 
 /**
  * Expands leading tilde (~) into the user's home directory.

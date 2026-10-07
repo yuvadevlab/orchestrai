@@ -11,18 +11,19 @@ import { Plus, Search, Sparkles, Brain } from "lucide-react";
 import { Button, Input } from "@yuva-devlab/ui";
 import { MemoryType } from "@orchestrai/shared-types";
 import { PageShell } from "@/components/layout/page-shell";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, TableSkeleton } from "@/components/ui";
 import { useMemories } from "../api";
+import { UI_COPY } from "@/lib/ui-copy";
 import { MemoryCreateDialog } from "./memory-create-dialog";
 import { MemoryRecallDialog } from "./memory-recall-dialog";
 import { MemoryItemsList } from "./memory-items-list";
 
 const MEMORY_TYPE_PILLS = [
-  { id: "all", label: "All Types" },
-  { id: MemoryType.FACT, label: "Facts" },
-  { id: MemoryType.EPISODIC, label: "Episodic" },
-  { id: MemoryType.USER_PREFERENCE, label: "Preferences" },
-  { id: MemoryType.WORKING, label: "Working" },
+  { id: "all", label: UI_COPY.MEMORY.TYPE_FILTERS.ALL },
+  { id: MemoryType.FACT, label: UI_COPY.MEMORY.TYPE_FILTERS.FACTS },
+  { id: MemoryType.EPISODIC, label: UI_COPY.MEMORY.TYPE_FILTERS.EPISODIC },
+  { id: MemoryType.USER_PREFERENCE, label: UI_COPY.MEMORY.TYPE_FILTERS.PREFERENCES },
+  { id: MemoryType.WORKING, label: UI_COPY.MEMORY.TYPE_FILTERS.WORKING },
 ];
 
 /**
@@ -43,10 +44,10 @@ export function MemoryPageContent(): React.JSX.Element {
 
   return (
     <PageShell
-      title="Agent Memory & Recall"
-      breadcrumb="Memory"
-      stats={`${memories.length} memories retained`}
-      description="Cross-session episodic reflections and semantic facts that persist across swarm interactions."
+      title={UI_COPY.MEMORY.PAGE_TITLE}
+      breadcrumb={UI_COPY.MEMORY.BREADCRUMB}
+      stats={UI_COPY.MEMORY.STATS(memories.length)}
+      description={UI_COPY.MEMORY.PAGE_DESCRIPTION}
       actions={
         <div className="flex items-center gap-2">
           <Button
@@ -56,7 +57,7 @@ export function MemoryPageContent(): React.JSX.Element {
             className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
           >
             <Sparkles className="size-3.5" />
-            <span>Test recall</span>
+            <span>{UI_COPY.MEMORY.RECALL_TESTER.TRIGGER_BUTTON}</span>
           </Button>
           <Button
             variant="default"
@@ -65,7 +66,7 @@ export function MemoryPageContent(): React.JSX.Element {
             className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
           >
             <Plus className="size-3.5" />
-            <span>Record memory</span>
+            <span>{UI_COPY.MEMORY.RECORD_BUTTON}</span>
           </Button>
         </div>
       }
@@ -77,7 +78,7 @@ export function MemoryPageContent(): React.JSX.Element {
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
-              placeholder="Search memories by content..."
+              placeholder={UI_COPY.MEMORY.SEARCH_PLACEHOLDER}
               startIcon={<Search className="size-3.5" />}
               className="bg-card h-8 text-xs"
             />
@@ -100,14 +101,10 @@ export function MemoryPageContent(): React.JSX.Element {
 
         {/* Persisted Memories List */}
         {isLoading ? (
-          <div className="border-border bg-card/30 flex min-h-50 items-center justify-center rounded-md border backdrop-blur">
-            <span className="text-muted-foreground animate-pulse text-xs">
-              Loading agent memories from gateway...
-            </span>
-          </div>
+          <TableSkeleton rows={5} />
         ) : error ? (
           <div className="border-border bg-card flex flex-col items-center justify-center gap-2 rounded-md border p-6 text-center">
-            <p className="text-foreground text-xs font-medium">Failed to load memories</p>
+            <p className="text-foreground text-xs font-medium">{UI_COPY.MEMORY.ERROR_TITLE}</p>
             <p className="text-muted-foreground max-w-md text-xs">{error.message}</p>
             <Button
               size="sm"
@@ -115,14 +112,14 @@ export function MemoryPageContent(): React.JSX.Element {
               onClick={() => void refetch()}
               className="mt-2 h-7 cursor-pointer text-xs"
             >
-              Retry
+              {UI_COPY.MEMORY.RETRY_BUTTON}
             </Button>
           </div>
         ) : memories.length === 0 ? (
           <EmptyState
             icon={Brain}
-            title="No Memories Retained"
-            description="Cross-session memories store learned facts, user preferences, and execution reflections."
+            title={UI_COPY.MEMORY.EMPTY_TITLE}
+            description={UI_COPY.MEMORY.EMPTY_DESC}
             action={
               <Button
                 size="sm"
@@ -130,15 +127,15 @@ export function MemoryPageContent(): React.JSX.Element {
                 onClick={() => setIsCreateOpen(true)}
                 className="h-8 cursor-pointer text-xs"
               >
-                <Plus className="mr-1.5 size-3.5" /> Record First Memory
+                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.MEMORY.RECORD_BUTTON}
               </Button>
             }
           />
         ) : filteredMemories.length === 0 ? (
           <EmptyState
             icon={Search}
-            title="No Memories Matched"
-            description={`No memories matched your search query "${search}".`}
+            title={UI_COPY.MEMORY.NO_MATCH_TITLE}
+            description={UI_COPY.MEMORY.NO_MATCH_DESC(search)}
           />
         ) : (
           <MemoryItemsList

@@ -20,11 +20,12 @@ import {
   DialogBody,
   DialogFooter,
 } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useQueryKnowledge } from "../api";
 
 export interface KnowledgeQueryDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
 }
 
 /**
@@ -46,7 +47,7 @@ export function KnowledgeQueryDialog({
     try {
       await search(queryText.trim());
     } catch {
-      toast.error("Failed to query knowledge base");
+      toast.error(UI_COPY.KNOWLEDGE.QUERY_TESTER.TOAST_ERROR);
     }
   };
 
@@ -66,10 +67,10 @@ export function KnowledgeQueryDialog({
             </div>
             <div>
               <DialogTitle className="text-base font-semibold">
-                Hybrid Vector Query Tester
+                {UI_COPY.KNOWLEDGE.QUERY_TESTER.TITLE}
               </DialogTitle>
               <DialogDescription className="text-muted-foreground text-xs">
-                Evaluate dense semantic embeddings and sparse keyword ranking against your corpus.
+                {UI_COPY.KNOWLEDGE.QUERY_TESTER.DESCRIPTION}
               </DialogDescription>
             </div>
           </div>
@@ -81,7 +82,7 @@ export function KnowledgeQueryDialog({
               <Input
                 value={queryText}
                 onChange={(e) => setQueryText(e.target.value)}
-                placeholder="Type a test question or keyword to search indexed chunks..."
+                placeholder={UI_COPY.KNOWLEDGE.QUERY_TESTER.PLACEHOLDER}
                 startIcon={<Search className="size-3.5" />}
                 className="bg-card h-8 text-xs"
               />
@@ -97,7 +98,7 @@ export function KnowledgeQueryDialog({
               ) : (
                 <Search className="size-3.5" />
               )}
-              <span>Retrieve</span>
+              <span>{UI_COPY.KNOWLEDGE.QUERY_TESTER.SUBMIT_BUTTON}</span>
             </Button>
           </form>
 
@@ -106,7 +107,7 @@ export function KnowledgeQueryDialog({
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground font-mono">
-                  Found {result.chunks.length} matching chunks for &quot;{result.query}&quot;
+                  {UI_COPY.KNOWLEDGE.QUERY_TESTER.MATCHES_COUNT(result.chunks.length, result.query)}
                 </span>
               </div>
 
@@ -114,7 +115,7 @@ export function KnowledgeQueryDialog({
                 <div className="border-border/60 bg-muted/20 flex flex-col items-center justify-center rounded border py-6 text-center">
                   <Database className="text-muted-foreground mb-2 size-6" />
                   <p className="text-muted-foreground text-xs">
-                    No matching passages found above score threshold.
+                    {UI_COPY.KNOWLEDGE.QUERY_TESTER.NO_MATCHES}
                   </p>
                 </div>
               ) : (
@@ -161,7 +162,7 @@ export function KnowledgeQueryDialog({
             onClick={handleClose}
             className="h-8 cursor-pointer text-xs"
           >
-            Close
+            {UI_COPY.COMMON.ACTIONS.CLOSE}
           </Button>
         </DialogFooter>
       </DialogContent>

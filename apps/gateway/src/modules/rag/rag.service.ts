@@ -42,7 +42,7 @@ export interface RagQueryResult {
 /**
  * Composite embedding provider that tries Ollama first with transparent fallback to deterministic mock embeddings.
  */
-class ResilientEmbeddingProvider implements IEmbeddingProvider {
+export class ResilientEmbeddingProvider implements IEmbeddingProvider {
   readonly dimension: number;
   private readonly primary: OllamaEmbeddingProvider;
   private readonly fallback: MockEmbeddingProvider;

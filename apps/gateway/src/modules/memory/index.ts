@@ -6,3 +6,4 @@
 export { registerMemoryRoutes } from "./memory.route";
 export { MemoryController } from "./memory.controller";
 export { MemoryService } from "./memory.service";
+export { initMemoryDistillation } from "./memory-distillation";

@@ -1,0 +1,52 @@
+name: "Setup Node Environment"
+description: "Sets up Node.js, pnpm, optional Python/Ruff, installs dependencies, and configures Turborepo caching."
+inputs:
+  node-version:
+    description: "Node.js version to use"
+    required: false
+    default: "24"
+  setup-python:
+    description: "Whether to setup Python and Ruff for linting/formatting"
+    required: false
+    default: "false"
+  python-version:
+    description: "Python version to use"
+    required: false
+    default: "3.12"
+
+runs:
+  using: "composite"
+  steps:
+    - name: ⚡ Setup pnpm Package Manager
+      uses: pnpm/action-setup@v4
+
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: "pnpm"
+
+    - name: 🐍 Setup Python
+      if: ${{ inputs.setup-python == 'true' }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: 🛠️ Install Ruff
+      if: ${{ inputs.setup-python == 'true' }}
+      shell: bash
+      run: pip install ruff
+
+    - name: 📥 Install Dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: ⚡ Cache Turborepo
+      uses: actions/cache@v4
+      with:
+        path: |
+          .turbo
+          node_modules/.cache/turbo
+        key: ${{ runner.os }}-turbo-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-

@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { ShieldAlert, Terminal, Clock, ShieldCheck, CheckCheck, X, Loader2 } from "lucide-react";
 import { Button, Badge } from "@yuva-devlab/ui";
 import { PermissionScope, ApprovalRiskLevel } from "@orchestrai/shared-types";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { StudioApprovalRequest } from "../types";
 
 export interface StudioLiveClearanceCardProps {
@@ -50,7 +51,7 @@ export function StudioLiveClearanceCard({
   return (
     <div
       role="alertdialog"
-      aria-label="Security clearance required"
+      aria-label={UI_COPY.STUDIO.CLEARANCE.A11Y_REQUIRED}
       className={`bg-card/95 rounded-md border p-4 shadow-xl backdrop-blur-md transition-all ${
         isCritical ? "border-destructive/60 bg-destructive/5" : "border-warning/50 bg-warning/5"
       }`}
@@ -66,7 +67,9 @@ export function StudioLiveClearanceCard({
             <ShieldAlert className="size-4" />
           </div>
           <span className="text-foreground text-sm font-semibold">
-            {isCritical ? "Sensitive Action Clearance Required" : "Security Clearance Required"}
+            {isCritical
+              ? UI_COPY.STUDIO.CLEARANCE.TITLE_SENSITIVE
+              : UI_COPY.STUDIO.CLEARANCE.TITLE_SECURITY}
           </span>
         </div>
         <Badge
@@ -105,7 +108,7 @@ export function StudioLiveClearanceCard({
           ) : (
             <Clock className="size-3" />
           )}
-          Allow Once
+          {UI_COPY.STUDIO.CLEARANCE.ALLOW_ONCE}
         </Button>
 
         <Button
@@ -121,7 +124,7 @@ export function StudioLiveClearanceCard({
           ) : (
             <ShieldCheck className="text-primary size-3" />
           )}
-          This Chat
+          {UI_COPY.STUDIO.CLEARANCE.THIS_CHAT}
         </Button>
 
         <Button
@@ -137,7 +140,7 @@ export function StudioLiveClearanceCard({
           ) : (
             <CheckCheck className="size-3" />
           )}
-          Always Allow
+          {UI_COPY.STUDIO.CLEARANCE.ALWAYS_ALLOW}
         </Button>
 
         <Button
@@ -153,7 +156,7 @@ export function StudioLiveClearanceCard({
           ) : (
             <X className="size-3" />
           )}
-          Deny
+          {UI_COPY.STUDIO.CLEARANCE.DENY}
         </Button>
       </div>
     </div>

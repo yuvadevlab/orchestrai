@@ -8,6 +8,7 @@
 
 import React from "react";
 import { Input, Label } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 
 export interface SettingsApiKeysCardProps {
   apiKeys: Record<string, string>;
@@ -25,10 +26,10 @@ export function SettingsApiKeysCard({
     <section className="border-border bg-card/60 space-y-4 rounded-md border p-5 shadow-xs">
       <div>
         <h2 className="text-foreground text-sm font-semibold tracking-tight">
-          API Keys & Integration Tokens
+          {UI_COPY.SETTINGS.API_KEYS.TITLE}
         </h2>
         <p className="text-muted-foreground mt-0.5 text-xs">
-          Bring your own provider keys for custom inference quotas and private routing.
+          {UI_COPY.SETTINGS.API_KEYS.DESCRIPTION}
         </p>
       </div>
 
@@ -41,7 +42,7 @@ export function SettingsApiKeysCard({
             <Label className="text-muted-foreground w-28 text-xs">{p}</Label>
             <Input
               type="password"
-              placeholder="sk-••••••••"
+              placeholder={UI_COPY.SETTINGS.API_KEYS.PLACEHOLDER}
               value={apiKeys[p]}
               onChange={(e) => onKeyChange(p, e.target.value)}
               className="bg-background h-8 flex-1 font-mono text-xs"

@@ -113,7 +113,7 @@ export class PostgresAgentRepository implements IAgentRepository {
         description: data.description,
         systemPrompt: data.systemPrompt,
         tenantId: data.tenantId || null,
-        modelConfig: { model: data.defaultModel || "gemma4:31b-cloud" },
+        modelConfig: data.defaultModel ? { model: data.defaultModel } : {},
         enabledTools: data.toolBindings ? [...data.toolBindings] : [],
         mode: (data.defaultMode as never) || "auto",
         metadata: metadata as Prisma.InputJsonValue,

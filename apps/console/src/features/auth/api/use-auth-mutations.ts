@@ -6,7 +6,7 @@
 
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
-import type { LoginPayload, SignupPayload, ForgotPasswordPayload } from "@/lib/auth-client";
+import type { LoginPayload, SignupPayload, ForgotPasswordPayload } from "@/lib/auth";
 
 /**
  * Custom TanStack Query mutation hook for operator authentication.

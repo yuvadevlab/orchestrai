@@ -20,4 +20,13 @@ export interface PromptCompileOptions {
 
   /** Full message history of the current execution thread */
   readonly history: readonly AIMessage[];
+
+  /**
+   * Whether to automatically adopt core platform rules and invariants.
+   * Defaults to true to ensure universal invariant adherence across all agents.
+   */
+  readonly adoptRules?: boolean;
+
+  /** Optional supplementary rule strings appended to the platform rules block */
+  readonly customRules?: readonly string[];
 }

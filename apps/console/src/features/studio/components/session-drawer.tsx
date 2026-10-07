@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { MessageSquare, MoreHorizontal, Plus, Search, Trash2, X } from "lucide-react";
 import { Badge, Button } from "@yuva-devlab/ui";
+import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkSession } from "../types";
 
 export interface SessionDrawerProps {
@@ -46,7 +47,9 @@ export function SessionDrawer({
       <div className="border-border/60 flex h-14 shrink-0 items-center justify-between border-b px-4">
         <div className="flex items-center gap-2">
           <MessageSquare className="text-primary size-4" />
-          <span className="text-foreground text-sm font-semibold">Threads</span>
+          <span className="text-foreground text-sm font-semibold">
+            {UI_COPY.STUDIO.DRAWER.THREADS_LABEL}
+          </span>
           <Badge variant="secondary" className="px-1.5 py-0 font-mono text-[10px]">
             {sessions.length}
           </Badge>
@@ -57,8 +60,8 @@ export function SessionDrawer({
           size="sm"
           onClick={onClose}
           className="text-muted-foreground hover:text-foreground size-7 rounded-md p-0"
-          title="Close sidebar"
-          aria-label="Close session threads"
+          title={UI_COPY.STUDIO.DRAWER.CLOSE_TOOLTIP}
+          aria-label={UI_COPY.STUDIO.DRAWER.CLOSE_A11Y}
         >
           <X className="size-4" />
         </Button>
@@ -72,14 +75,14 @@ export function SessionDrawer({
           size="sm"
         >
           <Plus className="size-3.5" />
-          <span>New Thread</span>
+          <span>{UI_COPY.STUDIO.DRAWER.NEW_THREAD}</span>
         </Button>
 
         <div className="border-border bg-background/80 flex h-8.5 items-center gap-2 rounded-md border px-3 text-xs shadow-2xs">
           <Search className="text-muted-foreground size-3.5 shrink-0" />
           <input
             type="text"
-            placeholder="Search threads..."
+            placeholder={UI_COPY.STUDIO.DRAWER.SEARCH_PLACEHOLDER}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="placeholder:text-muted-foreground w-full bg-transparent text-xs outline-none"
@@ -92,11 +95,13 @@ export function SessionDrawer({
         {filtered.length === 0 ? (
           <div className="text-muted-foreground/70 space-y-1 py-10 text-center text-xs">
             <p className="font-medium">
-              {search ? "No matching threads." : "No saved threads yet."}
+              {search
+                ? UI_COPY.STUDIO.DRAWER.NO_MATCHING_THREADS
+                : UI_COPY.STUDIO.DRAWER.NO_SAVED_THREADS}
             </p>
             {!search && (
               <p className="text-muted-foreground/50 text-[11px]">
-                Send a message in the studio to start a thread.
+                {UI_COPY.STUDIO.DRAWER.START_THREAD_HINT}
               </p>
             )}
           </div>
@@ -146,8 +151,8 @@ export function SessionDrawer({
                         ? "text-foreground opacity-100"
                         : "opacity-0 group-hover:opacity-100"
                     }`}
-                    title="Thread options"
-                    aria-label="Thread options"
+                    title={UI_COPY.STUDIO.DRAWER.THREAD_OPTIONS_A11Y}
+                    aria-label={UI_COPY.STUDIO.DRAWER.THREAD_OPTIONS_A11Y}
                   >
                     <MoreHorizontal className="size-3.5" />
                   </button>
@@ -167,7 +172,7 @@ export function SessionDrawer({
                         className="hover:bg-destructive/10 text-destructive flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors"
                       >
                         <Trash2 className="size-3.5" />
-                        <span>Delete</span>
+                        <span>{UI_COPY.COMMON.ACTIONS.DELETE}</span>
                       </button>
                     </div>
                   )}

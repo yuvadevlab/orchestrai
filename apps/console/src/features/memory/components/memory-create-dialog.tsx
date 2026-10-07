@@ -10,6 +10,7 @@ import React from "react";
 import { toast } from "@yuva-devlab/ui";
 import { FormDialog, type FormFieldConfig } from "@/components/ui";
 import { formatApiError } from "@/lib/error-utils";
+import { UI_COPY } from "@/lib/ui-copy";
 import { useCreateMemory } from "../api";
 
 export interface MemoryCreateDialogProps {
@@ -21,23 +22,22 @@ export interface MemoryCreateDialogProps {
 const MEMORY_FIELDS: FormFieldConfig[] = [
   {
     name: "content",
-    label: "Memory / Learned Fact",
+    label: UI_COPY.MEMORY.CREATE_DIALOG.CONTENT_LABEL,
     type: "textarea",
-    placeholder:
-      "e.g. User prefers Python with type annotations and functional error handling using Result pattern.",
+    placeholder: UI_COPY.MEMORY.CREATE_DIALOG.CONTENT_PLACEHOLDER,
     required: true,
     colSpan: 2,
   },
   {
     name: "importanceScore",
-    label: "Importance Priority (0.1 - 1.0)",
+    label: UI_COPY.MEMORY.CREATE_DIALOG.IMPORTANCE_LABEL,
     type: "select",
     defaultValue: "0.8",
     options: [
-      { value: "0.9", label: "Critical (0.9) - Always prioritize" },
-      { value: "0.8", label: "High (0.8) - Core preference" },
-      { value: "0.5", label: "Medium (0.5) - General note" },
-      { value: "0.2", label: "Low (0.2) - Ephemeral observation" },
+      { value: "0.9", label: UI_COPY.MEMORY.CREATE_DIALOG.PRIORITY_CRITICAL },
+      { value: "0.8", label: UI_COPY.MEMORY.CREATE_DIALOG.PRIORITY_HIGH },
+      { value: "0.5", label: UI_COPY.MEMORY.CREATE_DIALOG.PRIORITY_MEDIUM },
+      { value: "0.2", label: UI_COPY.MEMORY.CREATE_DIALOG.PRIORITY_LOW },
     ],
   },
 ];
@@ -58,7 +58,7 @@ export function MemoryCreateDialog({
         content: formData.content || "",
         importanceScore: parseFloat(formData.importanceScore || "0.8"),
       });
-      toast.success("Fact recorded in persistent agent memory");
+      toast.success(UI_COPY.MEMORY.CREATE_DIALOG.TOAST_SUCCESS);
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -69,10 +69,10 @@ export function MemoryCreateDialog({
   return (
     <FormDialog
       isOpen={isOpen}
-      title="Record Memory or Fact"
-      description="Inject persistent knowledge and user preferences remembered across all sessions."
+      title={UI_COPY.MEMORY.CREATE_DIALOG.TITLE}
+      description={UI_COPY.MEMORY.CREATE_DIALOG.DESCRIPTION}
       fields={MEMORY_FIELDS}
-      submitText="Save Memory"
+      submitText={UI_COPY.MEMORY.CREATE_DIALOG.SUBMIT_BUTTON}
       maxWidth="md"
       columns={1}
       onClose={onClose}
