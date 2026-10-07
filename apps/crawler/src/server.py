@@ -3,16 +3,17 @@ apps/crawler/src/server.py
 FastAPI server exposing Playwright browser automation, deep crawling, and RAG ingestion endpoints.
 """
 
-from typing import Optional
 from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from .config import settings
+
 from .browser import browser_manager
-from .parser import parse_html_document
+from .config import settings
 from .crawler import crawler
 from .ingestion import ingest_page_to_rag
+from .parser import parse_html_document
 
 
 @asynccontextmanager
@@ -41,12 +42,12 @@ class CrawlRequest(BaseModel):
     """Recursive crawl request."""
 
     url: str = Field(..., description="Root seed URL")
-    max_depth: Optional[int] = Field(None, description="Max link depth")
-    max_pages: Optional[int] = Field(None, description="Max visited pages")
+    max_depth: int | None = Field(None, description="Max link depth")
+    max_pages: int | None = Field(None, description="Max visited pages")
     ingest_to_rag: bool = Field(
         default=False, description="Automatically ingest pages into RAG"
     )
-    tenant_id: Optional[str] = Field(None, description="Tenant UUID for isolation")
+    tenant_id: str | None = Field(None, description="Tenant UUID for isolation")
 
 
 @app.get("/health")
@@ -64,9 +65,10 @@ async def scrape_url(req: ScrapeRequest):
     try:
         raw_html, screenshot = await browser_manager.fetch_page_content(req.url)
     except Exception as exc:
+        # Catch broad fetch exceptions to surface 502 Bad Gateway response
         raise HTTPException(
-            status_code=502, detail=f"Failed to fetch {req.url}: {str(exc)}"
-        )
+            status_code=502, detail=f"Failed to fetch {req.url}: {exc!s}"
+        ) from exc
 
     parsed = parse_html_document(raw_html, req.url)
 

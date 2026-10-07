@@ -4,15 +4,20 @@ Conversational RAG for selective context injection.
 Retrieves only semantically relevant previous turns for the current prompt instead of full history.
 """
 
-from typing import Any
+import logging
 import math
+from typing import Any
+
 import httpx
+
 from ..config import settings
+
+logger = logging.getLogger(__name__)
 
 
 def _cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
     """Computes cosine similarity between two floating-point vectors."""
-    dot = sum(a * b for a, b in zip(vec_a, vec_b))
+    dot = sum(a * b for a, b in zip(vec_a, vec_b, strict=False))
     norm_a = math.sqrt(sum(a * a for a in vec_a))
     norm_b = math.sqrt(sum(b * b for b in vec_b))
     if norm_a == 0.0 or norm_b == 0.0:
@@ -39,8 +44,9 @@ async def embed_turn(text: str, model_name: str | None = None) -> list[float]:
             )
             if resp.status_code == 200:
                 return resp.json().get("embedding", [])
-        except Exception:
-            pass
+        except Exception as exc:  # noqa: BLE001
+            # Log embedding service error and fall back to deterministic hash vector
+            logger.warning("Ollama embedding call failed: %s", exc)
 
     # Deterministic fallback vector for offline or mock environments
     dim = 64

@@ -3,11 +3,14 @@ apps/crawler/src/crawler.py
 Breadth-first crawler executing recursive link traversal within domain scope boundaries.
 """
 
+import logging
 from collections import deque
-from typing import Optional
+
 from .browser import browser_manager
-from .parser import parse_html_document, ParsedPage
 from .config import settings
+from .parser import ParsedPage, parse_html_document
+
+logger = logging.getLogger(__name__)
 
 
 class WebCrawler:
@@ -18,8 +21,8 @@ class WebCrawler:
     async def crawl(
         self,
         start_url: str,
-        max_depth: Optional[int] = None,
-        max_pages: Optional[int] = None,
+        max_depth: int | None = None,
+        max_pages: int | None = None,
     ) -> list[ParsedPage]:
         """
         Crawls starting from `start_url` up to configured depth and page limits.
@@ -61,8 +64,9 @@ class WebCrawler:
                     for link in parsed.links:
                         if link.rstrip("/") not in visited:
                             queue.append((link, current_depth + 1))
-            except Exception:
+            except Exception as exc:  # noqa: BLE001
                 # Log non-fatal crawl fetch errors and continue traversal
+                logger.warning("Crawl fetch failed for %s: %s", current_url, exc)
                 continue
 
         return results

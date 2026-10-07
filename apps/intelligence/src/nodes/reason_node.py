@@ -4,7 +4,9 @@ LLM reasoning node that generates thoughts, detects tool invocations, or produce
 """
 
 from typing import Any
+
 import httpx
+
 from ..config import settings
 from ..state import AgentState
 
@@ -58,9 +60,10 @@ async def reason_node(state: AgentState) -> dict[str, Any]:
             )
             resp.raise_for_status()
             data = resp.json()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
+            # Catch HTTP connection or parsing failures from Ollama host
             return {
-                "error": f"Ollama reasoning error: {str(exc)}",
+                "error": f"Ollama reasoning error: {exc!s}",
                 "is_complete": True,
             }
 

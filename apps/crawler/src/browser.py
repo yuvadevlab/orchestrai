@@ -3,13 +3,13 @@ apps/crawler/src/browser.py
 Headless browser automation manager using Playwright with graceful HTTP fallback.
 """
 
-from typing import Optional
 import httpx
+
 from .config import settings
 
 # Attempt playwright import; fallback to httpx if browser binaries are not installed
 try:
-    from playwright.async_api import async_playwright, Browser, Playwright
+    from playwright.async_api import Browser, Playwright, async_playwright
 
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
@@ -22,8 +22,8 @@ class BrowserManager:
     """
 
     def __init__(self):
-        self._playwright: Optional[Playwright] = None
-        self._browser: Optional[Browser] = None
+        self._playwright: Playwright | None = None
+        self._browser: Browser | None = None
 
     async def initialize(self) -> None:
         """Starts Playwright async process if library is installed."""
@@ -34,8 +34,8 @@ class BrowserManager:
                     headless=settings.headless,
                     args=["--no-sandbox", "--disable-dev-shm-usage"],
                 )
-            except Exception:
-                # Browser binaries may need 'playwright install'
+            except Exception:  # noqa: BLE001
+                # Browser binaries may need 'playwright install' or environment may lack display/dependencies
                 self._browser = None
 
     async def close(self) -> None:
@@ -47,7 +47,7 @@ class BrowserManager:
             await self._playwright.stop()
             self._playwright = None
 
-    async def fetch_page_content(self, url: str) -> tuple[str, Optional[bytes]]:
+    async def fetch_page_content(self, url: str) -> tuple[str, bytes | None]:
         """
         Loads a page URL and retrieves the evaluated DOM HTML and optional screenshot.
 
