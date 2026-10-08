@@ -5,8 +5,11 @@
  * @module apps/gateway/modules/cache
  */
 
-import { SemanticCache, SemanticCacheStats } from "@orchestrai/semantic-cache";
-import { CacheHitStatus } from "@orchestrai/shared-types";
+import {
+  SemanticCache,
+  type SemanticCacheStats,
+  CacheHitStatus,
+} from "@yuva-devlab/semantic-cache";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 import { ResilientEmbeddingProvider } from "@/modules/rag/rag.service";
 import { platformConfigService } from "@/modules/platform/services/platform-config.service";

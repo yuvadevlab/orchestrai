@@ -63,5 +63,17 @@
     "*.{json,md,yml,yaml,css,scss}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@yuva-devlab/agent-core": "link:../devlab-shared/packages/agent-core",
+    "@yuva-devlab/ai-client": "link:../devlab-shared/packages/ai-client",
+    "@yuva-devlab/auth-react": "link:../devlab-shared/packages/auth-react",
+    "@yuva-devlab/auth-server": "link:../devlab-shared/packages/auth-server",
+    "@yuva-devlab/billing": "link:../devlab-shared/packages/billing",
+    "@yuva-devlab/events": "link:../devlab-shared/packages/events",
+    "@yuva-devlab/rag": "link:../devlab-shared/packages/rag",
+    "@yuva-devlab/resilience": "link:../devlab-shared/packages/resilience",
+    "@yuva-devlab/sdk": "link:../devlab-shared/packages/sdk",
+    "@yuva-devlab/semantic-cache": "link:../devlab-shared/packages/semantic-cache"
   }
 }

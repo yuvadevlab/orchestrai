@@ -5,7 +5,7 @@
  */
 
 import { ExecutionStatus, SseStreamEvent } from "@orchestrai/shared-types";
-import { createModelResiliencePipeline } from "@orchestrai/resilience";
+import { createModelResiliencePipeline } from "@yuva-devlab/resilience";
 import { OllamaAdapter } from "@orchestrai/models";
 import { extractToolCall } from "@/modules/streaming/autonomous-agent-runner";
 import { traceService } from "@/modules/trace/trace.service";
