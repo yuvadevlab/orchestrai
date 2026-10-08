@@ -177,7 +177,7 @@ sequenceDiagram
     autonumber
     participant Op as Operator Studio (:3001)
     participant GW as Gateway (:4001)
-    participant DP as DevLab Portal (:3010)
+    participant DP as DevLab Portal (:3015)
     participant Redis as Redis (:6379)
     participant Worker as Worker Pool (:4003)
     participant DL as DevLab Logs (:3020)
@@ -210,7 +210,7 @@ sequenceDiagram
 
 | Ecosystem Member    | Direction | Protocol & Transport                                   | Exact Payload Contract & Endpoint                     | Purpose & Operational Behavior                                                                                                                |
 | :------------------ | :-------: | :----------------------------------------------------- | :---------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`devlab-portal`** |  Inbound  | Redis Pub/Sub (`devlab:killswitch:events`) & HTTP JWKS | `GET http://localhost:3010/api/v1/keys/verify`        | Gateway validates API keys and enforces sub-1ms instant revocation when an administrator disables an enterprise key in Portal.                |
+| **`devlab-portal`** |  Inbound  | Redis Pub/Sub (`devlab:killswitch:events`) & HTTP JWKS | `GET http://localhost:3015/api/v1/keys/verify`        | Gateway validates API keys and enforces sub-1ms instant revocation when an administrator disables an enterprise key in Portal.                |
 | **`devlab-logs`**   | Outbound  | HTTP/2 POST / Kafka                                    | `POST http://localhost:3020/api/v1/logs/ingest`       | Worker and Gateway stream all structured JSON logs, LLM token counts, tool invocation latency, and error traces to DevLab Logs.               |
 | **`incidentai`**    | Outbound  | HTTP POST Webhook                                      | `POST http://localhost:8085/api/v1/incidents/webhook` | Worker dispatches runtime exceptions, sandbox crashes, and memory leaks to IncidentAI to trigger autonomous SRE root-cause diagnosis.         |
 | **`devlab-guard`**  |  Inbound  | Local CLI / Git Hook / CI                              | `uv run devlab-guard scan --path .`                   | Scans all TypeScript and Python code before commit to strictly enforce the 250-line rule, zero raw string enums, and centralized regex rules. |
@@ -283,7 +283,7 @@ pnpm typecheck
 | `CRAWLER_URL`            | String | `http://localhost:8083`  |   Yes    | Headless Chromium web extraction engine endpoint.                                          |
 | `ADMIN_URL`              | String | `http://localhost:4005`  |   Yes    | Fastify internal admin control plane endpoint.                                             |
 | `ORCHESTRATOR_GRPC_URL`  | String |    `localhost:50051`     |   Yes    | gRPC binary DAG orchestrator endpoint.                                                     |
-| `DEVLAB_PORTAL_URL`      | String | `http://localhost:3010`  |   Yes    | DevLab Portal API URL for key validation and audit events.                                 |
+| `DEVLAB_PORTAL_URL`      | String | `http://localhost:3015`  |   Yes    | DevLab Portal API URL for key validation and audit events.                                 |
 | `DEVLAB_LOGS_URL`        | String | `http://localhost:3020`  |   Yes    | DevLab Logs ingestion endpoint for structured streaming.                                   |
 | `INCIDENTAI_WEBHOOK_URL` | String | `http://localhost:8085`  |    No    | IncidentAI webhook endpoint for automated crash reporting.                                 |
 
