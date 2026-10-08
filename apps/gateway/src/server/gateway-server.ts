@@ -7,7 +7,14 @@ import { createServer, type Server } from "node:http";
 import { Logger, loggerWithConfig, requestLogger } from "@yuva-devlab/logger";
 import type { GatewayConfig } from "@/config";
 import { createRequestContext } from "@/context";
-import { handleCors, authenticateRequest, RateLimiter, handleError } from "@/middleware";
+import {
+  handleCors,
+  authenticateRequest,
+  RateLimiter,
+  handleError,
+  handleKillSwitch,
+  initKillSwitchSubscriber,
+} from "@/middleware";
 import type { Router, GatewayRequest, GatewayResponse } from "@/routes";
 
 /**
@@ -28,6 +35,9 @@ export class GatewayServer {
     this.reqLoggerMiddleware = requestLogger(this.logger);
     this.rateLimiter = new RateLimiter(config.rateLimitMaxRequests, config.rateLimitWindowMs);
 
+    // Initialize Redis kill-switch subscriber from DevLab Portal control plane
+    void initKillSwitchSubscriber(process.env.REDIS_URL);
+
     this.httpServer = createServer(async (nodeReq, nodeRes) => {
       const req = nodeReq as GatewayRequest;
       const res = nodeRes as GatewayResponse;
@@ -44,6 +54,12 @@ export class GatewayServer {
         const handled = handleCors(req, res, this.config.corsAllowedOrigins);
         if (handled) {
           this.logger.debug("CORS preflight handled", { url: req.url });
+          return;
+        }
+
+        // 1.5. Control Plane Kill-Switch evaluation (503 if deactivated by DevLab Portal)
+        const isKilled = handleKillSwitch(req, res);
+        if (isKilled) {
           return;
         }
 
