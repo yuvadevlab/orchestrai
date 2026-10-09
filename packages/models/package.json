@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@orchestrai/core": "workspace:*",
-    "@yuva-devlab/logger": "1.1.0",
+    "@yuva-devlab/logger": "^1.2.0",
     "zod": "^4.6.5"
   },
   "peerDependencies": {

@@ -283,8 +283,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -323,8 +323,8 @@ importers:
         specifier: ^3.13.2
         version: 3.14.13(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       '@yuva-devlab/tokens':
         specifier: ^1.1.1
         version: 1.1.1
@@ -459,8 +459,8 @@ importers:
         specifier: link:../../../devlab-shared/packages/billing
         version: link:../../../devlab-shared/packages/billing
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       '@yuva-devlab/resilience':
         specifier: link:../../../devlab-shared/packages/resilience
         version: link:../../../devlab-shared/packages/resilience
@@ -529,8 +529,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tools
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -566,8 +566,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -618,8 +618,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tools
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       bullmq:
         specifier: ^6.3.6
         version: 6.3.6(ioredis@6.0.0(supports-color@8.1.1))(pg@8.23.0)
@@ -664,8 +664,8 @@ importers:
         specifier: workspace:*
         version: link:../tools
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -717,8 +717,8 @@ importers:
         specifier: ^7.10.0
         version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3))(typescript@6.0.3)
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -770,8 +770,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       ioredis:
         specifier: ^6.0.0
         version: 6.0.0(supports-color@8.1.1)
@@ -823,8 +823,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -848,8 +848,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -873,8 +873,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       ollama:
         specifier: '>=0.5.0'
         version: 0.6.3
@@ -904,8 +904,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
     devDependencies:
       tsup:
         specifier: ^8.5.1
@@ -939,8 +939,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       bullmq:
         specifier: ^6.3.6
         version: 6.3.6(ioredis@6.0.0(supports-color@8.1.1))(pg@8.23.0)
@@ -973,8 +973,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -1019,8 +1019,8 @@ importers:
         specifier: workspace:*
         version: link:../tools
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -1072,8 +1072,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -3393,8 +3393,8 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
-  '@yuva-devlab/logger@1.1.0':
-    resolution: {integrity: sha512-lxj5yv09fNQmzZbhoo1UJbSepbI/PKNXC5rYDg+ITr5pF3njeLTW0L0uTMaOMI0HSgtTOYbnRPg1EXMUeTrBaQ==}
+  '@yuva-devlab/logger@1.2.0':
+    resolution: {integrity: sha512-BbJaY1XXX5cYLvf0ExQZXXLdbydV5b3bBHXXxwG+xBx7mZc5eHOlhYZeZ9XWHn92pWeSQpXAPAh9FSSyuxTfng==}
 
   '@yuva-devlab/tokens@1.1.1':
     resolution: {integrity: sha512-+Dt3u8uP5fo6DZvUkcMh3Qrha2qgCzAmk160ou9jW7LLCN+YAqXbQJUiqJJDKZk4W4OSFqUGWxjxUoeS1Rpo/g==}
@@ -7919,7 +7919,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
-  '@yuva-devlab/logger@1.1.0': {}
+  '@yuva-devlab/logger@1.2.0': {}
 
   '@yuva-devlab/tokens@1.1.1': {}
 
