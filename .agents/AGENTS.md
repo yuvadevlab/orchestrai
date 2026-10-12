@@ -50,3 +50,14 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, an enterprise-grade 
    - NO client or worker application may hardcode operational parameters (slash commands, system prompts, max execution steps, sampling temperatures, compaction thresholds, cache similarity/TTL, RAG chunking parameters, retention policies, or starter suggestions).
    - All operational behaviors must be dynamic, database- or control-plane-driven, served via Gateway APIs (`/api/v1/platform/...`), and cached with stale-while-revalidate IndexedDB persistence.
    - All regular expressions across all apps and packages must originate from `@orchestrai/regex`. Zero inline regexes.
+9. **Next.js Page & Layout Invariant (Pure SSR Wrappers)**:
+   - All `page.tsx` and `layout.tsx` files across Next.js applications MUST remain Server Components (`SSR`).
+   - NEVER place `"use client"` on `page.tsx` or `layout.tsx`.
+   - Pages and layouts act purely as server wrappers (handling metadata, prefetching, server-side data fetching, and rendering client views).
+   - All interactive client logic, state, and browser APIs must reside in dedicated client components under `features/<feature>/components/` or `components/`.
+   - All authentication routes must be grouped under `app/(auth)/...`.
+
+10. **Feature-Scoped TanStack Query Hook Encapsulation (Universal Web Standard)**:
+    - Direct inline calls to `useQuery`, `useMutation`, or raw `apiClient`/`fetch` calls inside UI components are strictly forbidden.
+    - All server state queries, mutations, query keys, and SSR prefetch helpers must be encapsulated in dedicated files under `features/<feature>/api/` (e.g., `use-agents.ts`, `use-agent-mutations.ts`).
+    - Components must exclusively consume these exported custom hooks.
