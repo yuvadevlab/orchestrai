@@ -163,16 +163,6 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@yuva-devlab/agent-core': link:../devlab-shared/packages/agent-core
-  '@yuva-devlab/ai-client': link:../devlab-shared/packages/ai-client
-  '@yuva-devlab/auth-client': link:../devlab-shared/packages/auth-client
-  '@yuva-devlab/auth-server': link:../devlab-shared/packages/auth-server
-  '@yuva-devlab/billing': link:../devlab-shared/packages/billing
-  '@yuva-devlab/events': link:../devlab-shared/packages/events
-  '@yuva-devlab/rag': link:../devlab-shared/packages/rag
-  '@yuva-devlab/resilience': link:../devlab-shared/packages/resilience
-  '@yuva-devlab/sdk': link:../devlab-shared/packages/sdk
-  '@yuva-devlab/semantic-cache': link:../devlab-shared/packages/semantic-cache
   rollup-plugin-dts: ^6.5.1
 
 importers:
@@ -419,20 +409,20 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tools
       '@yuva-devlab/auth-server':
-        specifier: link:../../../devlab-shared/packages/auth-server
-        version: link:../../../devlab-shared/packages/auth-server
+        specifier: ^0.3.0
+        version: 0.3.0
       '@yuva-devlab/billing':
-        specifier: link:../../../devlab-shared/packages/billing
-        version: link:../../../devlab-shared/packages/billing
+        specifier: ^0.2.0
+        version: 0.2.0
       '@yuva-devlab/logger':
         specifier: ^1.2.0
         version: 1.2.0
       '@yuva-devlab/resilience':
-        specifier: link:../../../devlab-shared/packages/resilience
-        version: link:../../../devlab-shared/packages/resilience
+        specifier: ^0.2.0
+        version: 0.2.0
       '@yuva-devlab/semantic-cache':
-        specifier: link:../../../devlab-shared/packages/semantic-cache
-        version: link:../../../devlab-shared/packages/semantic-cache
+        specifier: ^0.2.0
+        version: 0.2.0
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -3359,8 +3349,23 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
+  '@yuva-devlab/auth-server@0.3.0':
+    resolution: {integrity: sha512-cNLnzcF2jX/mshR74Ckms4cuTYJ0bDVBstBohNfGClEhs/61ffRH921O28fxY2xrR9p8TTKKdLIwlypELJPgLg==}
+
+  '@yuva-devlab/billing@0.2.0':
+    resolution: {integrity: sha512-tHCBFSoDvlGTduXgOnM11IsmFe5+obUS7Ka0MN0rTZxDBJf2o1ODAWZ8yErqah1QZnmHqkRMZ7QgTuaLyoKsjQ==}
+
+  '@yuva-devlab/errors@0.2.0':
+    resolution: {integrity: sha512-eGunJ1eDbkGfEida3MJx9gaWRTeWjx/UPFUHUs+r7m++hkbShw4VKekaH5MMb7gIIc5sUmb4mESgir0TYnE30w==}
+
   '@yuva-devlab/logger@1.2.0':
     resolution: {integrity: sha512-BbJaY1XXX5cYLvf0ExQZXXLdbydV5b3bBHXXxwG+xBx7mZc5eHOlhYZeZ9XWHn92pWeSQpXAPAh9FSSyuxTfng==}
+
+  '@yuva-devlab/resilience@0.2.0':
+    resolution: {integrity: sha512-aVNCG6GZHMfVWKcs5vxXe86kKxeYWnd1iaZZSPd/3zqQYHsxIyZHLl+6bWCZ9ldnzb5PkmwIElGGDABUnDwGgg==}
+
+  '@yuva-devlab/semantic-cache@0.2.0':
+    resolution: {integrity: sha512-599FuyBwrYSN9gaburNwIv9W2cQ6ZlCgqEizCA3md20CfvAR95HecTXeXtn30fUGj78MLumGM47OIx40O53ebg==}
 
   '@yuva-devlab/tokens@1.1.1':
     resolution: {integrity: sha512-+Dt3u8uP5fo6DZvUkcMh3Qrha2qgCzAmk160ou9jW7LLCN+YAqXbQJUiqJJDKZk4W4OSFqUGWxjxUoeS1Rpo/g==}
@@ -7885,7 +7890,31 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
+  '@yuva-devlab/auth-server@0.3.0':
+    dependencies:
+      '@yuva-devlab/errors': 0.2.0
+      '@yuva-devlab/logger': 1.2.0
+      zod: 3.25.76
+
+  '@yuva-devlab/billing@0.2.0':
+    dependencies:
+      '@yuva-devlab/errors': 0.2.0
+      '@yuva-devlab/logger': 1.2.0
+      zod: 3.25.76
+
+  '@yuva-devlab/errors@0.2.0': {}
+
   '@yuva-devlab/logger@1.2.0': {}
+
+  '@yuva-devlab/resilience@0.2.0':
+    dependencies:
+      '@yuva-devlab/errors': 0.2.0
+
+  '@yuva-devlab/semantic-cache@0.2.0':
+    dependencies:
+      '@yuva-devlab/errors': 0.2.0
+      '@yuva-devlab/logger': 1.2.0
+      zod: 3.25.76
 
   '@yuva-devlab/tokens@1.1.1': {}
 
