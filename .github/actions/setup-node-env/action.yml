@@ -5,6 +5,10 @@ inputs:
     description: "Node.js version to use"
     required: false
     default: "24"
+  db-generate:
+    description: "Whether to run Prisma db:generate"
+    required: false
+    default: "true"
   setup-python:
     description: "Whether to setup Python and Ruff for linting/formatting"
     required: false
@@ -40,6 +44,11 @@ runs:
     - name: 📥 Install Dependencies
       shell: bash
       run: pnpm install --frozen-lockfile
+
+    - name: 🗄️ Generate Prisma Client
+      if: ${{ inputs.db-generate == 'true' }}
+      shell: bash
+      run: pnpm db:generate
 
     - name: ⚡ Cache Turborepo
       uses: actions/cache@v4
