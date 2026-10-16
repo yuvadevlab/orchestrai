@@ -75,7 +75,7 @@ model User {
   userId       String   @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
   tenantId     String   @map("tenant_id") @db.Uuid
   email        String   @unique @db.VarChar(255)
-  passwordHash String   @map("password_hash") @db.VarChar(255)
+  passwordHash String?  @map("password_hash") @db.VarChar(255)
   name         String?  @db.VarChar(120)
   role         String   @default("developer") @db.VarChar(32)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz

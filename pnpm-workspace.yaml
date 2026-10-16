@@ -9,6 +9,9 @@ allowBuilds:
   prisma: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
+  - "@yuva-devlab/auth-client@0.3.0"
+  - "@yuva-devlab/auth-server@0.3.0"
+  - "@yuva-devlab/sdk@0.2.1"
   - "@turbo/darwin-64@2.11.1"
   - "@turbo/darwin-arm64@2.11.1"
   - "@turbo/linux-64@2.11.1"
@@ -23,7 +26,7 @@ minimumReleaseAgeExclude:
 overrides:
   "@yuva-devlab/agent-core": link:../devlab-shared/packages/agent-core
   "@yuva-devlab/ai-client": link:../devlab-shared/packages/ai-client
-  "@yuva-devlab/auth-react": link:../devlab-shared/packages/auth-react
+  "@yuva-devlab/auth-client": link:../devlab-shared/packages/auth-client
   "@yuva-devlab/auth-server": link:../devlab-shared/packages/auth-server
   "@yuva-devlab/billing": link:../devlab-shared/packages/billing
   "@yuva-devlab/events": link:../devlab-shared/packages/events

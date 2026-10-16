@@ -165,7 +165,7 @@ settings:
 overrides:
   '@yuva-devlab/agent-core': link:../devlab-shared/packages/agent-core
   '@yuva-devlab/ai-client': link:../devlab-shared/packages/ai-client
-  '@yuva-devlab/auth-react': link:../devlab-shared/packages/auth-react
+  '@yuva-devlab/auth-client': link:../devlab-shared/packages/auth-client
   '@yuva-devlab/auth-server': link:../devlab-shared/packages/auth-server
   '@yuva-devlab/billing': link:../devlab-shared/packages/billing
   '@yuva-devlab/events': link:../devlab-shared/packages/events
@@ -178,37 +178,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      '@yuva-devlab/agent-core':
-        specifier: link:../devlab-shared/packages/agent-core
-        version: link:../devlab-shared/packages/agent-core
-      '@yuva-devlab/ai-client':
-        specifier: link:../devlab-shared/packages/ai-client
-        version: link:../devlab-shared/packages/ai-client
-      '@yuva-devlab/auth-react':
-        specifier: link:../devlab-shared/packages/auth-react
-        version: link:../devlab-shared/packages/auth-react
-      '@yuva-devlab/auth-server':
-        specifier: link:../devlab-shared/packages/auth-server
-        version: link:../devlab-shared/packages/auth-server
-      '@yuva-devlab/billing':
-        specifier: link:../devlab-shared/packages/billing
-        version: link:../devlab-shared/packages/billing
-      '@yuva-devlab/events':
-        specifier: link:../devlab-shared/packages/events
-        version: link:../devlab-shared/packages/events
-      '@yuva-devlab/rag':
-        specifier: link:../devlab-shared/packages/rag
-        version: link:../devlab-shared/packages/rag
-      '@yuva-devlab/resilience':
-        specifier: link:../devlab-shared/packages/resilience
-        version: link:../devlab-shared/packages/resilience
-      '@yuva-devlab/sdk':
-        specifier: link:../devlab-shared/packages/sdk
-        version: link:../devlab-shared/packages/sdk
-      '@yuva-devlab/semantic-cache':
-        specifier: link:../devlab-shared/packages/semantic-cache
-        version: link:../devlab-shared/packages/semantic-cache
     devDependencies:
       '@commitlint/cli':
         specifier: ^21.2.1
@@ -222,9 +191,6 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))
-      '@prisma/client':
-        specifier: ^7.10.0
-        version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3))(typescript@6.0.3)
       '@types/node':
         specifier: ^26.6.1
         version: 26.6.1
@@ -255,9 +221,6 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.8.0
         version: 0.8.1(prettier@3.9.8)
-      prisma:
-        specifier: ^7.10.0
-        version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -455,6 +418,9 @@ importers:
       '@orchestrai/tools':
         specifier: workspace:*
         version: link:../../packages/tools
+      '@yuva-devlab/auth-server':
+        specifier: link:../../../devlab-shared/packages/auth-server
+        version: link:../../../devlab-shared/packages/auth-server
       '@yuva-devlab/billing':
         specifier: link:../../../devlab-shared/packages/billing
         version: link:../../../devlab-shared/packages/billing
