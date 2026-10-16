@@ -1474,3 +1474,37 @@ Chronological log of architecture, engineering decisions, and completed mileston
 - **Zero "local-first" string matches**: Verified complete removal across all monorepo source files, markdown docs, and seed configs.
 - **Strict Invariants**: All files strictly adhere to the 250 LOC maximum rule.
 - **Typecheck & Linting**: Turbo `pnpm typecheck` passed across 48/48 targets with 0 errors; `pnpm lint` passed with 0 warnings.
+
+---
+
+## 2026-10-08: DevLab Multi-Repo Platform Phase 1 — Foundation Extraction & Clean Direct Consumption
+
+### 1. Canonical Foundation Extraction (@yuva-devlab/* in devlab-shared)
+
+- **Extracted Shared Core**:
+  - `@yuva-devlab/errors` & `@yuva-devlab/regex`: Universal error hierarchy and centralized regex catalogue.
+  - `@yuva-devlab/resilience` & `@yuva-devlab/events`: Circuit breakers, bulkhead, exponential retry with jitter, in-memory bus, transactional outbox, and idempotency stores.
+  - `@yuva-devlab/ai-client`: Multi-provider adapters (Groq, Google, Ollama, OpenAI, Anthropic), FallbackCascade, structured output extraction.
+  - `@yuva-devlab/agent-core`: UniversalTool, defineTool, ToolRegistry, compilePrompt.
+  - `@yuva-devlab/billing`: Dynamic SWR pricing resolver (`IPricingResolver`, `SAFETY_CEILING_PRICING`), token counting, cost ledger, budget enforcer.
+  - `@yuva-devlab/semantic-cache`: Cosine similarity caching, LRU eviction, dynamic cache metrics collector.
+  - `@yuva-devlab/rag`: Text chunking, token estimation, InMemoryVectorStore, mock embedding provider.
+  - `@yuva-devlab/auth-server` & `@yuva-devlab/auth-react`: JWKS RS256 token verification, app kill-switch, multi-tab sync, DevLabAuthProvider.
+  - `@yuva-devlab/sdk`: Master DevLabClient integrating AI, RAG, agent tools, billing, semantic caching, and events.
+
+### 2. Clean Architecture Monorepo Refactor (OrchestrAI)
+
+- **Clean Removal of Redundant Packages**:
+  - Removed duplicate internal packages: `packages/billing`, `packages/resilience`, `packages/semantic-cache`.
+  - Upgraded `apps/gateway` to directly depend on `@yuva-devlab/billing`, `@yuva-devlab/resilience`, and `@yuva-devlab/semantic-cache`.
+  - Preserved domain-specific swarm packages (`@orchestrai/events`, `@orchestrai/models`, `@orchestrai/rag`, `@orchestrai/tools`) as first-class citizens.
+- **Verification**:
+  - `pnpm typecheck` in `orchestrai`: 42/42 tasks passed (FULL TURBO, 0 errors).
+
+### 3. Downstream Consumer Alignment (FinAI)
+
+- **AI Client Delegation**: `@finai/ai-engine` now delegates LLM requests to canonical `@yuva-devlab/ai-client` adapters via `DevLabChatModel`.
+- **Universal Tools**: `@finai/api` tool factory exposes `defineUniversalTool` from `@yuva-devlab/agent-core`.
+- **Auth Provider**: `@finai/web` layout wrapped with `<DevLabAuthProvider appId="finai">`.
+- **Verification**:
+  - `pnpm typecheck` in `finai`: 14/14 tasks passed (0 errors).

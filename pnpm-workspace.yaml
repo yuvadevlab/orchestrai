@@ -7,7 +7,11 @@ allowBuilds:
   esbuild: true
   msgpackr-extract: true
   prisma: true
+  unrs-resolver: true
 minimumReleaseAgeExclude:
+  - "@yuva-devlab/auth-client@0.3.0"
+  - "@yuva-devlab/auth-server@0.3.0"
+  - "@yuva-devlab/sdk@0.2.1"
   - "@turbo/darwin-64@2.11.1"
   - "@turbo/darwin-arm64@2.11.1"
   - "@turbo/linux-64@2.11.1"
@@ -18,6 +22,6 @@ minimumReleaseAgeExclude:
   - turbo@2.11.1
   - "@yuva-devlab/tokens@1.0.0 || 1.1.0 || 1.1.1"
   - "@yuva-devlab/ui@1.0.1 || 1.1.0 || 1.2.0 || 1.3.0 || 1.3.1"
-  - "@yuva-devlab/logger@1.1.0"
+  - "@yuva-devlab/logger@1.1.0 || 1.2.0"
 overrides:
   rollup-plugin-dts: "^6.5.1"

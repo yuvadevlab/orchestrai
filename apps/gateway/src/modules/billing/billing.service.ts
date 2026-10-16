@@ -6,8 +6,14 @@
  * @module apps/gateway/modules/billing
  */
 
-import { TokenCounter, CostLedger, BudgetEnforcer, TenantUsageSummary } from "@orchestrai/billing";
-import { BillingEnforcementAction, BillingLedgerEntryType } from "@orchestrai/shared-types";
+import {
+  TokenCounter,
+  CostLedger,
+  BudgetEnforcer,
+  type TenantUsageSummary,
+  BillingEnforcementAction,
+  BillingLedgerEntryType,
+} from "@yuva-devlab/billing";
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
 
 const logger = loggerWithConfig(new Logger("BillingService"));
