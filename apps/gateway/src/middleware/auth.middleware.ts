@@ -5,11 +5,17 @@
  */
 
 import { Logger, loggerWithConfig } from "@yuva-devlab/logger";
+import { M2mApiKeyValidator } from "@yuva-devlab/auth-server";
 import type { GatewayRequest, GatewayResponse } from "@/routes";
 import type { GatewayConfig } from "@/config";
 import { AuthService } from "@/modules/auth";
 
 const logger = loggerWithConfig(new Logger("AuthMiddleware"));
+
+const m2mValidator = new M2mApiKeyValidator({
+  portalUrl: process.env.DEVLAB_PORTAL_URL || "http://localhost:3015",
+  requiredAppId: "orchestrai",
+});
 
 /** Whitelisted public endpoints bypassing mandatory API key / token authentication */
 const PUBLIC_PATHS = new Set([
@@ -47,13 +53,34 @@ export async function authenticateRequest(
   const rawApiKey = req.headers[apiKeyHeaderKey] || req.headers["x-api-key"];
   const apiKey = typeof rawApiKey === "string" ? rawApiKey.trim() : undefined;
 
-  if (apiKey && apiKey === config.gatewayApiKey) {
-    logger.info("[Auth] Request authenticated via Gateway API Key", { path: urlPath });
-    req.context.authenticated = true;
-    req.context.apiKeyId = "primary-key";
-    req.context.userId = "service-account";
-    req.context.roles = ["admin", "operator"];
-    return true;
+  if (apiKey) {
+    if (apiKey === config.gatewayApiKey) {
+      logger.info("[Auth] Request authenticated via Gateway API Key", { path: urlPath });
+      req.context.authenticated = true;
+      req.context.apiKeyId = "primary-key";
+      req.context.userId = "service-account";
+      req.context.roles = ["admin", "operator"];
+      return true;
+    }
+
+    if (apiKey.startsWith("dlk_")) {
+      try {
+        const validated = await m2mValidator.validateKey(apiKey);
+        if (validated.valid) {
+          logger.info("[Auth] Request authenticated via DevLab Portal M2M Key", {
+            name: validated.name,
+            appId: validated.appId,
+          });
+          req.context.authenticated = true;
+          req.context.apiKeyId = validated.keyId || "m2m-key";
+          req.context.userId = validated.name || "service-account";
+          req.context.roles = (validated.scopes as string[]) || ["operator"];
+          return true;
+        }
+      } catch (err) {
+        logger.warn("[Auth] M2M API Key validation failed", { error: String(err) });
+      }
+    }
   }
 
   // 3. Check for Bearer session token using declared auth header name

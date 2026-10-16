@@ -42,6 +42,16 @@ export async function authenticateLogin(req: LoginRequest): Promise<AuthResponse
     });
 
     if (dbUser) {
+      // If user is an SSO shadow user with no local password, direct them to DevLab Portal SSO
+      if (!dbUser.passwordHash) {
+        logger.warn("[AuthLogin] User account is managed via DevLab Portal SSO", {
+          email: req.email,
+        });
+        throw new Error(
+          "This account is managed via DevLab Single Sign-On. Please sign in via DevLab Portal.",
+        );
+      }
+
       const isValid = verifyPassword(req.password, dbUser.passwordHash);
       if (!isValid) {
         logger.warn("[AuthLogin] Login failed: Incorrect password", { email: req.email });
