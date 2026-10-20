@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@yuva-devlab/ui";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@orchestrai/ui";
+import { StatusBadge } from "@orchestrai/ui/components/status-badge";
 import { ALPHANUMERIC_START_REGEX } from "@orchestrai/regex";
 import type { AgentDefinition } from "../types";
 

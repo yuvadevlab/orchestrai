@@ -8,7 +8,7 @@ import {
   Input,
   Label,
   Switch,
-} from "@yuva-devlab/ui";
+} from "@orchestrai/ui";
 import { Database } from "lucide-react";
 import { UI_COPY } from "@/lib/ui-copy";
 

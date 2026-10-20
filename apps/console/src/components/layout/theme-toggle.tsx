@@ -3,7 +3,7 @@
 /**
  * @file theme-toggle.tsx
  * @description Theme mode switcher button with smooth icon transition.
- * Uses the shared useTheme from @yuva-devlab/ui so theme state is managed
+ * Uses the shared useTheme from @orchestrai/ui so theme state is managed
  * by ConfigProvider (sets data-brand/data-theme on html) — not the local
  * ThemeProvider which writes class="dark/light" and conflicts with the CSS.
  * @module apps/console/components/layout
@@ -11,7 +11,7 @@
 
 import React from "react";
 import { Moon, Sun } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger, useTheme } from "@yuva-devlab/ui";
+import { Tooltip, TooltipContent, TooltipTrigger, useTheme } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 
 /**

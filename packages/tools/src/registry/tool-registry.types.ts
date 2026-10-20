@@ -63,5 +63,5 @@ export interface IToolRegistry {
    * @param name - The tool's unique name.
    * @returns The ITool instance, or undefined if not registered.
    */
-  get(name: string): import("../interfaces/index.js").ITool | undefined;
+  get(name: string): import("../interfaces").ITool | undefined;
 }

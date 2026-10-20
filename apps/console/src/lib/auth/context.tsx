@@ -16,7 +16,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "@yuva-devlab/ui";
+import { toast } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import {
   getStoredSession,

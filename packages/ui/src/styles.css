@@ -1,0 +1,138 @@
+@import "tailwindcss";
+@import "@yuva-devlab/tokens/preset.css";
+@import "@yuva-devlab/tokens/themes/orchestrai.css";
+@import "@yuva-devlab/ui/styles.css";
+@import "tw-animate-css";
+@source "../node_modules/@yuva-devlab/ui";
+
+@custom-variant dark (&:is(.dark *));
+
+/**
+ * App-level font tokens — consumed by the orchestrai theme and Tailwind utilities.
+ * Manrope (body) + Sora (display headings) + JetBrains Mono (code/terminal).
+ * These are loaded via next/font in layout.tsx and injected as CSS variables.
+ *
+ * WHY here and not in the shared theme:
+ *   Font choices are app-specific. The shared UI package intentionally ships no
+ *   @font-face or font-family declarations so apps can own their own typeface.
+ */
+@theme inline {
+  --font-sans: var(--font-sans), "Manrope", sans-serif;
+  --font-display: var(--font-display), "Sora", sans-serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
+}
+
+/**
+ * @layer base — App-level resets only.
+ * Only contains rules specific to OrchestrAI's root layout.
+ * Universal interactive element normalizations and scrollbars are provided by @yuva-devlab/tokens.
+ */
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ── OrchestrAI-specific background patterns ────────────────────────────── */
+
+/**
+ * AI World Matrix — hero section immersive grid background.
+ * Uses a radial glow + CSS grid lines + radial vignette mask.
+ * Not in preset.css because it's specific to this product's hero designs.
+ */
+.ai-world-matrix {
+  background-image:
+    radial-gradient(
+      ellipse 60% 50% at 50% -20%,
+      color-mix(in oklab, var(--primary) 22%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--border) 40%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--border) 40%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    100% 100%,
+    48px 48px,
+    48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 95%);
+}
+
+/* ── OrchestrAI-specific animation utilities ─────────────────────────────── */
+
+/**
+ * Ambient AI drift — slow floating motion for decorative background blobs.
+ * Used on landing/hero sections only, so kept app-local.
+ */
+.animate-ai-drift {
+  animation: ai-drift 12s ease-in-out infinite alternate;
+}
+
+.animate-ai-drift-slow {
+  animation: ai-drift 18s ease-in-out infinite alternate-reverse;
+}
+
+.animate-ai-pulse-glow {
+  animation: ai-pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes ai-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(25px, -30px, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-20px, 20px, 0) scale(0.95);
+  }
+}
+
+@keyframes ai-pulse-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.05);
+  }
+}
+
+/**
+ * Constrained modal window — clamps maximum height to 85vh and enforces internal scrolling.
+ */
+.modal-window-85vh {
+  max-height: 85vh;
+  height: 85vh;
+}
+
+/**
+ * Scrollable modal body container in flex-column layouts.
+ */
+.modal-scrollable-body {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

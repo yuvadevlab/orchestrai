@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import React from "react";
 import { JetBrains_Mono, Manrope, Sora } from "next/font/google";
-import { ConfigProvider, Toaster } from "@yuva-devlab/ui";
+import { ConfigProvider, Toaster } from "@orchestrai/ui";
 import { AppQueryProvider } from "@/lib/providers";
 import { AuthProvider } from "@/lib/auth";
 import "./globals.css";
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
  * Root Layout for OrchestrAI Console application.
  *
  * WHY ConfigProvider only (no local ThemeProvider):
- *   ConfigProvider from @yuva-devlab/ui sets data-brand="orchestrai" AND
+ *   ConfigProvider from @orchestrai/ui sets data-brand="orchestrai" AND
  *   data-theme="orchestrai-dark/light" on <html>. Our theme CSS (orchestrai.css)
  *   scopes tokens to those exact selectors. A second ThemeProvider that also
  *   writes class="dark/light" conflicts and causes light mode to appear broken.

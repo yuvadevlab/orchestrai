@@ -9,12 +9,12 @@
 import React, { useState } from "react";
 import { ExecutionTable } from "./execution-table";
 import { ExecutionDebugDialog } from "./execution-debug-dialog";
-import { Button, Input } from "@yuva-devlab/ui";
+import { Button, Input } from "@orchestrai/ui";
 import { Search, RotateCcw, Play } from "lucide-react";
 import { useExecutions } from "../api";
 import { ExecutionStatus, type ExecutionRun } from "../types";
-import { EmptyState } from "@/components/ui/empty-state";
-import { TableSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@orchestrai/ui/components/empty-state";
+import { TableSkeleton } from "@orchestrai/ui/components/skeleton";
 import { PageShell } from "@/components/layout/page-shell";
 import { UI_COPY } from "@/lib/ui-copy";
 

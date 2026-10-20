@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { Activity, X } from "lucide-react";
-import { Button } from "@yuva-devlab/ui";
+import { Button } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { StudioEvent } from "../types";
 

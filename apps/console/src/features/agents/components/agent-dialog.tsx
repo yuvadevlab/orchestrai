@@ -7,9 +7,9 @@
  */
 
 import React from "react";
-import { toast } from "@yuva-devlab/ui";
+import { toast } from "@orchestrai/ui";
 import { formatApiError } from "@/lib/error-utils";
-import { FormDialog } from "@/components/ui";
+import { FormDialog } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import { buildAgentFields } from "./agent-form-fields";
 import { useCreateAgentMutation } from "../api";

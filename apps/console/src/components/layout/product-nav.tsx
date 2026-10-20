@@ -10,7 +10,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@yuva-devlab/ui";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@orchestrai/ui";
 import { cn, getInitials } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { useNavItems } from "@/lib/hooks";

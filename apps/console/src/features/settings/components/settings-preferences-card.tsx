@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
-} from "@yuva-devlab/ui";
+} from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { AgentDefinition } from "@/features/agents/types";
 

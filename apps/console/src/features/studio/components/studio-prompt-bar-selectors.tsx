@@ -8,7 +8,7 @@
 
 import React from "react";
 import { Bot, Cpu, Sparkles } from "lucide-react";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@yuva-devlab/ui";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { SpecialistPersona } from "../types";
 import type { LlmModelRecord, PlatformModeRecord } from "@orchestrai/shared-types";

@@ -13,8 +13,8 @@ import { AuthService } from "@/modules/auth";
 const logger = loggerWithConfig(new Logger("AuthMiddleware"));
 
 const m2mValidator = new M2mApiKeyValidator({
-  portalUrl: process.env.DEVLAB_PORTAL_URL || "http://localhost:3015",
-  requiredAppId: "orchestrai",
+  portalUrl:
+    process.env.DEVLAB_PORTAL_URL || process.env.DEVLAB_PORTAL_API_URL || "http://localhost:3015",
 });
 
 /** Whitelisted public endpoints bypassing mandatory API key / token authentication */
@@ -67,6 +67,33 @@ export async function authenticateRequest(
       try {
         const validated = await m2mValidator.validateKey(apiKey);
         if (validated.valid) {
+          const scopes = (validated.scopes as string[]) || [];
+          const hasAccess =
+            validated.appId === "orchestrai" ||
+            scopes.includes("*") ||
+            scopes.includes("orchestrai") ||
+            scopes.includes("orchestrai:*") ||
+            validated.appId === "incidentai";
+
+          if (!hasAccess) {
+            logger.warn("[Auth] M2M API Key rejected: insufficient scope for orchestrai", {
+              appId: validated.appId,
+              scopes,
+            });
+            res.statusCode = 403;
+            res.setHeader("Content-Type", "application/json");
+            res.end(
+              JSON.stringify({
+                error: {
+                  code: "FORBIDDEN",
+                  message: `API key from app '${validated.appId}' does not have permission to access OrchestrAI`,
+                  requestId: req.context?.requestId,
+                },
+              }),
+            );
+            return false;
+          }
+
           logger.info("[Auth] Request authenticated via DevLab Portal M2M Key", {
             name: validated.name,
             appId: validated.appId,
@@ -74,7 +101,7 @@ export async function authenticateRequest(
           req.context.authenticated = true;
           req.context.apiKeyId = validated.keyId || "m2m-key";
           req.context.userId = validated.name || "service-account";
-          req.context.roles = (validated.scopes as string[]) || ["operator"];
+          req.context.roles = scopes.length > 0 ? scopes : ["operator"];
           return true;
         }
       } catch (err) {

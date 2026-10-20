@@ -9,7 +9,7 @@
 import React from "react";
 import { BarChart2 } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
-import { EmptyState, DetailPageSkeleton } from "@/components/ui";
+import { EmptyState, DetailPageSkeleton } from "@orchestrai/ui";
 import { useEvaluationDatasets } from "../api";
 import { EvaluationsRunnerCard } from "./evaluations-runner-card";
 import { EvaluationsDatasetsList } from "./evaluations-datasets-list";

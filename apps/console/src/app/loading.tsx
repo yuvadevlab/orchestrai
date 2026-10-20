@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { LoadingState } from "@/components/ui/loading-state";
+import { LoadingState } from "@orchestrai/ui/components/loading-state";
 import { UI_COPY } from "@/lib/ui-copy";
 
 /**
