@@ -10,16 +10,16 @@
 /**
  * App-level font tokens — consumed by the orchestrai theme and Tailwind utilities.
  * Manrope (body) + Sora (display headings) + JetBrains Mono (code/terminal).
- * These are loaded via next/font in layout.tsx and injected as CSS variables.
+ * These are bundled from local Fontsource stylesheets imported by the console app.
  *
  * WHY here and not in the shared theme:
  *   Font choices are app-specific. The shared UI package intentionally ships no
  *   @font-face or font-family declarations so apps can own their own typeface.
  */
 @theme inline {
-  --font-sans: var(--font-sans), "Manrope", sans-serif;
-  --font-display: var(--font-display), "Sora", sans-serif;
-  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
+  --font-sans: "Manrope Variable", sans-serif;
+  --font-display: "Sora Variable", sans-serif;
+  --font-mono: "JetBrains Mono Variable", monospace;
 }
 
 /**
