@@ -38,9 +38,9 @@ export type OrchestratorConfig = z.infer<typeof OrchestratorConfigSchema>;
  */
 export function loadOrchestratorConfig(): OrchestratorConfig {
   return OrchestratorConfigSchema.parse({
-    grpcPort: process.env.ORCHESTRATOR_GRPC_PORT || process.env.GRPC_PORT,
-    httpPort: process.env.ORCHESTRATOR_HTTP_PORT || process.env.HTTP_PORT,
-    host: process.env.ORCHESTRATOR_HOST || process.env.HOST,
+    grpcPort: process.env.ORCHESTRATOR_GRPC_PORT,
+    httpPort: process.env.ORCHESTRATOR_HTTP_PORT,
+    host: process.env.ORCHESTRATOR_HOST,
     nodeEnv: process.env.NODE_ENV,
     redisUrl: process.env.REDIS_URL,
     databaseUrl: process.env.DATABASE_URL,

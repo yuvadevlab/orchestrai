@@ -27,7 +27,9 @@ class CrawlerSettings(BaseSettings):
         default=25, description="Maximum total pages per crawl request"
     )
     gateway_url: str = Field(
-        default_factory=lambda: os.getenv("GATEWAY_URL", "http://localhost:3000"),
+        default_factory=lambda: os.getenv(
+            "ORCHESTRAI_GATEWAY_URL", "http://localhost:4001"
+        ),
         description="Upstream OrchestrAI Gateway URL for RAG ingestion",
     )
     rag_ingest_path: str = Field(

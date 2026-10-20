@@ -72,8 +72,7 @@ export class GrpcExecutionService implements IGrpcExecutionService {
     const resolvedModelName =
       (modelCfg.modelName as string) ||
       (modelCfg.model as string) ||
-      process.env.DEFAULT_MODEL_NAME ||
-      process.env.OLLAMA_DEFAULT_MODEL;
+      process.env.DEFAULT_MODEL_NAME;
 
     // Guard against missing model configuration: require DB or env definition
     if (!resolvedModelName) {

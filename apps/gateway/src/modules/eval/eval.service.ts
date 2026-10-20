@@ -69,7 +69,7 @@ export class EvalService {
       BUILTIN_BENCHMARK_DATASETS.find((d) => d.name === datasetName) ??
       BUILTIN_BENCHMARK_DATASETS[0]!;
 
-    const host = process.env.OLLAMA_HOST || "http://localhost:11434";
+    const host = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
     const selectedModel =
       modelName ||
       process.env.DEFAULT_MODEL_NAME ||

@@ -19,7 +19,7 @@ class IntelligenceSettings(BaseSettings):
     host: str = Field(default="0.0.0.0", description="Server bind host")
     port: int = Field(default=8082, description="Server listen HTTP port")
     ollama_host: str = Field(
-        default_factory=lambda: os.getenv("OLLAMA_HOST", "http://localhost:11434"),
+        default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
         description="Ollama daemon HTTP URL",
     )
     default_model_name: str = Field(
@@ -35,7 +35,9 @@ class IntelligenceSettings(BaseSettings):
         description="Context utilization fraction at which to trigger compaction",
     )
     gateway_url: str = Field(
-        default_factory=lambda: os.getenv("GATEWAY_URL", "http://localhost:3000"),
+        default_factory=lambda: os.getenv(
+            "ORCHESTRAI_GATEWAY_URL", "http://localhost:4001"
+        ),
         description="Upstream OrchestrAI gateway HTTP URL",
     )
 

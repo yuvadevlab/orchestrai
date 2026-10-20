@@ -19,7 +19,7 @@ export function loadGatewayConfig(): GatewayConfig {
 
   const port = process.env.GATEWAY_PORT || 4001;
   const host = process.env.GATEWAY_HOST || "0.0.0.0";
-  const cors = process.env.CORS_ALLOWED_ORIGINS || process.env.CORS_ORIGIN || "*";
+  const cors = process.env.CORS_ALLOWED_ORIGINS || "*";
 
   return GatewayConfigSchema.parse({
     port,
@@ -48,7 +48,7 @@ export function loadGatewayConfig(): GatewayConfig {
     rateLimitMaxRequests: process.env.RATE_LIMIT_MAX_REQUESTS,
     shutdownTimeoutMs: process.env.SHUTDOWN_TIMEOUT_MS,
     defaultModelProvider: process.env.DEFAULT_MODEL_PROVIDER || "ollama",
-    defaultModelName: process.env.DEFAULT_MODEL_NAME || process.env.OLLAMA_DEFAULT_MODEL || "",
+    defaultModelName: process.env.DEFAULT_MODEL_NAME || "",
     defaultAgentTemperature: process.env.DEFAULT_AGENT_TEMPERATURE,
     defaultMaxSteps: process.env.DEFAULT_MAX_AGENT_STEPS,
   });
