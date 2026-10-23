@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "node --env-file-if-exists=.env.local --env-file-if-exists=.env node_modules/next/dist/bin/next dev",
     "build": "next build",
-    "start": "next start -p 3001",
+    "start": "node --env-file-if-exists=.env.local --env-file-if-exists=.env node_modules/next/dist/bin/next start",
+    "storybook": "storybook dev -p 6002",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit"
   },
