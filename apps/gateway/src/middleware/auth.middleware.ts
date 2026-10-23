@@ -13,7 +13,7 @@ import { AuthService } from "@/modules/auth";
 const logger = loggerWithConfig(new Logger("AuthMiddleware"));
 
 const m2mValidator = new M2mApiKeyValidator({
-  portalUrl: process.env.DEVLAB_PORTAL_API_URL || "http://localhost:3015",
+  portalUrl: process.env.DEVLAB_PORTAL_API_URL || "http://localhost:4000",
 });
 
 /** Whitelisted public endpoints bypassing mandatory API key / token authentication */
