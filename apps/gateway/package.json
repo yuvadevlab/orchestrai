@@ -31,7 +31,7 @@
     "@orchestrai/runtime": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
     "@orchestrai/tools": "workspace:*",
-    "@yuva-devlab/auth-server": "^0.3.0",
+    "@yuva-devlab/auth-server": "^1.0.0",
     "@yuva-devlab/billing": "^0.2.0",
     "@yuva-devlab/logger": "^1.2.0",
     "@yuva-devlab/resilience": "^0.2.0",
