@@ -9,7 +9,7 @@ allowBuilds:
   prisma: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
-  - "@yuva-devlab/auth-client@0.3.0 || 1.0.0"
+  - "@yuva-devlab/auth-client@0.3.0 || 1.0.0 || 1.0.1"
   - "@yuva-devlab/auth-server@0.3.0 || 1.0.0"
   - "@yuva-devlab/sdk@0.2.1 || 0.2.2"
   - "@turbo/darwin-64@2.11.1"

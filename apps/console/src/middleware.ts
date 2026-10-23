@@ -17,7 +17,31 @@ const AUTH_ROUTES = new Set(["/login", "/signup", "/forgot-password"]);
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
   const cookieName = process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME || "orch_token";
-  const tokenCookie = request.cookies.get(cookieName);
+
+  // 0. Intercept incoming token query param from DevLab Portal SSO
+  const tokenParam =
+    request.nextUrl.searchParams.get("token") || request.nextUrl.searchParams.get("access_token");
+
+  if (tokenParam) {
+    const cleanUrl = new URL(request.url);
+    cleanUrl.searchParams.delete("token");
+    cleanUrl.searchParams.delete("access_token");
+
+    const response = NextResponse.redirect(cleanUrl);
+    response.cookies.set(cookieName, tokenParam, {
+      path: "/",
+      maxAge: 604800,
+      sameSite: "lax",
+    });
+    response.cookies.set("devlab_access_token", tokenParam, {
+      path: "/",
+      maxAge: 604800,
+      sameSite: "lax",
+    });
+    return response;
+  }
+
+  const tokenCookie = request.cookies.get(cookieName) || request.cookies.get("devlab_access_token");
   const isAuthenticated = Boolean(tokenCookie?.value && tokenCookie.value.trim().length > 0);
 
   // Check if current requested route is an authentication route (login, signup, forgot-password)

@@ -17,6 +17,7 @@ import React, {
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@orchestrai/ui";
+import { DevLabAuthProvider } from "@yuva-devlab/auth-client";
 import { UI_COPY } from "@/lib/ui-copy";
 import {
   getStoredSession,
@@ -156,7 +157,15 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
     [session, isLoading],
   );
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return (
+    <DevLabAuthProvider
+      appId="orchestrai"
+      gatewayUrl={process.env.NEXT_PUBLIC_DEVLAB_PORTAL_API_URL}
+      portalUrl={process.env.NEXT_PUBLIC_DEVLAB_PORTAL_WEB_URL}
+    >
+      <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    </DevLabAuthProvider>
+  );
 }
 
 /**
