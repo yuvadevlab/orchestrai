@@ -22,7 +22,7 @@
     "@orchestrai/ui": "workspace:*",
     "@tanstack/react-query": "^5.67.2",
     "@tanstack/react-virtual": "^3.13.2",
-    "@yuva-devlab/auth-client": "^1.0.1",
+    "@yuva-devlab/auth-client": "^1.1.0",
     "@yuva-devlab/logger": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
