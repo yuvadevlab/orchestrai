@@ -8,18 +8,18 @@
 
 ```text
                ┌────────────────────────────────────────────────────────┐
-               │        Operator Studio / Console (Next.js - Port 3001) │
+               │        Operator Studio / Console (Next.js - Port 3002) │
                └───────────────────────────┬────────────────────────────┘
                                            │ HTTP / SSE / WS
                                            ▼
                ┌────────────────────────────────────────────────────────┐
-               │                   API Gateway (Port 4001)              │
+               │                   API Gateway (Port 4002)              │
                │        (Auth, Rate Limiting, Semantic Cache, Router)   │
                └───────────┬───────────────────┬────────────────┬───────┘
                            │                   │                │
             gRPC / HTTP    ▼                   ▼                ▼
 ┌───────────────────────────────┐  ┌────────────────┐  ┌────────────────┐
-│  Python Intelligence (8082)   │  │ Realtime (4002)│  │  Worker (4003) │
+│  Python Intelligence (8082)   │  │ Realtime (4022)│  │  Worker (4023) │
 │  (LangGraph + Conv RAG)       │  │ (SSE / WS Rail)│  │ (BullMQ Queue) │
 └──────────────┬────────────────┘  └───────┬────────┘  └───────┬────────┘
                │                           │                   │

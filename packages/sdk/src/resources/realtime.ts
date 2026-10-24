@@ -22,7 +22,7 @@ export class RealtimeResource extends ResourceBase {
 
   constructor(http: HttpClient, options: OrchestrAIClientOptions = {}) {
     super(http, options);
-    this.realtimeUrl = options.realtimeUrl || options.baseUrl || "http://localhost:4002";
+    this.realtimeUrl = options.realtimeUrl || options.baseUrl || "http://localhost:4022";
   }
 
   /**

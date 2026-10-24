@@ -13,8 +13,8 @@ import { AGENT_EXECUTION_DEFAULTS } from "@orchestrai/core";
  */
 export const GatewayConfigSchema = z.object({
   /** HTTP server port */
-  port: z.coerce.number().int().positive().default(4001),
-  gatewayPort: z.coerce.number().int().positive().default(4001),
+  port: z.coerce.number().int().positive().default(4002),
+  gatewayPort: z.coerce.number().int().positive().default(4002),
   /** HTTP listening interface host */
   host: z.string().default("0.0.0.0"),
   gatewayHost: z.string().default("0.0.0.0"),

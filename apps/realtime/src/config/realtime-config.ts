@@ -10,7 +10,7 @@ import { z } from "zod";
  */
 export const RealtimeConfigSchema = z.object({
   /** Port on which the HTTP, SSE, and WebSocket server listens (default: 4002) */
-  port: z.coerce.number().int().positive().default(4002),
+  port: z.coerce.number().int().positive().default(4022),
   /** Network interface to bind (default: 0.0.0.0) */
   host: z.string().default("0.0.0.0"),
   /** Execution environment mode */
@@ -21,7 +21,7 @@ export const RealtimeConfigSchema = z.object({
   corsOrigins: z
     .union([z.string(), z.array(z.string())])
     .transform((val) => (typeof val === "string" ? val.split(",").map((s) => s.trim()) : val))
-    .default(["http://localhost:3001", "http://localhost:3000"]),
+    .default(["http://localhost:3002", "http://localhost:3000"]),
   /** Secret key used to verify client JWT authentication tokens (must be provided via env) */
   jwtSecret: z.string().min(1, "JWT_SECRET environment variable is required"),
   /** Interval in milliseconds for WebSocket dead-connection heartbeat ping frames */
@@ -52,11 +52,11 @@ export function loadRealtimeConfig(
   env: Record<string, string | undefined> = process.env,
 ): RealtimeConfig {
   return RealtimeConfigSchema.parse({
-    port: env.PORT ?? env.REALTIME_PORT ?? 4002,
+    port: env.PORT ?? env.REALTIME_PORT ?? 4022,
     host: env.HOST ?? "0.0.0.0",
     nodeEnv: env.NODE_ENV ?? "development",
     redisUrl: env.REDIS_URL ?? "redis://localhost:6379",
-    corsOrigins: env.CORS_ORIGINS ?? "http://localhost:3001,http://localhost:3000",
+    corsOrigins: env.CORS_ORIGINS ?? "http://localhost:3002,http://localhost:3000",
     jwtSecret: env.JWT_SECRET || "dev-jwt-secret-orchestrai-realtime",
     heartbeatIntervalMs: env.HEARTBEAT_INTERVAL_MS ?? 30_000,
     clientTimeoutMs: env.CLIENT_TIMEOUT_MS ?? 60_000,
