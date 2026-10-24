@@ -19,7 +19,7 @@ import {
   Button,
 } from "@yuva-devlab/ui";
 import { Loader2 } from "lucide-react";
-import { UI_COPY } from "@/lib/ui-copy";
+import { COMMON_COPY } from "../copy/common";
 import { FormDialogField, type FormFieldConfig } from "./form-dialog-field";
 
 export type { FormFieldConfig };
@@ -48,7 +48,7 @@ export function FormDialog({
   title,
   description,
   fields,
-  submitText = "Save",
+  submitText = COMMON_COPY.ACTIONS.DEFAULT_SUBMIT,
   maxWidth = "xl",
   columns = 2,
   onClose,
@@ -83,7 +83,7 @@ export function FormDialog({
     // Validate required fields
     fields.forEach((f) => {
       if (f.required && !formData[f.name]?.trim()) {
-        errors[f.name] = `${f.label} is required.`;
+        errors[f.name] = COMMON_COPY.FORM.REQUIRED_MESSAGE(f.label);
       }
     });
 
@@ -141,7 +141,7 @@ export function FormDialog({
               onClick={onClose}
               className="h-8 cursor-pointer text-xs"
             >
-              {UI_COPY.COMMON.ACTIONS.CANCEL}
+              {COMMON_COPY.ACTIONS.CANCEL}
             </Button>
             <Button
               type="submit"
@@ -153,7 +153,7 @@ export function FormDialog({
               {isSubmitting ? (
                 <>
                   <Loader2 className="size-3.5 animate-spin" />
-                  <span>{UI_COPY.COMMON.ACTIONS.SAVING}</span>
+                  <span>{COMMON_COPY.ACTIONS.SAVING}</span>
                 </>
               ) : (
                 <span>{submitText}</span>

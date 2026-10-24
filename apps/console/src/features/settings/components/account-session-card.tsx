@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { Panel, Button, Badge } from "@yuva-devlab/ui";
+import { Panel, Button, Badge } from "@orchestrai/ui";
 import { LogOut, Copy, Check } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { getInitials } from "@/lib/utils";

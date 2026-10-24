@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { ShieldAlert, Terminal, Clock, ShieldCheck, CheckCheck, X, Loader2 } from "lucide-react";
-import { Button, Badge } from "@yuva-devlab/ui";
+import { Button, Badge } from "@orchestrai/ui";
 import { PermissionScope, ApprovalRiskLevel } from "@orchestrai/shared-types";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { StudioApprovalRequest } from "../types";

@@ -9,11 +9,11 @@
 import React, { useState } from "react";
 import { AgentCard } from "./agent-card";
 import { AgentDialog } from "./agent-dialog";
-import { Input, Button } from "@yuva-devlab/ui";
+import { Input, Button } from "@orchestrai/ui";
 import { Plus, Search, Bot } from "lucide-react";
 import { useAgents } from "../api";
 import { AgentStatus } from "../types";
-import { EmptyState, CardGridSkeleton } from "@/components/ui";
+import { EmptyState, CardGridSkeleton } from "@orchestrai/ui";
 import { PageShell } from "@/components/layout/page-shell";
 import { UI_COPY } from "@/lib/ui-copy";
 

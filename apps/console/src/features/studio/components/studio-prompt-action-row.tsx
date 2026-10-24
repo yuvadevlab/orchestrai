@@ -8,7 +8,7 @@
 
 import React from "react";
 import { ArrowUp, Square } from "lucide-react";
-import { Button } from "@yuva-devlab/ui";
+import { Button } from "@orchestrai/ui";
 import type { SpecialistPersona } from "../types";
 import type { LlmModelRecord, PlatformModeRecord } from "@orchestrai/shared-types";
 import { StudioFileAttachment, type AttachedFile } from "./studio-file-attachment";

@@ -16,7 +16,7 @@ import {
   SelectContent,
   SelectItem,
   toast,
-} from "@yuva-devlab/ui";
+} from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useRunBenchmark } from "../api";
 import { EvaluationsResultsDisplay } from "./evaluations-results-display";

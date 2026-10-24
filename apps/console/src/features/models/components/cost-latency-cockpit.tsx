@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { Gauge, Zap, DollarSign, ShieldAlert, Cpu } from "lucide-react";
-import { Button } from "@yuva-devlab/ui";
+import { Button } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 
 interface ProviderTelemetry {

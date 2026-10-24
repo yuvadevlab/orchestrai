@@ -6,7 +6,7 @@
  * @module apps/console/features/agents/components
  */
 
-import type { FormFieldSpec } from "@/components/ui/action-dialog";
+import type { FormFieldSpec } from "@orchestrai/ui/components/action-dialog";
 import type { LlmModelRecord, PlatformModeRecord } from "@orchestrai/shared-types";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { AgentRoleRecord } from "../api/use-agent-roles";

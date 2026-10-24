@@ -17,10 +17,10 @@ import {
   TableCell,
   Button,
   Badge,
-} from "@yuva-devlab/ui";
+} from "@orchestrai/ui";
 import { ExternalLink, Copy, Check, Bug } from "lucide-react";
 import type { ExecutionRun } from "../types";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusBadge } from "@orchestrai/ui/components/status-badge";
 import { UI_COPY } from "@/lib/ui-copy";
 
 export interface ExecutionTableProps {
@@ -60,12 +60,24 @@ export function ExecutionTable({
       <Table>
         <TableHeader className="bg-muted/40">
           <TableRow>
-            <TableHead className="text-xs font-semibold">Execution & Time</TableHead>
-            <TableHead className="text-xs font-semibold">Task Objective</TableHead>
-            <TableHead className="text-xs font-semibold">Specialist & Engine</TableHead>
-            <TableHead className="text-xs font-semibold">Status & Steps</TableHead>
-            <TableHead className="text-xs font-semibold">Duration & Usage</TableHead>
-            <TableHead className="text-right text-xs font-semibold">Forensic Actions</TableHead>
+            <TableHead className="text-xs font-semibold">
+              {UI_COPY.EXECUTIONS.TABLE.EXECUTION_TIME}
+            </TableHead>
+            <TableHead className="text-xs font-semibold">
+              {UI_COPY.EXECUTIONS.TABLE.TASK_OBJECTIVE}
+            </TableHead>
+            <TableHead className="text-xs font-semibold">
+              {UI_COPY.EXECUTIONS.TABLE.SPECIALIST_ENGINE}
+            </TableHead>
+            <TableHead className="text-xs font-semibold">
+              {UI_COPY.EXECUTIONS.TABLE.STATUS_STEPS}
+            </TableHead>
+            <TableHead className="text-xs font-semibold">
+              {UI_COPY.EXECUTIONS.TABLE.DURATION_USAGE}
+            </TableHead>
+            <TableHead className="text-right text-xs font-semibold">
+              {UI_COPY.EXECUTIONS.TABLE.FORENSIC_ACTIONS}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

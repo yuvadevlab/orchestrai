@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { Button, useTheme, toast } from "@yuva-devlab/ui";
+import { Button, useTheme, toast } from "@orchestrai/ui";
 import { PageShell } from "@/components/layout/page-shell";
 import { useAuth } from "@/lib/auth";
 import { useAgents } from "@/features/agents/api";

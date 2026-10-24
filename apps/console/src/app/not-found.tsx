@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { NotFoundState } from "@/components/ui/not-found-state";
+import { NotFoundState } from "@orchestrai/ui/components/not-found-state";
 
 /**
  * Root 404 Page Component.

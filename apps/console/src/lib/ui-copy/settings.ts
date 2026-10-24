@@ -53,6 +53,12 @@ export const SETTINGS_COPY = {
     OUTBOX_DESC: "Automatically flush unpublished outbox records",
     OUTBOX_A11Y: "Toggle transactional outbox poller",
   },
+  SECURITY: {
+    TITLE: "Security Boundaries & Limits",
+    DESCRIPTION: "Execution timeouts, rate limits, and approval workflows.",
+    MAX_TIMEOUT: "Max Execution Timeout (seconds)",
+    MAX_RETRY_LIMIT: "Max Retry Exhaustion Limit",
+  },
   TOAST: {
     SAVING: "Saving workspace preferences...",
     SAVED: "Settings saved successfully",

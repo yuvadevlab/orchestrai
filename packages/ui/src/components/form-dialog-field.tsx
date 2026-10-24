@@ -18,7 +18,7 @@ import {
   SelectValue,
   Textarea,
 } from "@yuva-devlab/ui";
-import { UI_COPY } from "@/lib/ui-copy";
+import { COMMON_COPY } from "../copy/common";
 
 /** Option specification for select fields. */
 export interface FormFieldOption {
@@ -68,7 +68,7 @@ export function FormDialogField({
       <Label htmlFor={name} className="text-foreground block text-xs font-semibold tracking-wide">
         {label}{" "}
         {required ? (
-          <span className="text-destructive">{UI_COPY.COMMON.FORM.REQUIRED_MARKER}</span>
+          <span className="text-destructive">{COMMON_COPY.FORM.REQUIRED_MARKER}</span>
         ) : null}
       </Label>
 
@@ -85,7 +85,7 @@ export function FormDialogField({
         <Select value={selectedValue} onValueChange={(val): void => onChange(name, val)}>
           <SelectTrigger className="bg-background/70 border-border/80 h-9 w-full min-w-0 text-xs">
             <SelectValue
-              placeholder={placeholder || UI_COPY.COMMON.ACTIONS.SELECT_OPTION}
+              placeholder={placeholder || COMMON_COPY.ACTIONS.SELECT_OPTION}
               className="truncate"
             />
           </SelectTrigger>
@@ -129,15 +129,15 @@ export function FormDialogField({
                   }`}
                 >
                   {isSelected
-                    ? UI_COPY.COMMON.FORM.PREFIX_SELECTED
-                    : UI_COPY.COMMON.FORM.PREFIX_UNSELECTED}
+                    ? COMMON_COPY.FORM.PREFIX_SELECTED
+                    : COMMON_COPY.FORM.PREFIX_UNSELECTED}
                   {opt.label}
                 </button>
               );
             })
           ) : (
             <span className="text-muted-foreground text-xs italic">
-              {UI_COPY.COMMON.FORM.NO_OPTIONS}
+              {COMMON_COPY.FORM.NO_OPTIONS}
             </span>
           )}
         </div>

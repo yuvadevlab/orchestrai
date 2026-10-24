@@ -283,7 +283,7 @@ pnpm typecheck
 | `CRAWLER_URL`            | String | `http://localhost:8083`  |   Yes    | Headless Chromium web extraction engine endpoint.                                          |
 | `ADMIN_URL`              | String | `http://localhost:4005`  |   Yes    | Fastify internal admin control plane endpoint.                                             |
 | `ORCHESTRATOR_GRPC_URL`  | String |    `localhost:50051`     |   Yes    | gRPC binary DAG orchestrator endpoint.                                                     |
-| `DEVLAB_PORTAL_URL`      | String | `http://localhost:3015`  |   Yes    | DevLab Portal API URL for key validation and audit events.                                 |
+| `DEVLAB_PORTAL_API_URL`  | String | `http://localhost:3015`  |   Yes    | DevLab Portal API URL for key validation and audit events.                                 |
 | `DEVLAB_LOGS_URL`        | String | `http://localhost:3020`  |   Yes    | DevLab Logs ingestion endpoint for structured streaming.                                   |
 | `INCIDENTAI_WEBHOOK_URL` | String | `http://localhost:8085`  |    No    | IncidentAI webhook endpoint for automated crash reporting.                                 |
 

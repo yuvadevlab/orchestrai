@@ -7,9 +7,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { UI_COPY } from "@/lib/ui-copy";
+import { cn } from "../lib/utils";
+import { COMMON_COPY } from "../copy/common";
 
 export interface DynamicErrorStateProps {
   /** Error instance or payload */
@@ -34,9 +33,9 @@ export interface DynamicErrorStateProps {
 export function DynamicErrorState({
   error,
   reset,
-  title = UI_COPY.COMMON.ERROR.DEFAULT_TITLE,
-  description = UI_COPY.COMMON.ERROR.DEFAULT_DESCRIPTION,
-  boundaryName = UI_COPY.COMMON.ERROR.DEFAULT_BOUNDARY,
+  title = COMMON_COPY.ERROR.DEFAULT_TITLE,
+  description = COMMON_COPY.ERROR.DEFAULT_DESCRIPTION,
+  boundaryName = COMMON_COPY.ERROR.DEFAULT_BOUNDARY,
   onError,
   className,
 }: DynamicErrorStateProps): React.JSX.Element {
@@ -52,7 +51,7 @@ export function DynamicErrorState({
   }, [error, boundaryName, onError]);
 
   const errorMessage =
-    error instanceof Error ? error.message : String(error || UI_COPY.COMMON.ERROR.UNKNOWN_ERROR);
+    error instanceof Error ? error.message : String(error || COMMON_COPY.ERROR.UNKNOWN_ERROR);
   const errorStack = error instanceof Error ? error.stack : undefined;
 
   return (
@@ -74,22 +73,22 @@ export function DynamicErrorState({
               onClick={reset}
               className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-xs transition-colors"
             >
-              {UI_COPY.COMMON.ERROR.TRY_AGAIN}
+              {COMMON_COPY.ERROR.TRY_AGAIN}
             </button>
           )}
 
-          <Link
+          <a
             href="/"
             className="border-input bg-background text-foreground hover:bg-accent inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium shadow-xs transition-colors"
           >
-            {UI_COPY.COMMON.ERROR.GO_HOME}
-          </Link>
+            {COMMON_COPY.ERROR.GO_HOME}
+          </a>
 
           <button
             onClick={() => setShowDetails((prev) => !prev)}
             className="border-input bg-background text-muted-foreground hover:bg-accent hover:text-foreground inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium shadow-xs transition-colors"
           >
-            {showDetails ? UI_COPY.COMMON.ERROR.HIDE_DETAILS : UI_COPY.COMMON.ERROR.DETAILS}
+            {showDetails ? COMMON_COPY.ERROR.HIDE_DETAILS : COMMON_COPY.ERROR.DETAILS}
           </button>
         </div>
 

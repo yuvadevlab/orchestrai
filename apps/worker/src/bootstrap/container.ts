@@ -59,9 +59,15 @@ export async function createWorkerContainer(config: WorkerConfig): Promise<Worke
   try {
     const provider = (config.defaultModelProvider?.toLowerCase() ||
       ModelProvider.OLLAMA) as ModelProvider;
+    const apiKey =
+      provider === ModelProvider.OPENAI
+        ? process.env.OPENAI_API_KEY
+        : provider === ModelProvider.ANTHROPIC
+          ? process.env.ANTHROPIC_API_KEY
+          : undefined;
     const defaultAdapter = await createAdapter(provider, {
       host: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
-      apiKey: process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || "",
+      apiKey,
       defaultModel: config.defaultModelName,
     });
 

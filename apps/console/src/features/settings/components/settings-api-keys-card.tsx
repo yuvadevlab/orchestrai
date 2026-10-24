@@ -7,7 +7,7 @@
  */
 
 import React from "react";
-import { Input, Label } from "@yuva-devlab/ui";
+import { Input, Label } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 
 export interface SettingsApiKeysCardProps {

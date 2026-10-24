@@ -7,10 +7,10 @@
  */
 
 import React from "react";
-import { Panel } from "@yuva-devlab/ui";
+import { Panel } from "@orchestrai/ui";
 import { useExecutions } from "../api";
-import { EmptyState } from "@/components/ui/empty-state";
-import { DetailPageSkeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@orchestrai/ui/components/empty-state";
+import { DetailPageSkeleton } from "@orchestrai/ui/components/skeleton";
 import { Play } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
 import { UI_COPY } from "@/lib/ui-copy";

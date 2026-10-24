@@ -97,6 +97,12 @@ export const EXECUTIONS_COPY = {
     COPY_JSON: "Copy JSON",
   },
   TABLE: {
+    EXECUTION_TIME: "Execution & Time",
+    TASK_OBJECTIVE: "Task Objective",
+    SPECIALIST_ENGINE: "Specialist & Engine",
+    STATUS_STEPS: "Status & Steps",
+    DURATION_USAGE: "Duration & Usage",
+    FORENSIC_ACTIONS: "Forensic Actions",
     COPY_ID_TOOLTIP: "Copy full Execution ID",
     DEBUG_TOOLTIP: "Open developer debug trace",
     DEBUG_BTN: "Debug",

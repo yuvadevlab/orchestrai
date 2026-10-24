@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { Bot, Check, Copy, Sparkles } from "lucide-react";
-import { Button, Badge } from "@yuva-devlab/ui";
+import { Button, Badge } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { StudioThinkingBlock } from "./studio-thinking-block";

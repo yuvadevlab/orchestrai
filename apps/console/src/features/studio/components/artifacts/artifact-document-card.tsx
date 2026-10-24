@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { Check, ChevronDown, ChevronRight, Copy, Download, FileText } from "lucide-react";
-import { Button } from "@yuva-devlab/ui";
+import { Button } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkArtifact } from "../../types";
 

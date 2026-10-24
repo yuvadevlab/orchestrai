@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect } from "react";
 import { History, Play, Pause, SkipBack, SkipForward, RotateCw } from "lucide-react";
-import { Button, toast } from "@yuva-devlab/ui";
+import { Button, toast } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { ExecutionRun } from "../types";
 
