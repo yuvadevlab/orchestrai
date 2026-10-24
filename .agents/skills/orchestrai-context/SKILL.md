@@ -37,6 +37,6 @@ Use this skill when developing, refactoring, or planning any feature within Orch
 
 ## Monorepo Directory
 
-- **Apps (`apps/*`)**: `console` (3001), `gateway` (4001), `realtime` (4002), `worker` (4003), `admin` (4004), `orchestrator` (gRPC 50051), `intelligence` (Python LangGraph 8082), `crawler` (Python Playwright 8083).
+- **Apps (`apps/*`)**: `console` (3002), `gateway` (4002), `realtime` (4022), `worker` (4023), `admin` (4025), `orchestrator` (gRPC 50051), `intelligence` (Python LangGraph 8082), `crawler` (Python Playwright 8083).
 - **Packages (`packages/*`)**: `core`, `shared-types`, `database`, `models`, `tools`, `agent`, `runtime`, `memory`, `rag`, `semantic-cache`, `model-router`, `eval`, `prompts`, `billing`, `resilience`, `events`, `queue`, `grpc`, `observability`, `sdk`, `regex`.
 - **Quality Gates**: `pnpm typecheck` (48 targets), `pnpm lint` (ESLint + Ruff), `pnpm format:check` (Prettier + Ruff).

@@ -47,14 +47,14 @@ Unlike simplistic conversational LLM wrappers or script-based agent chains, Orch
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                   ORCHESTRAI DISTRIBUTED TOPOLOGY                                      │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-                  [Operator Studio (Next.js 15 — Port 3001)]
+                  [Operator Studio (Next.js 15 — Port 3002)]
                                      │  (HTTP / SSE / WebSocket)
                                      ▼
-                  [Fastify API Gateway (Port 4001)]
+                  [Fastify API Gateway (Port 4002)]
                                      │  (Auth, Rate Limiting, Semantic Cache, Model Router)
      ┌───────────────────────────────┼───────────────────────────────┬───────────────────────────┐
      ▼                               ▼                               ▼                           ▼
-[Realtime Rail (:4002)]     [Worker Pool (:4003)]       [Intelligence (:8082)]     [Crawler (:8083)]
+[Realtime Rail (:4022)]     [Worker Pool (:4023)]       [Intelligence (:8082)]     [Crawler (:8083)]
  • Sub-50ms Token Bus        • BullMQ Queue Engine       • LangGraph StateGraph     • Playwright Engine
  • DAG State Streaming       • Tool Execution Sandbox    • Conversational RAG       • Markdown Parsing
      │                               │                               │                           │
@@ -68,7 +68,7 @@ Unlike simplistic conversational LLM wrappers or script-based agent chains, Orch
 
 ### 2.1 Application Catalog
 
-#### 1. Operator Studio (`apps/console` — Port `3001`)
+#### 1. Operator Studio (`apps/console` — Port `3002`, Prod: `3012`)
 
 - **Technology Stack**: Next.js 15, React 19, Tailwind CSS v4, `@yuva-devlab/ui`, `@yuva-devlab/tokens`.
 - **Purpose**: The primary operational command center for human operators to inspect, monitor, steer, and debug multi-agent swarm executions in real time.
@@ -79,7 +79,7 @@ Unlike simplistic conversational LLM wrappers or script-based agent chains, Orch
   - **Multi-Tier Memory Inspector**: Enables operators to browse working scratchpad memory, retrieve historical session checkpoints, and search the vector RAG store with cosine similarity previews.
   - **Time-Travel Execution Rewind**: Allows operators to select any historical checkpoint and fork execution into a new DAG path to test alternative reasoning strategies.
 
-#### 2. Fastify API Gateway (`apps/gateway` — Port `4001`)
+#### 2. Fastify API Gateway (`apps/gateway` — Port `4002`, Prod: `4012`)
 
 - **Technology Stack**: Fastify v4, TypeScript Node ESM, `@yuva-devlab/auth-server`, `@yuva-devlab/semantic-cache`.
 - **Purpose**: High-throughput public and internal ingress handling authentication, token validation, rate limiting, semantic caching, and dynamic model routing.
@@ -90,7 +90,7 @@ Unlike simplistic conversational LLM wrappers or script-based agent chains, Orch
   - **Semantic Completion Cache**: Hashes prompt embeddings via `@yuva-devlab/semantic-cache`. If an incoming prompt matches a previously executed query with cosine similarity > 0.96, the gateway returns the cached completion instantly, bypassing LLM inference entirely.
   - **Dynamic Model Router Integration**: Evaluates task complexity, context length, and budget constraints to dispatch requests to the optimal LLM provider.
 
-#### 3. Realtime Streaming Rail (`apps/realtime` — Port `4002`)
+#### 3. Realtime Streaming Rail (`apps/realtime` — Port `4022`, Prod: `4032`)
 
 - **Technology Stack**: Node.js HTTP/2, Server-Sent Events (SSE), Redis Pub/Sub.
 - **Purpose**: Low-latency, unidirectional event dissemination engine delivering live agent output to browser clients.
@@ -99,7 +99,7 @@ Unlike simplistic conversational LLM wrappers or script-based agent chains, Orch
   - **Topic-Based Channel Multiplexing**: Clients subscribe to `/api/v1/realtime/sessions/:sessionId/stream` to receive filtered streams of `token:delta`, `tool:call:start`, `tool:call:complete`, `node:transition`, and `dag:status` events.
   - **Automatic Reconnection & Event Replay**: Clients pass `Last-Event-ID` on reconnection; the realtime rail retrieves buffered events from a Redis sliding-window list to guarantee zero message loss during temporary network drops.
 
-#### 4. Distributed Worker Cluster (`apps/worker` — Port `4003`)
+#### 4. Distributed Worker Cluster (`apps/worker` — Port `4023`, Prod: `4033`)
 
 - **Technology Stack**: Node.js, BullMQ v5, Redis 7, Docker API / gVisor sandbox.
 - **Purpose**: Background execution engine processing long-running compute jobs, sandboxed tool executions, and asynchronous batch operations.
@@ -175,12 +175,12 @@ Unlike simplistic conversational LLM wrappers or script-based agent chains, Orch
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Op as Operator Studio (:3001)
-    participant GW as Gateway (:4001)
-    participant DP as DevLab Portal (:3015)
+    participant Op as Operator Studio (:3002)
+    participant GW as Gateway (:4002)
+    participant DP as DevLab Portal (:4000)
     participant Redis as Redis (:6379)
-    participant Worker as Worker Pool (:4003)
-    participant DL as DevLab Logs (:3020)
+    participant Worker as Worker Pool (:4023)
+    participant DL as DevLab Logs (:4003)
     participant IA as IncidentAI (:8085)
 
     Op->>GW: POST /api/v1/sessions/start (Bearer dl_live_...)
@@ -195,27 +195,27 @@ sequenceDiagram
     end
 
     Worker->>Worker: 3. Execute Sandboxed Multi-Agent Swarm
-    Worker->>DL: 4. Stream Structured Spans & Logs (:3020)
+    Worker->>DL: 4. Stream Structured Spans & Logs (:4003)
 
     alt Tool Crash or Unhandled Exception
         Worker->>IA: 5. Emit Webhook Alert to IncidentAI (:8085)
         IA->>Worker: 6. Spin up Isolated Sandbox & Run Auto-Fix
     else Swarm Completed Successfully
         Worker->>Redis: 7. Publish State Machine Transition
-        Redis->>Op: 8. Stream Completion Artifacts via Realtime SSE (:4002)
+        Redis->>Op: 8. Stream Completion Artifacts via Realtime SSE (:4022)
     end
 ```
 
 ### 3.1 Inter-Repository Integration Matrix
 
-| Ecosystem Member    | Direction | Protocol & Transport                                   | Exact Payload Contract & Endpoint                     | Purpose & Operational Behavior                                                                                                                |
-| :------------------ | :-------: | :----------------------------------------------------- | :---------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`devlab-portal`** |  Inbound  | Redis Pub/Sub (`devlab:killswitch:events`) & HTTP JWKS | `GET http://localhost:3015/api/v1/keys/verify`        | Gateway validates API keys and enforces sub-1ms instant revocation when an administrator disables an enterprise key in Portal.                |
-| **`devlab-logs`**   | Outbound  | HTTP/2 POST / Kafka                                    | `POST http://localhost:3020/api/v1/logs/ingest`       | Worker and Gateway stream all structured JSON logs, LLM token counts, tool invocation latency, and error traces to DevLab Logs.               |
-| **`incidentai`**    | Outbound  | HTTP POST Webhook                                      | `POST http://localhost:8085/api/v1/incidents/webhook` | Worker dispatches runtime exceptions, sandbox crashes, and memory leaks to IncidentAI to trigger autonomous SRE root-cause diagnosis.         |
-| **`devlab-guard`**  |  Inbound  | Local CLI / Git Hook / CI                              | `uv run devlab-guard scan --path .`                   | Scans all TypeScript and Python code before commit to strictly enforce the 250-line rule, zero raw string enums, and centralized regex rules. |
-| **`devlab-shared`** |  Static   | Internal npm Workspace (`@yuva-devlab/*`)              | Direct package import                                 | Imports `@yuva-devlab/ui`, `@yuva-devlab/tokens`, `@yuva-devlab/resilience` (circuit breakers), and `@yuva-devlab/semantic-cache`.            |
-| **`finai`**         | Cross-App | REST HTTP API / gRPC                                   | `POST http://localhost:4000/api/v1/advisory/analyze`  | Can invoke FinAI's pure financial engine for deterministic arithmetic calculations during complex portfolio or wealth management reasoning.   |
+| Ecosystem Member    | Direction | Protocol & Transport                                   | Exact Payload Contract & Endpoint                                    | Purpose & Operational Behavior                                                                                                                |
+| :------------------ | :-------: | :----------------------------------------------------- | :------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`devlab-portal`** |  Inbound  | Redis Pub/Sub (`devlab:killswitch:events`) & HTTP JWKS | `GET http://localhost:4000/api/v1/keys/verify` (Prod: `:4010`)       | Gateway validates API keys and enforces sub-1ms instant revocation when an administrator disables an enterprise key in Portal.                |
+| **`devlab-logs`**   | Outbound  | HTTP/2 POST / Kafka                                    | `POST http://localhost:4003/logs` (Prod: `:4013`)                    | Worker and Gateway stream all structured JSON logs, LLM token counts, tool invocation latency, and error traces to DevLab Logs.               |
+| **`incidentai`**    | Outbound  | HTTP POST Webhook                                      | `POST http://localhost:8085/api/v1/incidents/webhook`                | Worker dispatches runtime exceptions, sandbox crashes, and memory leaks to IncidentAI to trigger autonomous SRE root-cause diagnosis.         |
+| **`devlab-guard`**  |  Inbound  | Local CLI / Git Hook / CI                              | `uv run devlab-guard scan --path .`                                  | Scans all TypeScript and Python code before commit to strictly enforce the 250-line rule, zero raw string enums, and centralized regex rules. |
+| **`devlab-shared`** |  Static   | Internal npm Workspace (`@yuva-devlab/*`)              | Direct package import                                                | Imports `@yuva-devlab/ui`, `@yuva-devlab/tokens`, `@yuva-devlab/resilience` (circuit breakers), and `@yuva-devlab/semantic-cache`.            |
+| **`finai`**         | Cross-App | REST HTTP API / gRPC                                   | `POST http://localhost:4001/api/v1/advisory/analyze` (Prod: `:4011`) | Can invoke FinAI's pure financial engine for deterministic arithmetic calculations during complex portfolio or wealth management reasoning.   |
 
 ---
 
@@ -272,25 +272,25 @@ pnpm typecheck
 
 ### 5.3 Complete Environment Variables Reference
 
-| Variable                 |  Type  |         Default          | Required | Description                                                                                |
-| :----------------------- | :----: | :----------------------: | :------: | :----------------------------------------------------------------------------------------- |
-| `PORT`                   | Number |          `4001`          |   Yes    | Gateway API HTTP listening port.                                                           |
-| `DATABASE_URL`           | String |            —             |   Yes    | PostgreSQL connection string (`postgresql://postgres:postgres@localhost:5432/orchestrai`). |
-| `REDIS_URL`              | String | `redis://localhost:6379` |   Yes    | Redis connection string for BullMQ queues, caching, and kill-switch events.                |
-| `REALTIME_URL`           | String | `http://localhost:4002`  |   Yes    | Realtime SSE streaming rail service endpoint.                                              |
-| `WORKER_METRICS_URL`     | String | `http://localhost:4003`  |   Yes    | Distributed BullMQ worker pool metrics endpoint.                                           |
-| `INTELLIGENCE_URL`       | String | `http://localhost:8082`  |   Yes    | Python LangGraph cognitive reasoning engine endpoint.                                      |
-| `CRAWLER_URL`            | String | `http://localhost:8083`  |   Yes    | Headless Chromium web extraction engine endpoint.                                          |
-| `ADMIN_URL`              | String | `http://localhost:4005`  |   Yes    | Fastify internal admin control plane endpoint.                                             |
-| `ORCHESTRATOR_GRPC_URL`  | String |    `localhost:50051`     |   Yes    | gRPC binary DAG orchestrator endpoint.                                                     |
-| `DEVLAB_PORTAL_API_URL`  | String | `http://localhost:3015`  |   Yes    | DevLab Portal API URL for key validation and audit events.                                 |
-| `DEVLAB_LOGS_URL`        | String | `http://localhost:3020`  |   Yes    | DevLab Logs ingestion endpoint for structured streaming.                                   |
-| `INCIDENTAI_WEBHOOK_URL` | String | `http://localhost:8085`  |    No    | IncidentAI webhook endpoint for automated crash reporting.                                 |
+| Variable                 |  Type  |                            Default                             | Required | Description                                                                                |
+| :----------------------- | :----: | :------------------------------------------------------------: | :------: | :----------------------------------------------------------------------------------------- |
+| `PORT`                   | Number |                  `4002` (dev) / `4012` (prod)                  |   Yes    | Gateway API HTTP listening port.                                                           |
+| `DATABASE_URL`           | String |                               —                                |   Yes    | PostgreSQL connection string (`postgresql://postgres:postgres@localhost:5432/orchestrai`). |
+| `REDIS_URL`              | String |                    `redis://localhost:6379`                    |   Yes    | Redis connection string for BullMQ queues, caching, and kill-switch events.                |
+| `REALTIME_URL`           | String | `http://localhost:4022` (dev) / `http://localhost:4032` (prod) |   Yes    | Realtime SSE streaming rail service endpoint.                                              |
+| `WORKER_METRICS_URL`     | String | `http://localhost:4023` (dev) / `http://localhost:4033` (prod) |   Yes    | Distributed BullMQ worker pool metrics endpoint.                                           |
+| `INTELLIGENCE_URL`       | String |                    `http://localhost:8082`                     |   Yes    | Python LangGraph cognitive reasoning engine endpoint.                                      |
+| `CRAWLER_URL`            | String |                    `http://localhost:8083`                     |   Yes    | Headless Chromium web extraction engine endpoint.                                          |
+| `ADMIN_URL`              | String | `http://localhost:4025` (dev) / `http://localhost:4035` (prod) |   Yes    | Fastify internal admin control plane endpoint.                                             |
+| `ORCHESTRATOR_GRPC_URL`  | String |                       `localhost:50051`                        |   Yes    | gRPC binary DAG orchestrator endpoint.                                                     |
+| `DEVLAB_PORTAL_API_URL`  | String | `http://localhost:4000` (dev) / `http://localhost:4010` (prod) |   Yes    | DevLab Portal API URL for key validation and audit events.                                 |
+| `DEVLAB_LOGS_URL`        | String | `http://localhost:4003` (dev) / `http://localhost:4013` (prod) |   Yes    | DevLab Logs ingestion endpoint for structured streaming.                                   |
+| `INCIDENTAI_WEBHOOK_URL` | String |                    `http://localhost:8085`                     |    No    | IncidentAI webhook endpoint for automated crash reporting.                                 |
 
 ### 5.4 Starting a Multi-Agent Swarm Session via API
 
 ```bash
-curl -X POST http://localhost:4001/api/v1/sessions/start \
+curl -X POST http://localhost:4002/api/v1/sessions/start \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer dl_live_production_key_123" \
   -d '{
@@ -307,7 +307,7 @@ curl -X POST http://localhost:4001/api/v1/sessions/start \
 ```bash
 curl -N -H "Accept: text/event-stream" \
   -H "Authorization: Bearer dl_live_production_key_123" \
-  http://localhost:4002/api/v1/realtime/sessions/sess_9901/stream
+  http://localhost:4022/api/v1/realtime/sessions/sess_9901/stream
 ```
 
 ### 5.6 Troubleshooting & Runbook Recipes
@@ -315,6 +315,6 @@ curl -N -H "Accept: text/event-stream" \
 - **Issue: Gateway returns 503 "Redis connection failed"**
   - _Fix_: Verify Redis container is running: `docker ps | grep redis`. Check logs: `docker logs orchestrai-redis`.
 - **Issue: BullMQ workers not picking up tasks**
-  - _Fix_: Inspect queue health: `curl http://localhost:4003/metrics`. Ensure Redis memory limits haven't triggered `OOM command not allowed`.
+  - _Fix_: Inspect queue health: `curl http://localhost:4023/metrics`. Ensure Redis memory limits haven't triggered `OOM command not allowed`.
 - **Issue: Python Intelligence Engine fails to compile StateGraph**
   - _Fix_: Verify Python environment: `cd apps/intelligence && uv run uvicorn main:app --reload --port 8082`.

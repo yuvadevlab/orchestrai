@@ -17,7 +17,7 @@ import { persistSession } from "./session-storage";
 export * from "./types";
 export * from "./session-storage";
 
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:4001";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:4002";
 
 /**
  * Safely executes an HTTP request to the Gateway API, handling network failures and parsing structured errors.

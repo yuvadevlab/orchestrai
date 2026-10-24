@@ -33,7 +33,7 @@ export interface AdminConfig {
  * @returns Frozen AdminConfig instance with safe defaults
  */
 export function loadAdminConfig(): AdminConfig {
-  // Default to port 4005 to isolate control plane from gateway (4000) and orchestrator (4004)
+  // Default to port 4025 to isolate control plane from gateway (4002) and orchestrator (4024)
   const port = parseInt(process.env.ADMIN_PORT || "4005", 10);
   const shutdownTimeoutMs = parseInt(process.env.SHUTDOWN_TIMEOUT_MS || "5000", 10);
 

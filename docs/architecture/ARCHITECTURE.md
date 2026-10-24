@@ -20,12 +20,12 @@ The platform is designed around seven core pillars:
 
 ```text
                ┌────────────────────────────────────────────────────────┐
-               │        Operator Studio / Console (apps/console - 3001) │
+               │        Operator Studio / Console (apps/console - 3002) │
                └───────────────────────────┬────────────────────────────┘
                                            │ HTTP / SSE / WS
                                            ▼
                ┌────────────────────────────────────────────────────────┐
-               │                 API Gateway (apps/gateway - 4001)      │
+               │                 API Gateway (apps/gateway - 4002)      │
                │  - REST & WebSocket Ingress, Auth, Semantic Cache      │
                │  - Token Counting, Budget Gate, Model Router           │
                └───────────┬───────────────────┬────────────────┬───────┘
@@ -33,7 +33,7 @@ The platform is designed around seven core pillars:
             gRPC / HTTP    ▼                   ▼                ▼
 ┌───────────────────────────────┐  ┌────────────────┐  ┌────────────────┐
 │  apps/intelligence (Port 8082)│  │ apps/realtime  │  │  apps/worker   │
-│  - Python LangGraph StateGraph│  │ (Port 4002)    │  │  (Port 4003)   │
+│  - Python LangGraph StateGraph│  │ (Port 4022)    │  │  (Port 4023)   │
 │  - Conversational RAG Pruning │  │ - SSE Broker   │  │  - BullMQ Queue│
 └──────────────┬────────────────┘  └───────┬────────┘  └───────┬────────┘
                │                           │                   │

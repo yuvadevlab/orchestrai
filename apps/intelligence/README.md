@@ -34,4 +34,4 @@ python -m src.server
 | `PORT`                   | HTTP listen port            | `8082`                   |
 | `OLLAMA_BASE_URL`        | Ollama daemon endpoint      | `http://localhost:11434` |
 | `DEFAULT_MODEL_NAME`     | Required default model name | _(none)_                 |
-| `ORCHESTRAI_GATEWAY_URL` | OrchestrAI Gateway URL      | `http://localhost:4001`  |
+| `ORCHESTRAI_GATEWAY_URL` | OrchestrAI Gateway URL      | `http://localhost:4002`  |

@@ -9,11 +9,11 @@ A definitive architectural blueprint and execution walkthrough for the OrchestrA
 ```text
 orchestrai/
 ├── apps/                                   # Deployable Applications & Services
-│   ├── console/         (Port 3001)        │ Next.js 15 Operator Studio & Agent Cockpit
-│   ├── gateway/         (Port 4001)        │ Primary Ingress API (REST, WebSocket, SSE)
-│   ├── realtime/        (Port 4002)        │ SSE & WebSocket event streaming broker
-│   ├── worker/          (Port 4003)        │ Background BullMQ task & queue processor
-│   ├── admin/           (Port 4004)        │ Tenant administration & backoffice portal
+│   ├── console/         (Port 3002)        │ Next.js 15 Operator Studio & Agent Cockpit
+│   ├── gateway/         (Port 4022)        │ Primary Ingress API (REST, WebSocket, SSE)
+│   ├── realtime/        (Port 4022)        │ SSE & WebSocket event streaming broker
+│   ├── worker/          (Port 4023)        │ Background BullMQ task & queue processor
+│   ├── admin/           (Port 4025)        │ Tenant administration & backoffice portal
 │   ├── orchestrator/    (gRPC 50051)       │ StateGraph DAG orchestrator & checkpointer
 │   ├── intelligence/    (Port 8082)        │ Python LangGraph reasoning & Conv-RAG sidecar
 │   └── crawler/         (Port 8083)        │ Python Playwright web scraper & RAG ingestion
@@ -52,7 +52,7 @@ When a user submits a prompt in the **Console Studio**, the system executes acro
 sequenceDiagram
     autonumber
     actor User as "Operator (Console)"
-    participant Gateway as "API Gateway (Port 4001)"
+    participant Gateway as "API Gateway (Port 4022)"
     participant Cache as "Semantic Cache"
     participant Router as "Model Router"
     participant Engine as "Execution Engine (Port 8082)"
