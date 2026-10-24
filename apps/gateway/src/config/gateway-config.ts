@@ -17,7 +17,7 @@ export function loadGatewayConfig(): GatewayConfig {
   dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
   dotenv.config({ path: path.resolve(process.cwd(), ".env"), override: true });
 
-  const port = process.env.GATEWAY_PORT || 4001;
+  const port = process.env.GATEWAY_PORT || 4002;
   const host = process.env.GATEWAY_HOST || "0.0.0.0";
   const cors = process.env.CORS_ALLOWED_ORIGINS || "*";
 

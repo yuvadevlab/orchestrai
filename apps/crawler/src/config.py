@@ -28,7 +28,7 @@ class CrawlerSettings(BaseSettings):
     )
     gateway_url: str = Field(
         default_factory=lambda: os.getenv(
-            "ORCHESTRAI_GATEWAY_URL", "http://localhost:4001"
+            "ORCHESTRAI_GATEWAY_URL", "http://localhost:4002"
         ),
         description="Upstream OrchestrAI Gateway URL for RAG ingestion",
     )

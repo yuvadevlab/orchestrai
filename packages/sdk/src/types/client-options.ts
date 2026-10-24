@@ -23,7 +23,7 @@ export interface OrchestrAIClientOptions {
 
   /**
    * Root URL of the OrchestrAI Admin Control Plane API.
-   * @default "http://localhost:4003"
+   * @default "http://localhost:4002"
    */
   adminUrl?: string;
 

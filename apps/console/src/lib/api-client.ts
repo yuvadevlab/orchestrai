@@ -8,9 +8,9 @@ import { createOrchestrAIClient, type OrchestrAIClient } from "@orchestrai/sdk";
 import { getStoredSession } from "./auth";
 
 /** Gateway base URL configured from environment variable or default local port 4001 */
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:4001";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:4002";
 /** Streaming Realtime broker URL configured from environment or default local port 4002 */
-const REALTIME_URL = process.env.NEXT_PUBLIC_REALTIME_URL || "http://localhost:4002";
+const REALTIME_URL = process.env.NEXT_PUBLIC_REALTIME_URL || "http://localhost:4022";
 
 /** Cached client instance keyed by active token + tenant */
 let clientInstance: OrchestrAIClient | null = null;
