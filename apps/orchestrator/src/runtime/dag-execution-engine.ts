@@ -86,10 +86,7 @@ export class DagExecutionEngine {
 
     try {
       const toolRegistry = new ToolRegistry();
-      const modelName =
-        agent.modelConfig.modelName ||
-        process.env.DEFAULT_MODEL_NAME ||
-        process.env.OLLAMA_DEFAULT_MODEL;
+      const modelName = agent.modelConfig.modelName || process.env.DEFAULT_MODEL_NAME;
 
       // Guard against unconfigured models: require database or environment definition
       if (!modelName) {
@@ -99,7 +96,7 @@ export class DagExecutionEngine {
       }
 
       const adapter = await OllamaAdapter.create({
-        host: process.env.OLLAMA_HOST || "http://localhost:11434",
+        host: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
         timeoutMs: AGENT_EXECUTION_DEFAULTS.DEFAULT_TIMEOUT_MS,
         defaultModel: modelName,
       });

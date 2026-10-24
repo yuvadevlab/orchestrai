@@ -4,6 +4,6 @@
  * @module apps/console/components
  */
 
-export * from "./ui";
+export * from "@orchestrai/ui";
 export * from "./layout";
 export * from "./dashboard";

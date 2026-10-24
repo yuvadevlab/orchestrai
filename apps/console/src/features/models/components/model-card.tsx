@@ -8,8 +8,8 @@
  */
 
 import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@yuva-devlab/ui";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@orchestrai/ui";
+import { StatusBadge } from "@orchestrai/ui/components/status-badge";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { LlmModel } from "../types";
 

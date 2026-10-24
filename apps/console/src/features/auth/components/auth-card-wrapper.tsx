@@ -9,7 +9,7 @@
 import React, { type ReactNode } from "react";
 import Link from "next/link";
 import { Sparkles, Terminal } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@yuva-devlab/ui";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 
 export interface AuthCardWrapperProps {

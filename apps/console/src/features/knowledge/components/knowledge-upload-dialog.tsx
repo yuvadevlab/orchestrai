@@ -7,8 +7,8 @@
  */
 
 import React from "react";
-import { toast } from "@yuva-devlab/ui";
-import { FormDialog, type FormFieldConfig } from "@/components/ui";
+import { toast } from "@orchestrai/ui";
+import { FormDialog, type FormFieldConfig } from "@orchestrai/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { DocumentMimeType } from "@orchestrai/shared-types";
 import { LEADING_TRAILING_DASH_REGEX } from "@orchestrai/regex";

@@ -8,7 +8,7 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { Button, Input, toast } from "@yuva-devlab/ui";
+import { Button, Input, toast } from "@orchestrai/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useSignupMutation } from "../api/use-auth-mutations";

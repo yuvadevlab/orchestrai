@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch } from "@yuva-devlab/ui";
+import { Switch } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { ToolDefinition } from "../types";
 

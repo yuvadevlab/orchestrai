@@ -15,7 +15,7 @@ import {
 } from "@orchestrai/shared-types";
 
 export const DEFAULT_TENANT_ID = "e84e82d6-5e8f-4ba4-a242-86747fe88107";
-const DEFAULT_SEED_MODEL = process.env.DEFAULT_MODEL_NAME || process.env.OLLAMA_DEFAULT_MODEL || "";
+const DEFAULT_SEED_MODEL = process.env.DEFAULT_MODEL_NAME || "";
 
 export const SEED_AGENTS = [
   {

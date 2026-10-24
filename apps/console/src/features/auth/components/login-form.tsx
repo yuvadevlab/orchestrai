@@ -9,7 +9,7 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-import { Button, Input, toast } from "@yuva-devlab/ui";
+import { Button, Input, toast } from "@orchestrai/ui";
 import { formatApiError } from "@/lib/error-utils";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useLoginMutation } from "../api/use-auth-mutations";
@@ -110,6 +110,29 @@ export function LoginForm(): React.JSX.Element {
         ) : (
           <span>{UI_COPY.AUTH.LOGIN.SIGN_IN_BUTTON}</span>
         )}
+      </Button>
+
+      <div className="relative my-3 text-center">
+        <div className="border-border absolute inset-0 flex items-center">
+          <div className="w-full border-t" />
+        </div>
+        <span className="bg-card text-muted-foreground relative px-2 text-[10px] tracking-wider uppercase">
+          Or continue with
+        </span>
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => {
+          const portalUrl =
+            process.env.NEXT_PUBLIC_DEVLAB_PORTAL_WEB_URL || "http://localhost:3000";
+          const returnUrl = encodeURIComponent(window.location.origin);
+          window.location.href = `${portalUrl}/login?app=orchestrai&redirect=${returnUrl}`;
+        }}
+        className="w-full text-xs font-medium"
+      >
+        Sign in with DevLab Portal
       </Button>
     </form>
   );

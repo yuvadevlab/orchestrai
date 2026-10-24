@@ -7,13 +7,13 @@
  */
 
 import React, { useState } from "react";
-import { Button } from "@yuva-devlab/ui";
+import { Button } from "@orchestrai/ui";
 import { Plus, Cpu } from "lucide-react";
 import { ModelCard } from "./model-card";
 import { ModelDialog } from "./model-dialog";
 import { CostLatencyCockpit } from "./cost-latency-cockpit";
 import { useModels, useProviders } from "../api";
-import { EmptyState, CardGridSkeleton } from "@/components/ui";
+import { EmptyState, CardGridSkeleton } from "@orchestrai/ui";
 import { PageShell } from "@/components/layout/page-shell";
 import { UI_COPY } from "@/lib/ui-copy";
 

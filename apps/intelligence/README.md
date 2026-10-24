@@ -28,10 +28,10 @@ python -m src.server
 
 ## Environment Variables
 
-| Variable             | Description                 | Default                  |
-| -------------------- | --------------------------- | ------------------------ |
-| `HOST`               | Bind address                | `0.0.0.0`                |
-| `PORT`               | HTTP listen port            | `8082`                   |
-| `OLLAMA_HOST`        | Ollama daemon endpoint      | `http://localhost:11434` |
-| `DEFAULT_MODEL_NAME` | Required default model name | _(none)_                 |
-| `GATEWAY_URL`        | OrchestrAI Gateway URL      | `http://localhost:3000`  |
+| Variable                 | Description                 | Default                  |
+| ------------------------ | --------------------------- | ------------------------ |
+| `HOST`                   | Bind address                | `0.0.0.0`                |
+| `PORT`                   | HTTP listen port            | `8082`                   |
+| `OLLAMA_BASE_URL`        | Ollama daemon endpoint      | `http://localhost:11434` |
+| `DEFAULT_MODEL_NAME`     | Required default model name | _(none)_                 |
+| `ORCHESTRAI_GATEWAY_URL` | OrchestrAI Gateway URL      | `http://localhost:4001`  |

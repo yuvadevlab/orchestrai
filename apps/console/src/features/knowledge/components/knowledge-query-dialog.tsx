@@ -19,7 +19,7 @@ import {
   DialogDescription,
   DialogBody,
   DialogFooter,
-} from "@yuva-devlab/ui";
+} from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useQueryKnowledge } from "../api";
 

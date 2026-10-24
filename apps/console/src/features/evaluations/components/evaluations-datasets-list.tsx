@@ -8,7 +8,7 @@
 
 import React from "react";
 import { Database, Wrench } from "lucide-react";
-import { TableSkeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@orchestrai/ui/components/skeleton";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { EvaluationDataset } from "../types";
 

@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { MessageSquare, MoreHorizontal, Plus, Search, Trash2, X } from "lucide-react";
-import { Badge, Button } from "@yuva-devlab/ui";
+import { Badge, Button } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkSession } from "../types";
 

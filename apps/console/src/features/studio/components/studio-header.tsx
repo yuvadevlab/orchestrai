@@ -8,7 +8,7 @@
 
 import React from "react";
 import { BookOpen, History, Sidebar, Sparkles } from "lucide-react";
-import { Button, Badge } from "@yuva-devlab/ui";
+import { Button, Badge } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useConsoleStore } from "@/lib/stores";
 import { useWorkspaceHarness } from "../api";

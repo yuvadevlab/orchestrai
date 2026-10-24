@@ -6,8 +6,8 @@
 
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { UI_COPY } from "@/lib/ui-copy";
+import { cn } from "../lib/utils";
+import { COMMON_COPY } from "../copy/common";
 
 export interface LoadingStateProps {
   /** Primary loading title */
@@ -22,8 +22,8 @@ export interface LoadingStateProps {
  * Universal Loading State component matching reference typography.
  */
 export function LoadingState({
-  title = UI_COPY.COMMON.LOADING.PAGE_TITLE,
-  description = UI_COPY.COMMON.LOADING.DESCRIPTION,
+  title = COMMON_COPY.LOADING.PAGE_TITLE,
+  description = COMMON_COPY.LOADING.DESCRIPTION,
   className,
 }: LoadingStateProps): React.JSX.Element {
   return (

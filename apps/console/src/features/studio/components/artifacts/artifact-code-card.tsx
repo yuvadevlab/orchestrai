@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { Check, ChevronDown, ChevronRight, Code2, Copy, PanelRightOpen } from "lucide-react";
-import { Badge, Button } from "@yuva-devlab/ui";
+import { Badge, Button } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useConsoleStore } from "@/lib/stores";
 import type { CoworkArtifact } from "../../types";

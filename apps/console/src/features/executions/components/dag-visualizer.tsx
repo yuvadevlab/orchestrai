@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { ZoomIn, ZoomOut, RotateCcw, CheckCircle2, AlertCircle, Clock, Play } from "lucide-react";
-import { Button } from "@yuva-devlab/ui";
+import { Button } from "@orchestrai/ui";
 import { cn } from "@/lib/utils";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { ExecutionRun, ExecutionStepTrace } from "../types";

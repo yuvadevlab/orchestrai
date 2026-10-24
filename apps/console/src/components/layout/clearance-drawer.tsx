@@ -8,7 +8,7 @@
 
 import React, { useEffect } from "react";
 import { ShieldAlert, Check, X, AlertTriangle, FileWarning, Terminal } from "lucide-react";
-import { Button } from "@yuva-devlab/ui";
+import { Button } from "@orchestrai/ui";
 import { useConsoleStore } from "@/lib/stores";
 import { UI_COPY } from "@/lib/ui-copy";
 

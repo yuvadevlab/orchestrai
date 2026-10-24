@@ -27,7 +27,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@yuva-devlab/ui";
+} from "@orchestrai/ui";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------

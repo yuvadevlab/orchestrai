@@ -23,8 +23,7 @@ export const SEED_PROVIDERS = [
   },
 ];
 
-const SEED_MODEL_IDENTIFIER =
-  process.env.DEFAULT_MODEL_NAME || process.env.OLLAMA_DEFAULT_MODEL || "default-model";
+const SEED_MODEL_IDENTIFIER = process.env.DEFAULT_MODEL_NAME || "default-model";
 
 export const SEED_MODELS = [
   {

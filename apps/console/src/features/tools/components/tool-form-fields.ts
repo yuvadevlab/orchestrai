@@ -6,7 +6,7 @@
  * @module apps/console/features/tools/components
  */
 
-import type { FormFieldSpec } from "@/components/ui/action-dialog";
+import type { FormFieldSpec } from "@orchestrai/ui/components/action-dialog";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { ToolPermissionRecord } from "../api/use-permissions";
 import type { ToolDefinition } from "../types";

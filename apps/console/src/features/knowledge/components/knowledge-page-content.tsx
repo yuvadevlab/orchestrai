@@ -8,9 +8,9 @@
 
 import React, { useState } from "react";
 import { Plus, Search, Sparkles, BookOpen } from "lucide-react";
-import { Button, Input } from "@yuva-devlab/ui";
+import { Button, Input } from "@orchestrai/ui";
 import { PageShell } from "@/components/layout/page-shell";
-import { EmptyState, TableSkeleton } from "@/components/ui";
+import { EmptyState, TableSkeleton } from "@orchestrai/ui";
 import { useKnowledgeDocuments } from "../api";
 import { UI_COPY } from "@/lib/ui-copy";
 import { KnowledgeUploadDialog } from "./knowledge-upload-dialog";

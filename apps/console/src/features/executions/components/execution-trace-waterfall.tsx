@@ -8,9 +8,9 @@
 
 import React, { useState } from "react";
 import { Activity, Clock, ChevronDown, ChevronRight, AlertCircle } from "lucide-react";
-import { Panel } from "@yuva-devlab/ui";
+import { Panel } from "@orchestrai/ui";
 import { TraceSpanStatus } from "@orchestrai/shared-types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@orchestrai/ui/components/skeleton";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useExecutionTrace } from "../api/use-execution-trace";
 

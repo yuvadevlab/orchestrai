@@ -6,7 +6,7 @@
 
 import React from "react";
 import { ShieldCheck, X } from "lucide-react";
-import { Badge } from "@yuva-devlab/ui";
+import { Badge } from "@orchestrai/ui";
 import { PermissionScope } from "@orchestrai/shared-types";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { StudioApprovalRequest } from "../types";
