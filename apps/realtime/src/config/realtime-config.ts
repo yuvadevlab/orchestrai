@@ -16,7 +16,7 @@ export const RealtimeConfigSchema = z.object({
   /** Execution environment mode */
   nodeEnv: z.enum(["development", "production", "test"]).default("development"),
   /** Redis connection URL for cross-node Pub/Sub and stream consumer */
-  redisUrl: z.string().url().default("redis://localhost:6379"),
+  redisUrl: z.url().default("redis://localhost:6379"),
   /** Allowed origins for Cross-Origin Resource Sharing (CORS) */
   corsOrigins: z
     .union([z.string(), z.array(z.string())])

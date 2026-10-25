@@ -30,7 +30,7 @@ export const ModelIdentifierSchema = z
       .positive()
       .default(8192)
       .describe("Maximum context token window size"),
-    apiEndpoint: z.string().url().optional().describe("Optional custom host or proxy URL"),
+    apiEndpoint: z.url().optional().describe("Optional custom host or proxy URL"),
   })
   .describe("Identifier and context specifications for an AI model");
 

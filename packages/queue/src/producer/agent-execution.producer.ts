@@ -1,3 +1,4 @@
+import { z } from "zod";
 /**
  * @file packages/queue/src/producer/agent-execution.producer.ts
  * @description Dedicated producer for dispatching asynchronous agent workflow runs.
@@ -24,7 +25,10 @@ export class AgentExecutionProducer extends BaseQueueProducer<AgentExecutionJobP
   protected override validatePayload(raw: unknown): AgentExecutionJobPayload {
     const result = AgentExecutionJobPayloadSchema.safeParse(raw);
     if (!result.success) {
-      throw new ValidationError("Invalid agent execution job payload", result.error.format());
+      throw new ValidationError(
+        "Invalid agent execution job payload",
+        z.treeifyError(result.error),
+      );
     }
     return result.data;
   }

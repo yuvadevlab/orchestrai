@@ -29,7 +29,7 @@ export const OllamaConfigSchema = z
      * Base URL of the Ollama HTTP server.
      * Override this if you run Ollama on a remote host or custom port.
      */
-    host: z.string().url().default("http://localhost:11434").describe("Ollama server base URL"),
+    host: z.url().default("http://localhost:11434").describe("Ollama server base URL"),
 
     /**
      * Optional fallback model to use when LlmRequest.model is not specified.

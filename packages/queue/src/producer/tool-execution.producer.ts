@@ -1,3 +1,4 @@
+import { z } from "zod";
 /**
  * @file packages/queue/src/producer/tool-execution.producer.ts
  * @description Dedicated producer for dispatching asynchronous background tool invocations.
@@ -24,7 +25,7 @@ export class ToolExecutionProducer extends BaseQueueProducer<ToolExecutionJobPay
   protected override validatePayload(raw: unknown): ToolExecutionJobPayload {
     const result = ToolExecutionJobPayloadSchema.safeParse(raw);
     if (!result.success) {
-      throw new ValidationError("Invalid tool execution job payload", result.error.format());
+      throw new ValidationError("Invalid tool execution job payload", z.treeifyError(result.error));
     }
     return result.data;
   }
