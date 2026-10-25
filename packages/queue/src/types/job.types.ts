@@ -45,8 +45,7 @@ export const AgentExecutionJobPayloadSchema = z
       .enum(JobPriority)
       .default(JobPriority.NORMAL)
       .describe("Job scheduling priority in BullMQ"),
-    enqueuedAt: z
-      .string()
+    enqueuedAt: z.iso
       .datetime()
       .default(() => new Date().toISOString())
       .describe("ISO timestamp when job was scheduled"),
@@ -73,10 +72,7 @@ export const ToolExecutionJobPayloadSchema = z
       .positive()
       .default(60_000)
       .describe("Per-tool execution deadline in milliseconds"),
-    enqueuedAt: z
-      .string()
-      .datetime()
-      .default(() => new Date().toISOString()),
+    enqueuedAt: z.iso.datetime().default(() => new Date().toISOString()),
   })
   .describe("Payload contract for deferred background tool execution jobs");
 
@@ -92,10 +88,7 @@ export const DeadLetterJobPayloadSchema = z
     originalPayload: z.unknown().describe("Original payload of the failed job"),
     failedReason: z.string().describe("Root cause error message or exception stack"),
     attemptsMade: z.number().int().nonnegative().describe("Total retry attempts exhausted"),
-    failedAt: z
-      .string()
-      .datetime()
-      .default(() => new Date().toISOString()),
+    failedAt: z.iso.datetime().default(() => new Date().toISOString()),
   })
   .describe("Forensic payload stored in the dead-letter queue for operator inspection");
 

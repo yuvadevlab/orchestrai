@@ -34,11 +34,7 @@ export const OpenAiConfigSchema = z
      * Override the API base URL for compatible third-party providers.
      * Defaults to the official OpenAI endpoint if omitted.
      */
-    baseUrl: z
-      .string()
-      .url()
-      .optional()
-      .describe("Optional API base URL override for compatible endpoints"),
+    baseUrl: z.url().optional().describe("Optional API base URL override for compatible endpoints"),
 
     /** Optional default model identifier */
     defaultModel: z.string().min(1).optional().describe("Fallback model identifier"),

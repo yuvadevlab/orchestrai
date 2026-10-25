@@ -20,6 +20,13 @@ export default tseslint.config(
       "**/.vercel/**",
       "**/out/**",
       "**/next-env.d.ts",
+      "**/tsup.config.*",
+      "**/vite.config.*",
+      "**/vitest.config.*",
+      "**/next.config.*",
+      "**/postcss.config.*",
+      "**/commitlint.config.*",
+      "**/prisma.config.*",
     ],
   },
   {
@@ -43,12 +50,17 @@ export default tseslint.config(
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2022,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: rootDir,
+      },
       globals: {
         ...globals.node,
         ...globals.browser,
       },
     },
     rules: {
+      "@typescript-eslint/no-deprecated": "warn",
       "no-console": "warn",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "error",
