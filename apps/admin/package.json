@@ -19,7 +19,7 @@
     "@orchestrai/shared-types": "workspace:*",
     "@yuva-devlab/logger": "^1.2.0",
     "dotenv": "^16.4.7",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^26.6.1",
