@@ -40,7 +40,7 @@ export function KnowledgeQueryDialog({
 
   if (!isOpen) return null;
 
-  const handleSearch = async (e?: React.FormEvent): Promise<void> => {
+  const handleSearch = async (e?: React.SyntheticEvent): Promise<void> => {
     e?.preventDefault();
     if (!queryText.trim()) return;
 

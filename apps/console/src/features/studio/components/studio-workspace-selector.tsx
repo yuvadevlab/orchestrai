@@ -63,7 +63,7 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
     }
   };
 
-  const handleSubmitPath = (e: React.FormEvent): void => {
+  const handleSubmitPath = (e: React.SyntheticEvent): void => {
     e.preventDefault();
     if (!pathInput.trim()) return;
     openWorkspaceByPath(pathInput.trim());

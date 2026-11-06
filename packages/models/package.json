@@ -25,7 +25,7 @@
   "dependencies": {
     "@orchestrai/core": "workspace:*",
     "@yuva-devlab/logger": "^1.2.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   },
   "peerDependencies": {
     "@anthropic-ai/sdk": ">=0.24.0",

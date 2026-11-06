@@ -63,7 +63,9 @@ export function CanvasPreviewView({
             type="button"
             onClick={() => {
               const win = window.open();
-              win?.document.write(fullHtml);
+              if (win) {
+                win.document.documentElement.innerHTML = fullHtml;
+              }
             }}
             title={UI_COPY.STUDIO.CANVAS.OPEN_NEW_WINDOW}
             aria-label={UI_COPY.STUDIO.CANVAS.OPEN_NEW_WINDOW}

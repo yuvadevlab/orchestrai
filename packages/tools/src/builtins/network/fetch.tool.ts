@@ -23,7 +23,7 @@ import type { ITool, ToolExecutionContext } from "@/interfaces";
  * Input arguments schema for FetchTool.
  */
 export const FetchInputSchema = z.object({
-  url: z.string().url().describe("Target HTTP or HTTPS URL to query"),
+  url: z.url().describe("Target HTTP or HTTPS URL to query"),
   method: z.enum(["GET", "POST", "PUT", "DELETE"]).default("GET").describe("HTTP method"),
   headers: z
     .record(z.string(), z.string())

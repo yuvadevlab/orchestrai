@@ -1,3 +1,4 @@
+import { z } from "zod";
 /**
  * @file packages/queue/src/producer/dead-letter.producer.ts
  * @description Dedicated producer routing poisoned or repeatedly failed tasks to Dead-Letter Queue (DLQ).
@@ -24,7 +25,7 @@ export class DeadLetterProducer extends BaseQueueProducer<DeadLetterJobPayload> 
   protected override validatePayload(raw: unknown): DeadLetterJobPayload {
     const result = DeadLetterJobPayloadSchema.safeParse(raw);
     if (!result.success) {
-      throw new ValidationError("Invalid dead letter job payload", result.error.format());
+      throw new ValidationError("Invalid dead letter job payload", z.treeifyError(result.error));
     }
     return result.data;
   }
