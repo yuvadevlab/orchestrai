@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@yuva-devlab/tokens": "^2.0.0",
-    "@yuva-devlab/ui": "^2.0.0",
+    "@yuva-devlab/ui": "^2.1.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.575.0",
     "tailwind-merge": "^3.5.0",
