@@ -4,6 +4,7 @@
  * @file sidebar-nav.tsx
  * @description Sidebar navigation component dynamically populated from database API.
  * @module apps/console/components/dashboard
+ * @author yuva.devlab@gmail.com
  */
 
 import React from "react";
@@ -27,22 +28,27 @@ export function SidebarNav(): React.JSX.Element {
   const brandVersion = branding?.brandVersion ?? UI_COPY.COMMON.SIDEBAR.DEFAULT_BRAND_VERSION;
 
   return (
-    <aside className="border-border bg-sidebar flex h-screen w-64 shrink-0 flex-col border-r">
-      <div className="border-sidebar-border flex h-14 items-center gap-2.5 border-b px-4">
-        <div className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-md font-bold shadow-sm">
-          <Layers className="size-4" />
+    <aside className="orch-sidebar">
+      <div className="orch-sidebar__brand">
+        <div className="orch-sidebar__logo">
+          <Layers style={{ width: "1rem", height: "1rem" }} />
         </div>
-        <div className="flex flex-col">
-          <span className="text-sidebar-foreground text-sm font-bold tracking-tight">
-            {brandName}
-          </span>
-          <span className="text-muted-foreground font-mono text-[10px]">{brandVersion}</span>
+        <div className="orch-sidebar__brand-meta">
+          <span className="orch-sidebar__brand-name">{brandName}</span>
+          <span className="orch-sidebar__brand-version">{brandVersion}</span>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      <nav className="orch-sidebar__nav">
         {navItems.length === 0 ? (
-          <div className="text-muted-foreground/60 px-3 py-4 text-xs italic">
+          <div
+            style={{
+              color: "color-mix(in oklab, var(--mutedForeground) 60%, transparent)",
+              padding: "1rem 0.75rem",
+              fontSize: "0.75rem",
+              fontStyle: "italic",
+            }}
+          >
             {UI_COPY.COMMON.SIDEBAR.NO_NAV_ITEMS}
           </div>
         ) : (
@@ -54,15 +60,15 @@ export function SidebarNav(): React.JSX.Element {
               <Link
                 key={item.navItemId || item.href}
                 href={item.href}
-                className={`flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-xs font-medium transition-colors ${
-                  isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                }`}
+                className={`orch-sidebar__link ${isActive ? "orch-sidebar__link--active" : ""}`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="orch-sidebar__link-content">
                   <Icon
-                    className={`size-4 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                    style={{
+                      width: "1rem",
+                      height: "1rem",
+                      color: isActive ? "var(--primary)" : "var(--mutedForeground)",
+                    }}
                   />
                   <span>{item.label}</span>
                 </div>
@@ -72,14 +78,18 @@ export function SidebarNav(): React.JSX.Element {
         )}
       </nav>
 
-      <div className="border-sidebar-border bg-sidebar/50 text-muted-foreground space-y-1 border-t p-3 font-mono text-[11px]">
-        <div className="flex items-center justify-between">
+      <div className="orch-sidebar__footer">
+        <div className="orch-sidebar__footer-row">
           <span>{UI_COPY.COMMON.SIDEBAR.WORKER_DAEMON}</span>
-          <span className="text-primary font-semibold">{UI_COPY.COMMON.STATUS.ONLINE}</span>
+          <span style={{ color: "var(--primary)", fontWeight: 600 }}>
+            {UI_COPY.COMMON.STATUS.ONLINE}
+          </span>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="orch-sidebar__footer-row">
           <span>{UI_COPY.COMMON.SIDEBAR.REDIS_QUEUE}</span>
-          <span className="text-primary font-semibold">{UI_COPY.COMMON.STATUS.CONNECTED}</span>
+          <span style={{ color: "var(--primary)", fontWeight: 600 }}>
+            {UI_COPY.COMMON.STATUS.CONNECTED}
+          </span>
         </div>
       </div>
     </aside>

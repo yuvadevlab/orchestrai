@@ -34,7 +34,10 @@ import {
 } from "lucide-react";
 
 /** Map of string identifiers to Lucide icon components. */
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+const ICON_MAP: Record<
+  string,
+  React.ComponentType<{ className?: string; style?: React.CSSProperties }>
+> = {
   Sparkles,
   Network,
   Bot,
@@ -69,7 +72,9 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
  * @param iconName - String name of the icon (e.g. "Sparkles", "Bot", "Cpu")
  * @returns React icon component
  */
-export function getNavIcon(iconName?: string): React.ComponentType<{ className?: string }> {
+export function getNavIcon(
+  iconName?: string,
+): React.ComponentType<{ className?: string; style?: React.CSSProperties }> {
   if (!iconName) {
     return Layers;
   }

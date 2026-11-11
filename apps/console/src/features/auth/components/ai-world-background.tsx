@@ -143,37 +143,48 @@ export function AiWorldBackground(): React.JSX.Element {
   }, []);
 
   return (
-    <div
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none"
-      aria-hidden="true"
-    >
+    <div className="ai-world-bg" aria-hidden="true">
       {/* 1. Deep Vibrant Aurora Nebulas matching the cyber cyan/teal theme */}
-      <div className="animate-ai-drift absolute -top-40 left-1/2 -translate-x-1/2">
-        <div className="via-primary/25 h-130 w-195 rounded-full bg-linear-to-tr from-cyan-500/20 to-sky-500/15 blur-[120px]" />
+      <div className="orch-animate-ai-drift ai-world-nebula-top">
+        <div className="ai-world-nebula-top__glow" />
       </div>
 
-      <div className="animate-ai-drift-slow absolute -bottom-48 -left-32">
-        <div className="via-primary/20 h-120 w-155 rounded-full bg-linear-to-br from-teal-600/20 to-blue-600/15 blur-[130px]" />
+      <div className="orch-animate-ai-drift-slow ai-world-nebula-left">
+        <div className="ai-world-nebula-left__glow" />
       </div>
 
-      <div className="animate-ai-drift absolute top-1/4 -right-32">
-        <div className="via-primary/20 h-110 w-140 rounded-full bg-linear-to-bl from-sky-500/20 to-cyan-400/15 blur-[110px]" />
+      <div className="orch-animate-ai-drift ai-world-nebula-right">
+        <div className="ai-world-nebula-right__glow" />
       </div>
 
       {/* 2. Cybernetic Perspective Grid Horizon */}
-      <div className="ai-world-matrix absolute inset-0 opacity-90" />
+      <div className="ai-world-matrix" style={{ position: "absolute", inset: 0, opacity: 0.9 }} />
 
       {/* 3. Interactive Living Neural Synapse Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 size-full" />
+      <canvas ref={canvasRef} className="ai-world-canvas" />
 
       {/* 4. Cybernetic Telemetry Overlays */}
-      <div className="text-primary/80 absolute top-5 left-6 hidden items-center gap-2 font-mono text-[11px] tracking-widest sm:flex">
-        <span className="bg-primary size-2 animate-pulse rounded-full" />
+      <div className="ai-world-telemetry-top">
+        <span
+          style={{
+            width: "0.5rem",
+            height: "0.5rem",
+            borderRadius: "9999px",
+            backgroundColor: "var(--primary)",
+          }}
+        />
         <span>{UI_COPY.AUTH.CARD.SWARM_ACTIVE}</span>
       </div>
 
-      <div className="text-muted-foreground/70 absolute right-6 bottom-5 hidden items-center gap-2 font-mono text-[10px] tracking-widest sm:flex">
-        <span className="size-1.5 rounded-full bg-teal-400" />
+      <div className="ai-world-telemetry-bottom">
+        <span
+          style={{
+            width: "0.375rem",
+            height: "0.375rem",
+            borderRadius: "9999px",
+            backgroundColor: "var(--primary)",
+          }}
+        />
         <span>{UI_COPY.AUTH.CARD.RUNTIME_READY}</span>
       </div>
     </div>

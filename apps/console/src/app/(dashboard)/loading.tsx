@@ -18,10 +18,14 @@ import React from "react";
 /**
  * A single shimmer bar used to approximate a text or heading skeleton.
  */
-function Shimmer({ className }: { className?: string }): React.JSX.Element {
-  return (
-    <div className={`bg-muted/60 animate-pulse rounded-md ${className ?? ""}`} aria-hidden="true" />
-  );
+function Shimmer({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}): React.JSX.Element {
+  return <div className={`orch-shimmer ${className ?? ""}`} style={style} aria-hidden="true" />;
 }
 
 /**
@@ -30,16 +34,16 @@ function Shimmer({ className }: { className?: string }): React.JSX.Element {
  */
 function HeaderSkeleton(): React.JSX.Element {
   return (
-    <header className="border-border bg-background/95 shrink-0 border-b px-6 py-3 backdrop-blur">
-      <div className="flex items-center justify-between gap-3">
-        <div className="space-y-2">
+    <header className="orch-loading-header">
+      <div className="orch-loading-header__inner">
+        <div className="orch-loading-header__meta">
           {/* Breadcrumb line */}
-          <Shimmer className="h-3 w-40" />
+          <Shimmer style={{ height: "0.75rem", width: "10rem" }} />
           {/* Page heading */}
-          <Shimmer className="h-5 w-56" />
+          <Shimmer style={{ height: "1.25rem", width: "14rem" }} />
         </div>
         {/* Right-side action area */}
-        <Shimmer className="h-8 w-24 rounded-md" />
+        <Shimmer style={{ height: "2rem", width: "6rem" }} />
       </div>
     </header>
   );
@@ -51,24 +55,20 @@ function HeaderSkeleton(): React.JSX.Element {
  */
 function ContentSkeleton(): React.JSX.Element {
   return (
-    <div className="p-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div style={{ padding: "1.5rem" }}>
+      <div className="orch-loading-grid">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="border-border bg-card space-y-3 rounded-md border p-4"
-            aria-hidden="true"
-          >
-            <div className="flex items-center gap-3">
-              <Shimmer className="size-8 rounded-md" />
-              <div className="flex-1 space-y-1.5">
-                <Shimmer className="h-3.5 w-3/4" />
-                <Shimmer className="h-3 w-1/2" />
+          <div key={i} className="orch-loading-card" aria-hidden="true">
+            <div className="orch-loading-card__header">
+              <Shimmer style={{ width: "2rem", height: "2rem" }} />
+              <div className="orch-loading-card__meta">
+                <Shimmer style={{ height: "0.875rem", width: "75%" }} />
+                <Shimmer style={{ height: "0.75rem", width: "50%" }} />
               </div>
             </div>
-            <Shimmer className="h-3 w-full" />
-            <Shimmer className="h-3 w-4/5" />
-            <Shimmer className="h-3 w-2/3" />
+            <Shimmer style={{ height: "0.75rem", width: "100%" }} />
+            <Shimmer style={{ height: "0.75rem", width: "80%" }} />
+            <Shimmer style={{ height: "0.75rem", width: "65%" }} />
           </div>
         ))}
       </div>
@@ -82,9 +82,9 @@ function ContentSkeleton(): React.JSX.Element {
  */
 export default function DashboardLoading(): React.JSX.Element {
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+    <div className="orch-page-shell">
       <HeaderSkeleton />
-      <main className="min-h-0 flex-1 overflow-y-auto">
+      <main className="orch-page-shell__main" style={{ padding: 0 }}>
         <ContentSkeleton />
       </main>
     </div>

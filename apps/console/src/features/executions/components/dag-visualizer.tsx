@@ -61,27 +61,30 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
   };
 
   return (
-    <div className="border-border bg-card/60 flex flex-col rounded-md border backdrop-blur">
+    <div className="orch-dag-card">
       {/* Visualizer Header & Zoom Controls */}
-      <div className="border-border/60 flex items-center justify-between border-b px-4 py-2.5">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold tracking-tight">
+      <div className="orch-dag-header">
+        <div className="orch-flex-row orch-gap-sm">
+          <span
+            className="orch-font-semibold"
+            style={{ fontSize: "0.75rem", letterSpacing: "-0.01em" }}
+          >
             {UI_COPY.EXECUTIONS.DAG.TITLE}
           </span>
-          <span className="text-muted-foreground font-mono text-[11px]">
+          <span className="orch-text-muted orch-font-mono" style={{ fontSize: "0.6875rem" }}>
             {UI_COPY.EXECUTIONS.DAG.SUBTITLE(steps.length, Math.round(zoom * 100))}
           </span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="orch-flex-row orch-gap-xs">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleZoom(0.1)}
             aria-label={UI_COPY.EXECUTIONS.DAG.ZOOM_IN_A11Y}
             title={UI_COPY.EXECUTIONS.DAG.ZOOM_IN_A11Y}
-            className="size-7 p-0"
+            style={{ width: "1.75rem", height: "1.75rem", padding: 0 }}
           >
-            <ZoomIn className="size-3.5" />
+            <ZoomIn style={{ width: "0.875rem", height: "0.875rem" }} />
           </Button>
           <Button
             variant="ghost"
@@ -89,9 +92,9 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
             onClick={() => handleZoom(-0.1)}
             aria-label={UI_COPY.EXECUTIONS.DAG.ZOOM_OUT_A11Y}
             title={UI_COPY.EXECUTIONS.DAG.ZOOM_OUT_A11Y}
-            className="size-7 p-0"
+            style={{ width: "1.75rem", height: "1.75rem", padding: 0 }}
           >
-            <ZoomOut className="size-3.5" />
+            <ZoomOut style={{ width: "0.875rem", height: "0.875rem" }} />
           </Button>
           <Button
             variant="ghost"
@@ -99,18 +102,22 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
             onClick={() => setZoom(1)}
             aria-label={UI_COPY.EXECUTIONS.DAG.RESET_ZOOM_A11Y}
             title={UI_COPY.EXECUTIONS.DAG.RESET_ZOOM_A11Y}
-            className="size-7 p-0"
+            style={{ width: "1.75rem", height: "1.75rem", padding: 0 }}
           >
-            <RotateCcw className="size-3.5" />
+            <RotateCcw style={{ width: "0.875rem", height: "0.875rem" }} />
           </Button>
         </div>
       </div>
 
       {/* DAG Flow Canvas */}
-      <div className="bg-muted/10 relative min-h-48 overflow-x-auto p-6">
+      <div className="orch-dag-flow">
         <div
-          className="flex items-center justify-start gap-4 transition-transform duration-200"
-          style={{ transform: `scale(${zoom})`, transformOrigin: "left center" }}
+          className="orch-flex-row orch-gap-md"
+          style={{
+            transform: `scale(${zoom})`,
+            transformOrigin: "left center",
+            transition: "transform 0.2s ease",
+          }}
         >
           {steps.map((step, idx) => {
             const isSelected = selectedStep.stepIndex === step.stepIndex;
@@ -121,38 +128,63 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
             return (
               <React.Fragment key={step.stepIndex}>
                 {idx > 0 && (
-                  <div className="border-muted-foreground/30 flex w-8 items-center border-t-2 border-dashed">
-                    <span className="text-muted-foreground/40 -mr-1.5 ml-auto text-[10px]">▶</span>
+                  <div className="orch-dag-connector">
+                    <span className="orch-dag-connector-arrow">▶</span>
                   </div>
                 )}
                 <button
                   type="button"
                   onClick={() => setSelectedStep(step)}
                   className={cn(
-                    "bg-card group relative flex min-w-44 cursor-pointer flex-col rounded-md border p-3 text-left transition-all",
-                    isSelected
-                      ? "border-primary ring-primary/20 ring-2"
-                      : "border-border hover:border-primary/50",
-                    isCompleted && "border-primary/40",
-                    isFailed && "border-destructive/60 bg-destructive/5",
-                    isRunning && "border-primary animate-pulse",
+                    "orch-dag-node",
+                    isSelected && "is-selected",
+                    isCompleted && "is-completed",
+                    isFailed && "is-failed",
+                    isRunning && "is-running",
                   )}
                 >
-                  <div className="mb-1 flex items-center justify-between gap-2">
-                    <span className="text-muted-foreground font-mono text-[10px]">
+                  <div
+                    className="orch-flex-row orch-justify-between orch-gap-sm"
+                    style={{ marginBottom: "0.25rem" }}
+                  >
+                    <span
+                      className="orch-text-muted orch-font-mono"
+                      style={{ fontSize: "0.625rem" }}
+                    >
                       {UI_COPY.EXECUTIONS.DAG.STEP_LABEL(step.stepIndex)}
                     </span>
-                    {isCompleted && <CheckCircle2 className="text-primary size-3" />}
-                    {isFailed && <AlertCircle className="text-destructive size-3" />}
-                    {isRunning && <Play className="text-primary size-3 fill-current" />}
+                    {isCompleted && (
+                      <CheckCircle2
+                        className="orch-text-primary"
+                        style={{ width: "0.75rem", height: "0.75rem" }}
+                      />
+                    )}
+                    {isFailed && (
+                      <AlertCircle
+                        className="orch-text-destructive"
+                        style={{ width: "0.75rem", height: "0.75rem" }}
+                      />
+                    )}
+                    {isRunning && (
+                      <Play
+                        className="orch-text-primary"
+                        style={{ width: "0.75rem", height: "0.75rem", fill: "currentColor" }}
+                      />
+                    )}
                     {!isCompleted && !isFailed && !isRunning && (
-                      <Clock className="text-muted-foreground size-3" />
+                      <Clock
+                        className="orch-text-muted"
+                        style={{ width: "0.75rem", height: "0.75rem" }}
+                      />
                     )}
                   </div>
-                  <span className="text-foreground truncate text-xs font-medium">
+                  <span className="orch-truncate orch-font-medium" style={{ fontSize: "0.75rem" }}>
                     {step.nodeName}
                   </span>
-                  <div className="text-muted-foreground mt-2 flex items-center justify-between font-mono text-[10px]">
+                  <div
+                    className="orch-flex-row orch-justify-between orch-text-muted orch-font-mono"
+                    style={{ marginTop: "0.5rem", fontSize: "0.625rem" }}
+                  >
                     <span>
                       {step.durationMs ? UI_COPY.EXECUTIONS.DAG.MS_FORMAT(step.durationMs) : "—"}
                     </span>
@@ -169,42 +201,42 @@ export function DagVisualizer({ execution }: DagVisualizerProps): React.JSX.Elem
 
       {/* Selected Node Forensic Inspector */}
       {selectedStep && (
-        <div className="border-border/60 bg-muted/20 border-t p-3 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="font-medium">
+        <div className="orch-dag-inspector">
+          <div className="orch-flex-row orch-justify-between">
+            <span className="orch-font-medium">
               {UI_COPY.EXECUTIONS.DAG.NODE_DETAILS}{" "}
-              <span className="text-primary font-mono">{selectedStep.nodeName}</span>
+              <span className="orch-text-primary orch-font-mono">{selectedStep.nodeName}</span>
             </span>
-            <span className="text-muted-foreground font-mono text-[11px]">
+            <span className="orch-text-muted orch-font-mono" style={{ fontSize: "0.6875rem" }}>
               {UI_COPY.EXECUTIONS.DAG.STATUS_LABEL}{" "}
-              <span className="text-foreground uppercase">{selectedStep.status}</span>
+              <span className="orch-font-semibold" style={{ textTransform: "uppercase" }}>
+                {selectedStep.status}
+              </span>
             </span>
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-2 font-mono text-[11px] sm:grid-cols-4">
-            <div className="bg-card border-border/40 rounded border p-2">
-              <span className="text-muted-foreground block text-[10px]">
+          <div className="orch-dag-inspector-grid">
+            <div className="orch-dag-inspector-item">
+              <span className="orch-dag-inspector-item-label">
                 {UI_COPY.EXECUTIONS.DAG.STEP_INDEX}
               </span>
               <span>{selectedStep.stepIndex}</span>
             </div>
-            <div className="bg-card border-border/40 rounded border p-2">
-              <span className="text-muted-foreground block text-[10px]">
+            <div className="orch-dag-inspector-item">
+              <span className="orch-dag-inspector-item-label">
                 {UI_COPY.EXECUTIONS.DAG.LATENCY}
               </span>
               <span>{UI_COPY.EXECUTIONS.DAG.MS_FORMAT(selectedStep.durationMs ?? 0)}</span>
             </div>
-            <div className="bg-card border-border/40 rounded border p-2">
-              <span className="text-muted-foreground block text-[10px]">
+            <div className="orch-dag-inspector-item">
+              <span className="orch-dag-inspector-item-label">
                 {UI_COPY.EXECUTIONS.DAG.TOKENS_USED}
               </span>
               <span>{selectedStep.tokensUsed ?? 0}</span>
             </div>
-            <div className="bg-card border-border/40 rounded border p-2">
-              <span className="text-muted-foreground block text-[10px]">
-                {UI_COPY.EXECUTIONS.DAG.ERROR}
-              </span>
+            <div className="orch-dag-inspector-item">
+              <span className="orch-dag-inspector-item-label">{UI_COPY.EXECUTIONS.DAG.ERROR}</span>
               <span
-                className={selectedStep.errorMessage ? "text-destructive" : "text-muted-foreground"}
+                className={selectedStep.errorMessage ? "orch-text-destructive" : "orch-text-muted"}
               >
                 {selectedStep.errorMessage ?? UI_COPY.EXECUTIONS.DAG.NONE}
               </span>

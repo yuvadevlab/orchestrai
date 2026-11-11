@@ -11,7 +11,7 @@ import { Plus, Search, Sparkles, Brain } from "lucide-react";
 import { Button, Input } from "@orchestrai/ui";
 import { MemoryType } from "@orchestrai/shared-types";
 import { PageShell } from "@/components/layout/page-shell";
-import { EmptyState, TableSkeleton } from "@orchestrai/ui";
+import { EmptyState, TableSkeleton, DynamicErrorState } from "@orchestrai/ui";
 import { useMemories } from "../api";
 import { UI_COPY } from "@/lib/ui-copy";
 import { MemoryCreateDialog } from "./memory-create-dialog";
@@ -26,10 +26,17 @@ const MEMORY_TYPE_PILLS = [
   { id: MemoryType.WORKING, label: UI_COPY.MEMORY.TYPE_FILTERS.WORKING },
 ];
 
+export interface MemoryPageContentProps {
+  /** If true, renders the content directly without wrapping in PageShell */
+  readonly hideShell?: boolean;
+}
+
 /**
  * Enterprise agent memory dashboard and recall testing workbench.
  */
-export function MemoryPageContent(): React.JSX.Element {
+export function MemoryPageContent({
+  hideShell = false,
+}: MemoryPageContentProps = {}): React.JSX.Element {
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -42,119 +49,154 @@ export function MemoryPageContent(): React.JSX.Element {
     return matchesSearch && matchesType;
   });
 
-  return (
-    <PageShell
-      title={UI_COPY.MEMORY.PAGE_TITLE}
-      breadcrumb={UI_COPY.MEMORY.BREADCRUMB}
-      stats={UI_COPY.MEMORY.STATS(memories.length)}
-      description={UI_COPY.MEMORY.PAGE_DESCRIPTION}
-      actions={
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsRecallOpen(true)}
-            className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
-          >
-            <Sparkles className="size-3.5" />
-            <span>{UI_COPY.MEMORY.RECALL_TESTER.TRIGGER_BUTTON}</span>
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setIsCreateOpen(true)}
-            className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
-          >
-            <Plus className="size-3.5" />
-            <span>{UI_COPY.MEMORY.RECORD_BUTTON}</span>
-          </Button>
-        </div>
-      }
-    >
-      <div className="space-y-5">
-        {/* Search & Filter Toolbar matching Agents page layout */}
-        <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="w-full sm:w-72">
-            <Input
-              value={search}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
-              placeholder={UI_COPY.MEMORY.SEARCH_PLACEHOLDER}
-              startIcon={<Search className="size-3.5" />}
-              className="bg-card h-8 text-xs"
-            />
-          </div>
+  const actionButtons = (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setIsRecallOpen(true)}
+        style={{
+          height: hideShell ? "1.75rem" : "2rem",
+          cursor: "pointer",
+          gap: "0.375rem",
+          fontSize: "0.75rem",
+          fontWeight: 500,
+        }}
+      >
+        <Sparkles style={{ width: "0.875rem", height: "0.875rem" }} />
+        <span>{UI_COPY.MEMORY.RECALL_TESTER.TRIGGER_BUTTON}</span>
+      </Button>
+      <Button
+        variant="default"
+        size="sm"
+        onClick={() => setIsCreateOpen(true)}
+        style={{
+          height: hideShell ? "1.75rem" : "2rem",
+          cursor: "pointer",
+          gap: "0.375rem",
+          fontSize: "0.75rem",
+          fontWeight: 500,
+        }}
+      >
+        <Plus style={{ width: "0.875rem", height: "0.875rem" }} />
+        <span>{UI_COPY.MEMORY.RECORD_BUTTON}</span>
+      </Button>
+    </div>
+  );
 
-          <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-auto">
+  const bodyContent = (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+      {/* Search & Filter Toolbar matching Agents page layout */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "0.75rem",
+        }}
+      >
+        <div style={{ width: "18rem", maxWidth: "100%" }}>
+          <Input
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
+            placeholder={UI_COPY.MEMORY.SEARCH_PLACEHOLDER}
+            startIcon={<Search style={{ width: "0.875rem", height: "0.875rem" }} />}
+            style={{ height: "2rem", fontSize: "0.75rem" }}
+          />
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.375rem" }}>
             {MEMORY_TYPE_PILLS.map((pill) => (
               <Button
                 key={pill.id}
                 variant={selectedType === pill.id ? "default" : "outline"}
                 size="sm"
                 onClick={(): void => setSelectedType(pill.id)}
-                className="h-7 cursor-pointer rounded-full px-3 text-xs capitalize"
+                style={{
+                  height: "1.75rem",
+                  cursor: "pointer",
+                  borderRadius: "9999px",
+                  paddingInline: "0.75rem",
+                  fontSize: "0.75rem",
+                  textTransform: "capitalize",
+                }}
               >
                 {pill.label}
               </Button>
             ))}
           </div>
-        </div>
 
-        {/* Persisted Memories List */}
-        {isLoading ? (
-          <TableSkeleton rows={5} />
-        ) : error ? (
-          <div className="border-border bg-card flex flex-col items-center justify-center gap-2 rounded-md border p-6 text-center">
-            <p className="text-foreground text-xs font-medium">{UI_COPY.MEMORY.ERROR_TITLE}</p>
-            <p className="text-muted-foreground max-w-md text-xs">{error.message}</p>
+          {hideShell && actionButtons}
+        </div>
+      </div>
+
+      {/* Persisted Memories List */}
+      {isLoading ? (
+        <TableSkeleton rows={5} />
+      ) : error ? (
+        <DynamicErrorState
+          error={error}
+          title={UI_COPY.MEMORY.ERROR_TITLE}
+          reset={() => void refetch()}
+        />
+      ) : memories.length === 0 ? (
+        <EmptyState
+          icon={Brain}
+          title={UI_COPY.MEMORY.EMPTY_TITLE}
+          description={UI_COPY.MEMORY.EMPTY_DESC}
+          action={
             <Button
               size="sm"
               variant="outline"
-              onClick={() => void refetch()}
-              className="mt-2 h-7 cursor-pointer text-xs"
+              onClick={() => setIsCreateOpen(true)}
+              style={{ height: "2rem", cursor: "pointer", fontSize: "0.75rem" }}
             >
-              {UI_COPY.MEMORY.RETRY_BUTTON}
+              <Plus style={{ marginRight: "0.375rem", width: "0.875rem", height: "0.875rem" }} />{" "}
+              {UI_COPY.MEMORY.RECORD_BUTTON}
             </Button>
-          </div>
-        ) : memories.length === 0 ? (
-          <EmptyState
-            icon={Brain}
-            title={UI_COPY.MEMORY.EMPTY_TITLE}
-            description={UI_COPY.MEMORY.EMPTY_DESC}
-            action={
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsCreateOpen(true)}
-                className="h-8 cursor-pointer text-xs"
-              >
-                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.MEMORY.RECORD_BUTTON}
-              </Button>
-            }
-          />
-        ) : filteredMemories.length === 0 ? (
-          <EmptyState
-            icon={Search}
-            title={UI_COPY.MEMORY.NO_MATCH_TITLE}
-            description={UI_COPY.MEMORY.NO_MATCH_DESC(search)}
-          />
-        ) : (
-          <MemoryItemsList
-            memories={filteredMemories}
-            isLoading={isLoading}
-            onOpenCreate={() => setIsCreateOpen(true)}
-          />
-        )}
-
-        {/* Record Memory Modal Dialog */}
-        <MemoryCreateDialog
-          isOpen={isCreateOpen}
-          onClose={() => setIsCreateOpen(false)}
-          onSuccess={() => refetch()}
+          }
         />
+      ) : filteredMemories.length === 0 ? (
+        <EmptyState
+          icon={Search}
+          title={UI_COPY.MEMORY.NO_MATCH_TITLE}
+          description={UI_COPY.MEMORY.NO_MATCH_DESC(search)}
+        />
+      ) : (
+        <MemoryItemsList
+          memories={filteredMemories}
+          isLoading={isLoading}
+          onOpenCreate={() => setIsCreateOpen(true)}
+        />
+      )}
 
-        {/* Interactive Recall Tester Modal Dialog */}
-        <MemoryRecallDialog isOpen={isRecallOpen} onClose={() => setIsRecallOpen(false)} />
-      </div>
+      {/* Record Memory Modal Dialog */}
+      <MemoryCreateDialog
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onSuccess={() => refetch()}
+      />
+
+      {/* Interactive Recall Tester Modal Dialog */}
+      <MemoryRecallDialog isOpen={isRecallOpen} onClose={() => setIsRecallOpen(false)} />
+    </div>
+  );
+
+  if (hideShell) {
+    return bodyContent;
+  }
+
+  return (
+    <PageShell
+      title={UI_COPY.MEMORY.PAGE_TITLE}
+      breadcrumb={UI_COPY.MEMORY.BREADCRUMB}
+      stats={UI_COPY.MEMORY.STATS(memories.length)}
+      description={UI_COPY.MEMORY.PAGE_DESCRIPTION}
+      actions={actionButtons}
+    >
+      {bodyContent}
     </PageShell>
   );
 }

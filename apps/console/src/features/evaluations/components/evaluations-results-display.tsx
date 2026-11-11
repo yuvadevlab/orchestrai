@@ -24,58 +24,147 @@ export function EvaluationsResultsDisplay({
   const isHighAccuracy = result.accuracyPercentage >= 80;
 
   return (
-    <div className="border-border/80 bg-background/80 rounded-md border p-4 shadow-sm">
-      <div className="mb-3 flex items-center justify-between border-b pb-2">
-        <div className="flex items-center gap-2">
-          <Award className="text-primary size-4" />
-          <h4 className="text-xs font-semibold tracking-tight">
+    <div
+      style={{
+        border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
+        backgroundColor: "color-mix(in oklab, var(--background) 80%, transparent)",
+        borderRadius: "var(--radius-md, 0.375rem)",
+        padding: "1rem",
+      }}
+    >
+      <div
+        style={{
+          marginBottom: "0.75rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: "1px solid var(--border)",
+          paddingBottom: "0.5rem",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <Award style={{ color: "var(--primary)", width: "1rem", height: "1rem" }} />
+          <h4 style={{ fontSize: "0.75rem", fontWeight: 600, letterSpacing: "-0.01em", margin: 0 }}>
             {UI_COPY.EVALUATIONS.RESULTS.TITLE}
           </h4>
         </div>
-        <span className="text-muted-foreground font-mono text-[11px]">{result.datasetName}</span>
+        <span
+          style={{
+            color: "var(--mutedForeground)",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.6875rem",
+          }}
+        >
+          {result.datasetName}
+        </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div
+        style={{
+          display: "grid",
+          gap: "0.75rem",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+        }}
+      >
         {/* Accuracy Gauge */}
-        <div className="border-border/60 bg-card/60 flex flex-col justify-between rounded border p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px]">
+        <div
+          style={{
+            border: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+            backgroundColor: "color-mix(in oklab, var(--card) 60%, transparent)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            borderRadius: "var(--radius-sm, 0.25rem)",
+            padding: "0.75rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ color: "var(--mutedForeground)", fontSize: "0.6875rem" }}>
               {UI_COPY.EVALUATIONS.RESULTS.ACCURACY_LABEL}
             </span>
-            <Target className="text-primary size-3.5" />
+            <Target style={{ color: "var(--primary)", width: "0.875rem", height: "0.875rem" }} />
           </div>
-          <div className="mt-2 flex items-baseline gap-1">
+          <div
+            style={{ marginTop: "0.5rem", display: "flex", alignItems: "baseline", gap: "0.25rem" }}
+          >
             <span
-              className={`font-mono text-2xl font-bold ${
-                isHighAccuracy ? "text-primary" : "text-warning"
-              }`}
+              style={{
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "1.5rem",
+                fontWeight: 700,
+                color: isHighAccuracy ? "var(--primary)" : "var(--warning, #eab308)",
+              }}
             >
               {result.accuracyPercentage.toFixed(0)}%
             </span>
           </div>
-          <div className="bg-muted mt-2 h-1.5 w-full overflow-hidden rounded-full">
+          <div
+            style={{
+              backgroundColor: "var(--muted)",
+              marginTop: "0.5rem",
+              height: "0.375rem",
+              width: "100%",
+              overflow: "hidden",
+              borderRadius: "9999px",
+            }}
+          >
             <div
-              className={`h-full transition-all ${isHighAccuracy ? "bg-primary" : "bg-warning"}`}
-              style={{ width: `${result.accuracyPercentage}%` }}
+              style={{
+                height: "100%",
+                transition: "all 150ms ease",
+                backgroundColor: isHighAccuracy ? "var(--primary)" : "var(--warning, #eab308)",
+                width: `${result.accuracyPercentage}%`,
+              }}
             />
           </div>
         </div>
 
         {/* Test Items Passed */}
-        <div className="border-border/60 bg-card/60 flex flex-col justify-between rounded border p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px]">
+        <div
+          style={{
+            border: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+            backgroundColor: "color-mix(in oklab, var(--card) 60%, transparent)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            borderRadius: "var(--radius-sm, 0.25rem)",
+            padding: "0.75rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ color: "var(--mutedForeground)", fontSize: "0.6875rem" }}>
               {UI_COPY.EVALUATIONS.RESULTS.PASSED_LABEL}
             </span>
-            <CheckCircle2 className="text-primary size-3.5" />
+            <CheckCircle2
+              style={{ color: "var(--primary)", width: "0.875rem", height: "0.875rem" }}
+            />
           </div>
-          <div className="mt-2 flex items-baseline gap-1">
-            <span className="text-foreground font-mono text-2xl font-bold">
+          <div
+            style={{ marginTop: "0.5rem", display: "flex", alignItems: "baseline", gap: "0.25rem" }}
+          >
+            <span
+              style={{
+                color: "var(--foreground)",
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "1.5rem",
+                fontWeight: 700,
+              }}
+            >
               {result.passedItems}
             </span>
-            <span className="text-muted-foreground font-mono text-xs">/ {result.totalItems}</span>
+            <span
+              style={{
+                color: "var(--mutedForeground)",
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "0.75rem",
+              }}
+            >
+              / {result.totalItems}
+            </span>
           </div>
-          <span className="text-muted-foreground mt-2 text-[10px]">
+          <span
+            style={{ color: "var(--mutedForeground)", marginTop: "0.5rem", fontSize: "0.625rem" }}
+          >
             {result.totalItems - result.passedItems === 0
               ? UI_COPY.EVALUATIONS.RESULTS.ALL_PASSED
               : UI_COPY.EVALUATIONS.RESULTS.FAILED_COUNT(result.totalItems - result.passedItems)}
@@ -83,22 +172,51 @@ export function EvaluationsResultsDisplay({
         </div>
 
         {/* Mean Latency */}
-        <div className="border-border/60 bg-card/60 flex flex-col justify-between rounded border p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px]">
+        <div
+          style={{
+            border: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+            backgroundColor: "color-mix(in oklab, var(--card) 60%, transparent)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            borderRadius: "var(--radius-sm, 0.25rem)",
+            padding: "0.75rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ color: "var(--mutedForeground)", fontSize: "0.6875rem" }}>
               {UI_COPY.EVALUATIONS.RESULTS.LATENCY_LABEL}
             </span>
-            <Clock className="text-muted-foreground size-3.5" />
+            <Clock
+              style={{ color: "var(--mutedForeground)", width: "0.875rem", height: "0.875rem" }}
+            />
           </div>
-          <div className="mt-2 flex items-baseline gap-1">
-            <span className="text-foreground font-mono text-2xl font-bold">
+          <div
+            style={{ marginTop: "0.5rem", display: "flex", alignItems: "baseline", gap: "0.25rem" }}
+          >
+            <span
+              style={{
+                color: "var(--foreground)",
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "1.5rem",
+                fontWeight: 700,
+              }}
+            >
               {result.meanLatencyMs.toFixed(0)}
             </span>
-            <span className="text-muted-foreground font-mono text-xs">
+            <span
+              style={{
+                color: "var(--mutedForeground)",
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "0.75rem",
+              }}
+            >
               {UI_COPY.EVALUATIONS.RESULTS.MS_PER_ITEM}
             </span>
           </div>
-          <span className="text-muted-foreground mt-2 text-[10px]">
+          <span
+            style={{ color: "var(--mutedForeground)", marginTop: "0.5rem", fontSize: "0.625rem" }}
+          >
             {UI_COPY.EVALUATIONS.RESULTS.SPEED_LABEL}
           </span>
         </div>

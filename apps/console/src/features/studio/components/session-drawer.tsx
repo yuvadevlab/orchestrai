@@ -7,10 +7,11 @@
  */
 
 import React, { useState } from "react";
-import { MessageSquare, MoreHorizontal, Plus, Search, Trash2, X } from "lucide-react";
+import { MessageSquare, Plus, Search, X } from "lucide-react";
 import { Badge, Button } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { CoworkSession } from "../types";
+import { SessionDrawerItem } from "./session-drawer-item";
 
 export interface SessionDrawerProps {
   isOpen: boolean;
@@ -42,15 +43,40 @@ export function SessionDrawer({
   const filtered = sessions.filter((s) => s.title.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <aside className="border-border bg-sidebar/80 flex h-full w-72 shrink-0 flex-col border-r backdrop-blur-md transition-all duration-200">
+    <aside
+      style={{
+        display: "flex",
+        height: "100%",
+        width: "18rem",
+        flexShrink: 0,
+        flexDirection: "column",
+        borderRight: "1px solid var(--border)",
+        backgroundColor: "color-mix(in oklab, var(--sidebar) 80%, transparent)",
+        backdropFilter: "blur(12px)",
+        transition: "all 0.2s ease",
+      }}
+    >
       {/* Header */}
-      <div className="border-border/60 flex h-14 shrink-0 items-center justify-between border-b px-4">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="text-primary size-4" />
-          <span className="text-foreground text-sm font-semibold">
+      <div
+        className="orch-flex-row orch-justify-between"
+        style={{
+          height: "3.5rem",
+          flexShrink: 0,
+          alignItems: "center",
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+          padding: "0 1rem",
+        }}
+      >
+        <div className="orch-flex-row orch-gap-xs" style={{ alignItems: "center" }}>
+          <MessageSquare className="orch-text-primary" style={{ width: "1rem", height: "1rem" }} />
+          <span className="orch-font-semibold" style={{ fontSize: "0.875rem" }}>
             {UI_COPY.STUDIO.DRAWER.THREADS_LABEL}
           </span>
-          <Badge variant="secondary" className="px-1.5 py-0 font-mono text-[10px]">
+          <Badge
+            variant="secondary"
+            className="orch-font-mono"
+            style={{ padding: "0 0.375rem", fontSize: "0.625rem" }}
+          >
             {sessions.length}
           </Badge>
         </div>
@@ -59,127 +85,121 @@ export function SessionDrawer({
           variant="ghost"
           size="sm"
           onClick={onClose}
-          className="text-muted-foreground hover:text-foreground size-7 rounded-md p-0"
+          className="orch-text-muted"
+          style={{ width: "1.75rem", height: "1.75rem", padding: 0 }}
           title={UI_COPY.STUDIO.DRAWER.CLOSE_TOOLTIP}
           aria-label={UI_COPY.STUDIO.DRAWER.CLOSE_A11Y}
         >
-          <X className="size-4" />
+          <X style={{ width: "1rem", height: "1rem" }} />
         </Button>
       </div>
 
       {/* Action Bar: New Thread & Search */}
-      <div className="border-border/40 space-y-2 border-b p-3">
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 40%, transparent)",
+          padding: "0.75rem",
+        }}
+      >
         <Button
           onClick={onNewSession}
-          className="h-8.5 w-full gap-1.5 text-xs font-semibold shadow-xs"
+          className="orch-flex-row orch-gap-xs"
+          style={{
+            height: "2.125rem",
+            width: "100%",
+            justifyContent: "center",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+          }}
           size="sm"
         >
-          <Plus className="size-3.5" />
+          <Plus style={{ width: "0.875rem", height: "0.875rem" }} />
           <span>{UI_COPY.STUDIO.DRAWER.NEW_THREAD}</span>
         </Button>
 
-        <div className="border-border bg-background/80 flex h-8.5 items-center gap-2 rounded-md border px-3 text-xs shadow-2xs">
-          <Search className="text-muted-foreground size-3.5 shrink-0" />
+        <div
+          className="orch-flex-row orch-gap-xs"
+          style={{
+            height: "2.125rem",
+            alignItems: "center",
+            borderRadius: "var(--radius-md, 0.375rem)",
+            border: "1px solid var(--border)",
+            backgroundColor: "color-mix(in oklab, var(--background) 80%, transparent)",
+            padding: "0 0.75rem",
+            fontSize: "0.75rem",
+          }}
+        >
+          <Search
+            className="orch-text-muted"
+            style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+          />
           <input
             type="text"
             placeholder={UI_COPY.STUDIO.DRAWER.SEARCH_PLACEHOLDER}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="placeholder:text-muted-foreground w-full bg-transparent text-xs outline-none"
+            style={{
+              width: "100%",
+              background: "transparent",
+              border: "none",
+              fontSize: "0.75rem",
+              outline: "none",
+              color: "inherit",
+            }}
           />
         </div>
       </div>
 
       {/* Thread List */}
-      <div className="flex-1 space-y-1 overflow-y-auto p-2">
+      <div
+        style={{
+          flex: "1 1 0%",
+          overflowY: "auto",
+          padding: "0.5rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.25rem",
+        }}
+      >
         {filtered.length === 0 ? (
-          <div className="text-muted-foreground/70 space-y-1 py-10 text-center text-xs">
-            <p className="font-medium">
+          <div
+            className="orch-text-muted"
+            style={{ padding: "2.5rem 0", textAlign: "center", fontSize: "0.75rem" }}
+          >
+            <p style={{ margin: 0, fontWeight: 500 }}>
               {search
                 ? UI_COPY.STUDIO.DRAWER.NO_MATCHING_THREADS
                 : UI_COPY.STUDIO.DRAWER.NO_SAVED_THREADS}
             </p>
             {!search && (
-              <p className="text-muted-foreground/50 text-[11px]">
+              <p style={{ margin: 0, marginTop: "0.25rem", fontSize: "0.6875rem", opacity: 0.5 }}>
                 {UI_COPY.STUDIO.DRAWER.START_THREAD_HINT}
               </p>
             )}
           </div>
         ) : (
-          filtered.map((s) => {
-            const isActive = s.id === activeSessionId;
-            const isMenuOpen = menuSessionId === s.id;
-            const msgCount = s.messages.length;
-
-            return (
-              <div
-                key={s.id}
-                onClick={() => {
-                  onSelectSession(s.id);
-                  setMenuSessionId(null);
-                }}
-                className={`group relative flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-xs transition-all ${
-                  isActive
-                    ? "bg-primary/10 text-primary border-primary/20 border font-medium"
-                    : "hover:bg-accent text-muted-foreground hover:text-foreground border border-transparent"
-                }`}
-              >
-                {/* Title & Metadata with Text Ellipsis */}
-                <div className="min-w-0 flex-1 pr-2">
-                  <p className="text-foreground truncate text-xs leading-snug font-medium">
-                    {s.title}
-                  </p>
-                  <div className="text-muted-foreground mt-0.5 flex items-center gap-1.5 font-mono text-[10px]">
-                    <span>
-                      {msgCount} msg{msgCount === 1 ? "" : "s"}
-                    </span>
-                    <span>·</span>
-                    <span>{new Date(s.updatedAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-
-                {/* Three-dots Action Button on Hover */}
-                <div className="relative shrink-0">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMenuSessionId(isMenuOpen ? null : s.id);
-                    }}
-                    className={`hover:text-foreground hover:bg-muted/80 rounded-md p-1 transition-all ${
-                      isMenuOpen || isActive
-                        ? "text-foreground opacity-100"
-                        : "opacity-0 group-hover:opacity-100"
-                    }`}
-                    title={UI_COPY.STUDIO.DRAWER.THREAD_OPTIONS_A11Y}
-                    aria-label={UI_COPY.STUDIO.DRAWER.THREAD_OPTIONS_A11Y}
-                  >
-                    <MoreHorizontal className="size-3.5" />
-                  </button>
-
-                  {/* Dropdown Action Popover */}
-                  {isMenuOpen && (
-                    <div
-                      onClick={(e) => e.stopPropagation()}
-                      className="border-border bg-popover text-popover-foreground absolute top-7 right-0 z-50 min-w-30 rounded-md border p-1 text-xs shadow-lg backdrop-blur-md"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onDeleteSession(s.id);
-                          setMenuSessionId(null);
-                        }}
-                        className="hover:bg-destructive/10 text-destructive flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors"
-                      >
-                        <Trash2 className="size-3.5" />
-                        <span>{UI_COPY.COMMON.ACTIONS.DELETE}</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
+          filtered.map((s) => (
+            <SessionDrawerItem
+              key={s.id}
+              session={s}
+              isActive={s.id === activeSessionId}
+              isMenuOpen={menuSessionId === s.id}
+              onSelect={(id) => {
+                onSelectSession(id);
+                setMenuSessionId(null);
+              }}
+              onToggleMenu={(id) => {
+                setMenuSessionId(menuSessionId === id ? null : id);
+              }}
+              onDelete={(id) => {
+                onDeleteSession(id);
+                setMenuSessionId(null);
+              }}
+            />
+          ))
         )}
       </div>
     </aside>

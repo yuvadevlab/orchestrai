@@ -27,23 +27,53 @@ export function AuthCard({
   children,
 }: AuthCardProps): React.JSX.Element {
   return (
-    <div className="runner-enter relative z-10 mx-auto w-full max-w-md">
+    <div className="orch-auth-wrapper runner-enter">
       {/* Radiant Glow Behind Card */}
-      <div className="bg-primary/20 pointer-events-none absolute -inset-1 rounded-md blur-xl" />
+      <div className="orch-auth-glow" />
 
       {/* Main Glassmorphic Panel */}
-      <div className="border-border/80 bg-card/85 relative overflow-hidden rounded-md border p-6 shadow-2xl shadow-black/40 backdrop-blur-2xl sm:p-8">
+      <div className="orch-auth-card" style={{ padding: "1.5rem" }}>
         {/* Top Edge Neon Shimmer Line */}
-        <div className="via-primary/60 absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-transparent to-transparent" />
+        <div className="orch-auth-shimmer-line" />
 
         {/* Brand Header */}
-        <div className="mb-6 flex flex-col items-center text-center">
+        <div
+          style={{
+            marginBottom: "1.5rem",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
           {/* Pulsating Monogram Halo */}
-          <div className="relative mb-3.5">
-            <div className="bg-primary/30 absolute -inset-2 animate-pulse rounded-md blur-md" />
+          <div style={{ position: "relative", marginBottom: "0.875rem" }}>
+            <div
+              style={{
+                position: "absolute",
+                inset: "-0.5rem",
+                borderRadius: "var(--radius-md, 0.375rem)",
+                backgroundColor: "color-mix(in oklab, var(--primary) 30%, transparent)",
+                filter: "blur(8px)",
+              }}
+            />
             <Link
               href="/"
-              className="bg-primary text-primary-foreground font-display relative grid size-12 place-items-center rounded-md text-lg font-black shadow-lg transition-transform hover:scale-105"
+              style={{
+                position: "relative",
+                display: "grid",
+                height: "3rem",
+                width: "3rem",
+                placeItems: "center",
+                borderRadius: "var(--radius-md, 0.375rem)",
+                backgroundColor: "var(--primary)",
+                color: "var(--primaryForeground)",
+                fontFamily: "var(--font-display, sans-serif)",
+                fontSize: "1.125rem",
+                fontWeight: 900,
+                textDecoration: "none",
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+              }}
               aria-label={UI_COPY.AUTH.CARD.HOME_A11Y}
             >
               O
@@ -51,19 +81,41 @@ export function AuthCard({
           </div>
 
           {/* Micro Telemetry Badge */}
-          <div className="bg-primary/10 border-primary/30 text-primary mb-2.5 flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold tracking-wider uppercase">
-            <Sparkles className="size-3 animate-spin" style={{ animationDuration: "6s" }} />
+          <div className="orch-auth-pill" style={{ marginBottom: "0.625rem" }}>
+            <Sparkles
+              style={{ width: "0.75rem", height: "0.75rem", animation: "spin 6s linear infinite" }}
+            />
             <span>{badgeText}</span>
           </div>
 
-          <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">
+          <h1
+            style={{
+              color: "var(--foreground)",
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              margin: 0,
+            }}
+          >
             {title}
           </h1>
-          <p className="text-muted-foreground mt-1 max-w-xs text-xs leading-relaxed">{subtitle}</p>
+          <p
+            style={{
+              color: "var(--mutedForeground)",
+              marginTop: "0.25rem",
+              maxWidth: "20rem",
+              fontSize: "0.75rem",
+              lineHeight: 1.5,
+              marginInline: "auto",
+              marginBottom: 0,
+            }}
+          >
+            {subtitle}
+          </p>
         </div>
 
         {/* Form Slot */}
-        <div className="relative">{children}</div>
+        <div style={{ position: "relative" }}>{children}</div>
       </div>
     </div>
   );

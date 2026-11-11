@@ -33,15 +33,35 @@ export function ModelCard({ model, providerName }: ModelCardProps): React.JSX.El
   const cost = typeof config.cost === "string" ? config.cost : "$1.25 / 1M";
 
   return (
-    <Card className="border-border bg-card/60 flex flex-col justify-between rounded-md p-5 shadow-xs">
+    <Card className="orch-model-card">
       <div>
-        <CardHeader className="p-0 pb-3">
-          <div className="flex items-start justify-between gap-3">
+        <CardHeader style={{ padding: 0, paddingBottom: "0.75rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: "0.75rem",
+            }}
+          >
             <div>
-              <CardTitle className="text-foreground text-sm font-semibold tracking-tight">
+              <CardTitle
+                style={{
+                  color: "var(--foreground)",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                }}
+              >
                 {model.name}
               </CardTitle>
-              <div className="text-muted-foreground mt-0.5 text-xs">
+              <div
+                style={{
+                  color: "var(--mutedForeground)",
+                  marginTop: "0.125rem",
+                  fontSize: "0.75rem",
+                }}
+              >
                 {providerName || UI_COPY.MODELS.CARD.FALLBACK_PROVIDER} · {model.modelIdentifier}
               </div>
             </div>
@@ -55,34 +75,74 @@ export function ModelCard({ model, providerName }: ModelCardProps): React.JSX.El
           </div>
         </CardHeader>
 
-        <CardContent className="p-0">
-          <dl className="mt-2 grid grid-cols-3 gap-2 font-mono text-xs">
+        <CardContent style={{ padding: 0 }}>
+          <dl
+            style={{
+              marginTop: "0.5rem",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "0.5rem",
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: "0.75rem",
+            }}
+          >
             <div>
-              <dt className="text-muted-foreground">{UI_COPY.MODELS.CARD.LATENCY_LABEL}</dt>
-              <dd className="text-foreground mt-0.5 font-medium">
+              <dt style={{ color: "var(--mutedForeground)" }}>
+                {UI_COPY.MODELS.CARD.LATENCY_LABEL}
+              </dt>
+              <dd style={{ color: "var(--foreground)", marginTop: "0.125rem", fontWeight: 500 }}>
                 {latency > 0 ? UI_COPY.MODELS.CARD.MS_FORMAT(latency) : "—"}
               </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">{UI_COPY.MODELS.CARD.CONTEXT_LABEL}</dt>
-              <dd className="text-foreground mt-0.5 font-medium">{contextFormatted}</dd>
+              <dt style={{ color: "var(--mutedForeground)" }}>
+                {UI_COPY.MODELS.CARD.CONTEXT_LABEL}
+              </dt>
+              <dd style={{ color: "var(--foreground)", marginTop: "0.125rem", fontWeight: 500 }}>
+                {contextFormatted}
+              </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">{UI_COPY.MODELS.CARD.COST_LABEL}</dt>
-              <dd className="text-foreground mt-0.5 font-medium">{cost}</dd>
+              <dt style={{ color: "var(--mutedForeground)" }}>{UI_COPY.MODELS.CARD.COST_LABEL}</dt>
+              <dd style={{ color: "var(--foreground)", marginTop: "0.125rem", fontWeight: 500 }}>
+                {cost}
+              </dd>
             </div>
           </dl>
         </CardContent>
       </div>
 
-      <div className="border-border/50 mt-4 flex items-center justify-between border-t pt-3 text-xs">
+      <div
+        style={{
+          marginTop: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderTop: "1px solid color-mix(in oklab, var(--border) 50%, transparent)",
+          paddingTop: "0.75rem",
+          fontSize: "0.75rem",
+        }}
+      >
         {model.isEnabled ? (
-          <span className="text-success font-medium">{UI_COPY.MODELS.CARD.KEY_CONNECTED}</span>
+          <span style={{ color: "var(--success, #22c55e)", fontWeight: 500 }}>
+            {UI_COPY.MODELS.CARD.KEY_CONNECTED}
+          </span>
         ) : (
-          <span className="text-muted-foreground">{UI_COPY.MODELS.CARD.NO_KEY}</span>
+          <span style={{ color: "var(--mutedForeground)" }}>{UI_COPY.MODELS.CARD.NO_KEY}</span>
         )}
         {model.isDefault && (
-          <span className="bg-primary/10 text-primary rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold">
+          <span
+            style={{
+              backgroundColor: "color-mix(in oklab, var(--primary) 10%, transparent)",
+              color: "var(--primary)",
+              borderRadius: "var(--radius-md, 0.375rem)",
+              paddingInline: "0.375rem",
+              paddingBlock: "0.125rem",
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: "0.625rem",
+              fontWeight: 600,
+            }}
+          >
             {UI_COPY.MODELS.CARD.DEFAULT_BADGE}
           </span>
         )}

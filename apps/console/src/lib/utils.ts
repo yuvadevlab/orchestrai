@@ -1,21 +1,21 @@
 /**
- * @fileoverview Classname merging and string formatting utilities for React Components.
+ * @fileoverview Classname formatting and string utilities for React Components.
  * Adheres strictly to the 250-line maximum rule.
+ * @author yuva.devlab@gmail.com
  */
 
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { WORD_SPLIT_REGEX, ALPHANUMERIC_START_REGEX } from "@orchestrai/regex";
 import { UI_COPY } from "./ui-copy";
 
 /**
- * Combines Tailwind and conditional CSS classnames safely in both Server and Client environments.
+ * Combines conditional CSS classnames safely in both Server and Client environments.
  *
  * @param inputs - List of class names, conditional records, or arrays.
- * @returns Merged deduplicated CSS class string.
+ * @returns Merged CSS class string.
  */
 export function cn(...inputs: ClassValue[]): string {
-  return twMerge(clsx(inputs));
+  return clsx(inputs);
 }
 
 /**

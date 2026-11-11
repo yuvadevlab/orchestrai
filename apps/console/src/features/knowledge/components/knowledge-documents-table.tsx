@@ -51,8 +51,12 @@ export function KnowledgeDocumentsTable({
         title={UI_COPY.KNOWLEDGE.EMPTY_TITLE}
         description={UI_COPY.KNOWLEDGE.EMPTY_DESC}
         action={
-          <Button size="sm" onClick={onOpenUpload} className="h-8 gap-1.5 text-xs font-medium">
-            <FileText className="size-3.5" />
+          <Button
+            size="sm"
+            onClick={onOpenUpload}
+            style={{ height: "2rem", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 500 }}
+          >
+            <FileText style={{ width: "0.875rem", height: "0.875rem" }} />
             <span>{UI_COPY.KNOWLEDGE.UPLOAD_BUTTON}</span>
           </Button>
         }
@@ -61,44 +65,115 @@ export function KnowledgeDocumentsTable({
   }
 
   return (
-    <div className="border-border bg-card/40 overflow-hidden rounded-md border backdrop-blur">
-      <div className="divide-border/60 divide-y">
+    <div
+      style={{
+        border: "1px solid var(--border)",
+        backgroundColor: "color-mix(in oklab, var(--card) 40%, transparent)",
+        borderRadius: "var(--radius-md, 0.375rem)",
+        overflow: "hidden",
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {documents.map((doc) => (
           <div
             key={doc.documentId}
-            className="hover:bg-muted/30 flex flex-col gap-3 p-4 transition-colors sm:flex-row sm:items-center sm:justify-between"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "0.75rem",
+              padding: "1rem",
+              borderBottom: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+              transition: "background-color 150ms ease",
+            }}
           >
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <FileText className="text-primary size-4 shrink-0" />
-                <span className="truncate text-xs font-semibold">{doc.title}</span>
-                <span className="border-border/80 bg-muted/60 text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]">
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <FileText
+                  style={{ color: "var(--primary)", width: "1rem", height: "1rem", flexShrink: 0 }}
+                />
+                <span
+                  style={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  {doc.title}
+                </span>
+                <span
+                  style={{
+                    border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
+                    backgroundColor: "color-mix(in oklab, var(--muted) 60%, transparent)",
+                    color: "var(--mutedForeground)",
+                    borderRadius: "var(--radius-sm, 0.25rem)",
+                    paddingInline: "0.375rem",
+                    paddingBlock: "0.125rem",
+                    fontFamily: "var(--font-mono, monospace)",
+                    fontSize: "0.625rem",
+                  }}
+                >
                   {doc.mimeType}
                 </span>
               </div>
-              <div className="text-muted-foreground mt-1.5 flex flex-wrap items-center gap-3 text-[11px]">
-                <div className="flex items-center gap-1 font-mono">
-                  <Globe className="size-3" />
-                  <span className="max-w-72 truncate">{doc.sourceUri}</span>
+              <div
+                style={{
+                  color: "var(--mutedForeground)",
+                  marginTop: "0.375rem",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  fontSize: "0.6875rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    fontFamily: "var(--font-mono, monospace)",
+                  }}
+                >
+                  <Globe style={{ width: "0.75rem", height: "0.75rem" }} />
+                  <span
+                    style={{
+                      maxWidth: "18rem",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {doc.sourceUri}
+                  </span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="size-3" />
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                  <Calendar style={{ width: "0.75rem", height: "0.75rem" }} />
                   <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:self-center">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => handleDelete(doc)}
                 disabled={deleteMutation.isPending}
-                className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground size-7 rounded"
+                style={{
+                  width: "1.75rem",
+                  height: "1.75rem",
+                  color: "var(--mutedForeground)",
+                  borderRadius: "var(--radius-sm, 0.25rem)",
+                }}
                 title={UI_COPY.KNOWLEDGE.TABLE.DELETE_TOOLTIP}
                 aria-label={UI_COPY.KNOWLEDGE.TABLE.DELETE_TOOLTIP}
               >
-                <Trash2 className="size-3.5" />
+                <Trash2 style={{ width: "0.875rem", height: "0.875rem" }} />
               </Button>
             </div>
           </div>

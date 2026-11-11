@@ -17,5 +17,6 @@ export function registerHealthRoutes(
   controller: HealthController = new HealthController(),
 ): void {
   router.get("/health", (req, res) => controller.getHealth(req, res));
+  router.get("/api/v1/health", (req, res) => controller.getHealth(req, res));
   router.get("/ready", (req, res) => controller.getReady(req, res));
 }

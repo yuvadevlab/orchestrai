@@ -33,16 +33,9 @@ export function ProductNav(): React.JSX.Element {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <nav
-        className="border-border bg-sidebar hidden w-14 shrink-0 flex-col items-center gap-0.5 overflow-y-auto border-r py-3 md:flex"
-        aria-label={UI_COPY.COMMON.A11Y.PRODUCT_NAV}
-      >
+      <nav className="orch-nav-rail" aria-label={UI_COPY.COMMON.A11Y.PRODUCT_NAV}>
         {/* Brand Monogram */}
-        <Link
-          href="/"
-          className="bg-primary text-primary-foreground mb-3 grid size-8 shrink-0 cursor-pointer place-items-center rounded-md text-sm font-bold shadow-sm"
-          aria-label={UI_COPY.COMMON.A11Y.HOME}
-        >
+        <Link href="/" className="orch-nav-rail__brand" aria-label={UI_COPY.COMMON.A11Y.HOME}>
           {UI_COPY.COMMON.BRAND.MONOGRAM}
         </Link>
 
@@ -60,26 +53,19 @@ export function ProductNav(): React.JSX.Element {
                 <Link
                   href={item.href}
                   aria-label={item.label}
-                  className={cn(
-                    "text-muted-foreground hover:bg-accent hover:text-foreground relative grid size-10 shrink-0 cursor-pointer place-items-center rounded-md transition-all duration-200",
-                    isActive && "bg-sidebar-accent text-primary",
-                  )}
+                  className={cn("orch-nav-rail__item", isActive && "orch-nav-rail__item--active")}
                 >
-                  <Icon className="size-4.5" />
-                  {isActive && (
-                    <span className="bg-primary absolute -left-2 h-5 w-1 rounded-r-full" />
-                  )}
+                  <Icon style={{ width: "1.125rem", height: "1.125rem" }} />
+                  {isActive && <span className="orch-nav-rail__indicator" />}
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right" className="font-mono text-xs">
-                {item.label}
-              </TooltipContent>
+              <TooltipContent side="right">{item.label}</TooltipContent>
             </Tooltip>
           );
         })}
 
         {/* Bottom Actions: Theme Toggle, User Avatar, Sign Out */}
-        <div className="mt-auto flex flex-col items-center gap-1 pt-3">
+        <div className="orch-nav-rail__footer">
           {/* Light / Dark Mode Switcher */}
           <ThemeToggle />
 
@@ -90,14 +76,14 @@ export function ProductNav(): React.JSX.Element {
                 href="/settings"
                 aria-label={UI_COPY.COMMON.A11Y.SETTINGS}
                 className={cn(
-                  "bg-secondary text-muted-foreground hover:text-foreground grid size-9 shrink-0 cursor-pointer place-items-center rounded-md font-mono text-[10px]",
-                  pathname.startsWith("/settings") && "border-primary/40 text-primary border",
+                  "orch-nav-rail__avatar",
+                  pathname.startsWith("/settings") && "orch-nav-rail__avatar--active",
                 )}
               >
                 {userInitials}
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right" className="font-mono text-xs">
+            <TooltipContent side="right">
               {user?.email || UI_COPY.COMMON.A11Y.SETTINGS}
             </TooltipContent>
           </Tooltip>
@@ -109,14 +95,12 @@ export function ProductNav(): React.JSX.Element {
                 type="button"
                 onClick={logout}
                 aria-label={UI_COPY.COMMON.A11Y.SIGN_OUT}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 grid size-9 shrink-0 cursor-pointer place-items-center rounded-md transition-colors"
+                className="orch-nav-rail__btn orch-nav-rail__btn--signout"
               >
-                <LogOut className="size-4" />
+                <LogOut style={{ width: "1rem", height: "1rem" }} />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right" className="font-mono text-xs">
-              {UI_COPY.COMMON.A11Y.SIGN_OUT_BTN}
-            </TooltipContent>
+            <TooltipContent side="right">{UI_COPY.COMMON.A11Y.SIGN_OUT_BTN}</TooltipContent>
           </Tooltip>
         </div>
       </nav>

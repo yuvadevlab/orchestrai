@@ -21,7 +21,6 @@ export interface StudioWelcomeProps {
 /**
  * Welcome hero for OrchestrAI Cowork Studio.
  * Displayed in the center feed when the active session has no messages.
- * Uses dynamic server-driven headline, subtitle, and starter chips.
  */
 export function StudioWelcome({
   userFirstName,
@@ -32,7 +31,6 @@ export function StudioWelcome({
 
   const headline = React.useMemo(() => {
     if (welcome?.headline?.includes("{name}")) {
-      // Substitute the {name} token from server-driven headline with first name
       return welcome.headline.replace(
         "{name}",
         userFirstName ?? UI_COPY.STUDIO.WELCOME.GREETING_FALLBACK_NAME,
@@ -47,22 +45,51 @@ export function StudioWelcome({
   const subtitle = welcome?.subtitle ?? UI_COPY.STUDIO.WELCOME.FALLBACK_SUBTITLE;
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-6 py-10 text-center">
-      {/* ── Gradient Headline ── */}
-      <h1 className="text-gradient font-display text-4xl font-bold tracking-tight">{headline}</h1>
+    <div
+      style={{
+        marginLeft: "auto",
+        marginRight: "auto",
+        display: "flex",
+        width: "100%",
+        maxWidth: "48rem",
+        flex: "1 1 0%",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2.5rem 1.5rem",
+        textAlign: "center",
+      }}
+    >
+      {/* ── Headline ── */}
+      <h1
+        className="orch-font-bold"
+        style={{ fontSize: "2.25rem", lineHeight: "2.5rem", letterSpacing: "-0.025em" }}
+      >
+        {headline}
+      </h1>
 
       {/* ── Subtitle ── */}
-      <p className="text-muted-foreground mt-2 text-sm">{subtitle}</p>
+      <p className="orch-text-muted" style={{ marginTop: "0.5rem", fontSize: "0.875rem" }}>
+        {subtitle}
+      </p>
 
       {/* ── Dynamic Suggestion Chips ── */}
       {onSelectPrompt && chips.length > 0 && (
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div
+          style={{
+            marginTop: "1.5rem",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "0.5rem",
+          }}
+        >
           {chips.map((chip) => (
             <button
               key={chip}
               type="button"
               onClick={() => onSelectPrompt(chip)}
-              className="border-border bg-card text-muted-foreground hover:border-primary hover:text-foreground rounded-full border px-3 py-1 text-xs transition-colors"
+              className="orch-prompt-pill"
             >
               {chip}
             </button>

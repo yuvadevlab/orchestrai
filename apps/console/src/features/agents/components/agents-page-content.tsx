@@ -54,34 +54,55 @@ export function AgentsPageContent(): React.JSX.Element {
           variant="default"
           size="sm"
           onClick={() => setIsModalOpen(true)}
-          className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+          style={{
+            height: "2rem",
+            cursor: "pointer",
+            gap: "0.375rem",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          }}
         >
-          <Plus className="size-3.5" />
+          <Plus style={{ width: "0.875rem", height: "0.875rem" }} />
           <span>{UI_COPY.AGENTS.REGISTER_BUTTON}</span>
         </Button>
       }
     >
-      <div className="space-y-5">
-        <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="w-full sm:w-72">
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.75rem",
+          }}
+        >
+          <div style={{ width: "18rem", maxWidth: "100%" }}>
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
               placeholder={UI_COPY.AGENTS.SEARCH_PLACEHOLDER}
-              startIcon={<Search className="size-3.5" />}
-              className="bg-card h-8 text-xs"
+              startIcon={<Search style={{ width: "0.875rem", height: "0.875rem" }} />}
+              style={{ height: "2rem", fontSize: "0.75rem" }}
             />
           </div>
 
           {/* Domain Filter Pills */}
-          <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-auto">
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.375rem" }}>
             {domains.map((d) => (
               <Button
                 key={d}
                 variant={selectedDomain.toLowerCase() === d.toLowerCase() ? "default" : "outline"}
                 size="sm"
                 onClick={(): void => setSelectedDomain(d)}
-                className="h-7 cursor-pointer rounded-full px-3 text-xs capitalize"
+                style={{
+                  height: "1.75rem",
+                  cursor: "pointer",
+                  borderRadius: "9999px",
+                  paddingInline: "0.75rem",
+                  fontSize: "0.75rem",
+                  textTransform: "capitalize",
+                }}
               >
                 {d}
               </Button>
@@ -92,14 +113,50 @@ export function AgentsPageContent(): React.JSX.Element {
         {isLoading ? (
           <CardGridSkeleton count={6} />
         ) : error ? (
-          <div className="border-border bg-card flex flex-col items-center justify-center gap-2 rounded-md border p-6 text-center">
-            <p className="text-foreground text-xs font-medium">{UI_COPY.AGENTS.ERROR_TITLE}</p>
-            <p className="text-muted-foreground max-w-md text-xs">{error.message}</p>
+          <div
+            style={{
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--card)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+              borderRadius: "var(--radius-md, 0.375rem)",
+              padding: "1.5rem",
+              textAlign: "center",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--foreground)",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                margin: 0,
+              }}
+            >
+              {UI_COPY.AGENTS.ERROR_TITLE}
+            </p>
+            <p
+              style={{
+                color: "var(--mutedForeground)",
+                maxWidth: "28rem",
+                fontSize: "0.75rem",
+                margin: 0,
+              }}
+            >
+              {error.message}
+            </p>
             <Button
               size="sm"
               variant="outline"
               onClick={() => void refetch()}
-              className="mt-2 h-7 cursor-pointer text-xs"
+              style={{
+                marginTop: "0.5rem",
+                height: "1.75rem",
+                cursor: "pointer",
+                fontSize: "0.75rem",
+              }}
             >
               {UI_COPY.AGENTS.RETRY_BUTTON}
             </Button>
@@ -114,9 +171,10 @@ export function AgentsPageContent(): React.JSX.Element {
                 size="sm"
                 variant="outline"
                 onClick={() => setIsModalOpen(true)}
-                className="h-8 cursor-pointer text-xs"
+                style={{ height: "2rem", cursor: "pointer", fontSize: "0.75rem" }}
               >
-                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.AGENTS.REGISTER_BUTTON}
+                <Plus style={{ marginRight: "0.375rem", width: "0.875rem", height: "0.875rem" }} />{" "}
+                {UI_COPY.AGENTS.REGISTER_BUTTON}
               </Button>
             }
           />
@@ -127,7 +185,7 @@ export function AgentsPageContent(): React.JSX.Element {
             description={UI_COPY.AGENTS.NO_MATCH_DESC(search)}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="orch-agent-grid">
             {filteredAgents.map((agent) => (
               <AgentCard key={agent.id} agent={agent} />
             ))}

@@ -29,32 +29,57 @@ export function SecuritySettings({
   maxRetryLimit,
 }: SecuritySettingsProps): React.JSX.Element {
   return (
-    <Card className="border-border bg-card">
-      <CardHeader className="border-border/50 border-b pb-3">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="text-primary size-4" />
-          <CardTitle className="text-sm font-semibold">{UI_COPY.SETTINGS.SECURITY.TITLE}</CardTitle>
+    <Card>
+      <CardHeader
+        style={{
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 50%, transparent)",
+          paddingBottom: "0.75rem",
+        }}
+      >
+        <div className="orch-flex-row orch-gap-sm" style={{ alignItems: "center" }}>
+          <ShieldCheck className="orch-text-primary" style={{ width: "1rem", height: "1rem" }} />
+          <CardTitle style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+            {UI_COPY.SETTINGS.SECURITY.TITLE}
+          </CardTitle>
         </div>
-        <CardDescription className="text-muted-foreground text-xs">
+        <CardDescription className="orch-text-muted" style={{ fontSize: "0.75rem" }}>
           {UI_COPY.SETTINGS.SECURITY.DESCRIPTION}
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 p-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label className="text-xs font-medium">{UI_COPY.SETTINGS.SECURITY.MAX_TIMEOUT}</Label>
+      <CardContent
+        style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "1rem",
+          }}
+        >
+          <div className="orch-flex-col orch-gap-xs">
+            <Label style={{ fontSize: "0.75rem", fontWeight: 500 }}>
+              {UI_COPY.SETTINGS.SECURITY.MAX_TIMEOUT}
+            </Label>
             <Input
               defaultValue={maxTimeoutSeconds.toString()}
-              className="bg-background/50 font-mono text-xs"
+              className="orch-font-mono"
+              style={{
+                fontSize: "0.75rem",
+                backgroundColor: "color-mix(in oklab, var(--background) 50%, transparent)",
+              }}
             />
           </div>
-          <div className="space-y-2">
-            <Label className="text-xs font-medium">
+          <div className="orch-flex-col orch-gap-xs">
+            <Label style={{ fontSize: "0.75rem", fontWeight: 500 }}>
               {UI_COPY.SETTINGS.SECURITY.MAX_RETRY_LIMIT}
             </Label>
             <Input
               defaultValue={maxRetryLimit.toString()}
-              className="bg-background/50 font-mono text-xs"
+              className="orch-font-mono"
+              style={{
+                fontSize: "0.75rem",
+                backgroundColor: "color-mix(in oklab, var(--background) 50%, transparent)",
+              }}
             />
           </div>
         </div>

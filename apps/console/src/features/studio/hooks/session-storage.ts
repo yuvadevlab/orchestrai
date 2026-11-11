@@ -5,6 +5,7 @@
  */
 
 import { getApiClient } from "@/lib/api-client";
+import { ConsoleStorageKey } from "@/lib/auth/types";
 import {
   CoworkMessageRole,
   CoworkMode,
@@ -13,8 +14,8 @@ import {
   type CoworkSession,
 } from "../types";
 
-export const SESSIONS_STORAGE_KEY = "orchestrai_cowork_sessions";
-export const ACTIVE_SESSION_STORAGE_KEY = "orchestrai_active_session_id";
+export const SESSIONS_STORAGE_KEY = ConsoleStorageKey.COWORK_SESSIONS;
+export const ACTIVE_SESSION_STORAGE_KEY = ConsoleStorageKey.ACTIVE_SESSION_ID;
 
 /**
  * Generates an RFC-4122 compliant v4 UUID for session identification.

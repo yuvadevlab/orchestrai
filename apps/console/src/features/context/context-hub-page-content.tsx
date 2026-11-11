@@ -8,12 +8,20 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { BookOpen, Brain, Layers } from "lucide-react";
+import { BookOpen, Brain } from "lucide-react";
+import { PageShell } from "@/components/layout/page-shell";
+import { cn } from "@/lib/utils";
 import { KnowledgePageContent } from "@/features/knowledge";
 import { MemoryPageContent } from "@/features/memory";
+import { useKnowledgeDocuments } from "@/features/knowledge/api";
+import { useMemories } from "@/features/memory/api";
 import { UI_COPY } from "@/lib/ui-copy";
+import { ConsoleQueryParamKey, ConsoleRoutePath } from "@/lib/auth/types";
 
-type ContextTab = "knowledge" | "memory";
+export enum ContextTab {
+  KNOWLEDGE = "knowledge",
+  MEMORY = "memory",
+}
 
 /**
  * Unified Context Hub page content providing tabbed management of RAG documents and persistent memories.
@@ -21,66 +29,71 @@ type ContextTab = "knowledge" | "memory";
 export function ContextHubPageContent(): React.JSX.Element {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const initialTab = (searchParams.get("tab") as ContextTab) || "knowledge";
+  const rawTab = searchParams.get(ConsoleQueryParamKey.TAB);
+  const initialTab = rawTab === ContextTab.MEMORY ? ContextTab.MEMORY : ContextTab.KNOWLEDGE;
   const [activeTab, setActiveTab] = useState<ContextTab>(initialTab);
 
+  const { data: documents = [] } = useKnowledgeDocuments();
+  const { data: memories = [] } = useMemories();
+
   useEffect(() => {
-    const tabParam = searchParams.get("tab") as ContextTab;
-    if (tabParam && (tabParam === "knowledge" || tabParam === "memory")) {
-      setActiveTab(tabParam);
+    const tabParam = searchParams.get(ConsoleQueryParamKey.TAB);
+    if (tabParam === ContextTab.KNOWLEDGE || tabParam === ContextTab.MEMORY) {
+      setActiveTab(tabParam as ContextTab);
     }
   }, [searchParams]);
 
   const handleTabChange = (tab: ContextTab): void => {
     setActiveTab(tab);
-    router.replace(`/context?tab=${tab}`);
+    const targetUrl = new URL(ConsoleRoutePath.CONTEXT, "http://localhost");
+    targetUrl.searchParams.set(ConsoleQueryParamKey.TAB, tab);
+    router.replace(`${targetUrl.pathname}${targetUrl.search}`);
   };
 
+  const activeStats =
+    activeTab === ContextTab.KNOWLEDGE
+      ? UI_COPY.KNOWLEDGE.STATS(documents.length)
+      : UI_COPY.MEMORY.STATS(memories.length);
+
   return (
-    <div className="flex size-full min-w-0 flex-1 flex-col overflow-hidden">
-      {/* Sub-header Navigation Rail */}
-      <div className="border-border/60 bg-card/40 flex w-full shrink-0 items-center justify-between border-b px-6 py-2.5 backdrop-blur">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <Layers className="text-primary size-4" />
-            <span className="text-sm font-semibold tracking-tight">
-              {UI_COPY.CONTEXT.PAGE_TITLE}
-            </span>
-          </div>
-          <div className="bg-muted/40 border-border/60 flex rounded-md border p-0.5 text-xs">
-            <button
-              type="button"
-              onClick={() => handleTabChange("knowledge")}
-              className={`flex items-center gap-1.5 rounded px-3 py-1 font-medium transition-colors ${
-                activeTab === "knowledge"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <BookOpen className="size-3.5" />
-              <span>{UI_COPY.CONTEXT.TAB_KNOWLEDGE}</span>
-            </button>
+    <PageShell
+      title={UI_COPY.CONTEXT.PAGE_TITLE}
+      breadcrumb={UI_COPY.CONTEXT.BREADCRUMB}
+      description={UI_COPY.CONTEXT.PAGE_DESCRIPTION}
+      stats={activeStats}
+      extraRows={[
+        <div key="context-hub-tabs" className="orch-header-tabs">
+          <button
+            type="button"
+            onClick={() => handleTabChange(ContextTab.KNOWLEDGE)}
+            className={cn("orch-header-tab", activeTab === ContextTab.KNOWLEDGE && "is-active")}
+          >
+            <BookOpen />
+            <span>{UI_COPY.CONTEXT.TAB_KNOWLEDGE}</span>
+            {documents.length > 0 && (
+              <span className="orch-header-tab__count">{documents.length}</span>
+            )}
+          </button>
 
-            <button
-              type="button"
-              onClick={() => handleTabChange("memory")}
-              className={`flex items-center gap-1.5 rounded px-3 py-1 font-medium transition-colors ${
-                activeTab === "memory"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Brain className="size-3.5" />
-              <span>{UI_COPY.CONTEXT.TAB_MEMORY}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Active Tab View */}
-      <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden">
-        {activeTab === "knowledge" ? <KnowledgePageContent /> : <MemoryPageContent />}
-      </div>
-    </div>
+          <button
+            type="button"
+            onClick={() => handleTabChange(ContextTab.MEMORY)}
+            className={cn("orch-header-tab", activeTab === ContextTab.MEMORY && "is-active")}
+          >
+            <Brain />
+            <span>{UI_COPY.CONTEXT.TAB_MEMORY}</span>
+            {memories.length > 0 && (
+              <span className="orch-header-tab__count">{memories.length}</span>
+            )}
+          </button>
+        </div>,
+      ]}
+    >
+      {activeTab === ContextTab.KNOWLEDGE ? (
+        <KnowledgePageContent hideShell />
+      ) : (
+        <MemoryPageContent hideShell />
+      )}
+    </PageShell>
   );
 }

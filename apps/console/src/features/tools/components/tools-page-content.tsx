@@ -78,14 +78,20 @@ export function ToolsPageContent(): React.JSX.Element {
           variant="default"
           size="sm"
           onClick={() => setIsModalOpen(true)}
-          className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+          style={{
+            height: "2rem",
+            cursor: "pointer",
+            gap: "0.375rem",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          }}
         >
-          <Plus className="size-3.5" />
+          <Plus style={{ width: "0.875rem", height: "0.875rem" }} />
           <span>{UI_COPY.TOOLS.REGISTER_BUTTON}</span>
         </Button>
       }
     >
-      <div className="space-y-8">
+      <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
         {isLoading ? (
           <CardGridSkeleton count={6} />
         ) : tools.length === 0 ? (
@@ -98,23 +104,45 @@ export function ToolsPageContent(): React.JSX.Element {
                 size="sm"
                 variant="outline"
                 onClick={() => setIsModalOpen(true)}
-                className="h-8 cursor-pointer text-xs"
+                style={{ height: "2rem", cursor: "pointer", fontSize: "0.75rem" }}
               >
-                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.TOOLS.REGISTER_BUTTON}
+                <Plus style={{ marginRight: "0.375rem", width: "0.875rem", height: "0.875rem" }} />{" "}
+                {UI_COPY.TOOLS.REGISTER_BUTTON}
               </Button>
             }
           />
         ) : (
-          <div className="space-y-8">
+          <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
             {groupedTools.map((g) => (
-              <section key={g.group} className="space-y-3">
+              <section
+                key={g.group}
+                style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+              >
                 <div>
-                  <h2 className="text-foreground text-sm font-semibold tracking-tight">
+                  <h2
+                    style={{
+                      color: "var(--foreground)",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      letterSpacing: "-0.01em",
+                      margin: 0,
+                    }}
+                  >
                     {g.group}
                   </h2>
-                  <p className="text-muted-foreground mt-0.5 text-xs">{g.blurb}</p>
+                  <p
+                    style={{
+                      color: "var(--mutedForeground)",
+                      marginTop: "0.125rem",
+                      fontSize: "0.75rem",
+                      marginInline: 0,
+                      marginBottom: 0,
+                    }}
+                  >
+                    {g.blurb}
+                  </p>
                 </div>
-                <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 lg:grid-cols-3">
+                <div className="orch-tool-grid">
                   {g.tools.map((t) => (
                     <ToolCard
                       key={t.toolId ?? t.slug ?? t.name}

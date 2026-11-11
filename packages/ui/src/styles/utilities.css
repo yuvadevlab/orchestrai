@@ -1,0 +1,204 @@
+/**
+ * @file packages/ui/src/styles/utilities.css
+ * @description Zero-runtime platform layout, spacing, typography, and animation utilities for OrchestrAI.
+ * Governed under @layer dl-utilities.
+ * @author yuva.devlab@gmail.com
+ */
+
+@layer dl-utilities {
+  /* ── Display & Flexbox ── */
+  .orch-flex-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  button.orch-flex-row,
+  a.orch-flex-row {
+    display: inline-flex;
+  }
+
+  .orch-flex-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .orch-inline-flex {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .orch-items-center {
+    align-items: center;
+  }
+
+  .orch-items-start {
+    align-items: flex-start;
+  }
+
+  .orch-items-end {
+    align-items: flex-end;
+  }
+
+  .orch-justify-between {
+    justify-content: space-between;
+  }
+
+  .orch-justify-center {
+    justify-content: center;
+  }
+
+  .orch-justify-start {
+    justify-content: flex-start;
+  }
+
+  .orch-justify-end {
+    justify-content: flex-end;
+  }
+
+  /* ── Spacing & Gap ── */
+  .orch-gap-none {
+    gap: 0;
+  }
+
+  .orch-gap-xs {
+    gap: 0.375rem;
+  }
+
+  .orch-gap-sm {
+    gap: 0.5rem;
+  }
+
+  .orch-gap-md {
+    gap: 0.75rem;
+  }
+
+  .orch-gap-lg {
+    gap: 1rem;
+  }
+
+  .orch-gap-xl {
+    gap: 1.5rem;
+  }
+
+  /* ── Sizing & Flex Behavior ── */
+  .orch-w-full {
+    width: 100%;
+  }
+
+  .orch-h-full {
+    height: 100%;
+  }
+
+  .orch-min-w-0 {
+    min-width: 0;
+  }
+
+  .orch-min-h-0 {
+    min-height: 0;
+  }
+
+  .orch-shrink-0 {
+    flex-shrink: 0;
+  }
+
+  .orch-grow {
+    flex-grow: 1;
+  }
+
+  /* ── Typography & Text ── */
+  .orch-text-muted {
+    color: var(--mutedForeground);
+  }
+
+  .orch-text-primary {
+    color: var(--primary);
+  }
+
+  .orch-text-destructive {
+    color: var(--destructive);
+  }
+
+  .orch-text-foreground {
+    color: var(--foreground);
+  }
+
+  .orch-text-center {
+    text-align: center;
+  }
+
+  .orch-font-mono {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  }
+
+  .orch-font-sans {
+    font-family: var(
+      --font-sans,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif
+    );
+  }
+
+  .orch-font-medium {
+    font-weight: 500;
+  }
+
+  .orch-font-semibold {
+    font-weight: 600;
+  }
+
+  .orch-font-bold {
+    font-weight: 700;
+  }
+
+  .orch-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Accessibility ── */
+  .orch-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* ── Animations & Transitions ── */
+  .orch-animate-spin {
+    animation: orch-spin 1s linear infinite;
+  }
+
+  .orch-animate-pulse {
+    animation: orch-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes orch-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orch-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

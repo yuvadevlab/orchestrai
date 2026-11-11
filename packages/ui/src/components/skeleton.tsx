@@ -3,6 +3,7 @@
  * @description Accessible, animated shimmer skeleton primitives and precomposed layout skeletons.
  * Replaces static "Loading..." text with layout-preserving placeholders.
  * @module apps/console/components/ui
+ * @author yuva.devlab@gmail.com
  */
 
 import React from "react";
@@ -11,18 +12,15 @@ import { cn } from "../lib/utils";
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Optional custom class styling */
   className?: string;
+  style?: React.CSSProperties;
 }
 
 /**
  * Base shimmer block for building custom loading skeletons.
  */
-export function Skeleton({ className, ...props }: SkeletonProps): React.JSX.Element {
+export function Skeleton({ className, style, ...props }: SkeletonProps): React.JSX.Element {
   return (
-    <div
-      className={cn("bg-muted/60 animate-pulse rounded-md", className)}
-      aria-hidden="true"
-      {...props}
-    />
+    <div className={cn("orch-skeleton", className)} style={style} aria-hidden="true" {...props} />
   );
 }
 
@@ -32,23 +30,30 @@ export function Skeleton({ className, ...props }: SkeletonProps): React.JSX.Elem
  */
 export function DetailPageSkeleton(): React.JSX.Element {
   return (
-    <div className="grid gap-3 lg:grid-cols-3" aria-hidden="true">
-      <div className="space-y-3 lg:col-span-2">
-        <div className="border-border bg-card/60 space-y-3 rounded-md border p-4 backdrop-blur">
-          <Skeleton className="h-5 w-48" />
-          <Skeleton className="h-16 w-full" />
+    <div
+      style={{
+        display: "grid",
+        gap: "0.75rem",
+        gridTemplateColumns: "repeat(auto-fit, minmax(18rem, 1fr))",
+      }}
+      aria-hidden="true"
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <div className="orch-skeleton-card">
+          <Skeleton style={{ height: "1.25rem", width: "12rem" }} />
+          <Skeleton style={{ height: "4rem", width: "100%" }} />
         </div>
-        <div className="border-border bg-card/60 space-y-3 rounded-md border p-4 backdrop-blur">
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-24 w-full" />
+        <div className="orch-skeleton-card">
+          <Skeleton style={{ height: "1.25rem", width: "10rem" }} />
+          <Skeleton style={{ height: "6rem", width: "100%" }} />
         </div>
       </div>
-      <div className="space-y-3">
-        <div className="border-border bg-card/60 space-y-3 rounded-md border p-4 backdrop-blur">
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
+      <div>
+        <div className="orch-skeleton-card">
+          <Skeleton style={{ height: "1.25rem", width: "8rem" }} />
+          <Skeleton style={{ height: "2.5rem", width: "100%" }} />
+          <Skeleton style={{ height: "2.5rem", width: "100%" }} />
+          <Skeleton style={{ height: "2.5rem", width: "100%" }} />
         </div>
       </div>
     </div>
@@ -60,23 +65,35 @@ export function DetailPageSkeleton(): React.JSX.Element {
  */
 export function CardGridSkeleton({ count = 6 }: { count?: number }): React.JSX.Element {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+    <div className="orch-skeleton-grid" aria-hidden="true">
       {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className="border-border bg-card/60 space-y-3 rounded-md border p-4 backdrop-blur"
-        >
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-9 rounded-md" />
-            <div className="flex-1 space-y-1.5">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-3 w-20" />
+        <div key={i} className="orch-skeleton-card">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <Skeleton
+              style={{
+                width: "2.25rem",
+                height: "2.25rem",
+                borderRadius: "var(--radius-md, 0.375rem)",
+              }}
+            />
+            <div
+              style={{ flex: "1 1 0%", display: "flex", flexDirection: "column", gap: "0.375rem" }}
+            >
+              <Skeleton style={{ height: "1rem", width: "8rem" }} />
+              <Skeleton style={{ height: "0.75rem", width: "5rem" }} />
             </div>
           </div>
-          <Skeleton className="h-12 w-full" />
-          <div className="flex items-center justify-between pt-2">
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-4 w-20" />
+          <Skeleton style={{ height: "3rem", width: "100%" }} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingTop: "0.5rem",
+            }}
+          >
+            <Skeleton style={{ height: "1rem", width: "4rem" }} />
+            <Skeleton style={{ height: "1rem", width: "5rem" }} />
           </div>
         </div>
       ))}
@@ -89,15 +106,22 @@ export function CardGridSkeleton({ count = 6 }: { count?: number }): React.JSX.E
  */
 export function TableSkeleton({ rows = 5 }: { rows?: number }): React.JSX.Element {
   return (
-    <div className="border-border bg-card/40 space-y-2 rounded-md border p-4" aria-hidden="true">
+    <div className="orch-skeleton-card" aria-hidden="true">
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}
-          className="border-border/50 flex items-center justify-between gap-4 border-b py-2 last:border-0"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+            padding: "0.5rem 0",
+            borderBottom: i < rows - 1 ? "1px solid var(--border)" : "none",
+          }}
         >
-          <Skeleton className="h-4 w-48" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-16" />
+          <Skeleton style={{ height: "1rem", width: "12rem" }} />
+          <Skeleton style={{ height: "1rem", width: "6rem" }} />
+          <Skeleton style={{ height: "1rem", width: "4rem" }} />
         </div>
       ))}
     </div>

@@ -144,12 +144,17 @@ export function StudioPromptBar({
   };
 
   return (
-    <div className="relative z-20 mx-auto w-full max-w-4xl px-4 pb-4">
-      {/*
-       * When human authorization is required, the prompt container is taken over
-       * by the clearance action card (matching Claude Cowork, Copilot, and Antigravity).
-       * Disappears immediately upon decision; decision notes render in the chat stream.
-       */}
+    <div
+      style={{
+        position: "relative",
+        zIndex: 20,
+        marginLeft: "auto",
+        marginRight: "auto",
+        width: "100%",
+        maxWidth: "56rem",
+        padding: "0 1rem 1rem",
+      }}
+    >
       {pendingApproval && onResolveApproval ? (
         <StudioLiveClearanceCard
           pendingApproval={pendingApproval}
@@ -166,7 +171,16 @@ export function StudioPromptBar({
           <StudioAttachedFilesList files={attachedFiles} onRemove={handleFileRemoved} />
 
           {/* Floating Prompt Container */}
-          <div className="border-border bg-card/85 relative rounded-md border p-2 shadow-lg backdrop-blur-md">
+          <div
+            className="orch-prompt-box"
+            style={{
+              position: "relative",
+              padding: "0.5rem",
+              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+              backdropFilter: "blur(12px)",
+              backgroundColor: "color-mix(in oklab, var(--card) 85%, transparent)",
+            }}
+          >
             {/* Slash commands popover */}
             {slashQuery !== null && (
               <StudioSlashCommands
@@ -195,7 +209,13 @@ export function StudioPromptBar({
               placeholder={UI_COPY.STUDIO.PROMPT.PLACEHOLDER}
               rows={3}
               disabled={isRunning}
-              className="placeholder:text-muted-foreground max-h-56 min-h-21 w-full resize-none bg-transparent px-3 py-2 text-sm leading-relaxed outline-none disabled:opacity-50"
+              className="orch-prompt-textarea"
+              style={{
+                maxHeight: "14rem",
+                minHeight: "5.25rem",
+                padding: "0.5rem 0.75rem",
+                opacity: isRunning ? 0.5 : 1,
+              }}
             />
 
             <StudioPromptActionRow

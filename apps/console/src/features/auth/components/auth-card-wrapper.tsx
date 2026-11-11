@@ -35,52 +35,111 @@ export function AuthCardWrapper({
   footerLinkHref,
 }: AuthCardWrapperProps): React.JSX.Element {
   return (
-    <div className="runner-enter relative mx-auto w-full max-w-sm sm:max-w-md">
+    <div className="orch-auth-wrapper runner-enter">
       {/* 1. Radiant Ambient Glow Beneath Card */}
-      <div className="bg-primary/20 pointer-events-none absolute -inset-1 rounded-md blur-2xl" />
+      <div className="orch-auth-glow" />
 
       {/* 2. Glassmorphic Card Surface */}
-      <Card className="border-border/80 bg-card/80 relative overflow-hidden rounded-md border shadow-2xl shadow-black/40 backdrop-blur-2xl">
+      <Card className="orch-auth-card">
         {/* Top Edge Ambient Shimmer Line */}
-        <div className="via-primary/70 absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-transparent to-transparent" />
+        <div className="orch-auth-shimmer-line" />
 
-        <CardHeader className="space-y-2 pb-3 text-center">
+        <CardHeader
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+            paddingBottom: "0.75rem",
+            textAlign: "center",
+          }}
+        >
           {/* Brand Monogram with Pulsating Neural Halo */}
-          <div className="mb-1 flex justify-center">
-            <div className="relative">
-              <div className="bg-primary/30 absolute -inset-2 animate-pulse rounded-md blur-md" />
-              <div className="bg-primary text-primary-foreground font-display relative grid size-11 place-items-center rounded-md text-base font-black shadow-lg">
+          <div style={{ marginBottom: "0.25rem", display: "flex", justifyContent: "center" }}>
+            <div style={{ position: "relative" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  inset: "-0.5rem",
+                  borderRadius: "var(--radius-md, 0.375rem)",
+                  backgroundColor: "color-mix(in oklab, var(--primary) 30%, transparent)",
+                  filter: "blur(8px)",
+                }}
+              />
+              <div
+                style={{
+                  position: "relative",
+                  display: "grid",
+                  height: "2.75rem",
+                  width: "2.75rem",
+                  placeItems: "center",
+                  borderRadius: "var(--radius-md, 0.375rem)",
+                  backgroundColor: "var(--primary)",
+                  color: "var(--primaryForeground)",
+                  fontFamily: "var(--font-display, sans-serif)",
+                  fontSize: "1rem",
+                  fontWeight: 900,
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                }}
+              >
                 O
               </div>
             </div>
           </div>
 
           {/* Micro Telemetry Pill */}
-          <div className="flex justify-center">
-            <div className="bg-primary/10 border-primary/30 text-primary flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold tracking-wider uppercase">
-              <Sparkles className="size-3 animate-spin" style={{ animationDuration: "8s" }} />
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div className="orch-auth-pill">
+              <Sparkles
+                style={{
+                  width: "0.75rem",
+                  height: "0.75rem",
+                  animation: "spin 8s linear infinite",
+                }}
+              />
               <span>{badgeText}</span>
             </div>
           </div>
 
-          <CardTitle className="font-display text-foreground text-xl font-bold tracking-tight sm:text-2xl">
+          <CardTitle
+            style={{
+              fontFamily: "var(--font-display, sans-serif)",
+              fontSize: "1.25rem",
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+            }}
+          >
             {title}
           </CardTitle>
-          <CardDescription className="text-muted-foreground mx-auto max-w-xs text-xs leading-relaxed">
+          <CardDescription
+            style={{
+              color: "var(--mutedForeground)",
+              marginInline: "auto",
+              maxWidth: "20rem",
+              fontSize: "0.75rem",
+              lineHeight: 1.5,
+            }}
+          >
             {subtitle}
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {children}
 
           {footerLinkText && footerLinkHref && (
-            <div className="border-border/60 mt-4 border-t pt-4 text-center">
-              <p className="text-muted-foreground text-xs">
+            <div
+              style={{
+                marginTop: "1rem",
+                borderTop: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+                paddingTop: "1rem",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ color: "var(--mutedForeground)", fontSize: "0.75rem", margin: 0 }}>
                 {footerPrompt}{" "}
                 <Link
                   href={footerLinkHref}
-                  className="text-primary font-medium transition-colors hover:underline"
+                  style={{ color: "var(--primary)", fontWeight: 500, textDecoration: "none" }}
                 >
                   {footerLinkText}
                 </Link>
@@ -89,13 +148,20 @@ export function AuthCardWrapper({
           )}
 
           {/* Bottom Cybernetic Telemetry Footer */}
-          <div className="border-border/40 text-muted-foreground/50 mt-4 flex items-center justify-between border-t pt-3 font-mono text-[9px]">
-            <span className="flex items-center gap-1">
-              <Terminal className="size-2.5" />
+          <div className="orch-auth-footer-telemetry">
+            <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+              <Terminal style={{ width: "0.625rem", height: "0.625rem" }} />
               <span>{UI_COPY.AUTH.CARD.NODE_TELEMETRY}</span>
             </span>
-            <span className="flex items-center gap-1">
-              <span className="bg-primary size-1.5 animate-pulse rounded-full" />
+            <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+              <span
+                style={{
+                  width: "0.375rem",
+                  height: "0.375rem",
+                  borderRadius: "9999px",
+                  backgroundColor: "var(--primary)",
+                }}
+              />
               <span>{UI_COPY.AUTH.CARD.ENGINE_STATUS}</span>
             </span>
           </div>

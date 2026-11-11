@@ -11,6 +11,8 @@ import { Activity, X } from "lucide-react";
 import { Button } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import type { StudioEvent } from "../types";
+import { StudioInspectorStream } from "./studio-inspector-stream";
+import { StudioInspectorTelemetry } from "./studio-inspector-telemetry";
 
 export interface StudioInspectorRailProps {
   events: StudioEvent[];
@@ -31,115 +33,113 @@ export function StudioInspectorRail({
   const [tab, setTab] = useState<"stream" | "telemetry">("stream");
 
   return (
-    <div className="border-border bg-card/60 flex size-full flex-col border-l font-mono text-xs backdrop-blur-md">
-      {/* Spacious Header with ample top/bottom padding matching h-16 */}
-      <div className="border-border/60 flex h-16 shrink-0 items-center justify-between border-b px-5 py-4">
-        <div className="flex items-center gap-2.5">
-          <div className="bg-primary/10 text-primary grid size-8 place-items-center rounded-md">
-            <Activity className="size-4" />
+    <div className="orch-inspector-rail" style={{ width: "100%", height: "100%", padding: 0 }}>
+      {/* Header */}
+      <div
+        className="orch-flex-row orch-justify-between"
+        style={{
+          height: "3.5rem",
+          flexShrink: 0,
+          alignItems: "center",
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+          padding: "0.75rem 1.25rem",
+        }}
+      >
+        <div className="orch-flex-row orch-gap-sm" style={{ alignItems: "center" }}>
+          <div
+            style={{
+              display: "grid",
+              width: "2rem",
+              height: "2rem",
+              placeItems: "center",
+              borderRadius: "var(--radius-md, 0.375rem)",
+              backgroundColor: "color-mix(in oklab, var(--primary) 10%, transparent)",
+              color: "var(--primary)",
+            }}
+          >
+            <Activity style={{ width: "1rem", height: "1rem" }} />
           </div>
           <div>
-            <span className="text-foreground text-sm font-semibold tracking-tight">
+            <span
+              className="orch-font-semibold"
+              style={{ fontSize: "0.875rem", letterSpacing: "-0.01em" }}
+            >
               {UI_COPY.STUDIO.INSPECTOR.TITLE}
             </span>
-            <p className="text-muted-foreground mt-0.5 font-mono text-[10px] leading-none">
+            <p
+              className="orch-text-muted orch-font-mono"
+              style={{ margin: 0, marginTop: "0.125rem", fontSize: "0.625rem", lineHeight: 1 }}
+            >
               {UI_COPY.STUDIO.INSPECTOR.SUBTITLE}
             </p>
           </div>
         </div>
 
         {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose} className="size-8 p-0 md:hidden">
-            <X className="size-4" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            style={{ width: "2rem", height: "2rem", padding: 0 }}
+          >
+            <X style={{ width: "1rem", height: "1rem" }} />
           </Button>
         )}
       </div>
 
-      {/* Tabs with generous padding */}
-      <div className="border-border/40 bg-muted/20 flex border-b p-1.5 text-[11px]">
+      {/* Tabs */}
+      <div
+        style={{
+          display: "flex",
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 40%, transparent)",
+          backgroundColor: "color-mix(in oklab, var(--muted) 20%, transparent)",
+          padding: "0.375rem",
+          fontSize: "0.6875rem",
+          gap: "0.25rem",
+        }}
+      >
         <button
           type="button"
           onClick={() => setTab("stream")}
-          className={`flex-1 rounded-md py-1.5 text-center font-medium transition-colors ${
-            tab === "stream"
-              ? "bg-card text-primary shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          style={{
+            flex: 1,
+            borderRadius: "var(--radius-sm, 0.25rem)",
+            padding: "0.375rem 0",
+            textAlign: "center",
+            fontWeight: 500,
+            border: "none",
+            cursor: "pointer",
+            backgroundColor: tab === "stream" ? "var(--card)" : "transparent",
+            color: tab === "stream" ? "var(--primary)" : "var(--mutedForeground)",
+          }}
         >
           {UI_COPY.STUDIO.INSPECTOR.TAB_STREAM(events.length)}
         </button>
         <button
           type="button"
           onClick={() => setTab("telemetry")}
-          className={`flex-1 rounded-md py-1.5 text-center font-medium transition-colors ${
-            tab === "telemetry"
-              ? "bg-card text-primary shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          style={{
+            flex: 1,
+            borderRadius: "var(--radius-sm, 0.25rem)",
+            padding: "0.375rem 0",
+            textAlign: "center",
+            fontWeight: 500,
+            border: "none",
+            cursor: "pointer",
+            backgroundColor: tab === "telemetry" ? "var(--card)" : "transparent",
+            color: tab === "telemetry" ? "var(--primary)" : "var(--mutedForeground)",
+          }}
         >
           {UI_COPY.STUDIO.INSPECTOR.TAB_TELEMETRY}
         </button>
       </div>
 
       {/* Body: Stream or Telemetry */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div style={{ flex: "1 1 0%", overflowY: "auto", padding: "1rem" }}>
         {tab === "stream" ? (
-          <div className="space-y-2.5">
-            {events.length === 0 ? (
-              <div className="text-muted-foreground/60 py-12 text-center text-[11px]">
-                {isRunning
-                  ? UI_COPY.STUDIO.INSPECTOR.AWAITING_STREAM
-                  : UI_COPY.STUDIO.INSPECTOR.NO_LIVE_EVENTS}
-              </div>
-            ) : (
-              events.map((evt) => (
-                <div
-                  key={evt.id}
-                  className="border-border/50 bg-background/50 rounded-md border p-3 text-[11px] shadow-2xs"
-                >
-                  <div className="text-muted-foreground flex items-center justify-between">
-                    <span className="text-primary font-semibold">{evt.agent}</span>
-                    <span>{evt.meta}</span>
-                  </div>
-                  <p className="text-foreground mt-1 font-medium">{evt.title}</p>
-                  {evt.detail && (
-                    <p className="text-muted-foreground mt-1 text-[10px] leading-normal break-all">
-                      {evt.detail}
-                    </p>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
+          <StudioInspectorStream events={events} isRunning={isRunning} />
         ) : (
-          <div className="space-y-3">
-            <div className="border-border/50 bg-background/50 rounded-md border p-3.5 shadow-2xs">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                {UI_COPY.STUDIO.INSPECTOR.HANDLE_LABEL}
-              </span>
-              <p className="text-foreground mt-1 truncate font-semibold">
-                {activeExecutionId || UI_COPY.STUDIO.INSPECTOR.IDLE}
-              </p>
-            </div>
-
-            <div className="border-border/50 bg-background/50 rounded-md border p-3.5 shadow-2xs">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                {UI_COPY.STUDIO.INSPECTOR.ENGINE_LABEL}
-              </span>
-              <p className="text-foreground mt-1 font-semibold">
-                Universal Swarm Coordinator (v1.0.0)
-              </p>
-            </div>
-
-            <div className="border-border/50 bg-background/50 rounded-md border p-3.5 shadow-2xs">
-              <span className="text-muted-foreground text-[10px] uppercase">
-                {UI_COPY.STUDIO.INSPECTOR.SANDBOX_LABEL}
-              </span>
-              <p className="mt-1 font-semibold text-emerald-400">
-                {UI_COPY.STUDIO.INSPECTOR.LOCAL_FIRST_STATUS}
-              </p>
-            </div>
-          </div>
+          <StudioInspectorTelemetry activeExecutionId={activeExecutionId} />
         )}
       </div>
     </div>

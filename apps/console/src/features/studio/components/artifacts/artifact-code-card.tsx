@@ -48,33 +48,43 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
   };
 
   return (
-    <div className="border-border/80 bg-card/70 my-2 overflow-hidden rounded-md border shadow-sm">
+    <div className="orch-artifact-card">
       {/* Code Header */}
-      <div
-        className={`bg-muted/30 flex items-center justify-between px-3.5 py-2 font-mono text-xs ${
-          isExpanded ? "border-border/60 border-b" : ""
-        }`}
-      >
+      <div className={`orch-artifact-header ${isExpanded ? "is-expanded" : ""}`}>
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="flex min-w-0 items-center gap-2 overflow-hidden text-left transition-opacity hover:opacity-80"
+          className="orch-artifact-trigger"
         >
-          <Code2 className="text-primary size-4 shrink-0" />
-          <span className="text-foreground truncate font-semibold">{artifact.title}</span>
+          <Code2
+            className="orch-text-primary"
+            style={{ width: "1rem", height: "1rem", flexShrink: 0 }}
+          />
+          <span className="orch-truncate orch-font-semibold">{artifact.title}</span>
           {artifact.filePath && (
-            <span className="text-muted-foreground hidden truncate text-[11px] sm:inline">
+            <span className="orch-text-muted orch-truncate" style={{ fontSize: "0.6875rem" }}>
               {artifact.filePath}
             </span>
           )}
-          <span className="text-muted-foreground ml-1 flex items-center gap-0.5 text-[10px]">
+          <span
+            className="orch-flex-row orch-gap-xs orch-text-muted"
+            style={{ fontSize: "0.625rem", alignItems: "center", marginLeft: "0.25rem" }}
+          >
             <span>{isExpanded ? UI_COPY.COMMON.ACTIONS.HIDE : UI_COPY.COMMON.ACTIONS.SHOW}</span>
-            {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+            {isExpanded ? (
+              <ChevronDown style={{ width: "0.75rem", height: "0.75rem" }} />
+            ) : (
+              <ChevronRight style={{ width: "0.75rem", height: "0.75rem" }} />
+            )}
           </span>
         </button>
 
-        <div className="flex shrink-0 items-center gap-1.5">
-          <Badge variant="outline" className="px-1.5 py-0 font-mono text-[10px] uppercase">
+        <div className="orch-artifact-actions">
+          <Badge
+            variant="outline"
+            className="orch-font-mono"
+            style={{ padding: "0 0.375rem", fontSize: "0.625rem", textTransform: "uppercase" }}
+          >
             {UI_COPY.STUDIO.ARTIFACTS.LINES_COUNT(language, lines.length)}
           </Badge>
 
@@ -82,27 +92,46 @@ export function ArtifactCodeCard({ artifact }: ArtifactCodeCardProps): React.JSX
             variant="outline"
             size="sm"
             onClick={handleOpenInCanvas}
-            className="h-7 cursor-pointer gap-1 px-2 text-xs"
+            style={{
+              height: "1.75rem",
+              cursor: "pointer",
+              gap: "0.25rem",
+              padding: "0 0.5rem",
+              fontSize: "0.75rem",
+            }}
             title={UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS_TOOLTIP}
             aria-label={UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS_TOOLTIP}
           >
-            <PanelRightOpen className="text-primary size-3" />
-            <span className="hidden sm:inline">{UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS}</span>
+            <PanelRightOpen
+              className="orch-text-primary"
+              style={{ width: "0.75rem", height: "0.75rem" }}
+            />
+            <span>{UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS}</span>
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={handleCopy} className="h-7 gap-1 px-2 text-xs">
-            {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
-            <span className="hidden sm:inline">
-              {copied ? UI_COPY.COMMON.ACTIONS.COPIED : UI_COPY.COMMON.ACTIONS.COPY}
-            </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopy}
+            style={{ height: "1.75rem", gap: "0.25rem", padding: "0 0.5rem", fontSize: "0.75rem" }}
+          >
+            {copied ? (
+              <Check
+                className="orch-text-primary"
+                style={{ width: "0.75rem", height: "0.75rem" }}
+              />
+            ) : (
+              <Copy style={{ width: "0.75rem", height: "0.75rem" }} />
+            )}
+            <span>{copied ? UI_COPY.COMMON.ACTIONS.COPIED : UI_COPY.COMMON.ACTIONS.COPY}</span>
           </Button>
         </div>
       </div>
 
       {/* Code Body */}
       {isExpanded && (
-        <div className="bg-background/60 text-foreground overflow-x-auto p-4 font-mono text-xs leading-relaxed">
-          <pre className="whitespace-pre-wrap">{artifact.content}</pre>
+        <div className="orch-artifact-code">
+          <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{artifact.content}</pre>
         </div>
       )}
     </div>

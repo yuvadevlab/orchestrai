@@ -17,7 +17,9 @@ export class HealthController {
     sendJson(res, 200, {
       status: "ok",
       service: "@orchestrai/gateway",
+      version: "1.0.0",
       timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
     });
   }
 

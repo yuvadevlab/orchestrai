@@ -4,6 +4,7 @@
  * @file top-bar.tsx
  * @description Operational telemetry indicators, live tenant identity, theme toggles, guide drawer, and auth controls.
  * @module apps/console/components/dashboard
+ * @author yuva.devlab@gmail.com
  */
 
 import React from "react";
@@ -24,39 +25,74 @@ export function TopBar(): React.JSX.Element {
   const { user, logout, isAuthenticated } = useAuth();
 
   return (
-    <header className="border-border bg-background/80 flex h-14 shrink-0 items-center justify-between border-b px-6 backdrop-blur-sm">
+    <header className="orch-topbar">
       {/* Telemetry Pills */}
-      <div className="flex items-center gap-2.5">
+      <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
         <Badge
           variant="outline"
-          className="border-primary/40 bg-primary/5 flex items-center gap-1.5 px-2.5 py-1 font-mono text-xs"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.375rem",
+            padding: "0.25rem 0.625rem",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.75rem",
+            borderColor: "color-mix(in oklab, var(--primary) 40%, transparent)",
+            backgroundColor: "color-mix(in oklab, var(--primary) 5%, transparent)",
+          }}
         >
-          <span className="bg-primary size-2 animate-pulse rounded-full" />
-          <span className="text-primary font-semibold">{UI_COPY.COMMON.A11Y.GATEWAY_ACTIVE}</span>
-          <span className="text-muted-foreground">· {UI_COPY.COMMON.A11Y.LOCAL_CORE}</span>
+          <span
+            style={{
+              width: "0.5rem",
+              height: "0.5rem",
+              borderRadius: "9999px",
+              backgroundColor: "var(--primary)",
+            }}
+            className="orch-animate-pulse"
+          />
+          <span style={{ color: "var(--primary)", fontWeight: 600 }}>
+            {UI_COPY.COMMON.A11Y.GATEWAY_ACTIVE}
+          </span>
+          <span style={{ color: "var(--mutedForeground)" }}>
+            · {UI_COPY.COMMON.A11Y.LOCAL_CORE}
+          </span>
         </Badge>
 
         <Badge
           variant="secondary"
-          className="hidden items-center gap-1.5 px-2.5 py-1 font-mono text-xs sm:flex"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.375rem",
+            padding: "0.25rem 0.625rem",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.75rem",
+          }}
         >
-          <Cpu className="text-muted-foreground size-3.5" />
+          <Cpu style={{ width: "0.875rem", height: "0.875rem", color: "var(--mutedForeground)" }} />
           <span>{UI_COPY.COMMON.A11Y.OUTBOX_BUS_CONNECTED}</span>
         </Badge>
 
         {isAuthenticated && user && (
           <Badge
             variant="outline"
-            className="border-border bg-secondary text-foreground hidden items-center gap-1.5 px-2.5 py-1 font-mono text-xs md:flex"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              padding: "0.25rem 0.625rem",
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: "0.75rem",
+            }}
           >
-            <User className="text-primary size-3" />
+            <User style={{ width: "0.75rem", height: "0.75rem", color: "var(--primary)" }} />
             <span>{user.name}</span>
           </Badge>
         )}
       </div>
 
       {/* Action Controls */}
-      <div className="flex items-center gap-2">
+      <div className="orch-topbar__actions">
         <Button
           variant="outline"
           size="sm"
@@ -66,17 +102,25 @@ export function TopBar(): React.JSX.Element {
               ? UI_COPY.COMMON.A11Y.SWITCH_LIGHT
               : UI_COPY.COMMON.A11Y.SWITCH_DARK
           }
-          className="h-8 cursor-pointer gap-1.5 px-2.5 font-mono text-xs"
+          style={{
+            height: "2rem",
+            cursor: "pointer",
+            display: "inline-flex",
+            gap: "0.375rem",
+            paddingInline: "0.625rem",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.75rem",
+          }}
         >
           {resolvedTheme === "dark" ? (
             <>
-              <Sun className="size-3.5" />
-              <span className="hidden sm:inline">{UI_COPY.COMMON.THEME.LIGHT}</span>
+              <Sun style={{ width: "0.875rem", height: "0.875rem" }} />
+              <span>{UI_COPY.COMMON.THEME.LIGHT}</span>
             </>
           ) : (
             <>
-              <Moon className="size-3.5" />
-              <span className="hidden sm:inline">{UI_COPY.COMMON.THEME.DARK}</span>
+              <Moon style={{ width: "0.875rem", height: "0.875rem" }} />
+              <span>{UI_COPY.COMMON.THEME.DARK}</span>
             </>
           )}
         </Button>
@@ -85,9 +129,16 @@ export function TopBar(): React.JSX.Element {
           variant="default"
           size="sm"
           onClick={() => router.push("/console")}
-          className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+          style={{
+            height: "2rem",
+            cursor: "pointer",
+            display: "inline-flex",
+            gap: "0.375rem",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          }}
         >
-          <Zap className="size-3.5" />
+          <Zap style={{ width: "0.875rem", height: "0.875rem" }} />
           <span>{UI_COPY.COMMON.A11Y.NEW_EXECUTION}</span>
         </Button>
 
@@ -96,21 +147,35 @@ export function TopBar(): React.JSX.Element {
             variant="ghost"
             size="sm"
             onClick={logout}
-            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 cursor-pointer gap-1.5 font-mono text-xs"
+            style={{
+              height: "2rem",
+              cursor: "pointer",
+              display: "inline-flex",
+              gap: "0.375rem",
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: "0.75rem",
+              color: "var(--mutedForeground)",
+            }}
             title={UI_COPY.COMMON.A11Y.SIGN_OUT_SESSION}
-            aria-label={UI_COPY.COMMON.A11Y.SIGN_OUT_SESSION}
           >
-            <LogOut className="size-3.5" />
-            <span className="hidden sm:inline">{UI_COPY.COMMON.A11Y.SIGN_OUT_BTN}</span>
+            <LogOut style={{ width: "0.875rem", height: "0.875rem" }} />
+            <span>{UI_COPY.COMMON.A11Y.SIGN_OUT_BTN}</span>
           </Button>
         ) : (
           <Link href="/login">
             <Button
               variant="outline"
               size="sm"
-              className="border-border hover:bg-accent h-8 cursor-pointer gap-1.5 font-mono text-xs"
+              style={{
+                height: "2rem",
+                cursor: "pointer",
+                display: "inline-flex",
+                gap: "0.375rem",
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "0.75rem",
+              }}
             >
-              <LogIn className="size-3.5" />
+              <LogIn style={{ width: "0.875rem", height: "0.875rem" }} />
               <span>{UI_COPY.COMMON.A11Y.SIGN_IN}</span>
             </Button>
           </Link>

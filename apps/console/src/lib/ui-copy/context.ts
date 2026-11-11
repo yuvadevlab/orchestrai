@@ -6,6 +6,9 @@
 
 export const CONTEXT_COPY = {
   PAGE_TITLE: "Context Hub",
+  BREADCRUMB: "Context Hub",
+  PAGE_DESCRIPTION:
+    "Consolidated cognitive context, vector knowledge bases, and agent episodic memory.",
   TAB_KNOWLEDGE: "RAG Knowledge Base",
   TAB_MEMORY: "Episodic & Semantic Memory",
 } as const;

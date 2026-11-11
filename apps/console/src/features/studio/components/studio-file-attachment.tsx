@@ -2,7 +2,7 @@
 
 /**
  * @file apps/console/src/features/studio/components/studio-file-attachment.tsx
- * @description ChatGPT-style "+" file attachment button and uploaded document chips.
+ * @description File attachment button and uploaded document chips for Studio.
  * @module apps/console/features/studio/components
  */
 
@@ -27,7 +27,7 @@ export interface StudioFileAttachmentProps {
 }
 
 /**
- * File attachment trigger and badge pills matching ChatGPT/Claude interface.
+ * File attachment trigger and badge pills matching Cowork interface.
  */
 export function StudioFileAttachment({
   onFileUploaded,
@@ -77,7 +77,7 @@ export function StudioFileAttachment({
         ref={fileInputRef}
         type="file"
         aria-label={UI_COPY.STUDIO.FILE.UPLOAD_A11Y}
-        className="hidden"
+        style={{ display: "none" }}
         accept=".txt,.md,.json,.csv,.ts,.js,.tsx,.jsx,.py,.html,.css,.yaml,.yml"
         onChange={handleFileSelect}
         disabled={disabled || uploadMutation.isPending}
@@ -89,16 +89,31 @@ export function StudioFileAttachment({
         size="icon"
         onClick={() => fileInputRef.current?.click()}
         disabled={disabled || uploadMutation.isPending}
-        className="hover:bg-accent/60 size-7 shrink-0 rounded-md transition-colors"
+        style={{
+          width: "1.75rem",
+          height: "1.75rem",
+          flexShrink: 0,
+          borderRadius: "var(--radius-md, 0.375rem)",
+        }}
         title={UI_COPY.STUDIO.FILE.UPLOAD_TOOLTIP}
         aria-label={UI_COPY.STUDIO.FILE.UPLOAD_A11Y}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {uploadMutation.isPending ? (
-          <Loader2 className="text-muted-foreground size-4 animate-spin" />
+          <Loader2
+            className="orch-text-muted orch-animate-spin"
+            style={{ width: "1rem", height: "1rem" }}
+          />
         ) : (
-          <Plus className={`size-4 transition-transform ${isHovered ? "rotate-90" : ""}`} />
+          <Plus
+            style={{
+              width: "1rem",
+              height: "1rem",
+              transition: "transform 0.15s ease",
+              transform: isHovered ? "rotate(90deg)" : "none",
+            }}
+          />
         )}
       </Button>
     </>
@@ -118,40 +133,83 @@ export function StudioAttachedFilesList({
   if (files.length === 0) return null;
 
   return (
-    <div className="mb-2 flex flex-wrap items-center gap-1.5 px-1">
+    <div
+      style={{
+        marginBottom: "0.5rem",
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: "0.375rem",
+        padding: "0 0.25rem",
+      }}
+    >
       {files.map((file) => (
         <div
           key={file.id}
-          className={`flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[11px] shadow-sm transition-all ${
-            file.status === DocumentUploadStatus.ERROR
-              ? "border-destructive/40 bg-destructive/10 text-destructive"
-              : file.status === DocumentUploadStatus.UPLOADING
-                ? "border-primary/30 bg-primary/5 text-primary"
-                : "border-border bg-card text-foreground"
-          }`}
+          className="orch-file-chip"
+          style={{
+            borderColor:
+              file.status === DocumentUploadStatus.ERROR
+                ? "color-mix(in oklab, var(--destructive) 40%, transparent)"
+                : file.status === DocumentUploadStatus.UPLOADING
+                  ? "color-mix(in oklab, var(--primary) 30%, transparent)"
+                  : undefined,
+            backgroundColor:
+              file.status === DocumentUploadStatus.ERROR
+                ? "color-mix(in oklab, var(--destructive) 10%, transparent)"
+                : file.status === DocumentUploadStatus.UPLOADING
+                  ? "color-mix(in oklab, var(--primary) 5%, transparent)"
+                  : undefined,
+            color:
+              file.status === DocumentUploadStatus.ERROR
+                ? "var(--destructive)"
+                : file.status === DocumentUploadStatus.UPLOADING
+                  ? "var(--primary)"
+                  : "inherit",
+          }}
         >
           {file.status === DocumentUploadStatus.UPLOADING ? (
-            <Loader2 className="size-3 animate-spin" />
+            <Loader2
+              style={{ width: "0.75rem", height: "0.75rem" }}
+              className="orch-animate-spin"
+            />
           ) : (
-            <FileText className="text-muted-foreground size-3" />
+            <FileText className="orch-text-muted" style={{ width: "0.75rem", height: "0.75rem" }} />
           )}
-          <span className="max-w-40 truncate font-sans font-medium">{file.name}</span>
-          <span className="text-muted-foreground text-[10px]">
+          <span className="orch-truncate" style={{ maxWidth: "10rem", fontWeight: 500 }}>
+            {file.name}
+          </span>
+          <span className="orch-text-muted" style={{ fontSize: "0.625rem" }}>
             ({(file.sizeBytes / 1024).toFixed(1)} KB)
           </span>
           {file.status === DocumentUploadStatus.INDEXED && (
-            <span className="text-primary text-[9px] font-semibold tracking-wide uppercase">
+            <span
+              className="orch-text-primary"
+              style={{
+                fontSize: "0.5625rem",
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+              }}
+            >
               {UI_COPY.STUDIO.FILE.INDEXED}
             </span>
           )}
           <button
             type="button"
             onClick={() => onRemove(file.id)}
-            className="hover:bg-muted ml-0.5 rounded p-0.5 transition-colors"
+            style={{
+              marginLeft: "0.125rem",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "0.125rem",
+              color: "inherit",
+            }}
             title={UI_COPY.STUDIO.FILE.REMOVE_TOOLTIP}
             aria-label={UI_COPY.STUDIO.FILE.REMOVE_TOOLTIP}
           >
-            <X className="size-3" />
+            <X style={{ width: "0.75rem", height: "0.75rem" }} />
           </button>
         </div>
       ))}

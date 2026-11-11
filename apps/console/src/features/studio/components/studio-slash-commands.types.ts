@@ -28,7 +28,7 @@ export interface SlashCommandItem {
   readonly command: string;
   readonly title: string;
   readonly description: string;
-  readonly icon: React.ComponentType<{ className?: string }>;
+  readonly icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   readonly targetMode?: AgentMode;
   readonly action?: string;
 }

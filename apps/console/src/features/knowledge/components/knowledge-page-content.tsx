@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { Plus, Search, Sparkles, BookOpen } from "lucide-react";
 import { Button, Input } from "@orchestrai/ui";
 import { PageShell } from "@/components/layout/page-shell";
-import { EmptyState, TableSkeleton } from "@orchestrai/ui";
+import { EmptyState, TableSkeleton, DynamicErrorState } from "@orchestrai/ui";
 import { useKnowledgeDocuments } from "../api";
 import { UI_COPY } from "@/lib/ui-copy";
 import { KnowledgeUploadDialog } from "./knowledge-upload-dialog";
@@ -25,10 +25,17 @@ const MIME_FILTER_PILLS = [
   { id: "csv", label: UI_COPY.KNOWLEDGE.MIME_FILTERS.CSV },
 ];
 
+export interface KnowledgePageContentProps {
+  /** If true, renders the content directly without wrapping in PageShell */
+  readonly hideShell?: boolean;
+}
+
 /**
  * Knowledge Base administration and hybrid vector search workbench.
  */
-export function KnowledgePageContent(): React.JSX.Element {
+export function KnowledgePageContent({
+  hideShell = false,
+}: KnowledgePageContentProps = {}): React.JSX.Element {
   const [search, setSearch] = useState("");
   const [selectedMime, setSelectedMime] = useState("all");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -44,119 +51,154 @@ export function KnowledgePageContent(): React.JSX.Element {
     return matchesSearch && matchesMime;
   });
 
-  return (
-    <PageShell
-      title={UI_COPY.KNOWLEDGE.PAGE_TITLE}
-      breadcrumb={UI_COPY.KNOWLEDGE.BREADCRUMB}
-      stats={UI_COPY.KNOWLEDGE.STATS(documents.length)}
-      description={UI_COPY.KNOWLEDGE.PAGE_DESCRIPTION}
-      actions={
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsQueryOpen(true)}
-            className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
-          >
-            <Sparkles className="size-3.5" />
-            <span>{UI_COPY.KNOWLEDGE.QUERY_TESTER.TRIGGER_BUTTON}</span>
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setIsUploadOpen(true)}
-            className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
-          >
-            <Plus className="size-3.5" />
-            <span>{UI_COPY.KNOWLEDGE.UPLOAD_BUTTON}</span>
-          </Button>
-        </div>
-      }
-    >
-      <div className="space-y-5">
-        {/* Search & Filter Toolbar matching Agents page layout */}
-        <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="w-full sm:w-72">
-            <Input
-              value={search}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
-              placeholder={UI_COPY.KNOWLEDGE.SEARCH_PLACEHOLDER}
-              startIcon={<Search className="size-3.5" />}
-              className="bg-card h-8 text-xs"
-            />
-          </div>
+  const actionButtons = (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setIsQueryOpen(true)}
+        style={{
+          height: hideShell ? "1.75rem" : "2rem",
+          cursor: "pointer",
+          gap: "0.375rem",
+          fontSize: "0.75rem",
+          fontWeight: 500,
+        }}
+      >
+        <Sparkles style={{ width: "0.875rem", height: "0.875rem" }} />
+        <span>{UI_COPY.KNOWLEDGE.QUERY_TESTER.TRIGGER_BUTTON}</span>
+      </Button>
+      <Button
+        variant="default"
+        size="sm"
+        onClick={() => setIsUploadOpen(true)}
+        style={{
+          height: hideShell ? "1.75rem" : "2rem",
+          cursor: "pointer",
+          gap: "0.375rem",
+          fontSize: "0.75rem",
+          fontWeight: 500,
+        }}
+      >
+        <Plus style={{ width: "0.875rem", height: "0.875rem" }} />
+        <span>{UI_COPY.KNOWLEDGE.UPLOAD_BUTTON}</span>
+      </Button>
+    </div>
+  );
 
-          <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-auto">
+  const bodyContent = (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+      {/* Search & Filter Toolbar matching Agents page layout */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "0.75rem",
+        }}
+      >
+        <div style={{ width: "18rem", maxWidth: "100%" }}>
+          <Input
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
+            placeholder={UI_COPY.KNOWLEDGE.SEARCH_PLACEHOLDER}
+            startIcon={<Search style={{ width: "0.875rem", height: "0.875rem" }} />}
+            style={{ height: "2rem", fontSize: "0.75rem" }}
+          />
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.375rem" }}>
             {MIME_FILTER_PILLS.map((pill) => (
               <Button
                 key={pill.id}
                 variant={selectedMime === pill.id ? "default" : "outline"}
                 size="sm"
                 onClick={(): void => setSelectedMime(pill.id)}
-                className="h-7 cursor-pointer rounded-full px-3 text-xs capitalize"
+                style={{
+                  height: "1.75rem",
+                  cursor: "pointer",
+                  borderRadius: "9999px",
+                  paddingInline: "0.75rem",
+                  fontSize: "0.75rem",
+                  textTransform: "capitalize",
+                }}
               >
                 {pill.label}
               </Button>
             ))}
           </div>
-        </div>
 
-        {/* Ingested Documents List */}
-        {isLoading ? (
-          <TableSkeleton rows={5} />
-        ) : error ? (
-          <div className="border-border bg-card flex flex-col items-center justify-center gap-2 rounded-md border p-6 text-center">
-            <p className="text-foreground text-xs font-medium">{UI_COPY.KNOWLEDGE.ERROR_TITLE}</p>
-            <p className="text-muted-foreground max-w-md text-xs">{error.message}</p>
+          {hideShell && actionButtons}
+        </div>
+      </div>
+
+      {/* Ingested Documents List */}
+      {isLoading ? (
+        <TableSkeleton rows={5} />
+      ) : error ? (
+        <DynamicErrorState
+          error={error}
+          title={UI_COPY.KNOWLEDGE.ERROR_TITLE}
+          reset={() => void refetch()}
+        />
+      ) : documents.length === 0 ? (
+        <EmptyState
+          icon={BookOpen}
+          title={UI_COPY.KNOWLEDGE.EMPTY_TITLE}
+          description={UI_COPY.KNOWLEDGE.EMPTY_DESC}
+          action={
             <Button
               size="sm"
               variant="outline"
-              onClick={() => void refetch()}
-              className="mt-2 h-7 cursor-pointer text-xs"
+              onClick={() => setIsUploadOpen(true)}
+              style={{ height: "2rem", cursor: "pointer", fontSize: "0.75rem" }}
             >
-              {UI_COPY.KNOWLEDGE.RETRY_BUTTON}
+              <Plus style={{ marginRight: "0.375rem", width: "0.875rem", height: "0.875rem" }} />{" "}
+              {UI_COPY.KNOWLEDGE.UPLOAD_BUTTON}
             </Button>
-          </div>
-        ) : documents.length === 0 ? (
-          <EmptyState
-            icon={BookOpen}
-            title={UI_COPY.KNOWLEDGE.EMPTY_TITLE}
-            description={UI_COPY.KNOWLEDGE.EMPTY_DESC}
-            action={
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsUploadOpen(true)}
-                className="h-8 cursor-pointer text-xs"
-              >
-                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.KNOWLEDGE.UPLOAD_BUTTON}
-              </Button>
-            }
-          />
-        ) : filteredDocuments.length === 0 ? (
-          <EmptyState
-            icon={Search}
-            title={UI_COPY.KNOWLEDGE.NO_MATCH_TITLE}
-            description={UI_COPY.KNOWLEDGE.NO_MATCH_DESC(search)}
-          />
-        ) : (
-          <KnowledgeDocumentsTable
-            documents={filteredDocuments}
-            isLoading={isLoading}
-            onOpenUpload={() => setIsUploadOpen(true)}
-          />
-        )}
-
-        {/* Upload Document Modal Dialog */}
-        <KnowledgeUploadDialog
-          isOpen={isUploadOpen}
-          onClose={() => setIsUploadOpen(false)}
-          onSuccess={() => refetch()}
+          }
         />
+      ) : filteredDocuments.length === 0 ? (
+        <EmptyState
+          icon={Search}
+          title={UI_COPY.KNOWLEDGE.NO_MATCH_TITLE}
+          description={UI_COPY.KNOWLEDGE.NO_MATCH_DESC(search)}
+        />
+      ) : (
+        <KnowledgeDocumentsTable
+          documents={filteredDocuments}
+          isLoading={isLoading}
+          onOpenUpload={() => setIsUploadOpen(true)}
+        />
+      )}
 
-        {/* Interactive Query Tester Modal Dialog */}
-        <KnowledgeQueryDialog isOpen={isQueryOpen} onClose={() => setIsQueryOpen(false)} />
-      </div>
+      {/* Upload Document Modal Dialog */}
+      <KnowledgeUploadDialog
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        onSuccess={() => refetch()}
+      />
+
+      {/* Interactive Query Tester Modal Dialog */}
+      <KnowledgeQueryDialog isOpen={isQueryOpen} onClose={() => setIsQueryOpen(false)} />
+    </div>
+  );
+
+  if (hideShell) {
+    return bodyContent;
+  }
+
+  return (
+    <PageShell
+      title={UI_COPY.KNOWLEDGE.PAGE_TITLE}
+      breadcrumb={UI_COPY.KNOWLEDGE.BREADCRUMB}
+      stats={UI_COPY.KNOWLEDGE.STATS(documents.length)}
+      description={UI_COPY.KNOWLEDGE.PAGE_DESCRIPTION}
+      actions={actionButtons}
+    >
+      {bodyContent}
     </PageShell>
   );
 }

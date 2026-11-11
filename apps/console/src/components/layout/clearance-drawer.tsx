@@ -7,10 +7,11 @@
  */
 
 import React, { useEffect } from "react";
-import { ShieldAlert, Check, X, AlertTriangle, FileWarning, Terminal } from "lucide-react";
+import { ShieldAlert, Check, X } from "lucide-react";
 import { Button } from "@orchestrai/ui";
 import { useConsoleStore } from "@/lib/stores";
 import { UI_COPY } from "@/lib/ui-copy";
+import { ClearanceTicketDetails } from "./clearance-ticket-details";
 
 /**
  * Slide-out Human-In-The-Loop (HITL) Security Clearance Drawer.
@@ -45,27 +46,36 @@ export function ClearanceDrawer(): React.JSX.Element | null {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className="orch-clearance-overlay">
       {/* Backdrop */}
-      <div
-        role="presentation"
-        onClick={() => setOpen(false)}
-        className="bg-background/80 fixed inset-0 backdrop-blur-xs transition-opacity"
-      />
+      <div role="presentation" onClick={() => setOpen(false)} className="orch-clearance-backdrop" />
 
       {/* Slide-out Drawer Panel */}
-      <div className="border-border bg-card relative z-50 flex size-full max-w-lg flex-col border-l p-6 shadow-2xl">
+      <div className="orch-clearance-panel">
         {/* Header */}
-        <div className="border-border/60 flex items-center justify-between border-b pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="bg-destructive/10 text-destructive flex size-8 items-center justify-center rounded-md">
-              <ShieldAlert className="size-4.5" />
+        <div className="orch-clearance-header">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+            <div className="orch-clearance-icon">
+              <ShieldAlert style={{ width: "1.125rem", height: "1.125rem" }} />
             </div>
             <div>
-              <h2 className="text-sm font-semibold tracking-tight">
+              <h2
+                style={{
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                  margin: 0,
+                }}
+              >
                 {UI_COPY.STUDIO.CLEARANCE.DRAWER.TITLE}
               </h2>
-              <span className="text-muted-foreground font-mono text-[11px]">
+              <span
+                style={{
+                  color: "var(--mutedForeground)",
+                  fontFamily: "var(--font-mono, monospace)",
+                  fontSize: "0.6875rem",
+                }}
+              >
                 {UI_COPY.STUDIO.CLEARANCE.DRAWER.PENDING_COUNT(pendingTickets.length)}
               </span>
             </div>
@@ -74,104 +84,53 @@ export function ClearanceDrawer(): React.JSX.Element | null {
             type="button"
             onClick={() => setOpen(false)}
             aria-label={UI_COPY.COMMON.ACTIONS.CLOSE}
-            className="text-muted-foreground hover:text-foreground rounded p-1"
+            style={{
+              color: "var(--mutedForeground)",
+              cursor: "pointer",
+              border: "none",
+              background: "transparent",
+              padding: "0.25rem",
+            }}
           >
-            <X className="size-4" />
+            <X style={{ width: "1rem", height: "1rem" }} />
           </button>
         </div>
 
         {/* Content Body */}
-        {activeTicket ? (
-          <div className="flex-1 space-y-4 overflow-y-auto py-4">
-            {/* Risk Badge and Tool Intent */}
-            <div className="bg-destructive/5 border-destructive/30 rounded-md border p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-destructive font-mono text-xs font-semibold uppercase">
-                  {UI_COPY.STUDIO.CLEARANCE.DRAWER.RISK_LEVEL(String(activeTicket.riskLevel))}
-                </span>
-                <span className="text-muted-foreground font-mono text-[10px]">
-                  {UI_COPY.STUDIO.CLEARANCE.DRAWER.TICKET_ID(activeTicket.ticketId.slice(0, 8))}
-                </span>
-              </div>
-              <p className="text-foreground mt-2 text-xs font-medium">{activeTicket.description}</p>
-            </div>
-
-            {/* Target Tool */}
-            <div className="space-y-1">
-              <span className="text-muted-foreground block text-[11px] font-medium">
-                {UI_COPY.STUDIO.CLEARANCE.DRAWER.INVOKING_TOOL}
-              </span>
-              <div className="border-border/60 bg-muted/30 flex items-center gap-2 rounded border px-3 py-2">
-                <Terminal className="text-primary size-4" />
-                <span className="text-foreground font-mono text-xs font-semibold">
-                  {activeTicket.toolName}
-                </span>
-              </div>
-            </div>
-
-            {/* Blast-Radius Sensitive Paths */}
-            {activeTicket.sensitivePaths && activeTicket.sensitivePaths.length > 0 && (
-              <div className="space-y-1">
-                <span className="text-muted-foreground flex items-center gap-1 text-[11px] font-medium">
-                  <FileWarning className="text-destructive size-3" />{" "}
-                  {UI_COPY.STUDIO.CLEARANCE.DRAWER.BLAST_RADIUS}
-                </span>
-                <div className="border-destructive/20 bg-destructive/5 rounded border p-2 font-mono text-xs">
-                  {activeTicket.sensitivePaths.map((path) => (
-                    <div key={path} className="text-destructive truncate py-0.5">
-                      • {path}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Parameter Payload Inspector */}
-            {activeTicket.inputParams && (
-              <div className="space-y-1">
-                <span className="text-muted-foreground block text-[11px] font-medium">
-                  {UI_COPY.STUDIO.CLEARANCE.DRAWER.PAYLOAD_PARAMS}
-                </span>
-                <pre className="border-border/60 bg-muted/30 text-muted-foreground max-h-48 overflow-y-auto rounded border p-3 font-mono text-[11px] leading-relaxed">
-                  {JSON.stringify(activeTicket.inputParams, null, 2)}
-                </pre>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <AlertTriangle className="text-muted-foreground mb-2 size-8" />
-            <p className="text-muted-foreground text-xs">
-              {UI_COPY.STUDIO.CLEARANCE.DRAWER.EMPTY_DESC}
-            </p>
-          </div>
-        )}
+        <ClearanceTicketDetails ticket={activeTicket} />
 
         {/* Footer Actions */}
         {activeTicket && (
-          <div className="border-border/60 flex flex-col gap-2 border-t pt-4">
-            <div className="flex items-center gap-2">
+          <div className="orch-clearance-footer">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <Button
                 variant="destructive"
-                className="flex-1 gap-1.5 text-xs font-medium"
+                style={{ flex: 1, gap: "0.375rem", fontSize: "0.75rem", fontWeight: 500 }}
                 onClick={() => resolveTicket(activeTicket.ticketId, "REJECTED")}
               >
-                <X className="size-3.5" />
+                <X style={{ width: "0.875rem", height: "0.875rem" }} />
                 <span>{UI_COPY.STUDIO.CLEARANCE.DRAWER.DENY_ACTION}</span>
               </Button>
               <Button
                 variant="default"
-                className="flex-1 gap-1.5 text-xs font-medium"
+                style={{ flex: 1, gap: "0.375rem", fontSize: "0.75rem", fontWeight: 500 }}
                 onClick={() => resolveTicket(activeTicket.ticketId, "APPROVED")}
               >
-                <Check className="size-3.5" />
+                <Check style={{ width: "0.875rem", height: "0.875rem" }} />
                 <span>{UI_COPY.STUDIO.CLEARANCE.DRAWER.APPROVE_ACTION}</span>
               </Button>
             </div>
             <button
               type="button"
               onClick={() => dismissTicket(activeTicket.ticketId)}
-              className="text-muted-foreground hover:text-foreground text-center text-[11px]"
+              style={{
+                color: "var(--mutedForeground)",
+                textAlign: "center",
+                fontSize: "0.6875rem",
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+              }}
             >
               {UI_COPY.STUDIO.CLEARANCE.DRAWER.DISMISS}
             </button>
