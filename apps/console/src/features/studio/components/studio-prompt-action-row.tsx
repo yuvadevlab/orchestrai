@@ -52,7 +52,10 @@ export function StudioPromptActionRow({
   onSelectMode,
 }: StudioPromptActionRowProps): React.JSX.Element {
   return (
-    <div className="flex flex-wrap items-center gap-2 px-2 pt-1.5">
+    <div
+      className="orch-flex-row orch-gap-xs"
+      style={{ flexWrap: "wrap", alignItems: "center", padding: "0.375rem 0.5rem 0" }}
+    >
       <StudioFileAttachment onFileUploaded={onFileUploaded} disabled={isRunning} />
 
       <StudioPromptBarSelectors
@@ -67,16 +70,20 @@ export function StudioPromptActionRow({
         onSelectMode={onSelectMode}
       />
 
-      <div className="ml-auto">
+      <div style={{ marginLeft: "auto" }}>
         {isRunning ? (
           <Button
             variant="destructive"
             size="icon"
             onClick={onStop}
-            className="size-7 rounded-md"
+            style={{
+              width: "1.75rem",
+              height: "1.75rem",
+              borderRadius: "var(--radius-md, 0.375rem)",
+            }}
             aria-label={UI_COPY.STUDIO.PROMPT.STOP_A11Y}
           >
-            <Square className="size-3 fill-current" />
+            <Square style={{ width: "0.75rem", height: "0.75rem", fill: "currentColor" }} />
           </Button>
         ) : (
           <Button
@@ -84,10 +91,14 @@ export function StudioPromptActionRow({
             size="icon"
             onClick={onSubmit}
             disabled={!canSubmit}
-            className="size-7 rounded-md"
+            style={{
+              width: "1.75rem",
+              height: "1.75rem",
+              borderRadius: "var(--radius-md, 0.375rem)",
+            }}
             aria-label={UI_COPY.STUDIO.PROMPT.RUN_A11Y}
           >
-            <ArrowUp className="size-3.5" />
+            <ArrowUp style={{ width: "0.875rem", height: "0.875rem" }} />
           </Button>
         )}
       </div>

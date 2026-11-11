@@ -60,6 +60,12 @@ export interface PageShellProps {
    */
   description?: string;
 
+  /**
+   * Optional additional rows rendered below Row 1 (e.g. tab strips, query filters).
+   * Forwarded directly to PageHeader `extraRows`.
+   */
+  extraRows?: React.ReactNode[];
+
   /** Page body content rendered inside the scrollable `<main>` region. */
   children: React.ReactNode;
 
@@ -98,6 +104,7 @@ export function PageShell({
   stats,
   actions,
   description,
+  extraRows,
   children,
   className,
 }: PageShellProps): React.JSX.Element {
@@ -119,23 +126,24 @@ export function PageShell({
   const rightContent =
     stats || actions ? (
       <>
-        {stats ? <span className="text-muted-foreground font-mono text-xs">{stats}</span> : null}
-        {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+        {stats ? <span className="orch-page-shell__stats">{stats}</span> : null}
+        {actions ? <div className="orch-page-shell__actions">{actions}</div> : null}
       </>
     ) : undefined;
 
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+    <div className="orch-page-shell">
       {/* Shared header — breadcrumb, h1, right-side stats/actions, description */}
       <PageHeader
         breadcrumbs={resolvedBreadcrumbs}
         heading={title}
         subHeading={description}
         rightContent={rightContent}
+        extraRows={extraRows}
       />
 
       {/* Main Viewport — scrollable page content */}
-      <main className={cn("min-h-0 flex-1 overflow-y-auto p-6", className)}>{children}</main>
+      <main className={cn("orch-page-shell__main", className)}>{children}</main>
     </div>
   );
 }

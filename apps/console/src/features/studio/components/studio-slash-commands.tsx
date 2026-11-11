@@ -89,13 +89,23 @@ export function StudioSlashCommands({
   if (filtered.length === 0) return null;
 
   return (
-    <div className="border-border bg-card/95 text-card-foreground animate-in fade-in-50 slide-in-from-bottom-2 absolute bottom-full left-4 z-50 mb-2 max-h-72 w-80 overflow-y-auto rounded-md border p-1 shadow-2xl backdrop-blur-md">
-      <div className="border-border/60 text-muted-foreground flex items-center justify-between border-b px-2 py-1 font-mono text-[10px] uppercase">
+    <div className="orch-slash-menu">
+      <div
+        className="orch-flex-row orch-justify-between orch-text-muted orch-font-mono"
+        style={{
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+          padding: "0.25rem 0.5rem",
+          fontSize: "0.625rem",
+          textTransform: "uppercase",
+        }}
+      >
         <span>{UI_COPY.STUDIO.COMMANDS.HEADER_TITLE}</span>
         <span>{UI_COPY.STUDIO.COMMANDS.AVAILABLE_COUNT(filtered.length)}</span>
       </div>
 
-      <div className="space-y-0.5 p-0.5">
+      <div
+        style={{ padding: "0.125rem", display: "flex", flexDirection: "column", gap: "0.125rem" }}
+      >
         {filtered.map((cmd, idx) => {
           const isSelected = idx === selectedIndex;
           const Icon = cmd.icon;
@@ -105,19 +115,22 @@ export function StudioSlashCommands({
               type="button"
               onClick={() => onSelect(cmd)}
               onMouseEnter={() => setSelectedIndex(idx)}
-              className={`flex w-full items-center gap-2.5 rounded px-2.5 py-2 text-left text-xs transition-colors ${
-                isSelected
-                  ? "bg-primary/15 text-primary font-medium"
-                  : "hover:bg-muted/60 text-foreground"
-              }`}
+              className={`orch-slash-item ${isSelected ? "is-selected" : ""}`}
             >
-              <Icon className="text-primary size-4 shrink-0 opacity-80" />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono font-semibold">{cmd.command}</span>
-                  <span className="text-muted-foreground text-[11px]">• {cmd.title}</span>
+              <Icon
+                className="orch-text-primary"
+                style={{ width: "1rem", height: "1rem", flexShrink: 0, opacity: 0.8 }}
+              />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div className="orch-flex-row orch-gap-xs" style={{ alignItems: "center" }}>
+                  <span className="orch-font-mono orch-font-semibold">{cmd.command}</span>
+                  <span className="orch-text-muted" style={{ fontSize: "0.6875rem" }}>
+                    • {cmd.title}
+                  </span>
                 </div>
-                <div className="text-muted-foreground truncate text-[10px]">{cmd.description}</div>
+                <div className="orch-text-muted orch-truncate" style={{ fontSize: "0.625rem" }}>
+                  {cmd.description}
+                </div>
               </div>
             </button>
           );

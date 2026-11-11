@@ -47,35 +47,36 @@ export function SettingsPreferencesCard({
   setAutonomy,
 }: SettingsPreferencesCardProps): React.JSX.Element {
   return (
-    <section className="border-border bg-card/60 space-y-4 rounded-md border p-5 shadow-xs">
-      <div>
-        <h2 className="text-foreground text-sm font-semibold tracking-tight">
-          {UI_COPY.SETTINGS.PREFERENCES.TITLE}
-        </h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">
-          {UI_COPY.SETTINGS.PREFERENCES.DESCRIPTION}
-        </p>
+    <section className="orch-settings-section">
+      <div className="orch-settings-section-header">
+        <h2 className="orch-settings-section-title">{UI_COPY.SETTINGS.PREFERENCES.TITLE}</h2>
+        <p className="orch-settings-section-desc">{UI_COPY.SETTINGS.PREFERENCES.DESCRIPTION}</p>
       </div>
 
-      <div className="space-y-4 text-xs">
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", fontSize: "0.75rem" }}>
         {/* Theme Toggle */}
-        <div className="border-border/60 flex items-center justify-between border-b pb-3">
+        <div className="orch-settings-row">
           <div>
-            <Label className="text-foreground text-xs font-medium">
+            <Label style={{ fontSize: "0.75rem", fontWeight: 500 }}>
               {UI_COPY.SETTINGS.PREFERENCES.THEME_LABEL}
             </Label>
-            <p className="text-muted-foreground text-[11px]">
+            <p className="orch-text-muted" style={{ margin: 0, fontSize: "0.6875rem" }}>
               {UI_COPY.SETTINGS.PREFERENCES.THEME_DESC}
             </p>
           </div>
-          <div className="flex gap-1">
+          <div className="orch-flex-row orch-gap-xs">
             {(["light", "dark", "system"] as const).map((t) => (
               <Button
                 key={t}
                 size="sm"
                 variant={theme === t ? "default" : "outline"}
                 onClick={() => setTheme(t)}
-                className="h-7 cursor-pointer text-xs capitalize"
+                style={{
+                  height: "1.75rem",
+                  cursor: "pointer",
+                  fontSize: "0.75rem",
+                  textTransform: "capitalize",
+                }}
               >
                 {t}
               </Button>
@@ -84,12 +85,12 @@ export function SettingsPreferencesCard({
         </div>
 
         {/* Default Specialist */}
-        <div className="border-border/60 flex items-center justify-between border-b pb-3">
+        <div className="orch-settings-row">
           <div>
-            <Label className="text-foreground text-xs font-medium">
+            <Label style={{ fontSize: "0.75rem", fontWeight: 500 }}>
               {UI_COPY.SETTINGS.PREFERENCES.DEFAULT_AGENT_LABEL}
             </Label>
-            <p className="text-muted-foreground text-[11px]">
+            <p className="orch-text-muted" style={{ margin: 0, fontSize: "0.6875rem" }}>
               {UI_COPY.SETTINGS.PREFERENCES.DEFAULT_AGENT_DESC}
             </p>
           </div>
@@ -97,15 +98,21 @@ export function SettingsPreferencesCard({
             value={selectedAgent || "__auto"}
             onValueChange={(v) => setSelectedAgent(v === "__auto" ? "" : v)}
           >
-            <SelectTrigger className="border-border bg-background h-8 w-48 text-xs font-medium">
+            <SelectTrigger
+              style={{ height: "2rem", width: "12rem", fontSize: "0.75rem", fontWeight: 500 }}
+            >
               <SelectValue placeholder={UI_COPY.SETTINGS.PREFERENCES.DEFAULT_AGENT_PLACEHOLDER} />
             </SelectTrigger>
-            <SelectContent className="bg-popover border-border text-foreground text-xs">
-              <SelectItem value="__auto" className="cursor-pointer text-xs">
+            <SelectContent>
+              <SelectItem value="__auto" style={{ cursor: "pointer", fontSize: "0.75rem" }}>
                 {UI_COPY.SETTINGS.PREFERENCES.DEFAULT_AGENT_PLACEHOLDER}
               </SelectItem>
               {agents.map((a) => (
-                <SelectItem key={a.id} value={a.id} className="cursor-pointer text-xs">
+                <SelectItem
+                  key={a.id}
+                  value={a.id}
+                  style={{ cursor: "pointer", fontSize: "0.75rem" }}
+                >
                   {a.name}
                 </SelectItem>
               ))}
@@ -114,12 +121,12 @@ export function SettingsPreferencesCard({
         </div>
 
         {/* Notifications Toggle */}
-        <div className="border-border/60 flex items-center justify-between border-b pb-3">
+        <div className="orch-settings-row">
           <div>
-            <Label className="text-foreground text-xs font-medium">
+            <Label style={{ fontSize: "0.75rem", fontWeight: 500 }}>
               {UI_COPY.SETTINGS.PREFERENCES.NOTIFICATIONS_LABEL}
             </Label>
-            <p className="text-muted-foreground text-[11px]">
+            <p className="orch-text-muted" style={{ margin: 0, fontSize: "0.6875rem" }}>
               {UI_COPY.SETTINGS.PREFERENCES.NOTIFICATIONS_DESC}
             </p>
           </div>
@@ -127,12 +134,12 @@ export function SettingsPreferencesCard({
         </div>
 
         {/* Autonomous Delegation */}
-        <div className="flex items-center justify-between">
+        <div className="orch-settings-row">
           <div>
-            <Label className="text-foreground text-xs font-medium">
+            <Label style={{ fontSize: "0.75rem", fontWeight: 500 }}>
               {UI_COPY.SETTINGS.PREFERENCES.AUTONOMY_LABEL}
             </Label>
-            <p className="text-muted-foreground text-[11px]">
+            <p className="orch-text-muted" style={{ margin: 0, fontSize: "0.6875rem" }}>
               {UI_COPY.SETTINGS.PREFERENCES.AUTONOMY_DESC}
             </p>
           </div>

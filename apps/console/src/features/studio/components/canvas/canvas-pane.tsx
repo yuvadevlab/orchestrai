@@ -31,7 +31,7 @@ export function CanvasPane(): React.JSX.Element | null {
   const tabs: {
     mode: CanvasMode;
     label: string;
-    icon: React.ComponentType<{ className?: string }>;
+    icon: React.ComponentType<{ style?: React.CSSProperties }>;
   }[] = [
     { mode: "code", label: UI_COPY.STUDIO.CANVAS.TABS.CODE, icon: Code },
     { mode: "preview", label: UI_COPY.STUDIO.CANVAS.TABS.PREVIEW, icon: Eye },
@@ -40,16 +40,21 @@ export function CanvasPane(): React.JSX.Element | null {
   ];
 
   return (
-    <div className="border-border bg-card flex size-full flex-col overflow-hidden border-l">
+    <div className="orch-canvas-pane">
       {/* Canvas Top Bar */}
-      <div className="border-border flex h-12 shrink-0 items-center justify-between border-b px-4">
+      <div className="orch-canvas-header">
         {/* Title */}
-        <div className="flex items-center gap-2 truncate pr-4">
-          <span className="truncate text-sm font-semibold">{activeArtifact.title}</span>
+        <div
+          className="orch-flex-row orch-gap-xs"
+          style={{ alignItems: "center", minWidth: 0, paddingRight: "1rem" }}
+        >
+          <span className="orch-truncate orch-font-semibold" style={{ fontSize: "0.875rem" }}>
+            {activeArtifact.title}
+          </span>
         </div>
 
         {/* View Mode Segmented Controls */}
-        <div className="bg-muted flex items-center rounded-lg p-0.5 text-xs">
+        <div className="orch-canvas-tabs">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = canvasMode === tab.mode;
@@ -58,13 +63,9 @@ export function CanvasPane(): React.JSX.Element | null {
                 key={tab.mode}
                 type="button"
                 onClick={() => setCanvasMode(tab.mode)}
-                className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-all ${
-                  isActive
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`orch-canvas-tab ${isActive ? "is-active" : ""}`}
               >
-                <Icon className="size-3.5" />
+                <Icon style={{ width: "0.875rem", height: "0.875rem" }} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -75,16 +76,24 @@ export function CanvasPane(): React.JSX.Element | null {
         <button
           type="button"
           onClick={() => setCanvasOpen(false)}
-          className="text-muted-foreground hover:bg-muted hover:text-foreground ml-3 rounded-md p-1 transition-colors"
+          className="orch-text-muted"
+          style={{
+            marginLeft: "0.75rem",
+            borderRadius: "var(--radius-sm, 0.25rem)",
+            padding: "0.25rem",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+          }}
           title={UI_COPY.STUDIO.CANVAS.CLOSE_A11Y}
           aria-label={UI_COPY.STUDIO.CANVAS.CLOSE_A11Y}
         >
-          <X className="size-4" />
+          <X style={{ width: "1rem", height: "1rem" }} />
         </button>
       </div>
 
       {/* Canvas Content Body */}
-      <div className="flex-1 overflow-hidden">
+      <div className="orch-canvas-body">
         {canvasMode === "code" && (
           <CanvasCodeView
             code={draftCode || activeArtifact.code}

@@ -33,8 +33,8 @@ export function AuthGuard({ children }: AuthGuardProps): React.JSX.Element {
   // While authenticating or redirecting, render placeholder to prevent unauthenticated crashes
   if (isLoading || !isAuthenticated || !tenantId) {
     return (
-      <div className="bg-background flex h-dvh w-screen items-center justify-center">
-        <div className="border-primary/20 border-t-primary size-6 animate-spin rounded-full border-2" />
+      <div className="orch-guard-loading">
+        <div className="orch-guard-spinner" />
       </div>
     );
   }

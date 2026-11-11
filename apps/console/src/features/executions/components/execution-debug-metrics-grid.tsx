@@ -21,52 +21,151 @@ export function ExecutionDebugMetricsGrid({
   execution,
 }: ExecutionDebugMetricsGridProps): React.JSX.Element {
   return (
-    <div className="flex flex-wrap items-stretch gap-3">
-      <div className="border-border bg-muted/20 flex min-w-50 flex-1 flex-col justify-between rounded-lg border p-3.5">
-        <span className="text-muted-foreground text-xs font-medium">
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch", gap: "0.75rem" }}>
+      <div
+        style={{
+          border: "1px solid var(--border)",
+          backgroundColor: "color-mix(in oklab, var(--muted) 20%, transparent)",
+          display: "flex",
+          minWidth: "12rem",
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          borderRadius: "var(--radius-lg, 0.5rem)",
+          padding: "0.875rem",
+        }}
+      >
+        <span style={{ color: "var(--mutedForeground)", fontSize: "0.75rem", fontWeight: 500 }}>
           {UI_COPY.EXECUTIONS.DEBUG_DIALOG.SPECIALIST_LABEL}
         </span>
-        <div className="text-foreground mt-1 text-sm font-semibold">{execution.agentName}</div>
-        <span className="text-muted-foreground mt-0.5 text-xs">{execution.agentRole}</span>
+        <div
+          style={{
+            color: "var(--foreground)",
+            marginTop: "0.25rem",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+          }}
+        >
+          {execution.agentName}
+        </div>
+        <span
+          style={{ color: "var(--mutedForeground)", marginTop: "0.125rem", fontSize: "0.75rem" }}
+        >
+          {execution.agentRole}
+        </span>
       </div>
 
-      <div className="border-border bg-muted/20 flex min-w-50 flex-1 flex-col justify-between rounded-lg border p-3.5">
-        <span className="text-muted-foreground text-xs font-medium">
+      <div
+        style={{
+          border: "1px solid var(--border)",
+          backgroundColor: "color-mix(in oklab, var(--muted) 20%, transparent)",
+          display: "flex",
+          minWidth: "12rem",
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          borderRadius: "var(--radius-lg, 0.5rem)",
+          padding: "0.875rem",
+        }}
+      >
+        <span style={{ color: "var(--mutedForeground)", fontSize: "0.75rem", fontWeight: 500 }}>
           {UI_COPY.EXECUTIONS.DEBUG_DIALOG.MODEL_ENGINE_LABEL}
         </span>
-        <div className="text-foreground mt-1 font-mono text-xs font-semibold break-all">
+        <div
+          style={{
+            color: "var(--foreground)",
+            marginTop: "0.25rem",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            wordBreak: "break-all",
+          }}
+        >
           {execution.agentModel}
         </div>
-        <span className="text-muted-foreground mt-0.5 text-xs capitalize">
+        <span
+          style={{
+            color: "var(--mutedForeground)",
+            marginTop: "0.125rem",
+            fontSize: "0.75rem",
+            textTransform: "capitalize",
+          }}
+        >
           {UI_COPY.EXECUTIONS.DEBUG_DIALOG.MODE_LABEL(execution.mode)}
         </span>
       </div>
 
-      <div className="border-border bg-muted/20 flex min-w-45 flex-1 flex-col justify-between rounded-lg border p-3.5">
-        <span className="text-muted-foreground text-xs font-medium">
+      <div
+        style={{
+          border: "1px solid var(--border)",
+          backgroundColor: "color-mix(in oklab, var(--muted) 20%, transparent)",
+          display: "flex",
+          minWidth: "11rem",
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          borderRadius: "var(--radius-lg, 0.5rem)",
+          padding: "0.875rem",
+        }}
+      >
+        <span style={{ color: "var(--mutedForeground)", fontSize: "0.75rem", fontWeight: 500 }}>
           {UI_COPY.EXECUTIONS.DEBUG_DIALOG.DURATION_LATENCY_LABEL}
         </span>
-        <div className="text-foreground mt-1 font-mono text-sm font-semibold">
+        <div
+          style={{
+            color: "var(--foreground)",
+            marginTop: "0.25rem",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+          }}
+        >
           {execution.durationFormatted}
         </div>
-        <span className="text-muted-foreground mt-0.5 font-mono text-xs">
+        <span
+          style={{
+            color: "var(--mutedForeground)",
+            marginTop: "0.125rem",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.75rem",
+          }}
+        >
           {UI_COPY.EXECUTIONS.DEBUG_DIALOG.MS_TOTAL(execution.latencyMs)}
         </span>
       </div>
 
-      <div className="border-border bg-muted/20 flex min-w-45 flex-1 flex-col justify-between rounded-lg border p-3.5">
-        <span className="text-muted-foreground text-xs font-medium">
+      <div
+        style={{
+          border: "1px solid var(--border)",
+          backgroundColor: "color-mix(in oklab, var(--muted) 20%, transparent)",
+          display: "flex",
+          minWidth: "11rem",
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          borderRadius: "var(--radius-lg, 0.5rem)",
+          padding: "0.875rem",
+        }}
+      >
+        <span style={{ color: "var(--mutedForeground)", fontSize: "0.75rem", fontWeight: 500 }}>
           {UI_COPY.EXECUTIONS.DEBUG_DIALOG.PROGRESS_TOKENS_LABEL}
         </span>
-        <div className="mt-1 flex items-center gap-2">
-          <span className="text-foreground text-sm font-semibold">
+        <div style={{ marginTop: "0.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ color: "var(--foreground)", fontSize: "0.875rem", fontWeight: 600 }}>
             {UI_COPY.EXECUTIONS.DEBUG_DIALOG.STEP_PROGRESS(
               execution.stepsCompleted,
               execution.totalSteps,
             )}
           </span>
         </div>
-        <span className="text-muted-foreground mt-0.5 font-mono text-xs">
+        <span
+          style={{
+            color: "var(--mutedForeground)",
+            marginTop: "0.125rem",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.75rem",
+          }}
+        >
           {UI_COPY.EXECUTIONS.DEBUG_DIALOG.TOKENS_FORMAT(execution.tokensUsed)}
         </span>
       </div>

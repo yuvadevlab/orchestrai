@@ -16,14 +16,14 @@ export interface DashboardShellProps {
  */
 export function DashboardShell({ children }: DashboardShellProps): React.JSX.Element {
   return (
-    <div className="bg-background text-foreground flex h-screen w-screen overflow-hidden">
+    <div className="orch-shell">
       {/* Left Sidebar */}
       <SidebarNav />
 
       {/* Right Column: TopBar + Page Body */}
-      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="orch-shell__main-col">
         <TopBar />
-        <main className="flex-1 space-y-6 overflow-y-auto p-6">{children}</main>
+        <main className="orch-shell__content">{children}</main>
       </div>
     </div>
   );

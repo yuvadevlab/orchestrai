@@ -1,0 +1,142 @@
+/**
+ * @file packages/ui/src/styles/canvas.css
+ * @description Side-by-side interactive canvas pane (diff, code, terminal, preview) for OrchestrAI.
+ * @author yuva.devlab@gmail.com
+ */
+
+.orch-canvas-pane {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--border);
+  background-color: var(--card);
+}
+
+.orch-canvas-header {
+  display: flex;
+  height: 3rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-inline: 1rem;
+}
+
+.orch-canvas-tabs {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-md, 0.375rem);
+  background-color: var(--muted);
+  padding: 0.125rem;
+  font-size: 0.75rem;
+}
+
+.orch-canvas-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  padding: 0.25rem 0.625rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--mutedForeground);
+  transition: all 0.15s ease;
+}
+
+.orch-canvas-tab.is-active {
+  background-color: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.orch-canvas-tab:hover:not(.is-active) {
+  color: var(--foreground);
+}
+
+.orch-canvas-body {
+  flex: 1 1 0%;
+  overflow: hidden;
+  position: relative;
+}
+
+.orch-canvas-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 40%, transparent);
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+}
+
+/* Diff View */
+.orch-diff-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  background-color: var(--card);
+  color: var(--foreground);
+}
+
+.orch-diff-header {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 40%, transparent);
+  padding: 0.5rem 1rem;
+}
+
+.orch-diff-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  border-left: none;
+}
+
+.orch-diff-grid > div:first-child {
+  border-right: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
+}
+
+.orch-diff-line {
+  display: flex;
+  line-height: 1.25rem;
+}
+
+.orch-diff-line--add {
+  background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+  color: var(--primary);
+}
+
+.orch-diff-line--del {
+  background-color: color-mix(in oklab, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+}
+
+/* Terminal View */
+.orch-terminal-view {
+  height: 100%;
+  width: 100%;
+  background-color: var(--card);
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+}
+
+.orch-terminal-body {
+  flex: 1 1 0%;
+  overflow: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}

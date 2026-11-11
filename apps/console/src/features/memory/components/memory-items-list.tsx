@@ -51,8 +51,12 @@ export function MemoryItemsList({
         title={UI_COPY.MEMORY.EMPTY_TITLE}
         description={UI_COPY.MEMORY.EMPTY_DESC}
         action={
-          <Button size="sm" onClick={onOpenCreate} className="h-8 gap-1.5 text-xs font-medium">
-            <Brain className="size-3.5" />
+          <Button
+            size="sm"
+            onClick={onOpenCreate}
+            style={{ height: "2rem", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 500 }}
+          >
+            <Brain style={{ width: "0.875rem", height: "0.875rem" }} />
             <span>{UI_COPY.MEMORY.LIST.ADD_FIRST}</span>
           </Button>
         }
@@ -61,48 +65,121 @@ export function MemoryItemsList({
   }
 
   return (
-    <div className="border-border bg-card/40 overflow-hidden rounded-md border backdrop-blur">
-      <div className="divide-border/60 divide-y">
+    <div
+      style={{
+        border: "1px solid var(--border)",
+        backgroundColor: "color-mix(in oklab, var(--card) 40%, transparent)",
+        borderRadius: "var(--radius-md, 0.375rem)",
+        overflow: "hidden",
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {memories.map((mem) => {
           const importancePct = Math.round((mem.importanceScore ?? 0.5) * 100);
           return (
             <div
               key={mem.memoryId}
-              className="hover:bg-muted/30 flex flex-col gap-3 p-4 transition-colors sm:flex-row sm:items-start sm:justify-between"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: "0.75rem",
+                padding: "1rem",
+                borderBottom: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+                transition: "background-color 150ms ease",
+              }}
             >
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="border-border/80 bg-muted/60 text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] uppercase">
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div
+                  style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem" }}
+                >
+                  <span
+                    style={{
+                      border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
+                      backgroundColor: "color-mix(in oklab, var(--muted) 60%, transparent)",
+                      color: "var(--mutedForeground)",
+                      borderRadius: "var(--radius-sm, 0.25rem)",
+                      paddingInline: "0.375rem",
+                      paddingBlock: "0.125rem",
+                      fontFamily: "var(--font-mono, monospace)",
+                      fontSize: "0.625rem",
+                      textTransform: "uppercase",
+                    }}
+                  >
                     {mem.memoryType}
                   </span>
-                  <div className="flex items-center gap-1 text-[11px]">
-                    <Star className="text-warning size-3" />
-                    <span className="text-muted-foreground font-mono text-[10px]">
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                      fontSize: "0.6875rem",
+                    }}
+                  >
+                    <Star
+                      style={{
+                        color: "var(--warning, #eab308)",
+                        width: "0.75rem",
+                        height: "0.75rem",
+                      }}
+                    />
+                    <span
+                      style={{
+                        color: "var(--mutedForeground)",
+                        fontFamily: "var(--font-mono, monospace)",
+                        fontSize: "0.625rem",
+                      }}
+                    >
                       {UI_COPY.MEMORY.LIST.PRIORITY_PCT(importancePct)}
                     </span>
                   </div>
-                  <div className="text-muted-foreground flex items-center gap-1 text-[11px]">
-                    <Calendar className="size-3" />
+                  <div
+                    style={{
+                      color: "var(--mutedForeground)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                      fontSize: "0.6875rem",
+                    }}
+                  >
+                    <Calendar style={{ width: "0.75rem", height: "0.75rem" }} />
                     <span>{new Date(mem.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
 
-                <p className="text-foreground/95 mt-2 font-mono text-xs leading-relaxed">
+                <p
+                  style={{
+                    color: "var(--foreground)",
+                    marginTop: "0.5rem",
+                    fontFamily: "var(--font-mono, monospace)",
+                    fontSize: "0.75rem",
+                    lineHeight: 1.5,
+                    marginInline: 0,
+                    marginBottom: 0,
+                  }}
+                >
                   {mem.content}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-center">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(mem)}
                   disabled={deleteMutation.isPending}
-                  className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground size-7 rounded"
+                  style={{
+                    width: "1.75rem",
+                    height: "1.75rem",
+                    color: "var(--mutedForeground)",
+                    borderRadius: "var(--radius-sm, 0.25rem)",
+                  }}
                   title={UI_COPY.MEMORY.LIST.DELETE_TOOLTIP}
                   aria-label={UI_COPY.MEMORY.LIST.DELETE_TOOLTIP}
                 >
-                  <Trash2 className="size-3.5" />
+                  <Trash2 style={{ width: "0.875rem", height: "0.875rem" }} />
                 </Button>
               </div>
             </div>

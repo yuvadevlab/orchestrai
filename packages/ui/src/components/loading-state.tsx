@@ -2,6 +2,7 @@
  * @file loading-state.tsx
  * @description Generic Loading component following reference typography.
  * @module apps/console/components/ui
+ * @author yuva.devlab@gmail.com
  */
 
 import React from "react";
@@ -27,20 +28,16 @@ export function LoadingState({
   className,
 }: LoadingStateProps): React.JSX.Element {
   return (
-    <div
-      className={cn(
-        "bg-background flex size-full h-screen flex-col items-center justify-center p-6 text-center",
-        className,
-      )}
-    >
-      <div className="max-w-md text-center">
-        <div className="mb-4 flex justify-center">
-          <Loader2 className="text-primary size-8 animate-spin" />
+    <div className={cn("orch-state-page", className)}>
+      <div className="orch-state-page__inner">
+        <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center" }}>
+          <Loader2
+            style={{ width: "2rem", height: "2rem", color: "var(--primary)" }}
+            className="orch-animate-spin"
+          />
         </div>
-        <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">
-          {title}
-        </h1>
-        <p className="text-muted-foreground mt-2 text-sm sm:text-base">{description}</p>
+        <h1 className="orch-state-page__title">{title}</h1>
+        <p className="orch-state-page__desc">{description}</p>
       </div>
     </div>
   );

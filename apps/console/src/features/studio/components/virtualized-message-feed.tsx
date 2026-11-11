@@ -98,7 +98,17 @@ export function VirtualizedMessageFeed({
   }, [messages, isPinnedToBottom, scrollToBottom]);
 
   return (
-    <div className="relative mx-auto flex w-full max-w-4xl flex-col">
+    <div
+      style={{
+        position: "relative",
+        marginLeft: "auto",
+        marginRight: "auto",
+        display: "flex",
+        width: "100%",
+        maxWidth: "56rem",
+        flexDirection: "column",
+      }}
+    >
       {/* Virtualized Container */}
       <div
         style={{
@@ -131,19 +141,19 @@ export function VirtualizedMessageFeed({
       </div>
 
       {/* Sentinel for bottom bounds */}
-      <div ref={bottomSentinelRef} aria-hidden className="h-2 shrink-0" />
+      <div ref={bottomSentinelRef} aria-hidden style={{ height: "0.5rem", flexShrink: 0 }} />
 
       {/* Floating Intent-Aware Pill when user has scrolled up and new tokens arrived */}
       {hasNewContentBelow && (
-        <div className="pointer-events-none sticky bottom-6 z-30 flex justify-center">
+        <div className="orch-stream-pill">
           <button
             type="button"
             onClick={scrollToBottom}
             aria-label={UI_COPY.STUDIO.FEED.NEW_OUTPUT_A11Y}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 pointer-events-auto flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold shadow-lg transition-transform hover:scale-105 active:scale-95"
+            className="orch-stream-pill-btn"
           >
             <span>{UI_COPY.STUDIO.FEED.NEW_OUTPUT_STREAMING}</span>
-            <ArrowDown className="size-3.5 animate-bounce" />
+            <ArrowDown style={{ width: "0.875rem", height: "0.875rem" }} />
           </button>
         </div>
       )}

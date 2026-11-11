@@ -29,12 +29,15 @@ export function CanvasTerminalView({
   }, [logs.length]);
 
   return (
-    <div className="bg-card text-foreground flex h-full flex-col overflow-hidden font-mono text-xs">
+    <div className="orch-terminal-view">
       {/* Terminal Title Bar */}
-      <div className="border-border/40 bg-muted/40 flex items-center justify-between border-b px-4 py-2">
-        <div className="text-muted-foreground flex items-center gap-2">
-          <Terminal className="text-primary size-3.5" />
-          <span className="text-foreground font-semibold">{command}</span>
+      <div className="orch-canvas-bar">
+        <div className="orch-flex-row orch-gap-xs" style={{ alignItems: "center" }}>
+          <Terminal
+            className="orch-text-primary"
+            style={{ width: "0.875rem", height: "0.875rem" }}
+          />
+          <span className="orch-font-semibold">{command}</span>
         </div>
         {onClear && (
           <button
@@ -42,23 +45,37 @@ export function CanvasTerminalView({
             onClick={onClear}
             title={UI_COPY.COMMON.A11Y.CLEAR_OUTPUT}
             aria-label={UI_COPY.COMMON.A11Y.CLEAR_OUTPUT}
-            className="hover:text-foreground text-muted-foreground/60 transition-colors"
+            className="orch-text-muted"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: "0.125rem",
+            }}
           >
-            <Trash2 className="size-3.5" />
+            <Trash2 style={{ width: "0.875rem", height: "0.875rem" }} />
           </button>
         )}
       </div>
 
       {/* Terminal Output Body */}
-      <div className="flex-1 space-y-1 overflow-auto p-4">
+      <div className="orch-terminal-body">
         {logs.length === 0 ? (
-          <div className="text-muted-foreground/60 italic">
+          <div className="orch-text-muted" style={{ fontStyle: "italic", opacity: 0.6 }}>
             {UI_COPY.STUDIO.CANVAS.TERMINAL_NO_OUTPUT}
           </div>
         ) : (
           logs.map((line, idx) => (
-            <div key={`log-${idx}`} className="leading-5 break-all whitespace-pre-wrap">
-              <span className="text-muted-foreground/50 pr-2 select-none">$</span>
+            <div
+              key={`log-${idx}`}
+              style={{ lineHeight: "1.25rem", wordBreak: "break-all", whiteSpace: "pre-wrap" }}
+            >
+              <span
+                className="orch-text-muted"
+                style={{ paddingRight: "0.5rem", userSelect: "none", opacity: 0.5 }}
+              >
+                $
+              </span>
               <span>{line}</span>
             </div>
           ))

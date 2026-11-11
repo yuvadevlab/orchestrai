@@ -5,6 +5,7 @@
  * @description Design System FormDialog component powered by @yuva-devlab/ui Dialog primitives.
  * Features accessible focus management, portal mounting, fixed header, scrollable body, and pinned action footer.
  * @module apps/console/components/ui
+ * @author yuva.devlab@gmail.com
  */
 
 import React, { useState, useEffect } from "react";
@@ -107,19 +108,30 @@ export function FormDialog({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent size={maxWidth}>
-        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "flex",
+            minHeight: 0,
+            flex: "1 1 0%",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
           <DialogHeader>
-            <DialogTitle className="font-display">{title}</DialogTitle>
+            <DialogTitle style={{ fontFamily: "var(--font-display, sans-serif)" }}>
+              {title}
+            </DialogTitle>
             {description ? <DialogDescription>{description}</DialogDescription> : null}
           </DialogHeader>
 
-          <DialogBody className="overflow-y-auto px-6 py-4">
+          <DialogBody style={{ overflowY: "auto", padding: "1rem 1.5rem" }}>
             <div
-              className={
-                columns === 1
-                  ? "grid grid-cols-1 gap-y-3.5"
-                  : "grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2"
-              }
+              style={{
+                display: "grid",
+                gridTemplateColumns: columns === 1 ? "1fr" : "repeat(auto-fit, minmax(14rem, 1fr))",
+                gap: "0.875rem 1rem",
+              }}
             >
               {fields.map((field) => (
                 <FormDialogField
@@ -139,7 +151,7 @@ export function FormDialog({
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="h-8 cursor-pointer text-xs"
+              style={{ height: "2rem", cursor: "pointer", fontSize: "0.75rem" }}
             >
               {COMMON_COPY.ACTIONS.CANCEL}
             </Button>
@@ -148,11 +160,21 @@ export function FormDialog({
               variant="default"
               size="sm"
               disabled={isSubmitting}
-              className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+              style={{
+                height: "2rem",
+                cursor: "pointer",
+                display: "inline-flex",
+                gap: "0.375rem",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+              }}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <Loader2
+                    style={{ width: "0.875rem", height: "0.875rem" }}
+                    className="orch-animate-spin"
+                  />
                   <span>{COMMON_COPY.ACTIONS.SAVING}</span>
                 </>
               ) : (

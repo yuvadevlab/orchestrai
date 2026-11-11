@@ -31,12 +31,16 @@ export function ThemeToggle(): React.JSX.Element {
           type="button"
           onClick={handleToggle}
           aria-label={UI_COPY.COMMON.A11Y.TOGGLE_THEME}
-          className="text-muted-foreground hover:bg-accent hover:text-foreground grid size-9 shrink-0 cursor-pointer place-items-center rounded-md transition-colors"
+          className="orch-nav-rail__btn"
         >
-          {resolvedTheme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          {resolvedTheme === "dark" ? (
+            <Sun style={{ width: "1rem", height: "1rem" }} />
+          ) : (
+            <Moon style={{ width: "1rem", height: "1rem" }} />
+          )}
         </button>
       </TooltipTrigger>
-      <TooltipContent side="right" className="font-mono text-xs">
+      <TooltipContent side="right" className="orch-font-mono" style={{ fontSize: "0.75rem" }}>
         {resolvedTheme === "dark"
           ? UI_COPY.COMMON.A11Y.SWITCH_LIGHT
           : UI_COPY.COMMON.A11Y.SWITCH_DARK}

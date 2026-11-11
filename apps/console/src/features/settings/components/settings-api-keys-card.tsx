@@ -23,29 +23,25 @@ export function SettingsApiKeysCard({
   onKeyChange,
 }: SettingsApiKeysCardProps): React.JSX.Element {
   return (
-    <section className="border-border bg-card/60 space-y-4 rounded-md border p-5 shadow-xs">
-      <div>
-        <h2 className="text-foreground text-sm font-semibold tracking-tight">
-          {UI_COPY.SETTINGS.API_KEYS.TITLE}
-        </h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">
-          {UI_COPY.SETTINGS.API_KEYS.DESCRIPTION}
-        </p>
+    <section className="orch-settings-section">
+      <div className="orch-settings-section-header">
+        <h2 className="orch-settings-section-title">{UI_COPY.SETTINGS.API_KEYS.TITLE}</h2>
+        <p className="orch-settings-section-desc">{UI_COPY.SETTINGS.API_KEYS.DESCRIPTION}</p>
       </div>
 
-      <div className="space-y-3">
+      <div className="orch-settings-keys-list">
         {Object.keys(apiKeys).map((p) => (
-          <div
-            key={p}
-            className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3"
-          >
-            <Label className="text-muted-foreground w-28 text-xs">{p}</Label>
+          <div key={p} className="orch-settings-key-item">
+            <Label className="orch-text-muted" style={{ width: "7rem", fontSize: "0.75rem" }}>
+              {p}
+            </Label>
             <Input
               type="password"
               placeholder={UI_COPY.SETTINGS.API_KEYS.PLACEHOLDER}
               value={apiKeys[p]}
               onChange={(e) => onKeyChange(p, e.target.value)}
-              className="bg-background h-8 flex-1 font-mono text-xs"
+              className="orch-font-mono"
+              style={{ flex: 1, height: "2rem", fontSize: "0.75rem", width: "100%" }}
             />
           </div>
         ))}

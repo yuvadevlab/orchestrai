@@ -86,38 +86,49 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
   };
 
   return (
-    <div className="border-border bg-card/60 flex flex-col rounded-md border p-4 backdrop-blur">
+    <div className="orch-replayer">
       {/* Header and Controls */}
-      <div className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b pb-3">
-        <div className="flex items-center gap-2">
-          <History className="text-primary size-4" />
-          <h3 className="text-sm font-semibold tracking-tight">
+      <div className="orch-replayer-header">
+        <div className="orch-flex-row orch-gap-sm">
+          <History className="orch-text-primary" style={{ width: "1rem", height: "1rem" }} />
+          <h3
+            className="orch-font-semibold"
+            style={{ fontSize: "0.875rem", letterSpacing: "-0.01em" }}
+          >
             {UI_COPY.EXECUTIONS.REPLAYER.TITLE}
           </h3>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="orch-flex-row orch-gap-xs">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
             disabled={currentIndex === 0}
             aria-label={UI_COPY.EXECUTIONS.REPLAYER.A11Y_PREV}
-            className="size-7 p-0"
+            style={{ width: "1.75rem", height: "1.75rem", padding: 0 }}
           >
-            <SkipBack className="size-3" />
+            <SkipBack style={{ width: "0.75rem", height: "0.75rem" }} />
           </Button>
 
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsPlaying(!isPlaying)}
-            className="h-7 px-2 font-mono text-xs"
+            className="orch-font-mono"
+            style={{ height: "1.75rem", padding: "0 0.5rem", fontSize: "0.75rem" }}
           >
             {isPlaying ? (
-              <Pause className="mr-1 size-3" />
+              <Pause style={{ width: "0.75rem", height: "0.75rem", marginRight: "0.25rem" }} />
             ) : (
-              <Play className="mr-1 size-3 fill-current" />
+              <Play
+                style={{
+                  width: "0.75rem",
+                  height: "0.75rem",
+                  marginRight: "0.25rem",
+                  fill: "currentColor",
+                }}
+              />
             )}
             {isPlaying ? UI_COPY.EXECUTIONS.REPLAYER.PAUSE : UI_COPY.EXECUTIONS.REPLAYER.PLAY}
           </Button>
@@ -128,26 +139,30 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
             onClick={() => setCurrentIndex((prev) => Math.min(checkpoints.length - 1, prev + 1))}
             disabled={currentIndex === checkpoints.length - 1}
             aria-label={UI_COPY.EXECUTIONS.REPLAYER.A11Y_NEXT}
-            className="size-7 p-0"
+            style={{ width: "1.75rem", height: "1.75rem", padding: 0 }}
           >
-            <SkipForward className="size-3" />
+            <SkipForward style={{ width: "0.75rem", height: "0.75rem" }} />
           </Button>
 
           <Button
             variant="default"
             size="sm"
             onClick={handleForkCheckpoint}
-            className="h-7 gap-1 px-2 font-mono text-xs"
+            className="orch-font-mono"
+            style={{ height: "1.75rem", gap: "0.25rem", padding: "0 0.5rem", fontSize: "0.75rem" }}
           >
-            <RotateCw className="size-3" />
+            <RotateCw style={{ width: "0.75rem", height: "0.75rem" }} />
             <span>{UI_COPY.EXECUTIONS.REPLAYER.FORK_HERE}</span>
           </Button>
         </div>
       </div>
 
       {/* Scrubbing Slider & Step Indicators */}
-      <div className="my-4 space-y-2">
-        <div className="text-muted-foreground flex items-center justify-between font-mono text-[11px]">
+      <div style={{ margin: "1rem 0", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <div
+          className="orch-flex-row orch-justify-between orch-text-muted orch-font-mono"
+          style={{ fontSize: "0.6875rem" }}
+        >
           <span>
             {UI_COPY.EXECUTIONS.REPLAYER.STEP_LABEL(currentIndex + 1, checkpoints.length)}
           </span>
@@ -163,9 +178,12 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
             setIsPlaying(false);
             setCurrentIndex(Number(e.target.value));
           }}
-          className="accent-primary w-full cursor-pointer"
+          style={{ width: "100%", cursor: "pointer", accentColor: "var(--primary)" }}
         />
-        <div className="text-muted-foreground flex justify-between font-mono text-[10px]">
+        <div
+          className="orch-flex-row orch-justify-between orch-text-muted orch-font-mono"
+          style={{ fontSize: "0.625rem" }}
+        >
           {checkpoints.map((cp, idx) => (
             <button
               key={cp.index}
@@ -174,9 +192,14 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
                 setIsPlaying(false);
                 setCurrentIndex(idx);
               }}
-              className={`cursor-pointer transition-colors ${
-                idx === currentIndex ? "text-primary font-bold" : "hover:text-foreground"
-              }`}
+              style={{
+                cursor: "pointer",
+                background: "none",
+                border: "none",
+                color: idx === currentIndex ? "var(--primary)" : "inherit",
+                fontWeight: idx === currentIndex ? 700 : 400,
+                font: "inherit",
+              }}
             >
               #{cp.index}
             </button>
@@ -185,14 +208,20 @@ export function CheckpointReplayer({ execution }: CheckpointReplayerProps): Reac
       </div>
 
       {/* State Snapshot Card */}
-      <div className="bg-muted/30 border-border/60 rounded border p-3">
-        <div className="mb-2 flex items-center justify-between text-xs">
-          <span className="text-foreground font-semibold">{activeCheckpoint.label}</span>
-          <span className="text-primary font-mono text-[11px] uppercase">
+      <div className="orch-replayer-snapshot">
+        <div
+          className="orch-flex-row orch-justify-between"
+          style={{ fontSize: "0.75rem", marginBottom: "0.5rem" }}
+        >
+          <span className="orch-font-semibold">{activeCheckpoint.label}</span>
+          <span
+            className="orch-text-primary orch-font-mono"
+            style={{ fontSize: "0.6875rem", textTransform: "uppercase" }}
+          >
             {activeCheckpoint.status}
           </span>
         </div>
-        <pre className="text-muted-foreground bg-card overflow-x-auto rounded p-2 font-mono text-[11px] leading-relaxed">
+        <pre className="orch-replayer-snapshot-pre">
           {JSON.stringify(activeCheckpoint.variables, null, 2)}
         </pre>
       </div>

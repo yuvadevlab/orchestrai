@@ -15,24 +15,7 @@ import { EmptyState, DetailPageSkeleton } from "@/components";
 import { Bot } from "lucide-react";
 import { PageShell } from "@/components/layout/page-shell";
 import { UI_COPY } from "@/lib/ui-copy";
-
-/** A label–value definition list row for agent detail panels. */
-function Row({
-  label,
-  value,
-  mono = false,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}): React.JSX.Element {
-  return (
-    <div className="border-border/60 flex items-center justify-between gap-3 border-b pb-1.5 last:border-0">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className={mono ? "font-mono text-[11px]" : ""}>{value}</dd>
-    </div>
-  );
-}
+import { AgentDetailSidebar } from "./agent-detail-sidebar";
 
 export interface AgentDetailPageContentProps {
   agentId: string;
@@ -64,11 +47,25 @@ export function AgentDetailPageContent({
           description={UI_COPY.AGENTS.DETAIL.NOT_FOUND_DESC(agentId)}
         />
       ) : (
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div
+          style={{
+            display: "grid",
+            gap: "0.75rem",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          }}
+        >
           {/* Main Column */}
-          <div className="space-y-3 lg:col-span-2">
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             <Panel title={UI_COPY.AGENTS.DETAIL.SYSTEM_INSTRUCTIONS_TITLE}>
-              <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
+              <p
+                style={{
+                  color: "var(--mutedForeground)",
+                  fontSize: "0.875rem",
+                  lineHeight: 1.6,
+                  whiteSpace: "pre-line",
+                  margin: 0,
+                }}
+              >
                 {agent.description}
               </p>
             </Panel>
@@ -77,9 +74,16 @@ export function AgentDetailPageContent({
               title={UI_COPY.AGENTS.DETAIL.EXECUTION_HISTORY_TITLE}
               meta={UI_COPY.AGENTS.DETAIL.RUNS_COUNT(history.length)}
             >
-              <div className="space-y-2">
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {history.length === 0 ? (
-                  <p className="text-muted-foreground font-mono text-xs">
+                  <p
+                    style={{
+                      color: "var(--mutedForeground)",
+                      fontFamily: "var(--font-mono, monospace)",
+                      fontSize: "0.75rem",
+                      margin: 0,
+                    }}
+                  >
                     {UI_COPY.AGENTS.DETAIL.NO_RUNS_DESC}
                   </p>
                 ) : (
@@ -87,10 +91,37 @@ export function AgentDetailPageContent({
                     <Link
                       key={execution.id}
                       href={`/executions/${execution.id}`}
-                      className="border-border hover:border-primary/40 flex items-center gap-3 rounded-md border px-3 py-2 transition-colors"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                        borderRadius: "var(--radius-md, 0.375rem)",
+                        border: "1px solid var(--border)",
+                        padding: "0.5rem 0.75rem",
+                        textDecoration: "none",
+                        color: "inherit",
+                        transition: "border-color 150ms ease",
+                      }}
                     >
-                      <span className="min-w-0 flex-1 truncate text-xs">{execution.intent}</span>
-                      <span className="text-muted-foreground font-mono text-[10px]">
+                      <span
+                        style={{
+                          minWidth: 0,
+                          flex: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          fontSize: "0.75rem",
+                        }}
+                      >
+                        {execution.intent}
+                      </span>
+                      <span
+                        style={{
+                          color: "var(--mutedForeground)",
+                          fontFamily: "var(--font-mono, monospace)",
+                          fontSize: "0.625rem",
+                        }}
+                      >
                         {execution.latencyMs}ms
                       </span>
                       <StatusChip status={execution.status} />
@@ -102,50 +133,7 @@ export function AgentDetailPageContent({
           </div>
 
           {/* Sidebar Cards */}
-          <div className="space-y-3">
-            <Panel title={UI_COPY.AGENTS.DETAIL.SPECIFICATION_TITLE}>
-              <div className="flex items-center gap-3">
-                <span className="border-border bg-secondary text-primary font-display grid size-12 place-items-center rounded-md border text-xl">
-                  ◉
-                </span>
-                <div>
-                  <p className="text-sm font-semibold">{agent.role}</p>
-                  <p className="text-muted-foreground font-mono text-[10px]">{agent.id}</p>
-                </div>
-              </div>
-              <dl className="mt-4 space-y-2 text-xs">
-                <Row label={UI_COPY.AGENTS.DETAIL.MODEL_LABEL} value={agent.model} mono />
-                <Row label={UI_COPY.AGENTS.DETAIL.STATUS_LABEL} value={agent.status} />
-                <Row
-                  label={UI_COPY.AGENTS.DETAIL.EXECUTIONS_LABEL}
-                  value={String(agent.totalExecutions)}
-                />
-                <Row
-                  label={UI_COPY.AGENTS.DETAIL.SUCCESS_RATE_LABEL}
-                  value={UI_COPY.AGENTS.DETAIL.PERCENTAGE(agent.successRate)}
-                />
-              </dl>
-            </Panel>
-
-            <Panel title={UI_COPY.AGENTS.DETAIL.TOOLS_TITLE}>
-              <div className="flex flex-wrap gap-1.5">
-                {agent.tools.length === 0 ? (
-                  <p className="text-muted-foreground font-mono text-xs">
-                    {UI_COPY.AGENTS.DETAIL.NO_TOOLS_DESC}
-                  </p>
-                ) : (
-                  agent.tools.map((tool) => (
-                    <span
-                      key={tool}
-                      className="border-primary/25 bg-primary/5 text-primary rounded border px-2 py-0.5 font-mono text-[10px]"
-                    >
-                      {tool}
-                    </span>
-                  ))
-                )}
-              </div>
-            </Panel>
-          </div>
+          <AgentDetailSidebar agent={agent} />
         </div>
       )}
     </PageShell>

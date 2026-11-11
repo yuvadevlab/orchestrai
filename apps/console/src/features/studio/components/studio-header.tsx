@@ -38,18 +38,29 @@ export function StudioHeader({
   const totalHarnessSpecs = (harness?.rulesCount ?? 0) + (harness?.skillsCount ?? 0);
 
   return (
-    <header className="border-border bg-card/60 relative z-20 flex h-13 shrink-0 items-center justify-between border-b px-4 backdrop-blur-md">
+    <header className="orch-studio-header">
       {/* Left: Workspace Folder Picker & Session History Drawer Button */}
-      <div className="flex items-center gap-2">
+      <div className="orch-flex-row orch-gap-xs" style={{ alignItems: "center" }}>
         <StudioWorkspaceSelector />
 
         {harness && totalHarnessSpecs > 0 && (
           <Badge
             variant="outline"
-            className="border-primary/30 bg-primary/5 text-primary hidden items-center gap-1.5 px-2 py-0.5 font-mono text-[10px] md:inline-flex"
+            className="orch-font-mono orch-text-primary"
+            style={{
+              borderColor: "color-mix(in oklab, var(--primary) 30%, transparent)",
+              backgroundColor: "color-mix(in oklab, var(--primary) 5%, transparent)",
+              alignItems: "center",
+              gap: "0.375rem",
+              padding: "0.125rem 0.5rem",
+              fontSize: "0.625rem",
+            }}
             title={`Harness active: ${harness.rootInstructionsCount} root specs, ${harness.rulesCount} rules, ${harness.skillsCount} skills loaded from ${harness.workspaceRoot}`}
           >
-            <BookOpen className="text-primary size-3" />
+            <BookOpen
+              className="orch-text-primary"
+              style={{ width: "0.75rem", height: "0.75rem" }}
+            />
             <span>
               {harness.rulesCount} rules · {harness.skillsCount} skills
             </span>
@@ -60,25 +71,35 @@ export function StudioHeader({
           variant="outline"
           size="sm"
           onClick={onOpenHistory}
-          className="h-8 gap-1.5 px-2.5 font-mono text-xs"
+          className="orch-font-mono"
+          style={{ height: "2rem", gap: "0.375rem", padding: "0 0.625rem", fontSize: "0.75rem" }}
           title={UI_COPY.STUDIO.HEADER.THREADS_TOOLTIP}
         >
-          <History className="size-3.5" />
-          <span className="hidden sm:inline">{UI_COPY.STUDIO.HEADER.THREADS_BUTTON}</span>
+          <History style={{ width: "0.875rem", height: "0.875rem" }} />
+          <span>{UI_COPY.STUDIO.HEADER.THREADS_BUTTON}</span>
         </Button>
       </div>
 
       {/* Right: Telemetry Badge & Inspector Action */}
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="orch-flex-row orch-gap-xs" style={{ flexShrink: 0, alignItems: "center" }}>
         <Badge
           variant="outline"
-          className={`gap-1.5 border px-2 py-0.5 font-mono text-[10px] uppercase ${
-            isRunning
-              ? "border-primary/40 bg-primary/10 text-primary animate-pulse"
-              : "border-border bg-secondary/50 text-muted-foreground"
-          }`}
+          className="orch-font-mono"
+          style={{
+            gap: "0.375rem",
+            padding: "0.125rem 0.5rem",
+            fontSize: "0.625rem",
+            textTransform: "uppercase",
+            borderColor: isRunning
+              ? "color-mix(in oklab, var(--primary) 40%, transparent)"
+              : "var(--border)",
+            backgroundColor: isRunning
+              ? "color-mix(in oklab, var(--primary) 10%, transparent)"
+              : "color-mix(in oklab, var(--secondary) 50%, transparent)",
+            color: isRunning ? "var(--primary)" : "var(--mutedForeground)",
+          }}
         >
-          <Sparkles className="size-3" />
+          <Sparkles style={{ width: "0.75rem", height: "0.75rem" }} />
           {isRunning
             ? UI_COPY.STUDIO.HEADER.STATUS_COLLABORATING
             : UI_COPY.STUDIO.HEADER.STATUS_READY}
@@ -88,11 +109,17 @@ export function StudioHeader({
           variant="outline"
           size="sm"
           onClick={onToggleRail}
-          className={`size-8 p-0 ${railOpen ? "bg-accent text-primary" : ""}`}
+          style={{
+            width: "2rem",
+            height: "2rem",
+            padding: 0,
+            backgroundColor: railOpen ? "var(--accent)" : undefined,
+            color: railOpen ? "var(--primary)" : undefined,
+          }}
           title={UI_COPY.STUDIO.HEADER.TOGGLE_INSPECTOR_A11Y}
           aria-label={UI_COPY.STUDIO.HEADER.TOGGLE_INSPECTOR_A11Y}
         >
-          <Sidebar className="size-3.5" />
+          <Sidebar style={{ width: "0.875rem", height: "0.875rem" }} />
         </Button>
       </div>
     </header>

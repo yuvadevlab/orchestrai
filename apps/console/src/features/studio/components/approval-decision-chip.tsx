@@ -18,8 +18,7 @@ export interface ApprovalDecisionChipProps {
 
 /**
  * Compact inline audit chip rendered in the message thread after the user resolves
- * a permission request via the LiveActivityBar. Provides a permanent, scannable
- * record of what was approved or denied and when.
+ * a permission request via the LiveActivityBar.
  */
 export function ApprovalDecisionChip({ request }: ApprovalDecisionChipProps): React.JSX.Element {
   const isDeny = request.resolvedScope === PermissionScope.DENY;
@@ -34,40 +33,65 @@ export function ApprovalDecisionChip({ request }: ApprovalDecisionChipProps): Re
     <div
       role="log"
       aria-label={UI_COPY.STUDIO.CLEARANCE.DECISION_LOG_A11Y(request.resolvedScope ?? "")}
-      className="border-border/40 bg-muted/20 my-2 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border px-3 py-1.5 font-mono text-[11px]"
+      className="orch-decision-chip"
     >
       {/* Decision icon */}
       {isDeny ? (
-        <X className="text-destructive size-3.5 shrink-0" />
+        <X
+          className="orch-text-destructive"
+          style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+        />
       ) : (
-        <ShieldCheck className="text-primary size-3.5 shrink-0" />
+        <ShieldCheck
+          className="orch-text-primary"
+          style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+        />
       )}
 
       {/* Verb + scope */}
-      <span className={isDeny ? "text-destructive font-semibold" : "text-primary font-semibold"}>
+      <span
+        className={
+          isDeny
+            ? "orch-text-destructive orch-font-semibold"
+            : "orch-text-primary orch-font-semibold"
+        }
+      >
         {isDeny
           ? UI_COPY.STUDIO.CLEARANCE.DENIED_SHORT
           : UI_COPY.STUDIO.CLEARANCE.CLEARED_SHORT(request.resolvedScope ?? "")}
       </span>
 
       {/* Separator */}
-      <span className="text-muted-foreground/40">·</span>
+      <span className="orch-text-muted" style={{ opacity: 0.4 }}>
+        ·
+      </span>
 
       {/* Tool badge */}
       <Badge
         variant="outline"
-        className="border-border/60 text-muted-foreground px-1.5 py-0 font-mono text-[10px]"
+        className="orch-font-mono orch-text-muted"
+        style={{ padding: "0 0.375rem", fontSize: "0.625rem" }}
       >
         {request.tool}
       </Badge>
 
       {/* Target path — truncated for readability */}
-      <span className="text-muted-foreground/80 max-w-xs truncate text-[10px]">
+      <span
+        className="orch-text-muted orch-truncate"
+        style={{ maxWidth: "20rem", fontSize: "0.625rem" }}
+      >
         {request.target}
       </span>
 
       {/* Timestamp */}
-      {time && <span className="text-muted-foreground/50 ml-auto text-[10px]">{time}</span>}
+      {time && (
+        <span
+          className="orch-text-muted"
+          style={{ marginLeft: "auto", fontSize: "0.625rem", opacity: 0.5 }}
+        >
+          {time}
+        </span>
+      )}
     </div>
   );
 }

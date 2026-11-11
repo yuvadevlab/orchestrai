@@ -32,10 +32,18 @@ export function ExecutionTraceWaterfall({
   if (isLoading) {
     return (
       <Panel title={UI_COPY.EXECUTIONS.WATERFALL.TITLE}>
-        <div className="space-y-2 p-1">
-          <Skeleton className="h-10 w-full rounded" />
-          <Skeleton className="h-10 w-full rounded" />
-          <Skeleton className="h-10 w-full rounded" />
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem", padding: "0.25rem" }}
+        >
+          <Skeleton
+            style={{ height: "2.5rem", width: "100%", borderRadius: "var(--radius-sm, 0.25rem)" }}
+          />
+          <Skeleton
+            style={{ height: "2.5rem", width: "100%", borderRadius: "var(--radius-sm, 0.25rem)" }}
+          />
+          <Skeleton
+            style={{ height: "2.5rem", width: "100%", borderRadius: "var(--radius-sm, 0.25rem)" }}
+          />
         </div>
       </Panel>
     );
@@ -44,9 +52,17 @@ export function ExecutionTraceWaterfall({
   if (spans.length === 0) {
     return (
       <Panel title={UI_COPY.EXECUTIONS.WATERFALL.TITLE}>
-        <div className="flex h-24 flex-col items-center justify-center text-center">
-          <Activity className="text-muted-foreground mb-1.5 size-5" />
-          <p className="text-muted-foreground text-xs">{UI_COPY.EXECUTIONS.WATERFALL.EMPTY_DESC}</p>
+        <div
+          className="orch-flex-col orch-items-center orch-justify-center orch-text-center"
+          style={{ height: "6rem" }}
+        >
+          <Activity
+            className="orch-text-muted"
+            style={{ marginBottom: "0.375rem", width: "1.25rem", height: "1.25rem" }}
+          />
+          <p className="orch-text-muted" style={{ fontSize: "0.75rem" }}>
+            {UI_COPY.EXECUTIONS.WATERFALL.EMPTY_DESC}
+          </p>
         </div>
       </Panel>
     );
@@ -63,16 +79,26 @@ export function ExecutionTraceWaterfall({
 
   return (
     <Panel title={UI_COPY.EXECUTIONS.WATERFALL.TITLE}>
-      <div className="mb-2 flex items-center justify-between border-b pb-2">
-        <span className="text-muted-foreground text-xs font-medium">
+      <div
+        className="orch-flex-row orch-justify-between"
+        style={{
+          marginBottom: "0.5rem",
+          borderBottom: "1px solid var(--border)",
+          paddingBottom: "0.5rem",
+        }}
+      >
+        <span className="orch-text-muted orch-font-medium" style={{ fontSize: "0.75rem" }}>
           {UI_COPY.EXECUTIONS.WATERFALL.SPANS_LABEL}
         </span>
-        <div className="text-muted-foreground flex items-center gap-1.5 font-mono text-[11px]">
-          <Clock className="size-3" />
+        <div
+          className="orch-flex-row orch-gap-xs orch-text-muted orch-font-mono"
+          style={{ fontSize: "0.6875rem" }}
+        >
+          <Clock style={{ width: "0.75rem", height: "0.75rem" }} />
           <span>{UI_COPY.EXECUTIONS.WATERFALL.TOTAL_DURATION(totalWindowMs)}</span>
         </div>
       </div>
-      <div className="space-y-2">
+      <div className="orch-flex-col orch-gap-sm">
         {spans.map((span) => {
           const spanStart = new Date(span.startTime).getTime();
           const offsetPercent = Math.max(
@@ -87,36 +113,58 @@ export function ExecutionTraceWaterfall({
           const isError = span.status === TraceSpanStatus.ERROR || span.status === "error";
 
           return (
-            <div
-              key={span.spanId}
-              className="border-border/60 bg-card/40 hover:bg-muted/20 rounded border p-2 text-xs transition-colors"
-            >
+            <div key={span.spanId} className="orch-waterfall-card">
               <div
-                className="flex cursor-pointer items-center justify-between gap-2"
+                className="orch-flex-row orch-justify-between orch-gap-sm"
+                style={{ cursor: "pointer" }}
                 onClick={() => setExpandedSpanId(isExpanded ? null : span.spanId)}
               >
-                <div className="flex min-w-0 items-center gap-1.5">
+                <div className="orch-flex-row orch-gap-xs" style={{ minWidth: 0 }}>
                   {isExpanded ? (
-                    <ChevronDown className="text-muted-foreground size-3 shrink-0" />
+                    <ChevronDown
+                      className="orch-text-muted"
+                      style={{ width: "0.75rem", height: "0.75rem", flexShrink: 0 }}
+                    />
                   ) : (
-                    <ChevronRight className="text-muted-foreground size-3 shrink-0" />
+                    <ChevronRight
+                      className="orch-text-muted"
+                      style={{ width: "0.75rem", height: "0.75rem", flexShrink: 0 }}
+                    />
                   )}
-                  {isError && <AlertCircle className="text-destructive size-3 shrink-0" />}
-                  <span className="text-foreground truncate font-mono text-[11px] font-medium">
+                  {isError && (
+                    <AlertCircle
+                      className="orch-text-destructive"
+                      style={{ width: "0.75rem", height: "0.75rem", flexShrink: 0 }}
+                    />
+                  )}
+                  <span
+                    className="orch-truncate orch-font-mono orch-font-medium"
+                    style={{ fontSize: "0.6875rem" }}
+                  >
                     {span.name}
                   </span>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="text-muted-foreground font-mono text-[10px]">
+                <div className="orch-flex-row orch-gap-sm" style={{ flexShrink: 0 }}>
+                  <span className="orch-text-muted orch-font-mono" style={{ fontSize: "0.625rem" }}>
                     {span.durationMs}ms
                   </span>
                   <span
-                    className={`py-0.2 rounded px-1.5 font-mono text-[9px] font-semibold uppercase ${
-                      isError
-                        ? "border-destructive/40 bg-destructive/10 text-destructive border"
-                        : "border-primary/30 bg-primary/10 text-primary border"
-                    }`}
+                    className="orch-font-mono"
+                    style={{
+                      borderRadius: "var(--radius-sm, 0.25rem)",
+                      padding: "0.125rem 0.375rem",
+                      fontSize: "0.5625rem",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      border: isError
+                        ? "1px solid color-mix(in oklab, var(--destructive) 40%, transparent)"
+                        : "1px solid color-mix(in oklab, var(--primary) 30%, transparent)",
+                      backgroundColor: isError
+                        ? "color-mix(in oklab, var(--destructive) 10%, transparent)"
+                        : "color-mix(in oklab, var(--primary) 10%, transparent)",
+                      color: isError ? "var(--destructive)" : "var(--primary)",
+                    }}
                   >
                     {span.status}
                   </span>
@@ -124,12 +172,11 @@ export function ExecutionTraceWaterfall({
               </div>
 
               {/* Relative Waterfall Timing Bar */}
-              <div className="bg-muted/40 relative mt-2 h-1.5 w-full overflow-hidden rounded-full">
+              <div className="orch-waterfall-track">
                 <div
-                  className={`absolute h-full rounded-full transition-all ${
-                    isError ? "bg-destructive" : "bg-primary"
-                  }`}
+                  className="orch-waterfall-span-bar"
                   style={{
+                    backgroundColor: isError ? "var(--destructive)" : "var(--primary)",
                     left: `${offsetPercent}%`,
                     width: `${durationPercent}%`,
                   }}
@@ -138,16 +185,22 @@ export function ExecutionTraceWaterfall({
 
               {/* Expanded OpenTelemetry Span Attributes */}
               {isExpanded && (
-                <div className="border-border/40 bg-background/90 mt-2.5 rounded border p-2 font-mono text-[10px]">
-                  <div className="text-muted-foreground mb-1 font-semibold">
+                <div className="orch-waterfall-details">
+                  <div
+                    className="orch-text-muted orch-font-semibold"
+                    style={{ marginBottom: "0.25rem" }}
+                  >
                     {UI_COPY.EXECUTIONS.WATERFALL.SPAN_ID(span.spanId)}
                   </div>
                   {Object.keys(span.attributes).length > 0 ? (
-                    <pre className="text-muted-foreground overflow-x-auto whitespace-pre-wrap">
+                    <pre
+                      className="orch-text-muted"
+                      style={{ overflowX: "auto", whiteSpace: "pre-wrap" }}
+                    >
                       {JSON.stringify(span.attributes, null, 2)}
                     </pre>
                   ) : (
-                    <span className="text-muted-foreground italic">
+                    <span className="orch-text-muted" style={{ fontStyle: "italic" }}>
                       {UI_COPY.EXECUTIONS.WATERFALL.NO_ATTRIBUTES}
                     </span>
                   )}

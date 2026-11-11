@@ -18,6 +18,7 @@ import { CanvasPane } from "./canvas/canvas-pane";
 import { useStudioWorkspaceState } from "../hooks/use-studio-workspace-state";
 import { useConsoleStore } from "@/lib/stores";
 import { usePlatformSuggestions } from "../api";
+import { ConsoleQueryParamKey } from "@/lib/auth/types";
 import type { CoworkMode } from "../types";
 
 export interface StudioWorkspaceProps {
@@ -27,15 +28,10 @@ export interface StudioWorkspaceProps {
 /**
  * Universal Autonomous Cowork Studio Workspace.
  * Dynamically queries and binds cluster specialist agents, models, and dual-pane canvas.
- *
- * Layout rule:
- *   - Canvas pane and Inspector Rail are mutually exclusive on the right side.
- *   - When Canvas opens, Inspector Rail auto-closes to avoid fighting for space.
- *   - When Inspector Rail opens, Canvas is closed to avoid overlap.
  */
 export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React.JSX.Element {
   const searchParams = useSearchParams();
-  const urlPrompt = searchParams.get("prompt") || "";
+  const urlPrompt = searchParams.get(ConsoleQueryParamKey.PROMPT) || "";
   const { data: dynamicSuggestions } = usePlatformSuggestions();
 
   const state = useStudioWorkspaceState({
@@ -48,28 +44,21 @@ export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React
   const setCanvasOpen = useConsoleStore((s) => s.setCanvasOpen);
   const hasActiveCanvas = isCanvasOpen && activeArtifact !== null;
 
-  /**
-   * Mutual-exclusion effect: Canvas and Inspector Rail cannot both be open.
-   * When the canvas opens, close the Inspector Rail.
-   * This prevents both right-side panels competing for the same flex space.
-   */
   useEffect(() => {
     if (hasActiveCanvas && state.railOpen) {
       state.setRailOpen(false);
     }
   }, [hasActiveCanvas, state.railOpen, state.setRailOpen]);
 
-  /** Handles toggling the Inspector Rail, closing Canvas first if it's open. */
   const handleToggleRail = (): void => {
     if (hasActiveCanvas) {
-      // Close canvas before opening rail so they don't overlap
       setCanvasOpen(false);
     }
     state.setRailOpen((p) => !p);
   };
 
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+    <div className="orch-studio">
       {/* Top Control Header */}
       <StudioHeader
         isRunning={state.isRunning}
@@ -79,7 +68,7 @@ export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React
       />
 
       {/* Main Workspace Body with in-flow sidebars */}
-      <div className="flex min-h-0 flex-1 overflow-hidden">
+      <div className="orch-studio__body">
         {/* Left Side: Session History Drawer */}
         <SessionDrawer
           isOpen={state.drawerOpen}
@@ -93,11 +82,18 @@ export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React
 
         {/* Center: Conversational Feed & Floating Prompt Bar */}
         <main
-          className={`relative flex min-w-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
-            hasActiveCanvas ? "lg:w-1/2 lg:flex-none" : "w-full"
-          }`}
+          style={{
+            position: "relative",
+            display: "flex",
+            minWidth: 0,
+            flex: hasActiveCanvas ? "0 0 50%" : "1 1 0%",
+            width: hasActiveCanvas ? "50%" : "100%",
+            flexDirection: "column",
+            overflow: "hidden",
+            transition: "all 0.3s ease",
+          }}
         >
-          <div ref={state.chatScrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
+          <div ref={state.chatScrollRef} className="orch-studio__feed">
             {state.activeSession.messages.length === 0 ? (
               <StudioWelcome
                 onSelectPrompt={(p) => state.setPrompt(p)}
@@ -136,16 +132,16 @@ export function StudioWorkspace({ routeSessionId }: StudioWorkspaceProps): React
           />
         </main>
 
-        {/* Right Side: Dual-Pane Interactive Canvas Pane (mutually exclusive with Inspector Rail) */}
+        {/* Right Side: Dual-Pane Interactive Canvas Pane */}
         {hasActiveCanvas && (
-          <section className="flex min-w-0 flex-1 overflow-hidden">
+          <section style={{ display: "flex", minWidth: 0, flex: 1, overflow: "hidden" }}>
             <CanvasPane />
           </section>
         )}
 
-        {/* Right Side: Collapsible Inspector Rail (mutually exclusive with Canvas) */}
+        {/* Right Side: Collapsible Inspector Rail */}
         {state.railOpen && !hasActiveCanvas && (
-          <aside className="border-border hidden w-80 shrink-0 border-l lg:block">
+          <aside style={{ width: "20rem", flexShrink: 0, borderLeft: "1px solid var(--border)" }}>
             <StudioInspectorRail
               events={state.events}
               isRunning={state.isRunning}

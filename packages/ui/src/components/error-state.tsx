@@ -2,6 +2,7 @@
  * @file error-state.tsx
  * @description Generic dynamic Error component following reference design typography.
  * @module apps/console/components/ui
+ * @author yuva.devlab@gmail.com
  */
 
 "use client";
@@ -54,49 +55,86 @@ export function DynamicErrorState({
     error instanceof Error ? error.message : String(error || COMMON_COPY.ERROR.UNKNOWN_ERROR);
   const errorStack = error instanceof Error ? error.stack : undefined;
 
-  return (
-    <div
-      className={cn(
-        "bg-background flex size-full h-screen flex-col items-center justify-center p-6 text-center",
-        className,
-      )}
-    >
-      <div className="max-w-md text-center">
-        <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">
-          {title}
-        </h1>
-        <p className="text-muted-foreground mt-2 text-sm sm:text-base">{description}</p>
+  const btnStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "var(--radius-md, 0.375rem)",
+    padding: "0.5rem 1rem",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "all 150ms ease",
+    border: "1px solid var(--border)",
+    backgroundColor: "var(--background)",
+    color: "var(--foreground)",
+    textDecoration: "none",
+  };
 
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+  return (
+    <div className={cn("orch-state-page", className)}>
+      <div className="orch-state-page__inner">
+        <h1 className="orch-state-page__title">{title}</h1>
+        <p className="orch-state-page__desc">{description}</p>
+
+        <div className="orch-state-page__actions">
           {reset && (
             <button
               onClick={reset}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-xs transition-colors"
+              style={{
+                ...btnStyle,
+                backgroundColor: "var(--primary)",
+                color: "var(--primaryForeground)",
+                borderColor: "var(--primary)",
+              }}
             >
               {COMMON_COPY.ERROR.TRY_AGAIN}
             </button>
           )}
 
-          <a
-            href="/"
-            className="border-input bg-background text-foreground hover:bg-accent inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium shadow-xs transition-colors"
-          >
+          <a href="/" style={btnStyle}>
             {COMMON_COPY.ERROR.GO_HOME}
           </a>
 
-          <button
-            onClick={() => setShowDetails((prev) => !prev)}
-            className="border-input bg-background text-muted-foreground hover:bg-accent hover:text-foreground inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium shadow-xs transition-colors"
-          >
+          <button onClick={() => setShowDetails((prev) => !prev)} style={btnStyle}>
             {showDetails ? COMMON_COPY.ERROR.HIDE_DETAILS : COMMON_COPY.ERROR.DETAILS}
           </button>
         </div>
 
         {showDetails && (
-          <div className="border-border bg-muted/40 mt-6 rounded-md border p-4 text-left font-mono text-xs shadow-inner">
-            <p className="text-destructive font-semibold wrap-break-word">{errorMessage}</p>
+          <div
+            style={{
+              marginTop: "1.5rem",
+              borderRadius: "var(--radius-md, 0.375rem)",
+              border: "1px solid var(--border)",
+              backgroundColor: "color-mix(in oklab, var(--muted) 40%, transparent)",
+              padding: "1rem",
+              textAlign: "left",
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: "0.75rem",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--destructive)",
+                fontWeight: 600,
+                wordBreak: "break-word",
+                margin: 0,
+              }}
+            >
+              {errorMessage}
+            </p>
             {errorStack && (
-              <pre className="text-muted-foreground mt-2 max-h-40 overflow-x-auto text-[11px] whitespace-pre-wrap">
+              <pre
+                style={{
+                  color: "var(--mutedForeground)",
+                  marginTop: "0.5rem",
+                  maxHeight: "10rem",
+                  overflowX: "auto",
+                  fontSize: "0.6875rem",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
                 {errorStack}
               </pre>
             )}

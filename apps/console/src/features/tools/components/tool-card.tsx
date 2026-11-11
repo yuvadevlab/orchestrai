@@ -87,10 +87,10 @@ export function ToolCard({ tool, onToggle, isPending = false }: ToolCardProps): 
   const sandboxLabel = formatSandboxLabel(tool.sandbox, tool.category);
 
   return (
-    <div className="glass border-border hover:border-border/80 bg-card/40 flex flex-col justify-between rounded-md border p-4 transition-all">
+    <div className="orch-tool-card">
       <div>
-        <div className="flex items-start justify-between gap-3">
-          <div className="text-foreground text-sm leading-snug font-medium">{tool.name}</div>
+        <div className="orch-tool-header">
+          <div className="orch-tool-title">{tool.name}</div>
           <Switch
             checked={isEnabled}
             disabled={isPending}
@@ -101,16 +101,45 @@ export function ToolCard({ tool, onToggle, isPending = false }: ToolCardProps): 
             aria-label={UI_COPY.TOOLS.CARD.TOGGLE_A11Y(tool.name)}
           />
         </div>
-        <p className="text-muted-foreground mt-1.5 line-clamp-2 text-xs leading-relaxed">
+        <p className="orch-tool-desc">
           {tool.description || UI_COPY.TOOLS.CARD.DEFAULT_DESCRIPTION}
         </p>
       </div>
 
-      <div className="mt-3.5 flex flex-wrap items-center gap-2 text-xs">
-        <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-0.5 text-xs font-medium">
+      <div
+        style={{
+          marginTop: "0.875rem",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: "0.5rem",
+          fontSize: "0.75rem",
+        }}
+      >
+        <span
+          style={{
+            backgroundColor: "var(--secondary)",
+            color: "var(--secondaryForeground)",
+            borderRadius: "var(--radius-md, 0.375rem)",
+            paddingInline: "0.5rem",
+            paddingBlock: "0.125rem",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          }}
+        >
           {permLabel}
         </span>
-        <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-0.5 font-mono text-xs">
+        <span
+          style={{
+            backgroundColor: "var(--secondary)",
+            color: "var(--secondaryForeground)",
+            borderRadius: "var(--radius-md, 0.375rem)",
+            paddingInline: "0.5rem",
+            paddingBlock: "0.125rem",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "0.75rem",
+          }}
+        >
           {sandboxLabel}
         </span>
       </div>

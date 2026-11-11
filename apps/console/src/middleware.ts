@@ -1,84 +1,107 @@
 /**
  * @file apps/console/src/middleware.ts
- * @description Next.js Edge middleware enforcing authentication guards on protected dashboard routes.
+ * @description Authentication edge middleware enforcing session checks and DevLab SSO redirect.
+ * Modeled after FinAI's centralized authentication architecture.
+ * @author yuva.devlab@gmail.com
+ * @module @orchestrai/console/middleware
  */
 
 import { NextResponse, type NextRequest } from "next/server";
+import { ConsoleQueryParamKey, ConsoleCookieKey, AUTH_COOKIE_NAME } from "./lib/auth/types";
+import { DEVLAB_PORTAL_ROUTES } from "./lib/routes";
+import { isJwtExpired } from "./lib/jwt";
 
-/** Paths accessible to unauthenticated visitors */
-const AUTH_ROUTES = new Set(["/login", "/signup", "/forgot-password"]);
+const AUTH_PATH_PREFIXES = [
+  "/login",
+  "/signup",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+] as const;
 
 /**
- * Edge middleware intercepting requests to enforce session token presence.
- *
- * @param request - Inbound Next.js HTTP request
- * @returns NextResponse redirecting unauthenticated or authenticated users appropriately
+ * Authentication middleware running before route execution.
+ * Intercepts incoming SSO tokens, manages authentication cookies,
+ * and delegates unauthenticated users to DevLab Portal Central SSO.
  */
 export function middleware(request: NextRequest): NextResponse {
-  const { pathname } = request.nextUrl;
-  const cookieName = process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME || "orch_token";
-
-  // 0. Intercept incoming token query param from DevLab Portal SSO
+  // 1. If returning from DevLab Portal SSO with token in query params
   const tokenParam =
-    request.nextUrl.searchParams.get("token") || request.nextUrl.searchParams.get("access_token");
+    request.nextUrl.searchParams.get(ConsoleQueryParamKey.TOKEN) ||
+    request.nextUrl.searchParams.get(ConsoleQueryParamKey.ACCESS_TOKEN);
 
-  if (tokenParam) {
+  if (tokenParam && tokenParam.trim().length > 0) {
     const cleanUrl = new URL(request.url);
-    cleanUrl.searchParams.delete("token");
-    cleanUrl.searchParams.delete("access_token");
+    cleanUrl.searchParams.delete(ConsoleQueryParamKey.TOKEN);
+    cleanUrl.searchParams.delete(ConsoleQueryParamKey.ACCESS_TOKEN);
 
-    const response = NextResponse.redirect(cleanUrl);
-    response.cookies.set(cookieName, tokenParam, {
-      path: "/",
-      maxAge: 604800,
-      sameSite: "lax",
-    });
-    response.cookies.set("devlab_access_token", tokenParam, {
-      path: "/",
-      maxAge: 604800,
-      sameSite: "lax",
-    });
+    // If redirected to an auth path (like /login or /signup), send to dashboard root
+    const isAuthPath = AUTH_PATH_PREFIXES.some((prefix) => cleanUrl.pathname.startsWith(prefix));
+    if (isAuthPath) {
+      cleanUrl.pathname = "/";
+    }
+
+    // If token is actively valid, set session cookies and redirect to clean target
+    if (!isJwtExpired(tokenParam)) {
+      const response = NextResponse.redirect(cleanUrl);
+      response.cookies.set(AUTH_COOKIE_NAME, tokenParam, {
+        path: "/",
+        maxAge: 604800,
+        sameSite: "lax",
+      });
+      response.cookies.set(ConsoleCookieKey.DEVLAB_ACCESS_TOKEN, tokenParam, {
+        path: "/",
+        maxAge: 604800,
+        sameSite: "lax",
+      });
+      return response;
+    }
+  }
+
+  // 2. Validate token from cookies
+  const token =
+    request.cookies.get(AUTH_COOKIE_NAME)?.value ||
+    request.cookies.get(ConsoleCookieKey.DEVLAB_ACCESS_TOKEN)?.value;
+
+  const isCurrentAuthPath = AUTH_PATH_PREFIXES.some((prefix) =>
+    request.nextUrl.pathname.startsWith(prefix),
+  );
+
+  // If already authenticated and visiting an auth path (/login), forward to dashboard
+  if (isCurrentAuthPath) {
+    if (token && !isJwtExpired(token)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // 3. Protected route: redirect to DevLab Portal Central SSO if unauthenticated
+  if (!token || isJwtExpired(token)) {
+    const response = NextResponse.redirect(
+      DEVLAB_PORTAL_ROUTES.LOGIN({
+        redirectUrl: request.url,
+      }),
+    );
+    if (token) {
+      response.cookies.delete(AUTH_COOKIE_NAME);
+      response.cookies.delete(ConsoleCookieKey.DEVLAB_ACCESS_TOKEN);
+    }
     return response;
   }
 
-  const tokenCookie = request.cookies.get(cookieName) || request.cookies.get("devlab_access_token");
-  const isAuthenticated = Boolean(tokenCookie?.value && tokenCookie.value.trim().length > 0);
-
-  // Check if current requested route is an authentication route (login, signup, forgot-password)
-  const isAuthRoute = AUTH_ROUTES.has(pathname);
-
-  // 1. Unauthenticated users attempting to access protected dashboard routes get redirected to /login
-  if (!isAuthenticated && !isAuthRoute) {
-    const loginUrl = new URL("/login", request.url);
-    // Preserve original target path for post-login redirect
-    if (pathname !== "/") {
-      loginUrl.searchParams.set("redirect", pathname);
-    }
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // 2. Authenticated users attempting to access /login, /signup, or /forgot-password get redirected to dashboard /
-  if (isAuthenticated && isAuthRoute) {
-    const dashboardUrl = new URL("/", request.url);
-    return NextResponse.redirect(dashboardUrl);
-  }
-
-  // Allow request to proceed to route handler
   return NextResponse.next();
 }
 
-/**
- * Configure path matching rules to exclude internal Next.js assets, static files, and public images.
- */
 export const config = {
   matcher: [
     /*
      * Match all request paths except:
+     * - api (API endpoints)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public assets (*.png, *.svg, *.jpg, *.jpeg, *.gif, *.webp)
+     * - static asset files (containing a dot: .png, .jpg, .svg, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
   ],
 };

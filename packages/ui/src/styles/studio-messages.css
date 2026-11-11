@@ -1,0 +1,181 @@
+/**
+ * @file packages/ui/src/styles/studio-messages.css
+ * @description Message feed items, thinking drawers, plan cards, and HITL clearance cards for OrchestrAI.
+ * @author yuva.devlab@gmail.com
+ */
+
+/* User message box */
+.orch-msg-user-container {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  padding: 0.75rem 0;
+}
+
+.orch-msg-user-box {
+  max-width: 42rem;
+  border-radius: var(--radius-md, 0.375rem);
+  border-top-right-radius: var(--radius-sm, 0.125rem);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background-color: color-mix(in oklab, var(--secondary) 80%, transparent);
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Agent response box */
+.orch-msg-agent-container {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+}
+
+.orch-msg-agent-box {
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background-color: color-mix(in oklab, var(--card) 40%, transparent);
+  padding: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Thinking block */
+.orch-thinking-block {
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 20%, transparent);
+}
+
+.orch-thinking-header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--mutedForeground);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.orch-thinking-header:hover {
+  color: var(--foreground);
+}
+
+.orch-thinking-body {
+  border-top: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
+  background-color: color-mix(in oklab, var(--card) 30%, transparent);
+  padding: 0.625rem 0.875rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  color: var(--mutedForeground);
+  white-space: pre-wrap;
+}
+
+/* Plan card */
+.orch-plan-card {
+  margin: 0.75rem 0;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background-color: color-mix(in oklab, var(--card) 60%, transparent);
+  padding: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.orch-plan-track {
+  margin-bottom: 0.75rem;
+  height: 0.375rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background-color: color-mix(in oklab, var(--muted) 50%, transparent);
+}
+
+.orch-plan-bar {
+  height: 100%;
+  background-color: var(--primary);
+  transition: width 0.3s ease;
+}
+
+/* Clearance & Approvals */
+.orch-clearance-card {
+  margin: 0.75rem 0;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  padding: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease;
+}
+
+.orch-clearance-card--critical {
+  border-color: color-mix(in oklab, var(--destructive) 40%, transparent);
+  background-color: color-mix(in oklab, var(--destructive) 5%, transparent);
+}
+
+.orch-clearance-card--warning {
+  border-color: color-mix(in oklab, var(--warning, #eab308) 40%, transparent);
+  background-color: color-mix(in oklab, var(--warning, #eab308) 5%, transparent);
+}
+
+.orch-clearance-target {
+  margin: 0.75rem 0;
+  border-radius: var(--radius-sm, 0.25rem);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background-color: color-mix(in oklab, var(--background) 80%, transparent);
+  padding: 0.625rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+}
+
+/* Inline Decision Chips */
+.orch-decision-chip {
+  margin: 0.375rem 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 20%, transparent);
+  padding: 0.25rem 0.75rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+}
+
+/* Floating intent-aware streaming pill */
+.orch-stream-pill {
+  position: sticky;
+  bottom: 1.5rem;
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.orch-stream-pill-btn {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--primary);
+  color: var(--primaryForeground);
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.orch-stream-pill-btn:hover {
+  transform: scale(1.05);
+}

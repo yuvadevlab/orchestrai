@@ -37,28 +37,59 @@ export function CanvasCodeView({
   const lines = code.split("\n");
 
   return (
-    <div className="bg-card text-foreground flex h-full flex-col overflow-hidden font-mono text-sm">
+    <div className="orch-diff-container" style={{ fontSize: "0.875rem" }}>
       {/* Code Action Bar */}
-      <div className="border-border/40 bg-muted/40 flex items-center justify-between border-b px-4 py-2 text-xs">
-        <span className="text-muted-foreground font-semibold tracking-wider uppercase">
+      <div className="orch-canvas-bar">
+        <span
+          className="orch-text-muted orch-font-semibold"
+          style={{ letterSpacing: "0.05em", textTransform: "uppercase" }}
+        >
           {language}
         </span>
         <button
           type="button"
           onClick={() => void handleCopy()}
-          className="border-border/40 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center gap-1.5 rounded border px-2.5 py-1 transition-colors"
+          className="orch-flex-row orch-gap-xs orch-text-muted"
+          style={{
+            alignItems: "center",
+            borderRadius: "var(--radius-sm, 0.25rem)",
+            border: "1px solid color-mix(in oklab, var(--border) 40%, transparent)",
+            padding: "0.25rem 0.625rem",
+            background: "transparent",
+            cursor: "pointer",
+            fontSize: "0.75rem",
+          }}
         >
-          {copied ? <Check className="text-primary size-3.5" /> : <Copy className="size-3.5" />}
+          {copied ? (
+            <Check
+              className="orch-text-primary"
+              style={{ width: "0.875rem", height: "0.875rem" }}
+            />
+          ) : (
+            <Copy style={{ width: "0.875rem", height: "0.875rem" }} />
+          )}
           <span>{copied ? "Copied" : "Copy"}</span>
         </button>
       </div>
 
       {/* Editor Body with Line Numbers */}
-      <div className="relative flex flex-1 overflow-auto p-4">
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          flex: "1 1 0%",
+          overflow: "auto",
+          padding: "1rem",
+        }}
+      >
         {/* Line Numbers Column */}
-        <div aria-hidden className="text-muted-foreground/50 pr-4 text-right select-none">
+        <div
+          aria-hidden
+          className="orch-text-muted"
+          style={{ paddingRight: "1rem", textAlign: "right", userSelect: "none", opacity: 0.5 }}
+        >
           {lines.map((_, i) => (
-            <div key={`line-${i + 1}`} className="leading-6">
+            <div key={`line-${i + 1}`} style={{ lineHeight: "1.5rem" }}>
               {i + 1}
             </div>
           ))}
@@ -66,7 +97,15 @@ export function CanvasCodeView({
 
         {/* Code Content / Textarea */}
         {readOnly ? (
-          <pre className="text-foreground/90 flex-1 font-mono leading-6 whitespace-pre">
+          <pre
+            style={{
+              margin: 0,
+              flex: 1,
+              fontFamily: "var(--font-mono, monospace)",
+              lineHeight: "1.5rem",
+              whiteSpace: "pre",
+            }}
+          >
             <code>{code}</code>
           </pre>
         ) : (
@@ -74,7 +113,17 @@ export function CanvasCodeView({
             value={code}
             onChange={(e) => onChange?.(e.target.value)}
             spellCheck={false}
-            className="text-foreground flex-1 resize-none bg-transparent leading-6 outline-none focus:ring-0"
+            style={{
+              flex: 1,
+              resize: "none",
+              background: "transparent",
+              lineHeight: "1.5rem",
+              outline: "none",
+              border: "none",
+              color: "inherit",
+              fontFamily: "inherit",
+              fontSize: "inherit",
+            }}
           />
         )}
       </div>

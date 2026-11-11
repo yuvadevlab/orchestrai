@@ -1,6 +1,5 @@
 import js from "@eslint/js";
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
-import tailwindcss from "eslint-plugin-tailwindcss";
 import globals from "globals";
 import path from "node:path";
 import tseslint from "typescript-eslint";
@@ -28,22 +27,6 @@ export default tseslint.config(
       "**/commitlint.config.*",
       "**/prisma.config.*",
     ],
-  },
-  {
-    // Scope tailwindcss rules strictly to frontend apps that contain Tailwind CSS
-    ...tailwindcss.configs.recommended,
-    files: ["apps/console/**/*.{ts,tsx}"],
-    rules: {
-      ...tailwindcss.configs.recommended.rules,
-      "tailwindcss/classnames-order": "off",
-      "tailwindcss/no-custom-classname": "off",
-    },
-    settings: {
-      tailwindcss: {
-        callees: ["cn", "cva"],
-        cssConfigPath: path.resolve(rootDir, "apps/console/src/app/globals.css"),
-      },
-    },
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],

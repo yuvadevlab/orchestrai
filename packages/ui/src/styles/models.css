@@ -1,0 +1,50 @@
+/**
+ * @file packages/ui/src/styles/models.css
+ * @description LLM model routing, model cards, and cost-latency cockpit for OrchestrAI.
+ * @author yuva.devlab@gmail.com
+ */
+
+.orch-model-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .orch-model-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .orch-model-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.orch-model-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  padding: 1rem;
+}
+
+.orch-model-cockpit {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  padding: 1.25rem;
+}
+
+.orch-model-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+}

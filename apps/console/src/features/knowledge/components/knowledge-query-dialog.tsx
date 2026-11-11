@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { Search, Loader2, Sparkles, Database } from "lucide-react";
+import { Search, Loader2, Sparkles } from "lucide-react";
 import {
   Button,
   Input,
@@ -22,6 +22,7 @@ import {
 } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useQueryKnowledge } from "../api";
+import { KnowledgeQueryResults } from "./knowledge-query-results";
 
 export interface KnowledgeQueryDialogProps {
   readonly isOpen: boolean;
@@ -61,106 +62,89 @@ export function KnowledgeQueryDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent size="lg">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="bg-primary/10 text-primary grid size-7 place-items-center rounded-md">
-              <Sparkles className="size-4" />
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div
+              style={{
+                backgroundColor: "color-mix(in oklab, var(--primary) 10%, transparent)",
+                color: "var(--primary)",
+                display: "grid",
+                height: "1.75rem",
+                width: "1.75rem",
+                placeItems: "center",
+                borderRadius: "var(--radius-md, 0.375rem)",
+              }}
+            >
+              <Sparkles style={{ width: "1rem", height: "1rem" }} />
             </div>
             <div>
-              <DialogTitle className="text-base font-semibold">
+              <DialogTitle style={{ fontSize: "1rem", fontWeight: 600, margin: 0 }}>
                 {UI_COPY.KNOWLEDGE.QUERY_TESTER.TITLE}
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground text-xs">
+              <DialogDescription
+                style={{ color: "var(--mutedForeground)", fontSize: "0.75rem", margin: 0 }}
+              >
                 {UI_COPY.KNOWLEDGE.QUERY_TESTER.DESCRIPTION}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <DialogBody className="space-y-4 px-6 py-4">
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="flex-1">
+        <DialogBody
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            paddingInline: "1.5rem",
+            paddingBlock: "1rem",
+          }}
+        >
+          <form onSubmit={handleSearch} style={{ display: "flex", gap: "0.5rem" }}>
+            <div style={{ flex: 1 }}>
               <Input
                 value={queryText}
                 onChange={(e) => setQueryText(e.target.value)}
                 placeholder={UI_COPY.KNOWLEDGE.QUERY_TESTER.PLACEHOLDER}
-                startIcon={<Search className="size-3.5" />}
-                className="bg-card h-8 text-xs"
+                startIcon={<Search style={{ width: "0.875rem", height: "0.875rem" }} />}
+                style={{ height: "2rem", fontSize: "0.75rem" }}
               />
             </div>
             <Button
               type="submit"
               size="sm"
               disabled={isSearching || !queryText.trim()}
-              className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+              style={{
+                height: "2rem",
+                cursor: "pointer",
+                gap: "0.375rem",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+              }}
             >
               {isSearching ? (
-                <Loader2 className="size-3.5 animate-spin" />
+                <Loader2
+                  style={{
+                    width: "0.875rem",
+                    height: "0.875rem",
+                    animation: "spin 1s linear infinite",
+                  }}
+                />
               ) : (
-                <Search className="size-3.5" />
+                <Search style={{ width: "0.875rem", height: "0.875rem" }} />
               )}
               <span>{UI_COPY.KNOWLEDGE.QUERY_TESTER.SUBMIT_BUTTON}</span>
             </Button>
           </form>
 
           {/* Query Results */}
-          {result && (
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground font-mono">
-                  {UI_COPY.KNOWLEDGE.QUERY_TESTER.MATCHES_COUNT(result.chunks.length, result.query)}
-                </span>
-              </div>
-
-              {result.chunks.length === 0 ? (
-                <div className="border-border/60 bg-muted/20 flex flex-col items-center justify-center rounded border py-6 text-center">
-                  <Database className="text-muted-foreground mb-2 size-6" />
-                  <p className="text-muted-foreground text-xs">
-                    {UI_COPY.KNOWLEDGE.QUERY_TESTER.NO_MATCHES}
-                  </p>
-                </div>
-              ) : (
-                <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-                  {result.chunks.map((chunk, idx) => {
-                    const scorePercent = Math.round(chunk.score * 100);
-                    return (
-                      <div
-                        key={chunk.chunkId || idx}
-                        className="border-border/80 bg-background/80 rounded border p-3 text-xs shadow-sm"
-                      >
-                        <div className="mb-1.5 flex items-center justify-between">
-                          <span className="text-muted-foreground font-mono text-[11px]">
-                            Chunk #{idx + 1}
-                          </span>
-                          <div className="flex items-center gap-1.5">
-                            <div className="bg-muted h-1.5 w-16 overflow-hidden rounded-full">
-                              <div
-                                className="bg-primary h-full transition-all"
-                                style={{ width: `${Math.min(100, Math.max(0, scorePercent))}%` }}
-                              />
-                            </div>
-                            <span className="text-primary font-mono text-[10px] font-semibold">
-                              {scorePercent}% match
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-foreground/90 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
-                          {chunk.content}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+          {result && <KnowledgeQueryResults result={result} />}
         </DialogBody>
 
-        <DialogFooter className="px-6 py-3">
+        <DialogFooter style={{ padding: "0.75rem 1.5rem" }}>
           <Button
             variant="outline"
             size="sm"
             onClick={handleClose}
-            className="h-8 cursor-pointer text-xs"
+            style={{ height: "2rem", cursor: "pointer", fontSize: "0.75rem" }}
           >
             {UI_COPY.COMMON.ACTIONS.CLOSE}
           </Button>

@@ -138,19 +138,14 @@ export function PageHeader({
   className,
 }: PageHeaderProps): React.JSX.Element {
   return (
-    <header
-      className={cn(
-        "border-border bg-background/95 shrink-0 border-b px-6 py-3 backdrop-blur",
-        className,
-      )}
-    >
+    <header className={cn("orch-header", className)}>
       {/* ── Row 1: Left meta + Right slot ─────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="orch-header__row1">
         {/* Left: breadcrumb trail → h1 heading → optional sub-heading */}
-        <div className="min-w-0 space-y-1">
+        <div className="orch-header__left">
           {breadcrumbs && breadcrumbs.length > 0 && (
             <Breadcrumb>
-              <BreadcrumbList className="text-muted-foreground font-sans text-xs font-medium tracking-wide">
+              <BreadcrumbList className="orch-header__breadcrumbs">
                 {breadcrumbs.map((crumb, index) => {
                   /** Determine whether this is the last (active) segment. */
                   const isLast = index === breadcrumbs.length - 1;
@@ -160,7 +155,7 @@ export function PageHeader({
                   return (
                     <React.Fragment key={`${crumb.label}-${index}`}>
                       {/* Separator sits before every crumb except the first */}
-                      {needsSeparator && <BreadcrumbSeparator className="[&>svg]:size-3" />}
+                      {needsSeparator && <BreadcrumbSeparator />}
                       <BreadcrumbItem>
                         {/* Last crumb with no href → active page (no link) */}
                         {isLast && !crumb.href ? (
@@ -178,30 +173,21 @@ export function PageHeader({
 
           {/* Primary semantic heading — always rendered, optionally hidden.
               text-gradient matches the Lovable PageHeader heading style. */}
-          <h1
-            className={cn("text-gradient text-xl font-semibold tracking-tight", headingClassName)}
-          >
-            {heading}
-          </h1>
+          <h1 className={cn("orch-header__title text-gradient", headingClassName)}>{heading}</h1>
 
           {/* Optional muted sub-heading */}
-          {subHeading ? (
-            <p className="text-muted-foreground mt-0.5 max-w-3xl text-xs leading-relaxed">
-              {subHeading}
-            </p>
-          ) : null}
+          {subHeading ? <p className="orch-header__subtitle">{subHeading}</p> : null}
         </div>
 
         {/* Right: stats, actions, metrics — fully generic ReactNode slot */}
-        {rightContent ? <div className="flex items-center gap-3">{rightContent}</div> : null}
+        {rightContent ? <div className="orch-header__right">{rightContent}</div> : null}
       </div>
 
       {/* ── Extra Rows (Row 2, 3, …) ───────────────────────────────────── */}
       {extraRows && extraRows.length > 0
         ? extraRows.map((row, index) =>
             row ? (
-              // mt-2 = 8px gap between the primary row and each extra row
-              <div key={index} className="mt-2">
+              <div key={index} className="orch-header__extra-row">
                 {row}
               </div>
             ) : null,

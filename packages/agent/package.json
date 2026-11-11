@@ -27,7 +27,7 @@
     "@orchestrai/regex": "workspace:*",
     "@orchestrai/shared-types": "workspace:*",
     "@orchestrai/tools": "workspace:*",
-    "@yuva-devlab/logger": "^1.2.0",
+    "@yuva-devlab/logger": "^1.3.1",
     "zod": "^4.6.6"
   },
   "devDependencies": {

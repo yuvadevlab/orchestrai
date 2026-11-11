@@ -196,9 +196,6 @@ importers:
       eslint-plugin-prettier:
         specifier: ^5.5.6
         version: 5.5.6(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(prettier@3.9.8)
-      eslint-plugin-tailwindcss:
-        specifier: ^4.4.0
-        version: 4.4.0(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(tailwindcss@4.3.3)(typescript@6.0.3)
       globals:
         specifier: ^17.12.0
         version: 17.12.0
@@ -211,15 +208,9 @@ importers:
       prettier:
         specifier: ^3.9.8
         version: 3.9.8
-      prettier-plugin-tailwindcss:
-        specifier: ^0.8.0
-        version: 0.8.1(prettier@3.9.8)
       prisma:
         specifier: ^7.10.0
         version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
-      tailwindcss:
-        specifier: ^4.3.3
-        version: 4.3.3
       turbo:
         specifier: ^2.11.1
         version: 2.11.1
@@ -242,8 +233,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -294,11 +285,11 @@ importers:
         specifier: ^3.13.2
         version: 3.14.13(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@yuva-devlab/auth-client':
-        specifier: ^1.1.1
-        version: 1.1.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: ^1.1.4
+        version: 1.1.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -335,12 +326,6 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      tailwind-merge:
-        specifier: ^3.5.0
-        version: 3.7.0
-      tailwindcss:
-        specifier: ^4.2.1
-        version: 4.3.3
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -348,9 +333,6 @@ importers:
         specifier: ^5.0.3
         version: 5.0.15(@types/react@19.3.0)(react@19.3.0)
     devDependencies:
-      '@tailwindcss/postcss':
-        specifier: ^4.2.1
-        version: 4.3.3
       '@types/node':
         specifier: ^26.6.1
         version: 26.6.1
@@ -360,9 +342,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.6
         version: 19.3.0(@types/react@19.3.0)
-      postcss:
-        specifier: ^8.5.3
-        version: 8.5.28
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -421,20 +400,20 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tools
       '@yuva-devlab/auth-server':
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.2
+        version: 1.0.2
       '@yuva-devlab/billing':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.2.2
+        version: 0.2.2
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       '@yuva-devlab/resilience':
         specifier: ^0.2.0
         version: 0.2.0
       '@yuva-devlab/semantic-cache':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.2.2
+        version: 0.2.2
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -497,8 +476,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tools
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -534,8 +513,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
@@ -586,8 +565,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tools
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       bullmq:
         specifier: ^6.3.6
         version: 6.3.6(ioredis@6.0.0(supports-color@8.1.1))(pg@8.23.0)
@@ -632,8 +611,8 @@ importers:
         specifier: workspace:*
         version: link:../tools
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       zod:
         specifier: ^4.6.6
         version: 4.6.6
@@ -685,8 +664,8 @@ importers:
         specifier: ^7.10.0
         version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3))(typescript@6.0.3)
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -738,8 +717,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       ioredis:
         specifier: ^6.0.0
         version: 6.0.0(supports-color@8.1.1)
@@ -791,8 +770,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       zod:
         specifier: ^4.6.6
         version: 4.6.6
@@ -816,8 +795,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       zod:
         specifier: ^4.6.6
         version: 4.6.6
@@ -841,8 +820,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       ollama:
         specifier: '>=0.5.0'
         version: 0.6.3
@@ -872,8 +851,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
     devDependencies:
       tsup:
         specifier: ^8.5.1
@@ -907,8 +886,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       bullmq:
         specifier: ^6.3.6
         version: 6.3.6(ioredis@6.0.0(supports-color@8.1.1))(pg@8.23.0)
@@ -941,8 +920,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       zod:
         specifier: ^4.6.6
         version: 4.6.6
@@ -987,8 +966,8 @@ importers:
         specifier: workspace:*
         version: link:../tools
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       zod:
         specifier: ^4.6.6
         version: 4.6.6
@@ -1040,8 +1019,8 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
       '@yuva-devlab/logger':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.1
+        version: 1.3.1
       zod:
         specifier: ^4.6.6
         version: 4.6.6
@@ -1065,8 +1044,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       '@yuva-devlab/ui':
-        specifier: ^2.1.0
-        version: 2.1.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sonner@2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
+        specifier: ^2.2.1
+        version: 2.2.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(@yuva-devlab/tokens@2.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sonner@2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1076,25 +1055,12 @@ importers:
       react:
         specifier: ^19.2.0
         version: 19.3.0
-      tailwind-merge:
-        specifier: ^3.5.0
-        version: 3.7.0
-      tailwindcss:
-        specifier: ^4.2.1
-        version: 4.3.3
-      tw-animate-css:
-        specifier: ^1.3.4
-        version: 1.4.0
     devDependencies:
       '@types/react':
         specifier: ^19.2.6
         version: 19.3.0
 
 packages:
-
-  '@alloc/quick-lru@5.3.0':
-    resolution: {integrity: sha512-U4+70Pc5ZS9osnCBCE5Jha/ciHM+Yp+CNMNC/7HvYbNRk1Ldd+f7qO65W5qfhu/TCv+/ozljlXXe9Nj8419DMA==}
-    engines: {node: '>=10'}
 
   '@anthropic-ai/sdk@0.126.0':
     resolution: {integrity: sha512-VhiZl6rA/8uC+MgDaOhEcAWaIZ2tPnIY885jlZqxrGrutUW2nqCtophBtlsX0tk5kChBUjV/1NVjL3y0M4OwUg==}
@@ -1863,9 +1829,6 @@ packages:
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
-
-  '@jridgewell/remapping@2.3.5':
-    resolution: {integrity: sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==}
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -2920,7 +2883,9 @@ packages:
   '@smithy/core@3.34.1':
     resolution: {integrity: sha512-dLcOUxz8YCv1RZUMKq6GbyUf95pLbrqh34bPvpCZ1+CByFF31BEAFewZjsGCnVsZTKdThNENfGyAgk2TJqVwSw==}
     engines: {node: '>=18.0.0'}
-    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
+    deprecated: |-
+      Deprecated due to a bug in custom logger data redaction. Upgrade to the latest version. If you used a custom logger with this
+        version, review your logs and rotate any credentials or other secrets. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}
@@ -2954,98 +2919,6 @@ packages:
   '@tabby_ai/hijri-converter@1.0.5':
     resolution: {integrity: sha512-r5bClKrcIusDoo049dSL8CawnHR6mRdDwhlQuIgZRNty68q0x8k3Lf1BtPAMxRf/GgnHBnIO4ujd3+GQdLWzxQ==}
     engines: {node: '>=16.0.0'}
-
-  '@tailwindcss/node@4.3.3':
-    resolution: {integrity: sha512-/T8IKEsf9VTU6tLjgC7+sv2mOPtQxzE2jMw7u4Tt40Tx+QSZxpzh95/H6cMKoja9XuW7iMdLJYBB0o9G1CaAgg==}
-
-  '@tailwindcss/oxide-android-arm64@4.3.3':
-    resolution: {integrity: sha512-Y85A2gmPSkl5Ve5qR86GL4HT509cFqQh1aes9p3sSkyTPwt0Pppf3GkwGe4JPACcRYjgJIEhQgM6dBClnr0NYw==}
-    engines: {node: '>= 20'}
-    cpu: [arm64]
-    os: [android]
-
-  '@tailwindcss/oxide-darwin-arm64@4.3.3':
-    resolution: {integrity: sha512-BiaWatpBcERQFDlOjRDpIVXuFK5PJez5SA4JMg6VYZdBYU+qKfV/vqjcIs+IYmtitf1xYQZTwXvU/8y4lfZUGw==}
-    engines: {node: '>= 20'}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@tailwindcss/oxide-darwin-x64@4.3.3':
-    resolution: {integrity: sha512-fAeUqfV5ndhxRwai8cXGzdLvul9utWOmeTkv69unv4ZXixjn61Z+p9lCWdwOwA3TYboG3BwdVuN/RDjhBRl0mw==}
-    engines: {node: '>= 20'}
-    cpu: [x64]
-    os: [darwin]
-
-  '@tailwindcss/oxide-freebsd-x64@4.3.3':
-    resolution: {integrity: sha512-iyf5bV6+wnAlflVeEy7R25dupxTNECZN5QMI0qNT6eT+EgaGdZcKhGkr5SdoaWiLJ3spLqIY9VCeSGrwmtg4kw==}
-    engines: {node: '>= 20'}
-    cpu: [x64]
-    os: [freebsd]
-
-  '@tailwindcss/oxide-linux-arm-gnueabihf@4.3.3':
-    resolution: {integrity: sha512-aAYUprJAJQWWbRrPvtjdroZ56Md+JM8pMiopS6xGEwDfLhqj+2ver2p4nU4Mb3CRqcMmNBjo8KkUgcxhkzVQGQ==}
-    engines: {node: '>= 20'}
-    cpu: [arm]
-    os: [linux]
-
-  '@tailwindcss/oxide-linux-arm64-gnu@4.3.3':
-    resolution: {integrity: sha512-nDxldcEENOxZRzC2uu9jrutZdAAQtb+8WWDCSnWL1zvBk1+FN+x6MtDViPB5AJMfttVCUhehGWus3XBPgatM/w==}
-    engines: {node: '>= 20'}
-    cpu: [arm64]
-    os: [linux]
-    libc: [glibc]
-
-  '@tailwindcss/oxide-linux-arm64-musl@4.3.3':
-    resolution: {integrity: sha512-Md44bD6veX/PC5iyF8cDVnw4HBIANZepRZZ7a8DQOvkfo5WUBwcp6iAuCUz23u+4SUkhJlD3eL7hNdW8ezd/kA==}
-    engines: {node: '>= 20'}
-    cpu: [arm64]
-    os: [linux]
-    libc: [musl]
-
-  '@tailwindcss/oxide-linux-x64-gnu@4.3.3':
-    resolution: {integrity: sha512-tx7us1muwOKAKWao2v/GaafFeQboE6aj88vC6ziN2NCGcRm8gWUhwjzg+YdVB1e4boAtdtma4L43onunI6NS4w==}
-    engines: {node: '>= 20'}
-    cpu: [x64]
-    os: [linux]
-    libc: [glibc]
-
-  '@tailwindcss/oxide-linux-x64-musl@4.3.3':
-    resolution: {integrity: sha512-SJxX60smvHgasZoBy11dX6YRjXJFovwWBoedhbQPOBzgFWBHGB+TVPWB9BxzR7TTxU8FQZAI2AyiNCMzFm8Img==}
-    engines: {node: '>= 20'}
-    cpu: [x64]
-    os: [linux]
-    libc: [musl]
-
-  '@tailwindcss/oxide-wasm32-wasi@4.3.3':
-    resolution: {integrity: sha512-jx1+rPhY/5Ympkktd656HBWEBLxP7dH06losBLjjf5vgCODXvi9KhtftWcMIwTFIDqBr7cRnQkdLnAG+IOlGvQ==}
-    engines: {node: '>=14.0.0'}
-    cpu: [wasm32]
-    bundledDependencies:
-      - '@napi-rs/wasm-runtime'
-      - '@emnapi/core'
-      - '@emnapi/runtime'
-      - '@tybys/wasm-util'
-      - '@emnapi/wasi-threads'
-      - tslib
-
-  '@tailwindcss/oxide-win32-arm64-msvc@4.3.3':
-    resolution: {integrity: sha512-3rc292Ca2ceK6Ulcc/bAVnTs/3nDtoPhyEKlgPv+yQJQi/JS/AMJlqzxvlDacL1nekbrcf6bTqp/jV4qgnPxNQ==}
-    engines: {node: '>= 20'}
-    cpu: [arm64]
-    os: [win32]
-
-  '@tailwindcss/oxide-win32-x64-msvc@4.3.3':
-    resolution: {integrity: sha512-yJ0pwIVc/nYeGoV02WtsN8KYyLQv7kyI2wDnkezyJlGGjkd4QLwDGAwl47YpPJeuI0M0ObaXGSPjvWDPeTPggw==}
-    engines: {node: '>= 20'}
-    cpu: [x64]
-    os: [win32]
-
-  '@tailwindcss/oxide@4.3.3':
-    resolution: {integrity: sha512-krXjAikiaFSPaK/FkAQT5UTx3VormQaiZ5hBFlJZ9UFQGB/rwg1MZIhHAG9smMQRTdyJxP6Qt5MwMtdyU5FWrA==}
-    engines: {node: '>= 20'}
-
-  '@tailwindcss/postcss@4.3.3':
-    resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
 
   '@tanstack/query-core@5.103.2':
     resolution: {integrity: sha512-I8DkFXls5jXLqtm8+QpOhEmG07hIblhSZFzafg9wHsMSEvMzULy9hK17wU1T/ahfhMbtITJhbxutwwCoihkR7A==}
@@ -3356,36 +3229,37 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
-  '@yuva-devlab/auth-client@1.1.1':
-    resolution: {integrity: sha512-4xIU9mOmU2ZspRQnuZqlRRI+HOSDJOiQCJkaNzD0W8/3Q2czQjT5M+iR7d9XOKi9fZSQeGbE27GUjJLabmKegw==}
+  '@yuva-devlab/auth-client@1.1.4':
+    resolution: {integrity: sha512-Fo6Q3JyeWD3+jE69qTNb4LoHKY7QW8+tVRagHWo4lb/CsvMVwyLAQ+6Akg7ldog/c4R0hfArbK3skllgtsrYuQ==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
-  '@yuva-devlab/auth-server@1.0.0':
-    resolution: {integrity: sha512-a5Mxs2VFns+8Zx4YI+t8jJ4bXFrXiUJayUObMX4JNywBJdW2BrWRzwcKK7QjLVHrCOpaqmzubm25mIqFT0Rhiw==}
+  '@yuva-devlab/auth-server@1.0.2':
+    resolution: {integrity: sha512-8xrSFrPLNO0Sj3bntVKYhYA6B4MuxBWIjXhdjOuZFPi5TFLEk4CuQyKqNymOdK+OGlMYeSVhxxEftKMlNK08Dg==}
 
-  '@yuva-devlab/billing@0.2.0':
-    resolution: {integrity: sha512-tHCBFSoDvlGTduXgOnM11IsmFe5+obUS7Ka0MN0rTZxDBJf2o1ODAWZ8yErqah1QZnmHqkRMZ7QgTuaLyoKsjQ==}
+  '@yuva-devlab/billing@0.2.2':
+    resolution: {integrity: sha512-fVq1SJZaIIRcXixSxhWCml5e3u2mNBjNJe+I1gsevqhvlb9B8bV0K36WHaPr6HR7PvmJzRHyMYjaQbpcgwp/Ig==}
 
   '@yuva-devlab/errors@0.2.0':
     resolution: {integrity: sha512-eGunJ1eDbkGfEida3MJx9gaWRTeWjx/UPFUHUs+r7m++hkbShw4VKekaH5MMb7gIIc5sUmb4mESgir0TYnE30w==}
 
-  '@yuva-devlab/logger@1.2.0':
-    resolution: {integrity: sha512-BbJaY1XXX5cYLvf0ExQZXXLdbydV5b3bBHXXxwG+xBx7mZc5eHOlhYZeZ9XWHn92pWeSQpXAPAh9FSSyuxTfng==}
+  '@yuva-devlab/logger@1.3.1':
+    resolution: {integrity: sha512-cppWT5HUoIi6cZG6zhJC0HhEFjbdZyz5014cT24WP9hbDcNF0Be4VcI9A7Z4QbJFMlhSHkQxQzXt6k2ZRlR2OQ==}
 
   '@yuva-devlab/resilience@0.2.0':
     resolution: {integrity: sha512-aVNCG6GZHMfVWKcs5vxXe86kKxeYWnd1iaZZSPd/3zqQYHsxIyZHLl+6bWCZ9ldnzb5PkmwIElGGDABUnDwGgg==}
 
-  '@yuva-devlab/semantic-cache@0.2.0':
-    resolution: {integrity: sha512-599FuyBwrYSN9gaburNwIv9W2cQ6ZlCgqEizCA3md20CfvAR95HecTXeXtn30fUGj78MLumGM47OIx40O53ebg==}
+  '@yuva-devlab/semantic-cache@0.2.2':
+    resolution: {integrity: sha512-QKYwdbwnQp+1xHUCZ5SExBdJpAbHxln50mUgeoPMr3Wi/G+lPhCcZgNt6UpPZRMtUkx6QR1hZvtHVpb9LrIi+w==}
 
   '@yuva-devlab/tokens@2.0.0':
     resolution: {integrity: sha512-8qLAZ3V4YZlJL2u55mjr09dsMYi1nABv4HMhTsB/iiZhamkVSNkW4p5vPojBu8UiChdjLmVVe8wFhyKRLLesZg==}
 
-  '@yuva-devlab/ui@2.1.0':
-    resolution: {integrity: sha512-0Nakg+jnOlO6NeypxkNYzXTLWtn3U32lVEta82jFr6YS1q92EuvrrIIFT4dv/pxg1JqUh68idRl5rWAas00lpA==}
+  '@yuva-devlab/ui@2.2.1':
+    resolution: {integrity: sha512-7Ng5mpFprO3u2ALQKdLIo7OC0yX4d6bUlJGf+j9b/ClRWHKqRebIQTIwsHNT0oLZ37PVURUWsoGHOWDebEIcwQ==}
     peerDependencies:
+      '@yuva-devlab/tokens': '>=2.0.0'
       react: ^19.0.0
       react-dom: ^19.0.0
       sonner: ^2.0.0
@@ -3636,11 +3510,6 @@ packages:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
-  cssesc@3.0.0:
-    resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
-    engines: {node: '>=4'}
-    hasBin: true
-
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
@@ -3800,10 +3669,6 @@ packages:
     resolution: {integrity: sha512-i6UzDscO/XfAcNYD75CfICkmfLedpyPDdozrLMmQc5ORaQcdMoc21OnlEylMIqI7U8eniKrPMxxtj8k0vhmJhA==}
     engines: {node: '>=14'}
 
-  enhanced-resolve@5.25.1:
-    resolution: {integrity: sha512-nGXts5znJzmWPu+mIE9izCOzdg63oJca2mDzGWWTth7sr4aCToKcoyFVBQwN75Ij5Pf6p510EwkTqViTRzDV+w==}
-    engines: {node: '>=10.13.0'}
-
   env-paths@2.2.1:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
@@ -3865,17 +3730,6 @@ packages:
       '@types/eslint':
         optional: true
       eslint-config-prettier:
-        optional: true
-
-  eslint-plugin-tailwindcss@4.4.0:
-    resolution: {integrity: sha512-cPyEIeBTVbPU30oQTm7pOqOYurb5vtGaGhRCajYsSUwpUS9fvswB13dOLDUjGJJ+Rt8ylXf4L0hrhLA7Hf7WTQ==}
-    engines: {node: '>=20.19.0'}
-    peerDependencies:
-      eslint: ^9.0.0 || ^10.0.0
-      tailwindcss: ^4.0.0
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
         optional: true
 
   eslint-scope@9.1.2:
@@ -4314,10 +4168,6 @@ packages:
     resolution: {integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  local-pkg@1.2.1:
-    resolution: {integrity: sha512-++gUqRDEvcnN6Zhqrr+y/CkVEHhlrR96vZn3nZZPYzMcBUyBtTKzB9NadClFIsIVSsu+3i9tfk/erqy9kAmt7Q==}
-    engines: {node: '>=14'}
-
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
@@ -4704,16 +4554,6 @@ packages:
       yaml:
         optional: true
 
-  postcss-nested@7.0.2:
-    resolution: {integrity: sha512-5osppouFc0VR9/VYzYxO03VaDa3e8F23Kfd6/9qcZTUI8P58GIYlArOET2Wq0ywSl2o2PjELhYOFI4W7l5QHKw==}
-    engines: {node: '>=18.0'}
-    peerDependencies:
-      postcss: ^8.2.14
-
-  postcss-selector-parser@7.1.6:
-    resolution: {integrity: sha512-7qASPzhKF2l2KLboRZux8CCTRMdGiV08vWmyKzPz22qZ7ZjQBOeY7rNzNoCLSUiftJ7HUq0GERHmxw/t0dCdMw==}
-    engines: {node: '>=4'}
-
   postcss@8.4.31:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
@@ -4754,61 +4594,6 @@ packages:
     resolution: {integrity: sha512-SxToR7P8Y2lWmv/kTzVLC1t/GDI2WGjMwNhLLE9qtH8Q13C+aEmuRlzDst4Up4s0Wc8sF2M+J57iB3cMLqftfg==}
     engines: {node: '>=6.0.0'}
 
-  prettier-plugin-tailwindcss@0.8.1:
-    resolution: {integrity: sha512-iaFMYqDsE4ffdDkn5qup0j5f2aCEBFZrdrZnvu9QKTlWx/iGPeQ4HHu7b7fCPMxeo9nwQBiOAh2nSypdFYWJkw==}
-    engines: {node: '>=20.19'}
-    peerDependencies:
-      '@ianvs/prettier-plugin-sort-imports': '*'
-      '@prettier/plugin-hermes': '*'
-      '@prettier/plugin-oxc': '*'
-      '@prettier/plugin-pug': '*'
-      '@shopify/prettier-plugin-liquid': '*'
-      '@trivago/prettier-plugin-sort-imports': '*'
-      '@zackad/prettier-plugin-twig': '*'
-      prettier: ^3.0
-      prettier-plugin-astro: '*'
-      prettier-plugin-css-order: '*'
-      prettier-plugin-jsdoc: '*'
-      prettier-plugin-marko: '*'
-      prettier-plugin-multiline-arrays: '*'
-      prettier-plugin-organize-attributes: '*'
-      prettier-plugin-organize-imports: '*'
-      prettier-plugin-sort-imports: '*'
-      prettier-plugin-svelte: '*'
-    peerDependenciesMeta:
-      '@ianvs/prettier-plugin-sort-imports':
-        optional: true
-      '@prettier/plugin-hermes':
-        optional: true
-      '@prettier/plugin-oxc':
-        optional: true
-      '@prettier/plugin-pug':
-        optional: true
-      '@shopify/prettier-plugin-liquid':
-        optional: true
-      '@trivago/prettier-plugin-sort-imports':
-        optional: true
-      '@zackad/prettier-plugin-twig':
-        optional: true
-      prettier-plugin-astro:
-        optional: true
-      prettier-plugin-css-order:
-        optional: true
-      prettier-plugin-jsdoc:
-        optional: true
-      prettier-plugin-marko:
-        optional: true
-      prettier-plugin-multiline-arrays:
-        optional: true
-      prettier-plugin-organize-attributes:
-        optional: true
-      prettier-plugin-organize-imports:
-        optional: true
-      prettier-plugin-sort-imports:
-        optional: true
-      prettier-plugin-svelte:
-        optional: true
-
   prettier@3.9.8:
     resolution: {integrity: sha512-WRFq3Wn3WId7LLROfMLdH7xaFr2jR62wU8nLO6rQUOLOxNZUviyJQs1M0iIhLexSFy+L+w0ch66wtoO2jRjG0A==}
     engines: {node: '>=14'}
@@ -4846,9 +4631,6 @@ packages:
   qified@0.10.1:
     resolution: {integrity: sha512-+Owyggi9IxT1ePKGafcI87ubSmxol6smwJ+RAHDQlx9+9cPwFWDiKFFCPuWhr9ignlGpZ9vDQLw67N4dcTVFEA==}
     engines: {node: '>=20'}
-
-  quansync@0.2.11:
-    resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
 
   rc9@3.1.0:
     resolution: {integrity: sha512-ufjkNVzbRHKcCOmTahZkmVsyc3W+MSk3jY03m+a7tGHkIsdVMG9l10/3HvFbWkkKzY5VFp3pkRsIo/UYgmFL7Q==}
@@ -5161,21 +4943,6 @@ packages:
     resolution: {integrity: sha512-eNRKgb3z66Yp3D2CixVujOUvXLFUTij/zVnV8KRyvFdQwpz7I5DS8UfRkTeLzb64u+dkzDSdelE24izu+zSSUg==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
-  tailwind-api-utils@1.0.3:
-    resolution: {integrity: sha512-KpzUHkH1ug1sq4394SLJX38ZtpeTiqQ1RVyFTTSY2XuHsNSTWUkRo108KmyyrMWdDbQrLYkSHaNKj/a3bmA4sQ==}
-    peerDependencies:
-      tailwindcss: ^3.3.0 || ^4.0.0 || ^4.0.0-beta
-
-  tailwind-merge@3.7.0:
-    resolution: {integrity: sha512-XPPUyAc+cvspz3lHTcR/QgPfW2A0lv/xQNIjX3HGhLR+Nq2lHaLq5MtTesHn8GUr3W3DguT2KT5x3NVgRtYwmA==}
-
-  tailwindcss@4.3.3:
-    resolution: {integrity: sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==}
-
-  tapable@2.3.3:
-    resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
-    engines: {node: '>=6'}
-
   thenify-all@1.6.0:
     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
     engines: {node: '>=0.8'}
@@ -5260,9 +5027,6 @@ packages:
     resolution: {integrity: sha512-ZmfHqh0i7bHOcFyfef4AuinI1M0/UOJ9bcwYMA/D68xAKQTng5kIH8ay9hcq5eB3ydG+DTDSmKiiEW+OWWovFw==}
     hasBin: true
 
-  tw-animate-css@1.4.0:
-    resolution: {integrity: sha512-7bziOlRqH0hJx80h/3mbicLW7o8qLsH5+RaLR2t+OHM3D0JlWGODQKQ4cxbK7WlvmUxpcj6Kgu6EKqjrGFe3QQ==}
-
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
@@ -5338,9 +5102,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  util-deprecate@1.0.2:
-    resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
   valibot@1.4.2:
     resolution: {integrity: sha512-gjdCvJ6d3RyHAneqxMYMW9QMCwYMb3jpOO0IyHZV1bnRHFBHrX3VkIILt5XYR0WhwHiH7Mty8ovuPZ/O3gamrg==}
@@ -5576,8 +5337,6 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
-
-  '@alloc/quick-lru@5.3.0': {}
 
   '@anthropic-ai/sdk@0.126.0(zod@4.6.6)':
     dependencies:
@@ -6233,11 +5992,6 @@ snapshots:
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
-      '@jridgewell/trace-mapping': 0.3.31
-
-  '@jridgewell/remapping@2.3.5':
-    dependencies:
-      '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
 
   '@jridgewell/resolve-uri@3.1.2': {}
@@ -7321,75 +7075,6 @@ snapshots:
 
   '@tabby_ai/hijri-converter@1.0.5': {}
 
-  '@tailwindcss/node@4.3.3':
-    dependencies:
-      '@jridgewell/remapping': 2.3.5
-      enhanced-resolve: 5.25.1
-      jiti: 2.7.0
-      lightningcss: 1.32.0
-      magic-string: 0.30.21
-      source-map-js: 1.2.1
-      tailwindcss: 4.3.3
-
-  '@tailwindcss/oxide-android-arm64@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-darwin-arm64@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-darwin-x64@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-freebsd-x64@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-linux-arm-gnueabihf@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-linux-arm64-gnu@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-linux-arm64-musl@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-linux-x64-gnu@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-linux-x64-musl@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-wasm32-wasi@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-win32-arm64-msvc@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide-win32-x64-msvc@4.3.3':
-    optional: true
-
-  '@tailwindcss/oxide@4.3.3':
-    optionalDependencies:
-      '@tailwindcss/oxide-android-arm64': 4.3.3
-      '@tailwindcss/oxide-darwin-arm64': 4.3.3
-      '@tailwindcss/oxide-darwin-x64': 4.3.3
-      '@tailwindcss/oxide-freebsd-x64': 4.3.3
-      '@tailwindcss/oxide-linux-arm-gnueabihf': 4.3.3
-      '@tailwindcss/oxide-linux-arm64-gnu': 4.3.3
-      '@tailwindcss/oxide-linux-arm64-musl': 4.3.3
-      '@tailwindcss/oxide-linux-x64-gnu': 4.3.3
-      '@tailwindcss/oxide-linux-x64-musl': 4.3.3
-      '@tailwindcss/oxide-wasm32-wasi': 4.3.3
-      '@tailwindcss/oxide-win32-arm64-msvc': 4.3.3
-      '@tailwindcss/oxide-win32-x64-msvc': 4.3.3
-
-  '@tailwindcss/postcss@4.3.3':
-    dependencies:
-      '@alloc/quick-lru': 5.3.0
-      '@tailwindcss/node': 4.3.3
-      '@tailwindcss/oxide': 4.3.3
-      postcss: 8.5.28
-      tailwindcss: 4.3.3
-
   '@tanstack/query-core@5.103.2': {}
 
   '@tanstack/react-query@5.103.2(react@19.3.0)':
@@ -7767,43 +7452,43 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
-  '@yuva-devlab/auth-client@1.1.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@yuva-devlab/auth-client@1.1.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@yuva-devlab/errors': 0.2.0
-      '@yuva-devlab/logger': 1.2.0
+      '@yuva-devlab/logger': 1.3.1
       lucide-react: 0.575.0(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  '@yuva-devlab/auth-server@1.0.0':
+  '@yuva-devlab/auth-server@1.0.2':
     dependencies:
       '@yuva-devlab/errors': 0.2.0
-      '@yuva-devlab/logger': 1.2.0
+      '@yuva-devlab/logger': 1.3.1
       zod: 3.25.76
 
-  '@yuva-devlab/billing@0.2.0':
+  '@yuva-devlab/billing@0.2.2':
     dependencies:
       '@yuva-devlab/errors': 0.2.0
-      '@yuva-devlab/logger': 1.2.0
+      '@yuva-devlab/logger': 1.3.1
       zod: 3.25.76
 
   '@yuva-devlab/errors@0.2.0': {}
 
-  '@yuva-devlab/logger@1.2.0': {}
+  '@yuva-devlab/logger@1.3.1': {}
 
   '@yuva-devlab/resilience@0.2.0':
     dependencies:
       '@yuva-devlab/errors': 0.2.0
 
-  '@yuva-devlab/semantic-cache@0.2.0':
+  '@yuva-devlab/semantic-cache@0.2.2':
     dependencies:
       '@yuva-devlab/errors': 0.2.0
-      '@yuva-devlab/logger': 1.2.0
+      '@yuva-devlab/logger': 1.3.1
       zod: 3.25.76
 
   '@yuva-devlab/tokens@2.0.0': {}
 
-  '@yuva-devlab/ui@2.1.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sonner@2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))':
+  '@yuva-devlab/ui@2.2.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(@yuva-devlab/tokens@2.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sonner@2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))':
     dependencies:
       '@radix-ui/react-accordion': 1.2.20(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@radix-ui/react-alert-dialog': 1.1.23(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -8075,8 +7760,6 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  cssesc@3.0.0: {}
-
   csstype@3.2.3: {}
 
   d3-array@3.2.1:
@@ -8163,7 +7846,8 @@ snapshots:
 
   destr@2.0.5: {}
 
-  detect-libc@2.1.2: {}
+  detect-libc@2.1.2:
+    optional: true
 
   detect-node-es@1.1.0: {}
 
@@ -8205,11 +7889,6 @@ snapshots:
   emoji-regex@10.6.0: {}
 
   empathic@2.0.0: {}
-
-  enhanced-resolve@5.25.1:
-    dependencies:
-      graceful-fs: 4.2.11
-      tapable: 2.3.3
 
   env-paths@2.2.1: {}
 
@@ -8303,20 +7982,6 @@ snapshots:
     optionalDependencies:
       '@types/eslint': 9.6.1
       eslint-config-prettier: 10.1.8(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))
-
-  eslint-plugin-tailwindcss@4.4.0(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(tailwindcss@4.3.3)(typescript@6.0.3):
-    dependencies:
-      '@typescript-eslint/utils': 8.70.0(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
-      eslint: 10.10.0(jiti@2.7.0)(supports-color@8.1.1)
-      postcss: 8.5.28
-      postcss-nested: 7.0.2(postcss@8.5.28)
-      synckit: 0.11.13
-      tailwind-api-utils: 1.0.3(tailwindcss@4.3.3)
-      tailwindcss: 4.3.3
-    optionalDependencies:
-      typescript: 6.0.3
-    transitivePeerDependencies:
-      - supports-color
 
   eslint-scope@9.1.2:
     dependencies:
@@ -8711,6 +8376,7 @@ snapshots:
       lightningcss-linux-x64-musl: 1.32.0
       lightningcss-win32-arm64-msvc: 1.32.0
       lightningcss-win32-x64-msvc: 1.32.0
+    optional: true
 
   lilconfig@3.1.3: {}
 
@@ -8725,12 +8391,6 @@ snapshots:
       yaml: 2.9.1
 
   load-tsconfig@0.2.5: {}
-
-  local-pkg@1.2.1:
-    dependencies:
-      mlly: 1.8.2
-      pkg-types: 2.3.3
-      quansync: 0.2.11
 
   locate-path@6.0.0:
     dependencies:
@@ -9334,16 +8994,6 @@ snapshots:
       postcss: 8.5.28
       yaml: 2.9.1
 
-  postcss-nested@7.0.2(postcss@8.5.28):
-    dependencies:
-      postcss: 8.5.28
-      postcss-selector-parser: 7.1.6
-
-  postcss-selector-parser@7.1.6:
-    dependencies:
-      cssesc: 3.0.0
-      util-deprecate: 1.0.2
-
   postcss@8.4.31:
     dependencies:
       nanoid: 3.3.19
@@ -9375,10 +9025,6 @@ snapshots:
   prettier-linter-helpers@1.0.1:
     dependencies:
       fast-diff: 1.3.0
-
-  prettier-plugin-tailwindcss@0.8.1(prettier@3.9.8):
-    dependencies:
-      prettier: 3.9.8
 
   prettier@3.9.8: {}
 
@@ -9420,8 +9066,6 @@ snapshots:
   qified@0.10.1:
     dependencies:
       hookified: 2.2.0
-
-  quansync@0.2.11: {}
 
   rc9@3.1.0:
     dependencies:
@@ -9783,19 +9427,6 @@ snapshots:
     dependencies:
       '@pkgr/core': 0.3.6
 
-  tailwind-api-utils@1.0.3(tailwindcss@4.3.3):
-    dependencies:
-      enhanced-resolve: 5.25.1
-      jiti: 2.7.0
-      local-pkg: 1.2.1
-      tailwindcss: 4.3.3
-
-  tailwind-merge@3.7.0: {}
-
-  tailwindcss@4.3.3: {}
-
-  tapable@2.3.3: {}
-
   thenify-all@1.6.0:
     dependencies:
       thenify: 3.3.1
@@ -9906,8 +9537,6 @@ snapshots:
       '@turbo/windows-64': 2.11.1
       '@turbo/windows-arm64': 2.11.1
 
-  tw-animate-css@1.4.0: {}
-
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
@@ -9987,8 +9616,6 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.3.0
-
-  util-deprecate@1.0.2: {}
 
   valibot@1.4.2(typescript@6.0.3):
     optionalDependencies:

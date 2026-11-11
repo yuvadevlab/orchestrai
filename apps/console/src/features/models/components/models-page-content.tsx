@@ -48,27 +48,49 @@ export function ModelsPageContent(): React.JSX.Element {
       stats={UI_COPY.MODELS.STATS(models.length)}
       description={UI_COPY.MODELS.PAGE_DESCRIPTION}
       actions={
-        <div className="flex items-center gap-2">
-          <div className="bg-muted/30 border-border/60 flex rounded border p-0.5">
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div
+            style={{
+              backgroundColor: "color-mix(in oklab, var(--muted) 30%, transparent)",
+              border: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+              display: "flex",
+              borderRadius: "var(--radius-sm, 0.25rem)",
+              padding: "0.125rem",
+            }}
+          >
             <button
               type="button"
               onClick={() => setActiveTab("catalog")}
-              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
-                activeTab === "catalog"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              style={{
+                borderRadius: "var(--radius-sm, 0.25rem)",
+                paddingInline: "0.625rem",
+                paddingBlock: "0.25rem",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                border: "none",
+                cursor: "pointer",
+                backgroundColor: activeTab === "catalog" ? "var(--primary)" : "transparent",
+                color:
+                  activeTab === "catalog" ? "var(--primaryForeground)" : "var(--mutedForeground)",
+              }}
             >
               {UI_COPY.MODELS.TAB_CATALOG}
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("telemetry")}
-              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
-                activeTab === "telemetry"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              style={{
+                borderRadius: "var(--radius-sm, 0.25rem)",
+                paddingInline: "0.625rem",
+                paddingBlock: "0.25rem",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                border: "none",
+                cursor: "pointer",
+                backgroundColor: activeTab === "telemetry" ? "var(--primary)" : "transparent",
+                color:
+                  activeTab === "telemetry" ? "var(--primaryForeground)" : "var(--mutedForeground)",
+              }}
             >
               {UI_COPY.MODELS.TAB_COCKPIT}
             </button>
@@ -77,9 +99,15 @@ export function ModelsPageContent(): React.JSX.Element {
             variant="default"
             size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+            style={{
+              height: "2rem",
+              cursor: "pointer",
+              gap: "0.375rem",
+              fontSize: "0.75rem",
+              fontWeight: 500,
+            }}
           >
-            <Plus className="size-3.5" />
+            <Plus style={{ width: "0.875rem", height: "0.875rem" }} />
             <span>{UI_COPY.MODELS.REGISTER_BUTTON}</span>
           </Button>
         </div>
@@ -100,9 +128,15 @@ export function ModelsPageContent(): React.JSX.Element {
                 size="sm"
                 variant="outline"
                 onClick={() => setIsModalOpen(true)}
-                className="h-8 cursor-pointer font-mono text-xs"
+                style={{
+                  height: "2rem",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-mono, monospace)",
+                  fontSize: "0.75rem",
+                }}
               >
-                <Plus className="mr-1.5 size-3.5" /> {UI_COPY.MODELS.REGISTER_BUTTON}
+                <Plus style={{ marginRight: "0.375rem", width: "0.875rem", height: "0.875rem" }} />{" "}
+                {UI_COPY.MODELS.REGISTER_BUTTON}
               </Button>
             }
           />
@@ -114,7 +148,7 @@ export function ModelsPageContent(): React.JSX.Element {
         </>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="orch-model-grid">
             {models.map((m) => (
               <ModelCard key={m.modelId} model={m} providerName={providerMap.get(m.providerId)} />
             ))}

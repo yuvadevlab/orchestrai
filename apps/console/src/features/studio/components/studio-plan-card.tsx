@@ -26,25 +26,41 @@ export function StudioPlanCard({ steps }: StudioPlanCardProps): React.JSX.Elemen
   const progressPercent = Math.round((completedCount / steps.length) * 100);
 
   return (
-    <div className="border-border/80 bg-card/60 my-3 rounded-md border p-3 shadow-xs">
-      <div className="mb-2.5 flex items-center justify-between font-mono text-xs">
-        <div className="text-foreground flex items-center gap-1.5 font-semibold">
-          <ListTodo className="text-primary size-4" />
+    <div className="orch-plan-card">
+      <div
+        className="orch-flex-row orch-justify-between"
+        style={{
+          alignItems: "center",
+          marginBottom: "0.625rem",
+          fontFamily: "var(--font-mono, monospace)",
+          fontSize: "0.75rem",
+        }}
+      >
+        <div
+          className="orch-flex-row orch-gap-xs"
+          style={{ alignItems: "center", fontWeight: 600 }}
+        >
+          <ListTodo className="orch-text-primary" style={{ width: "1rem", height: "1rem" }} />
           <span>{UI_COPY.STUDIO.PLAN.TITLE}</span>
         </div>
-        <span className="text-muted-foreground text-[11px]">
+        <span className="orch-text-muted" style={{ fontSize: "0.6875rem" }}>
           {UI_COPY.STUDIO.PLAN.PROGRESS(completedCount, steps.length, progressPercent)}
         </span>
       </div>
 
-      <div className="bg-muted/50 mb-3 h-1.5 w-full overflow-hidden rounded-full">
-        <div
-          className="bg-primary h-full transition-all duration-300"
-          style={{ width: `${progressPercent}%` }}
-        />
+      <div className="orch-plan-track">
+        <div className="orch-plan-bar" style={{ width: `${progressPercent}%` }} />
       </div>
 
-      <div className="space-y-1.5 font-mono text-xs">
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.375rem",
+          fontFamily: "var(--font-mono, monospace)",
+          fontSize: "0.75rem",
+        }}
+      >
         {steps.map((step, idx) => {
           const isDone = step.status === PlanStepStatus.COMPLETED;
           const isRunning = step.status === PlanStepStatus.RUNNING;
@@ -52,25 +68,73 @@ export function StudioPlanCard({ steps }: StudioPlanCardProps): React.JSX.Elemen
           return (
             <div
               key={step.id || idx}
-              className={`flex items-start gap-2 rounded-md p-1.5 transition-colors ${
-                isRunning
-                  ? "bg-primary/10 border-primary/20 text-primary border"
-                  : "text-foreground"
-              }`}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "0.5rem",
+                borderRadius: "var(--radius-md, 0.375rem)",
+                padding: "0.375rem",
+                backgroundColor: isRunning
+                  ? "color-mix(in oklab, var(--primary) 10%, transparent)"
+                  : "transparent",
+                border: isRunning
+                  ? "1px solid color-mix(in oklab, var(--primary) 20%, transparent)"
+                  : "1px solid transparent",
+                color: isRunning ? "var(--primary)" : "inherit",
+              }}
             >
               {isDone ? (
-                <CheckCircle2 className="text-primary mt-0.5 size-3.5 shrink-0" />
+                <CheckCircle2
+                  className="orch-text-primary"
+                  style={{
+                    marginTop: "0.125rem",
+                    width: "0.875rem",
+                    height: "0.875rem",
+                    flexShrink: 0,
+                  }}
+                />
               ) : isRunning ? (
-                <Loader2 className="text-primary mt-0.5 size-3.5 shrink-0 animate-spin" />
+                <Loader2
+                  className="orch-text-primary"
+                  style={{
+                    marginTop: "0.125rem",
+                    width: "0.875rem",
+                    height: "0.875rem",
+                    flexShrink: 0,
+                  }}
+                />
               ) : (
-                <Circle className="text-muted-foreground mt-0.5 size-3.5 shrink-0" />
+                <Circle
+                  className="orch-text-muted"
+                  style={{
+                    marginTop: "0.125rem",
+                    width: "0.875rem",
+                    height: "0.875rem",
+                    flexShrink: 0,
+                  }}
+                />
               )}
-              <div className="min-w-0 flex-1">
-                <p className={`font-medium ${isDone ? "text-muted-foreground line-through" : ""}`}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontWeight: 500,
+                    textDecoration: isDone ? "line-through" : "none",
+                    color: isDone ? "var(--mutedForeground)" : "inherit",
+                  }}
+                >
                   {step.title}
                 </p>
                 {step.detail && (
-                  <p className="text-muted-foreground mt-0.5 text-[11px] leading-relaxed">
+                  <p
+                    className="orch-text-muted"
+                    style={{
+                      margin: 0,
+                      marginTop: "0.125rem",
+                      fontSize: "0.6875rem",
+                      lineHeight: 1.5,
+                    }}
+                  >
                     {step.detail}
                   </p>
                 )}

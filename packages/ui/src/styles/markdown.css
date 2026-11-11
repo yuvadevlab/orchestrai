@@ -1,0 +1,132 @@
+/**
+ * @file packages/ui/src/styles/markdown.css
+ * @description Markdown content typography and code block formatting for OrchestrAI.
+ * @author yuva.devlab@gmail.com
+ */
+
+/* Code Block & Markdown */
+.orch-codeblock {
+  margin-block: 0.75rem;
+  overflow: hidden;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 40%, transparent);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+}
+
+.orch-codeblock__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 70%, transparent);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.6875rem;
+}
+
+.orch-codeblock__pre {
+  margin: 0;
+  overflow-x: auto;
+  padding: 0.875rem;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+
+.orch-markdown {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--foreground);
+}
+
+.orch-markdown h1 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.orch-markdown h2 {
+  margin-top: 0.75rem;
+  margin-bottom: 0.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.orch-markdown h3 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.orch-markdown p {
+  margin-block: 0.375rem;
+  line-height: 1.6;
+}
+
+.orch-markdown ul,
+.orch-markdown ol {
+  margin-block: 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.orch-markdown li {
+  margin-block: 0.25rem;
+  line-height: 1.5;
+}
+
+.orch-markdown blockquote {
+  margin-block: 0.5rem;
+  border-left: 2px solid color-mix(in oklab, var(--primary) 40%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 20%, transparent);
+  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+  color: var(--mutedForeground);
+  font-style: italic;
+}
+
+.orch-markdown code:not(pre code) {
+  border-radius: var(--radius-sm, 0.25rem);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 60%, transparent);
+  padding: 0.125rem 0.375rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+}
+
+.orch-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  margin-block: 0.75rem;
+}
+
+.orch-markdown th,
+.orch-markdown td {
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  padding: 0.5rem 0.75rem;
+}
+
+.orch-markdown th {
+  background-color: color-mix(in oklab, var(--muted) 60%, transparent);
+  font-weight: 600;
+}
+
+.orch-markdown hr {
+  margin-block: 1rem;
+  border: none;
+  border-top: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+}
+
+.orch-markdown a {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.orch-markdown a:hover {
+  text-decoration: underline;
+}
