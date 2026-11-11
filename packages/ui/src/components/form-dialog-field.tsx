@@ -5,6 +5,7 @@
  * @description Design system FormDialogField component rendering validated form inputs.
  * Supports text, textarea, number, and rich select controls with option descriptions.
  * @module apps/console/components/ui
+ * @author yuva.devlab@gmail.com
  */
 
 import React from "react";
@@ -64,11 +65,27 @@ export function FormDialogField({
   const selectedValue = value || (options?.[0]?.value ?? "");
 
   return (
-    <div className={`space-y-1.5 ${colSpan === 2 ? "sm:col-span-2" : "sm:col-span-1"}`}>
-      <Label htmlFor={name} className="text-foreground block text-xs font-semibold tracking-wide">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.375rem",
+        gridColumn: colSpan === 2 ? "span 2" : "span 1",
+      }}
+    >
+      <Label
+        htmlFor={name}
+        style={{
+          color: "var(--foreground)",
+          display: "block",
+          fontSize: "0.75rem",
+          fontWeight: 600,
+          letterSpacing: "0.025em",
+        }}
+      >
         {label}{" "}
         {required ? (
-          <span className="text-destructive">{COMMON_COPY.FORM.REQUIRED_MARKER}</span>
+          <span style={{ color: "var(--destructive)" }}>{COMMON_COPY.FORM.REQUIRED_MARKER}</span>
         ) : null}
       </Label>
 
@@ -79,30 +96,41 @@ export function FormDialogField({
           value={value}
           onChange={(e): void => onChange(name, e.target.value)}
           placeholder={placeholder}
-          className="bg-background/70 border-border/80 focus-visible:ring-primary min-h-24 resize-y text-xs"
+          style={{ minHeight: "6rem", resize: "vertical", fontSize: "0.75rem" }}
         />
       ) : type === "select" ? (
         <Select value={selectedValue} onValueChange={(val): void => onChange(name, val)}>
-          <SelectTrigger className="bg-background/70 border-border/80 h-9 w-full min-w-0 text-xs">
-            <SelectValue
-              placeholder={placeholder || COMMON_COPY.ACTIONS.SELECT_OPTION}
-              className="truncate"
-            />
+          <SelectTrigger
+            style={{ height: "2.25rem", width: "100%", minWidth: 0, fontSize: "0.75rem" }}
+          >
+            <SelectValue placeholder={placeholder || COMMON_COPY.ACTIONS.SELECT_OPTION} />
           </SelectTrigger>
-          <SelectContent className="bg-popover border-border text-foreground max-h-60 w-(--radix-select-trigger-width) min-w-50 overflow-y-auto rounded-md p-1 shadow-xl">
+          <SelectContent
+            style={{
+              maxHeight: "15rem",
+              minWidth: "12.5rem",
+              overflowY: "auto",
+              padding: "0.25rem",
+            }}
+          >
             {options?.map((opt) => (
               <SelectItem
                 key={opt.value}
                 value={opt.value}
-                className="cursor-pointer px-2.5 py-1.5 text-xs font-medium"
+                style={{
+                  cursor: "pointer",
+                  padding: "0.375rem 0.625rem",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                }}
               >
-                <span className="truncate">{opt.label}</span>
+                <span>{opt.label}</span>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       ) : type === "multiselect" ? (
-        <div className="flex flex-wrap gap-1.5 pt-0.5">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", paddingTop: "0.125rem" }}>
           {options && options.length > 0 ? (
             options.map((opt) => {
               const selectedList = value
@@ -122,11 +150,21 @@ export function FormDialogField({
                       : [...selectedList, opt.value];
                     onChange(name, next.join(", "));
                   }}
-                  className={`cursor-pointer rounded-md border px-2.5 py-1 text-xs font-medium transition-all ${
-                    isSelected
-                      ? "border-primary/50 bg-primary/15 text-primary shadow-xs"
-                      : "border-border/70 bg-background/60 text-muted-foreground hover:border-border hover:text-foreground"
-                  }`}
+                  style={{
+                    cursor: "pointer",
+                    borderRadius: "var(--radius-md, 0.375rem)",
+                    border: isSelected
+                      ? "1px solid color-mix(in oklab, var(--primary) 50%, transparent)"
+                      : "1px solid var(--border)",
+                    backgroundColor: isSelected
+                      ? "color-mix(in oklab, var(--primary) 15%, transparent)"
+                      : "color-mix(in oklab, var(--background) 60%, transparent)",
+                    color: isSelected ? "var(--primary)" : "var(--mutedForeground)",
+                    padding: "0.25rem 0.625rem",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    transition: "all 150ms ease",
+                  }}
                 >
                   {isSelected
                     ? COMMON_COPY.FORM.PREFIX_SELECTED
@@ -136,7 +174,9 @@ export function FormDialogField({
               );
             })
           ) : (
-            <span className="text-muted-foreground text-xs italic">
+            <span
+              style={{ color: "var(--mutedForeground)", fontSize: "0.75rem", fontStyle: "italic" }}
+            >
               {COMMON_COPY.FORM.NO_OPTIONS}
             </span>
           )}
@@ -149,14 +189,25 @@ export function FormDialogField({
           value={value}
           onChange={(e): void => onChange(name, e.target.value)}
           placeholder={placeholder}
-          className="bg-background/70 border-border/80 h-9 text-xs"
+          style={{ height: "2.25rem", fontSize: "0.75rem" }}
         />
       )}
 
       {helperText ? (
-        <p className="text-muted-foreground text-[11px] leading-tight">{helperText}</p>
+        <p
+          style={{
+            color: "var(--mutedForeground)",
+            fontSize: "0.6875rem",
+            lineHeight: 1.25,
+            margin: 0,
+          }}
+        >
+          {helperText}
+        </p>
       ) : null}
-      {error ? <p className="text-destructive text-[11px]">{error}</p> : null}
+      {error ? (
+        <p style={{ color: "var(--destructive)", fontSize: "0.6875rem", margin: 0 }}>{error}</p>
+      ) : null}
     </div>
   );
 }

@@ -49,12 +49,12 @@ export default function GlobalError({ error, reset }: GlobalErrorProps): React.J
   }, [error]);
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="orch-fullscreen">
       <DynamicErrorState
         error={error}
         reset={reset}
         boundaryName="AppRoot"
-        className="min-h-screen"
+        className="orch-fullscreen"
       />
     </div>
   );

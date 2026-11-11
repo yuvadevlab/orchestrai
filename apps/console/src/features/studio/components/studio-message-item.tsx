@@ -39,13 +39,18 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
 
   if (isUser) {
     return (
-      <div className="flex w-full justify-end py-3">
-        <div className="border-border/80 bg-secondary/80 max-w-2xl rounded-md rounded-tr-sm border px-4 py-3 shadow-xs">
-          <div className="text-muted-foreground mb-1 flex items-center justify-between gap-3 font-mono text-[11px]">
-            <span className="text-foreground font-semibold">{UI_COPY.STUDIO.FEED.USER_LABEL}</span>
+      <div className="orch-msg-user-container">
+        <div className="orch-msg-user-box">
+          <div
+            className="orch-flex-row orch-justify-between orch-text-muted orch-font-mono"
+            style={{ marginBottom: "0.25rem", gap: "0.75rem", fontSize: "0.6875rem" }}
+          >
+            <span className="orch-font-semibold" style={{ color: "var(--foreground)" }}>
+              {UI_COPY.STUDIO.FEED.USER_LABEL}
+            </span>
             <span>{message.timestamp}</span>
           </div>
-          <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
+          <p style={{ margin: 0, fontSize: "0.875rem", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
             {message.content}
           </p>
         </div>
@@ -54,45 +59,67 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
   }
 
   return (
-    <div className="flex w-full flex-col gap-2 py-3">
+    <div className="orch-msg-agent-container">
       {/* Agent Header Metadata */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="bg-primary/10 text-primary grid size-6 place-items-center rounded-sm">
-            <Bot className="size-3.5" />
+      <div className="orch-flex-row orch-justify-between" style={{ alignItems: "center" }}>
+        <div className="orch-flex-row orch-gap-xs" style={{ alignItems: "center" }}>
+          <div
+            style={{
+              display: "grid",
+              width: "1.5rem",
+              height: "1.5rem",
+              placeItems: "center",
+              borderRadius: "var(--radius-sm, 0.25rem)",
+              backgroundColor: "color-mix(in oklab, var(--primary) 10%, transparent)",
+              color: "var(--primary)",
+            }}
+          >
+            <Bot style={{ width: "0.875rem", height: "0.875rem" }} />
           </div>
-          <span className="text-foreground text-xs font-semibold">
+          <span className="orch-font-semibold" style={{ fontSize: "0.75rem" }}>
             {message.specialistName || UI_COPY.STUDIO.FEED.DEFAULT_SPECIALIST}
           </span>
           {message.model && (
             <Badge
               variant="outline"
-              className="text-muted-foreground px-1.5 py-0 font-mono text-[10px]"
+              className="orch-font-mono orch-text-muted"
+              style={{ padding: "0 0.375rem", fontSize: "0.625rem" }}
             >
               {message.model}
             </Badge>
           )}
         </div>
 
-        <div className="text-muted-foreground flex items-center gap-2 text-[11px]">
+        <div
+          className="orch-flex-row orch-gap-xs orch-text-muted"
+          style={{ alignItems: "center", fontSize: "0.6875rem" }}
+        >
           <span>{message.timestamp}</span>
           {message.content && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleCopy}
-              className="text-muted-foreground hover:text-foreground size-6 p-0"
+              className="orch-text-muted"
+              style={{ width: "1.5rem", height: "1.5rem", padding: 0 }}
               title={UI_COPY.STUDIO.FEED.COPY_RESPONSE}
               aria-label={UI_COPY.STUDIO.FEED.COPY_RESPONSE}
             >
-              {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
+              {copied ? (
+                <Check
+                  className="orch-text-primary"
+                  style={{ width: "0.75rem", height: "0.75rem" }}
+                />
+              ) : (
+                <Copy style={{ width: "0.75rem", height: "0.75rem" }} />
+              )}
             </Button>
           )}
         </div>
       </div>
 
       {/* Main Agent Response Body */}
-      <div className="border-border/60 bg-card/40 rounded-md border p-4 shadow-xs">
+      <div className="orch-msg-agent-box">
         {message.segments && message.segments.length > 0 ? (
           // Interleaved chronological timeline of thinking, plans, artifacts, clearances, and text
           message.segments.map((seg) => {
@@ -110,21 +137,19 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
                 return <StudioPlanCard key={seg.id} steps={seg.steps} />;
               case MessageSegmentType.ARTIFACT:
                 return (
-                  <div key={seg.id} className="my-2">
+                  <div key={seg.id} style={{ margin: "0.5rem 0" }}>
                     <ArtifactRenderer artifact={seg.artifact} />
                   </div>
                 );
               case MessageSegmentType.APPROVAL: {
-                // Once resolved, show the permanent inline decision chip in this exact chronological position
                 if (seg.request.resolvedScope) {
                   return <ApprovalDecisionChip key={seg.id} request={seg.request} />;
                 }
-                // When pending clearance, interactive authorization takes over the prompt input bar below
                 return null;
               }
               case MessageSegmentType.TEXT:
                 return (
-                  <div key={seg.id} className="mt-2">
+                  <div key={seg.id} style={{ marginTop: "0.5rem" }}>
                     <MarkdownRenderer content={seg.content} />
                   </div>
                 );
@@ -144,7 +169,14 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
             )}
             {message.plan && message.plan.length > 0 && <StudioPlanCard steps={message.plan} />}
             {message.artifacts && message.artifacts.length > 0 && (
-              <div className="my-2 space-y-2">
+              <div
+                style={{
+                  margin: "0.5rem 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
                 {message.artifacts.map((artifact) => (
                   <ArtifactRenderer key={artifact.id} artifact={artifact} />
                 ))}
@@ -154,7 +186,7 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
               <ApprovalDecisionChip request={message.approvalRequest} />
             )}
             {message.content && (
-              <div className="mt-2">
+              <div style={{ marginTop: "0.5rem" }}>
                 <MarkdownRenderer content={message.content} />
               </div>
             )}
@@ -163,20 +195,35 @@ export function StudioMessageItem({ message }: StudioMessageItemProps): React.JS
 
         {/* Streaming synthesizing indicator */}
         {message.isStreaming && (!message.content || message.content.length === 0) && (
-          <div className="text-muted-foreground flex items-center gap-2 py-2 font-mono text-xs">
-            <Sparkles className="text-primary size-3.5 animate-spin" />
+          <div
+            className="orch-flex-row orch-gap-xs orch-text-muted orch-font-mono"
+            style={{ alignItems: "center", padding: "0.5rem 0", fontSize: "0.75rem" }}
+          >
+            <Sparkles
+              className="orch-text-primary orch-animate-spin"
+              style={{ width: "0.875rem", height: "0.875rem" }}
+            />
             <span>{UI_COPY.STUDIO.FEED.SYNTHESIZING}</span>
           </div>
         )}
 
         {/* Footer Diagnostics */}
         {(message.tokensIn || message.tokensOut) && (
-          <div className="border-border/40 text-muted-foreground/80 mt-4 flex items-center justify-between border-t pt-2 font-mono text-[10px]">
+          <div
+            className="orch-flex-row orch-justify-between orch-font-mono"
+            style={{
+              marginTop: "1rem",
+              borderTop: "1px solid color-mix(in oklab, var(--border) 40%, transparent)",
+              paddingTop: "0.5rem",
+              fontSize: "0.625rem",
+              color: "color-mix(in oklab, var(--mutedForeground) 80%, transparent)",
+            }}
+          >
             <span>
               {UI_COPY.STUDIO.FEED.TOKENS_DIAGNOSTIC(message.tokensIn ?? 0, message.tokensOut ?? 0)}
             </span>
             {message.executionId && (
-              <span className="max-w-45 truncate">
+              <span className="orch-truncate" style={{ maxWidth: "12rem" }}>
                 {UI_COPY.STUDIO.FEED.EXEC_DIAGNOSTIC(message.executionId)}
               </span>
             )}

@@ -2,6 +2,7 @@
  * @file not-found-state.tsx
  * @description Generic 404 Not Found component matching reference design layout & typography.
  * @module apps/console/components/ui
+ * @author yuva.devlab@gmail.com
  */
 
 "use client";
@@ -31,24 +32,27 @@ export function NotFoundState({
   className,
 }: NotFoundStateProps): React.JSX.Element {
   return (
-    <div
-      className={cn(
-        "bg-background flex size-full h-screen flex-col items-center justify-center p-6 text-center",
-        className,
-      )}
-    >
-      <div className="max-w-md text-center">
-        <h1 className="text-foreground text-7xl font-bold tracking-tight sm:text-8xl">
-          {COMMON_COPY.NOT_FOUND.CODE}
-        </h1>
-        <h2 className="text-foreground mt-4 text-xl font-semibold tracking-tight sm:text-2xl">
-          {title}
-        </h2>
-        <p className="text-muted-foreground mt-2 text-sm sm:text-base">{description}</p>
-        <div className="mt-6">
+    <div className={cn("orch-state-page", className)}>
+      <div className="orch-state-page__inner">
+        <h1 className="orch-state-page__code">{COMMON_COPY.NOT_FOUND.CODE}</h1>
+        <h2 className="orch-state-page__title">{title}</h2>
+        <p className="orch-state-page__desc">{description}</p>
+        <div className="orch-state-page__actions">
           <a
             href={homeHref}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-xs transition-colors"
+            style={{
+              backgroundColor: "var(--primary)",
+              color: "var(--primaryForeground)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "var(--radius-md, 0.375rem)",
+              padding: "0.5rem 1rem",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              textDecoration: "none",
+              transition: "opacity 150ms ease",
+            }}
           >
             {COMMON_COPY.NOT_FOUND.GO_HOME}
           </a>

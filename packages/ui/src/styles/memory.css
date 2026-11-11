@@ -1,0 +1,26 @@
+/**
+ * @file packages/ui/src/styles/memory.css
+ * @description Long-term associative memory, semantic search, and memory recall dialogs for OrchestrAI.
+ * @author yuva.devlab@gmail.com
+ */
+
+.orch-memory-card {
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  padding: 1rem;
+}
+
+.orch-memory-key {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.orch-memory-val {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--foreground);
+}

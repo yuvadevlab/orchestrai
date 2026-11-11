@@ -43,18 +43,41 @@ export function AgentCard({ agent }: AgentCardProps): React.JSX.Element {
   const initials = getInitials(agent.name);
 
   return (
-    <Card className="border-border bg-card hover:border-border/80 flex flex-col rounded-md shadow-xs transition-colors">
-      <CardHeader className="border-border/50 border-b pb-3.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 text-primary grid size-10 shrink-0 place-items-center rounded-md font-mono text-sm font-bold">
-              {initials}
-            </div>
+    <Card className="orch-agent-card">
+      <CardHeader
+        style={{
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 50%, transparent)",
+          paddingBottom: "0.875rem",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: "0.75rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <div className="orch-agent-icon">{initials}</div>
             <div>
-              <CardTitle className="text-foreground text-sm font-semibold tracking-tight">
+              <CardTitle
+                style={{
+                  color: "var(--foreground)",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                }}
+              >
                 {agent.name}
               </CardTitle>
-              <div className="text-muted-foreground mt-0.5 text-xs">
+              <div
+                style={{
+                  color: "var(--mutedForeground)",
+                  marginTop: "0.125rem",
+                  fontSize: "0.75rem",
+                }}
+              >
                 {agent.role} · {agent.model}
               </div>
             </div>
@@ -64,18 +87,34 @@ export function AgentCard({ agent }: AgentCardProps): React.JSX.Element {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 space-y-3.5 p-4">
-        <p className="text-muted-foreground line-clamp-3 text-xs leading-relaxed">
-          {agent.description}
-        </p>
+      <CardContent
+        style={{
+          flex: 1,
+          padding: "1rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.875rem",
+        }}
+      >
+        <p className="orch-agent-desc">{agent.description}</p>
 
         {/* Bound Tools / Capabilities */}
         {agent.tools.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-1">
+          <div
+            style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", paddingTop: "0.25rem" }}
+          >
             {agent.tools.map((t) => (
               <span
                 key={t}
-                className="bg-secondary text-secondary-foreground rounded-md px-2 py-0.5 font-mono text-[11px]"
+                style={{
+                  backgroundColor: "var(--secondary)",
+                  color: "var(--secondaryForeground)",
+                  borderRadius: "var(--radius-md, 0.375rem)",
+                  paddingInline: "0.5rem",
+                  paddingBlock: "0.125rem",
+                  fontFamily: "var(--font-mono, monospace)",
+                  fontSize: "0.6875rem",
+                }}
               >
                 {t}
               </span>
@@ -84,9 +123,24 @@ export function AgentCard({ agent }: AgentCardProps): React.JSX.Element {
         )}
       </CardContent>
 
-      <CardFooter className="border-border/50 text-muted-foreground flex items-center justify-between border-t px-4 pt-3 pb-3.5 font-mono text-xs">
+      <CardFooter
+        style={{
+          borderTop: "1px solid color-mix(in oklab, var(--border) 50%, transparent)",
+          color: "var(--mutedForeground)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingInline: "1rem",
+          paddingTop: "0.75rem",
+          paddingBottom: "0.875rem",
+          fontFamily: "var(--font-mono, monospace)",
+          fontSize: "0.75rem",
+        }}
+      >
         <span>{agent.totalExecutions} runs</span>
-        <span className="text-success font-semibold">{agent.successRate}% success</span>
+        <span style={{ color: "var(--success, #22c55e)", fontWeight: 600 }}>
+          {agent.successRate}% success
+        </span>
       </CardFooter>
     </Card>
   );

@@ -1,0 +1,69 @@
+/**
+ * @file packages/ui/src/styles/reset.css
+ * @description Base resets, typography tokens, and layout normalizations for OrchestrAI.
+ * Governed under W3C Cascade Layer @layer dl-reset.
+ * @author yuva.devlab@gmail.com
+ */
+
+@layer dl-reset {
+  * {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
+
+  html {
+    font-family: var(--font-sans, "Manrope Variable", sans-serif);
+    color-scheme: dark light;
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans, "Manrope Variable", sans-serif);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--primary) 30%, transparent);
+    color: var(--foreground);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--mutedForeground) 30%, transparent);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--mutedForeground) 50%, transparent);
+  }
+
+  .orch-fullscreen {
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  .orch-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}

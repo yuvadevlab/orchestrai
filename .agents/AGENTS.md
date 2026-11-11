@@ -61,3 +61,7 @@ Welcome, Agent. You are pair-programming on **OrchestrAI**, an enterprise-grade 
     - Direct inline calls to `useQuery`, `useMutation`, or raw `apiClient`/`fetch` calls inside UI components are strictly forbidden.
     - All server state queries, mutations, query keys, and SSR prefetch helpers must be encapsulated in dedicated files under `features/<feature>/api/` (e.g., `use-agents.ts`, `use-agent-mutations.ts`).
     - Components must exclusively consume these exported custom hooks.
+
+11. **Strict `UI_COPY` Centralization Invariant (Zero Exceptions)**:
+    - ALL user-facing text (labels, headers, button text, placeholders, empty states, error messages, toast copy, and dialog descriptions) MUST be centralized in `@/lib/ui-copy/` dictionaries.
+    - Direct raw hardcoded strings in JSX/TSX components are strictly prohibited.

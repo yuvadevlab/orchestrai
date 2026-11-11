@@ -7,11 +7,12 @@
  */
 
 import React, { useState, useRef, useEffect } from "react";
-import { Folder, ChevronDown, Plus, FolderOpen, Copy } from "lucide-react";
+import { Folder, ChevronDown, FolderOpen, Copy } from "lucide-react";
 import { Button } from "@orchestrai/ui";
 import { UI_COPY } from "@/lib/ui-copy";
 import { useConsoleStore, type WorkspaceRecord } from "@/lib/stores";
 import { StudioWorkspaceRecentList } from "./studio-workspace-recent-list";
+import { StudioWorkspaceActions } from "./studio-workspace-actions";
 
 /**
  * Renders an active workspace folder picker and recent workspace history dropdown.
@@ -82,45 +83,80 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
   const displayName = activeWorkspace?.name || UI_COPY.STUDIO.WORKSPACE.SELECT_WORKSPACE;
 
   return (
-    <div className="relative inline-block text-left" ref={popoverRef}>
+    <div
+      style={{ position: "relative", display: "inline-block", textAlign: "left" }}
+      ref={popoverRef}
+    >
       <Button
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="hover:border-primary/40 h-8 max-w-55 gap-1.5 px-2.5 font-mono text-xs"
+        className="orch-font-mono"
+        style={{
+          height: "2rem",
+          maxWidth: "14rem",
+          gap: "0.375rem",
+          padding: "0 0.625rem",
+          fontSize: "0.75rem",
+        }}
         title={activeWorkspace?.path || UI_COPY.STUDIO.WORKSPACE.SWITCH_TOOLTIP}
       >
-        <Folder className="text-primary size-3.5 shrink-0" />
-        <span className="truncate font-semibold">{displayName}</span>
-        <ChevronDown className="text-muted-foreground ml-0.5 size-3 shrink-0" />
+        <Folder
+          className="orch-text-primary"
+          style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+        />
+        <span className="orch-truncate orch-font-semibold">{displayName}</span>
+        <ChevronDown
+          className="orch-text-muted"
+          style={{ width: "0.75rem", height: "0.75rem", flexShrink: 0 }}
+        />
       </Button>
 
       {isOpen && (
-        <div className="border-border bg-card text-card-foreground animate-in fade-in-50 zoom-in-95 absolute top-10 left-0 z-50 w-80 rounded-md border p-2 shadow-xl backdrop-blur-md">
+        <div className="orch-workspace-popover">
           {/* Active Workspace Header */}
-          <div className="border-border/60 border-b px-1 pb-2">
-            <div className="text-muted-foreground flex items-center justify-between text-[11px] font-medium">
+          <div className="orch-workspace-header">
+            <div
+              className="orch-flex-row orch-justify-between orch-text-muted"
+              style={{ fontSize: "0.6875rem", fontWeight: 500 }}
+            >
               <span>{UI_COPY.STUDIO.WORKSPACE.ACTIVE_WORKSPACE}</span>
               {activeWorkspace?.path && (
                 <button
                   type="button"
                   onClick={handleCopyPath}
-                  className="hover:text-foreground inline-flex items-center gap-1 font-mono text-[10px]"
+                  className="orch-flex-row orch-gap-xs orch-font-mono orch-text-muted"
+                  style={{
+                    alignItems: "center",
+                    fontSize: "0.625rem",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
                 >
-                  <Copy className="size-2.5" />
+                  <Copy style={{ width: "0.625rem", height: "0.625rem" }} />
                   {copied ? UI_COPY.COMMON.ACTIONS.COPIED : UI_COPY.STUDIO.WORKSPACE.COPY_PATH}
                 </button>
               )}
             </div>
-            <div className="mt-1 flex items-center gap-1.5 text-sm font-semibold">
-              <FolderOpen className="text-primary size-4" />
-              <span className="truncate">
+            <div
+              className="orch-flex-row orch-gap-xs"
+              style={{
+                alignItems: "center",
+                marginTop: "0.25rem",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+              }}
+            >
+              <FolderOpen className="orch-text-primary" style={{ width: "1rem", height: "1rem" }} />
+              <span className="orch-truncate">
                 {activeWorkspace?.name || UI_COPY.STUDIO.WORKSPACE.SELECT_WORKSPACE}
               </span>
             </div>
             {activeWorkspace?.path && (
               <p
-                className="text-muted-foreground mt-0.5 truncate font-mono text-[10px]"
+                className="orch-text-muted orch-truncate orch-font-mono"
+                style={{ margin: 0, marginTop: "0.125rem", fontSize: "0.625rem" }}
                 title={activeWorkspace.path}
               >
                 {activeWorkspace.path}
@@ -128,45 +164,15 @@ export function StudioWorkspaceSelector(): React.JSX.Element {
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-1.5 py-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePickDirectory}
-              className="h-7 justify-center gap-1 font-mono text-xs"
-            >
-              <Plus className="size-3" />
-              <span>{UI_COPY.STUDIO.WORKSPACE.OPEN_FOLDER}</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEnteringPath(!isEnteringPath)}
-              className="h-7 justify-center gap-1 font-mono text-xs"
-            >
-              <span>{UI_COPY.STUDIO.WORKSPACE.ENTER_PATH}</span>
-            </Button>
-          </div>
-
-          {/* Manual Path Input form */}
-          {isEnteringPath && (
-            <form onSubmit={handleSubmitPath} className="pb-2">
-              <div className="flex gap-1">
-                <input
-                  type="text"
-                  value={pathInput}
-                  onChange={(e) => setPathInput(e.target.value)}
-                  placeholder={UI_COPY.STUDIO.WORKSPACE.PATH_PLACEHOLDER}
-                  className="border-border bg-background flex-1 rounded border px-2 py-1 font-mono text-xs outline-none"
-                  autoFocus
-                />
-                <Button type="submit" size="sm" className="h-7 px-2 text-xs">
-                  {UI_COPY.STUDIO.WORKSPACE.OPEN_BUTTON}
-                </Button>
-              </div>
-            </form>
-          )}
+          {/* Action Buttons & Manual Path Input */}
+          <StudioWorkspaceActions
+            onPickDirectory={handlePickDirectory}
+            isEnteringPath={isEnteringPath}
+            onToggleEnteringPath={() => setIsEnteringPath(!isEnteringPath)}
+            pathInput={pathInput}
+            onPathInputChange={setPathInput}
+            onSubmitPath={handleSubmitPath}
+          />
 
           {/* Recent Workspaces List */}
           <StudioWorkspaceRecentList

@@ -1,0 +1,180 @@
+/**
+ * @file packages/ui/src/styles/ai-world.css
+ * @description Cybernetic AI World Matrix background, canvas overlays, and ambient animations for OrchestrAI.
+ * @author yuva.devlab@gmail.com
+ */
+
+/* AI World Matrix - cybernetic grid background */
+.ai-world-matrix {
+  background-image:
+    radial-gradient(
+      ellipse 60% 50% at 50% -20%,
+      color-mix(in oklab, var(--primary) 22%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--border) 40%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--border) 40%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    100% 100%,
+    48px 48px,
+    48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 95%);
+}
+
+/* Ambient AI Drift Animations */
+.orch-animate-ai-drift,
+.animate-ai-drift {
+  animation: ai-drift 12s ease-in-out infinite alternate;
+}
+
+.orch-animate-ai-drift-slow,
+.animate-ai-drift-slow {
+  animation: ai-drift 18s ease-in-out infinite alternate-reverse;
+}
+
+.orch-animate-ai-pulse-glow,
+.animate-ai-pulse-glow {
+  animation: ai-pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes ai-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(25px, -30px, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-20px, 20px, 0) scale(0.95);
+  }
+}
+
+@keyframes ai-pulse-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.05);
+  }
+}
+
+/* AI World Background Canvas & Nebulas */
+.ai-world-bg {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  user-select: none;
+}
+
+.ai-world-nebula-top {
+  position: absolute;
+  top: -10rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ai-world-nebula-top__glow {
+  height: 32rem;
+  width: 48rem;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--primary) 25%, transparent),
+    transparent 70%
+  );
+  filter: blur(120px);
+}
+
+.ai-world-nebula-left {
+  position: absolute;
+  bottom: -12rem;
+  left: -8rem;
+}
+
+.ai-world-nebula-left__glow {
+  height: 30rem;
+  width: 38rem;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--primary) 20%, transparent),
+    transparent 70%
+  );
+  filter: blur(130px);
+}
+
+.ai-world-nebula-right {
+  position: absolute;
+  top: 25%;
+  right: -8rem;
+}
+
+.ai-world-nebula-right__glow {
+  height: 28rem;
+  width: 35rem;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--primary) 20%, transparent),
+    transparent 70%
+  );
+  filter: blur(110px);
+}
+
+.ai-world-canvas {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.ai-world-telemetry-top {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.5rem;
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  color: color-mix(in oklab, var(--primary) 80%, transparent);
+}
+
+@media (min-width: 640px) {
+  .ai-world-telemetry-top {
+    display: flex;
+  }
+}
+
+.ai-world-telemetry-bottom {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.25rem;
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  color: color-mix(in oklab, var(--mutedForeground) 70%, transparent);
+}
+
+@media (min-width: 640px) {
+  .ai-world-telemetry-bottom {
+    display: flex;
+  }
+}

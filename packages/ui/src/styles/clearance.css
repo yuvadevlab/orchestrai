@@ -1,0 +1,112 @@
+/**
+ * @file packages/ui/src/styles/clearance.css
+ * @description Clearance drawer modal, risk levels, and blast radius panels for OrchestrAI.
+ * @author yuva.devlab@gmail.com
+ */
+
+/* Clearance Drawer */
+.orch-clearance-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.orch-clearance-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in oklab, var(--background) 80%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.orch-clearance-panel {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  max-width: 32rem;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background-color: var(--card);
+  padding: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.orch-clearance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  padding-bottom: 1rem;
+}
+
+.orch-clearance-body {
+  flex: 1 1 0%;
+  overflow-y: auto;
+  padding-block: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.orch-clearance-footer {
+  border-top: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.orch-clearance-icon {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md, 0.375rem);
+  background-color: color-mix(in oklab, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+}
+
+.orch-clearance-risk-box {
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid color-mix(in oklab, var(--destructive) 30%, transparent);
+  background-color: color-mix(in oklab, var(--destructive) 5%, transparent);
+  padding: 0.75rem;
+}
+
+.orch-clearance-tool-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 30%, transparent);
+  padding: 0.5rem 0.75rem;
+}
+
+.orch-clearance-blast-box {
+  border-radius: var(--radius-sm, 0.25rem);
+  border: 1px solid color-mix(in oklab, var(--destructive) 20%, transparent);
+  background-color: color-mix(in oklab, var(--destructive) 5%, transparent);
+  padding: 0.5rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--destructive);
+}
+
+.orch-clearance-payload-box {
+  max-height: 12rem;
+  overflow-y: auto;
+  border-radius: var(--radius-sm, 0.25rem);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background-color: color-mix(in oklab, var(--muted) 30%, transparent);
+  padding: 0.75rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--mutedForeground);
+}

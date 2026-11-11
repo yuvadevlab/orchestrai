@@ -29,31 +29,37 @@ export function StudioThinkingBlock({
   if (!text) return <></>;
 
   return (
-    <div className="border-border/60 bg-muted/20 my-2 overflow-hidden rounded-md border">
+    <div className="orch-thinking-block">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="text-muted-foreground hover:text-foreground flex w-full items-center justify-between px-3 py-2 text-left font-mono text-xs transition-colors"
+        className="orch-thinking-header"
       >
-        <div className="flex items-center gap-2">
-          <Sparkles className="text-primary size-3.5 animate-pulse" />
-          <span className="font-medium">{UI_COPY.STUDIO.THINKING.TITLE}</span>
-          <span className="text-muted-foreground/60 text-[10px]">
+        <div className="orch-flex-row orch-gap-xs" style={{ alignItems: "center" }}>
+          <Sparkles
+            className="orch-text-primary"
+            style={{ width: "0.875rem", height: "0.875rem" }}
+          />
+          <span className="orch-font-medium">{UI_COPY.STUDIO.THINKING.TITLE}</span>
+          <span className="orch-text-muted" style={{ fontSize: "0.625rem", opacity: 0.6 }}>
             ({durationSeconds.toFixed(1)}s)
           </span>
         </div>
 
-        <div className="flex items-center gap-1 text-[11px]">
+        <div
+          className="orch-flex-row orch-gap-xs"
+          style={{ alignItems: "center", fontSize: "0.6875rem" }}
+        >
           <span>{isOpen ? UI_COPY.STUDIO.THINKING.HIDE : UI_COPY.STUDIO.THINKING.SHOW}</span>
-          {isOpen ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+          {isOpen ? (
+            <ChevronDown style={{ width: "0.875rem", height: "0.875rem" }} />
+          ) : (
+            <ChevronRight style={{ width: "0.875rem", height: "0.875rem" }} />
+          )}
         </div>
       </button>
 
-      {isOpen && (
-        <div className="border-border/40 text-muted-foreground bg-card/30 border-t px-3.5 py-2.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
-          {text}
-        </div>
-      )}
+      {isOpen && <div className="orch-thinking-body">{text}</div>}
     </div>
   );
 }

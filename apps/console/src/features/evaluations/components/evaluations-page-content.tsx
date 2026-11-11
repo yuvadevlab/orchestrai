@@ -42,7 +42,7 @@ export function EvaluationsPageContent(): React.JSX.Element {
           description={UI_COPY.EVALUATIONS.EMPTY_DESC}
         />
       ) : (
-        <div className="space-y-6">
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           {/* Benchmark Runner Station */}
           <EvaluationsRunnerCard datasets={datasets} />
 
@@ -50,12 +50,19 @@ export function EvaluationsPageContent(): React.JSX.Element {
           <RubricGradingCard />
 
           {/* Registered Benchmark Datasets */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold tracking-tight">
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h3
+                style={{
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                  margin: 0,
+                }}
+              >
                 {UI_COPY.EVALUATIONS.SUITES_TITLE}
               </h3>
-              <span className="text-muted-foreground text-xs">
+              <span style={{ color: "var(--mutedForeground)", fontSize: "0.75rem" }}>
                 {UI_COPY.EVALUATIONS.SUITES_REGISTERED(datasets.length)}
               </span>
             </div>

@@ -18,12 +18,11 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@orchestrai/ui";
 import { DevLabAuthProvider } from "@yuva-devlab/auth-client";
+import { DEVLAB_PORTAL_ROUTES } from "@/lib/routes";
+import { isJwtExpired } from "@/lib/jwt";
 import { UI_COPY } from "@/lib/ui-copy";
 import {
   getStoredSession,
-  apiLogin,
-  apiSignup,
-  apiForgotPassword,
   clearSession,
   apiFetchSession,
   type AuthSession,
@@ -39,10 +38,10 @@ export interface AuthContextValue {
   tenantId: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (payload: LoginPayload) => Promise<void>;
-  signup: (payload: SignupPayload) => Promise<void>;
+  login: (payload?: LoginPayload) => Promise<void>;
+  signup: (payload?: SignupPayload) => Promise<void>;
   logout: () => void;
-  forgotPassword: (payload: ForgotPasswordPayload) => Promise<{ message: string }>;
+  forgotPassword: (payload?: ForgotPasswordPayload) => Promise<{ message: string }>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -63,20 +62,27 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
   useEffect(() => {
     const initialSession = getStoredSession();
     if (initialSession?.token) {
+      if (isJwtExpired(initialSession.token)) {
+        clearSession();
+        setSession(null);
+        setIsLoading(false);
+        return;
+      }
+
       setSession(initialSession);
-      // Validate token with Gateway in background
+      setIsLoading(false);
+
+      // Validate token with Gateway in background without clearing session on network error
       apiFetchSession(initialSession.token)
         .then((freshUser) => {
           setSession((prev) => (prev ? { ...prev, user: freshUser } : null));
         })
-        .catch(() => {
-          // Token expired or invalid
-          clearSession();
-          queryClient.clear();
-          setSession(null);
-        })
-        .finally(() => {
-          setIsLoading(false);
+        .catch((err) => {
+          if (err instanceof Error && err.message.toLowerCase().includes("unauthorized")) {
+            clearSession();
+            queryClient.clear();
+            setSession(null);
+          }
         });
     } else {
       setIsLoading(false);
@@ -109,23 +115,17 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
     };
   }, [router, queryClient]);
 
-  const login = async (payload: LoginPayload): Promise<void> => {
-    setIsLoading(true);
-    try {
-      const newSession = await apiLogin(payload);
-      setSession(newSession);
-    } finally {
-      setIsLoading(false);
+  const login = async (): Promise<void> => {
+    if (typeof window !== "undefined") {
+      window.location.href = DEVLAB_PORTAL_ROUTES.LOGIN({
+        redirectUrl: window.location.origin,
+      });
     }
   };
 
-  const signup = async (payload: SignupPayload): Promise<void> => {
-    setIsLoading(true);
-    try {
-      const newSession = await apiSignup(payload);
-      setSession(newSession);
-    } finally {
-      setIsLoading(false);
+  const signup = async (): Promise<void> => {
+    if (typeof window !== "undefined") {
+      window.location.href = DEVLAB_PORTAL_ROUTES.REGISTER();
     }
   };
 
@@ -134,12 +134,19 @@ export function AuthProvider({ children }: { children: ReactNode }): React.JSX.E
     queryClient.clear();
     setSession(null);
     toast.success(UI_COPY.AUTH.LOGOUT.TOAST_SUCCESS);
-    router.push("/login");
-    router.refresh();
+    if (typeof window !== "undefined") {
+      window.location.href = DEVLAB_PORTAL_ROUTES.LOGIN({
+        redirectUrl: window.location.origin,
+        prompt: "login",
+      });
+    }
   };
 
-  const forgotPassword = async (payload: ForgotPasswordPayload): Promise<{ message: string }> => {
-    return apiForgotPassword(payload);
+  const forgotPassword = async (): Promise<{ message: string }> => {
+    if (typeof window !== "undefined") {
+      window.location.href = DEVLAB_PORTAL_ROUTES.FORGOT_PASSWORD();
+    }
+    return { message: "Redirecting to DevLab Password Recovery" };
   };
 
   const contextValue: AuthContextValue = useMemo(

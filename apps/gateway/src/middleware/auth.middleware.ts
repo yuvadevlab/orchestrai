@@ -20,6 +20,7 @@ const m2mValidator = new M2mApiKeyValidator({
 const PUBLIC_PATHS = new Set([
   "/health",
   "/ready",
+  "/api/v1/auth/sso-url",
   "/api/v1/auth/login",
   "/api/v1/auth/signup",
   "/api/v1/auth/forgot-password",

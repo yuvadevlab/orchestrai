@@ -44,7 +44,6 @@ function computeDiff(original: string[], modified: string[]): DiffLine[] {
   const n = modified.length;
 
   // Build LCS DP table (m+1) x (n+1)
-  // Using a flat (m+1)*(n+1) Int32Array avoids TypeScript 2D-array undefined-index errors
   const dp = new Int32Array((m + 1) * (n + 1));
   const idx = (r: number, c: number): number => r * (n + 1) + c;
 
@@ -69,26 +68,22 @@ function computeDiff(original: string[], modified: string[]): DiffLine[] {
     const origLine = original[i - 1];
     const modLine = modified[j - 1];
     if (i > 0 && j > 0 && origLine === modLine) {
-      // Lines are equal — no change
       result.unshift({ op: DiffOp.EQUAL, text: origLine ?? "", origLine: i, modLine: j });
       origCounter = i;
       modCounter = j;
       i--;
       j--;
     } else if (j > 0 && (i === 0 || (dp[idx(i, j - 1)] ?? 0) >= (dp[idx(i - 1, j)] ?? 0))) {
-      // Line was inserted in modified
       result.unshift({ op: DiffOp.INSERT, text: modLine ?? "", modLine: j });
       modCounter = j;
       j--;
     } else {
-      // Line was deleted from original
       result.unshift({ op: DiffOp.DELETE, text: origLine ?? "", origLine: i });
       origCounter = i;
       i--;
     }
   }
 
-  // Suppress unused variable warnings — counters track final line numbers for future use
   void origCounter;
   void modCounter;
 
@@ -96,9 +91,7 @@ function computeDiff(original: string[], modified: string[]): DiffLine[] {
 }
 
 /**
- * Side-by-side diff viewer that correctly aligns ADDED/REMOVED/EQUAL blocks
- * using a proper LCS algorithm. Deleted lines appear red on the left, inserted
- * lines appear green on the right, unchanged lines are dimmed on both sides.
+ * Side-by-side diff viewer that correctly aligns ADDED/REMOVED/EQUAL blocks.
  */
 export function CanvasDiffView({
   originalText = "",
@@ -109,69 +102,105 @@ export function CanvasDiffView({
   const diffLines = computeDiff(originalLines, modifiedLines);
 
   return (
-    <div className="bg-card text-foreground flex h-full flex-col overflow-hidden font-mono text-xs">
+    <div className="orch-diff-container">
       {/* Diff Header */}
-      <div className="border-border/40 bg-muted/40 grid grid-cols-2 border-b px-4 py-2">
-        <span className="text-destructive font-semibold">
+      <div className="orch-diff-header">
+        <span className="orch-text-destructive orch-font-semibold">
           {UI_COPY.STUDIO.CANVAS.DIFF_ORIGINAL}
         </span>
-        <span className="text-primary font-semibold">{UI_COPY.STUDIO.CANVAS.DIFF_MODIFIED}</span>
+        <span className="orch-text-primary orch-font-semibold">
+          {UI_COPY.STUDIO.CANVAS.DIFF_MODIFIED}
+        </span>
       </div>
 
       {/* Side-by-Side Diff Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="divide-border/40 grid min-w-0 grid-cols-2 divide-x">
-          {/* Left Column: Original (EQUAL + DELETE) */}
-          <div className="space-y-0">
+      <div style={{ flex: "1 1 0%", overflow: "auto" }}>
+        <div className="orch-diff-grid">
+          {/* Left Column: Original */}
+          <div>
             {diffLines.map((line, idx) => {
               if (line.op === DiffOp.INSERT) {
-                // Right-only insert — show empty slot on the left to maintain alignment
                 return (
-                  <div key={`orig-${idx}`} className="bg-primary/5 flex h-5 leading-5 opacity-0">
-                    <span className="w-8 shrink-0" />
+                  <div key={`orig-${idx}`} style={{ height: "1.25rem", opacity: 0 }}>
+                    <span style={{ width: "2rem", display: "inline-block" }} />
                   </div>
                 );
               }
+              const isDel = line.op === DiffOp.DELETE;
               return (
                 <div
                   key={`orig-${idx}`}
-                  className={`flex leading-5 ${
-                    line.op === DiffOp.DELETE
-                      ? "bg-destructive/10 text-destructive"
-                      : "text-muted-foreground"
-                  }`}
+                  className={`orch-diff-line ${isDel ? "orch-diff-line--del" : "orch-text-muted"}`}
                 >
-                  <span className="text-muted-foreground/50 w-8 shrink-0 pr-2 text-right select-none">
+                  <span
+                    className="orch-text-muted"
+                    style={{
+                      width: "2rem",
+                      flexShrink: 0,
+                      paddingRight: "0.5rem",
+                      textAlign: "right",
+                      userSelect: "none",
+                      opacity: 0.5,
+                    }}
+                  >
                     {line.origLine ?? ""}
                   </span>
-                  <span className="min-w-0 truncate px-1 whitespace-pre">{line.text}</span>
+                  <span
+                    style={{
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      padding: "0 0.25rem",
+                      whiteSpace: "pre",
+                    }}
+                  >
+                    {line.text}
+                  </span>
                 </div>
               );
             })}
           </div>
 
-          {/* Right Column: Modified (EQUAL + INSERT) */}
-          <div className="space-y-0">
+          {/* Right Column: Modified */}
+          <div>
             {diffLines.map((line, idx) => {
               if (line.op === DiffOp.DELETE) {
-                // Left-only delete — show empty slot on the right to maintain alignment
                 return (
-                  <div key={`mod-${idx}`} className="bg-destructive/5 flex h-5 leading-5 opacity-0">
-                    <span className="w-8 shrink-0" />
+                  <div key={`mod-${idx}`} style={{ height: "1.25rem", opacity: 0 }}>
+                    <span style={{ width: "2rem", display: "inline-block" }} />
                   </div>
                 );
               }
+              const isAdd = line.op === DiffOp.INSERT;
               return (
                 <div
                   key={`mod-${idx}`}
-                  className={`flex leading-5 ${
-                    line.op === DiffOp.INSERT ? "bg-primary/10 text-primary" : "text-foreground"
-                  }`}
+                  className={`orch-diff-line ${isAdd ? "orch-diff-line--add" : ""}`}
                 >
-                  <span className="text-muted-foreground/50 w-8 shrink-0 pr-2 text-right select-none">
+                  <span
+                    className="orch-text-muted"
+                    style={{
+                      width: "2rem",
+                      flexShrink: 0,
+                      paddingRight: "0.5rem",
+                      textAlign: "right",
+                      userSelect: "none",
+                      opacity: 0.5,
+                    }}
+                  >
                     {line.modLine ?? ""}
                   </span>
-                  <span className="min-w-0 truncate px-1 whitespace-pre">{line.text}</span>
+                  <span
+                    style={{
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      padding: "0 0.25rem",
+                      whiteSpace: "pre",
+                    }}
+                  >
+                    {line.text}
+                  </span>
                 </div>
               );
             })}

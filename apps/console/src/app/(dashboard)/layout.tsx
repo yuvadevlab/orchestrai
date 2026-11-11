@@ -14,8 +14,8 @@ export default function DashboardLayout({
 }): React.JSX.Element {
   return (
     <AuthGuard>
-      <div className="bg-background text-foreground h-dvh overflow-hidden">
-        <div className="mesh-bg flex h-full">
+      <div className="orch-viewport">
+        <div className="mesh-bg orch-viewport__inner">
           <ProductNav />
           {children}
         </div>

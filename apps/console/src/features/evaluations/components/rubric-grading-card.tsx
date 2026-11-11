@@ -81,16 +81,42 @@ export function RubricGradingCard(): React.JSX.Element {
   };
 
   return (
-    <div className="border-border bg-card/60 rounded-md border p-4 backdrop-blur">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Award className="text-primary size-4" />
-          <h3 className="text-sm font-semibold tracking-tight">
+    <div
+      style={{
+        border: "1px solid var(--border)",
+        backgroundColor: "color-mix(in oklab, var(--card) 60%, transparent)",
+        borderRadius: "var(--radius-md, 0.375rem)",
+        padding: "1rem",
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <div
+        style={{
+          marginBottom: "0.75rem",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "0.5rem",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <Award style={{ color: "var(--primary)", width: "1rem", height: "1rem" }} />
+          <h3
+            style={{ fontSize: "0.875rem", fontWeight: 600, letterSpacing: "-0.01em", margin: 0 }}
+          >
             {UI_COPY.EVALUATIONS.RUBRIC.CARD_TITLE}
           </h3>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-primary font-mono text-xs font-semibold">
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span
+            style={{
+              color: "var(--primary)",
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+            }}
+          >
             {UI_COPY.EVALUATIONS.RUBRIC.SCORE_FORMAT(
               totalScore,
               maxScore,
@@ -103,35 +129,90 @@ export function RubricGradingCard(): React.JSX.Element {
             size="sm"
             onClick={() => setRubric(INITIAL_RUBRIC)}
             aria-label={UI_COPY.EVALUATIONS.RUBRIC.RESET_A11Y}
-            className="size-7 p-0"
+            style={{ width: "1.75rem", height: "1.75rem", padding: 0 }}
           >
-            <RotateCcw className="size-3.5" />
+            <RotateCcw style={{ width: "0.875rem", height: "0.875rem" }} />
           </Button>
         </div>
       </div>
 
-      <p className="text-muted-foreground mb-4 text-xs">{UI_COPY.EVALUATIONS.RUBRIC.CARD_DESC}</p>
+      <p
+        style={{
+          color: "var(--mutedForeground)",
+          marginBottom: "1rem",
+          fontSize: "0.75rem",
+          marginInline: 0,
+        }}
+      >
+        {UI_COPY.EVALUATIONS.RUBRIC.CARD_DESC}
+      </p>
 
-      <div className="space-y-3">
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
         {rubric.map((item) => (
-          <div key={item.id} className="bg-muted/20 border-border/40 rounded border p-2.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-foreground font-medium">{item.name}</span>
-              <span className="text-muted-foreground font-mono text-[11px]">
+          <div
+            key={item.id}
+            style={{
+              backgroundColor: "color-mix(in oklab, var(--muted) 20%, transparent)",
+              border: "1px solid color-mix(in oklab, var(--border) 40%, transparent)",
+              borderRadius: "var(--radius-sm, 0.25rem)",
+              padding: "0.625rem",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                fontSize: "0.75rem",
+              }}
+            >
+              <span style={{ color: "var(--foreground)", fontWeight: 500 }}>{item.name}</span>
+              <span
+                style={{
+                  color: "var(--mutedForeground)",
+                  fontFamily: "var(--font-mono, monospace)",
+                  fontSize: "0.6875rem",
+                }}
+              >
                 {UI_COPY.EVALUATIONS.RUBRIC.POINTS_LABEL(item.score, item.weight)}
               </span>
             </div>
-            <p className="text-muted-foreground mt-0.5 text-[11px]">{item.description}</p>
-            <div className="mt-2 flex items-center gap-3">
+            <p
+              style={{
+                color: "var(--mutedForeground)",
+                marginTop: "0.125rem",
+                fontSize: "0.6875rem",
+                marginInline: 0,
+                marginBottom: 0,
+              }}
+            >
+              {item.description}
+            </p>
+            <div
+              style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.75rem" }}
+            >
               <input
                 type="range"
                 min={0}
                 max={item.weight}
                 value={item.score}
                 onChange={(e) => handleScoreChange(item.id, Number(e.target.value))}
-                className="accent-primary bg-muted h-1.5 w-full cursor-pointer rounded-lg"
+                style={{
+                  width: "100%",
+                  height: "0.375rem",
+                  cursor: "pointer",
+                  accentColor: "var(--primary)",
+                }}
               />
-              <span className="text-muted-foreground w-12 text-right font-mono text-[11px]">
+              <span
+                style={{
+                  color: "var(--mutedForeground)",
+                  width: "3rem",
+                  textAlign: "right",
+                  fontFamily: "var(--font-mono, monospace)",
+                  fontSize: "0.6875rem",
+                }}
+              >
                 {Math.round((item.score / item.weight) * 100)}%
               </span>
             </div>
@@ -139,13 +220,13 @@ export function RubricGradingCard(): React.JSX.Element {
         ))}
       </div>
 
-      <div className="mt-4 flex justify-end">
+      <div style={{ marginTop: "1rem", display: "flex", justifyContent: "flex-end" }}>
         <Button
           size="sm"
           onClick={handleSaveEvaluation}
-          className="h-8 gap-1.5 text-xs font-medium"
+          style={{ height: "2rem", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 500 }}
         >
-          <CheckCircle className="size-3.5" />
+          <CheckCircle style={{ width: "0.875rem", height: "0.875rem" }} />
           <span>{UI_COPY.EVALUATIONS.RUBRIC.SAVE_BUTTON}</span>
         </Button>
       </div>

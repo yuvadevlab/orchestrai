@@ -29,42 +29,124 @@ export function EvaluationsDatasetsList({
   }
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       {datasets.map((dataset) => (
         <div
           key={dataset.name}
-          className="border-border bg-card/40 rounded-md border p-4 backdrop-blur"
+          style={{
+            border: "1px solid var(--border)",
+            backgroundColor: "color-mix(in oklab, var(--card) 40%, transparent)",
+            borderRadius: "var(--radius-md, 0.375rem)",
+            padding: "1rem",
+            backdropFilter: "blur(8px)",
+          }}
         >
-          <div className="mb-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Database className="text-primary size-4" />
-              <h4 className="text-xs font-semibold">{dataset.name}</h4>
+          <div
+            style={{
+              marginBottom: "0.5rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Database style={{ color: "var(--primary)", width: "1rem", height: "1rem" }} />
+              <h4 style={{ fontSize: "0.75rem", fontWeight: 600, margin: 0 }}>{dataset.name}</h4>
             </div>
-            <span className="border-border/80 bg-muted/60 text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]">
+            <span
+              style={{
+                border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
+                backgroundColor: "color-mix(in oklab, var(--muted) 60%, transparent)",
+                color: "var(--mutedForeground)",
+                borderRadius: "var(--radius-sm, 0.25rem)",
+                paddingInline: "0.375rem",
+                paddingBlock: "0.125rem",
+                fontFamily: "var(--font-mono, monospace)",
+                fontSize: "0.625rem",
+              }}
+            >
               {UI_COPY.EVALUATIONS.DATASETS.TEST_CASES_BADGE(dataset.items.length)}
             </span>
           </div>
 
           {dataset.description && (
-            <p className="text-muted-foreground mb-3 text-xs">{dataset.description}</p>
+            <p
+              style={{
+                color: "var(--mutedForeground)",
+                marginBottom: "0.75rem",
+                fontSize: "0.75rem",
+                marginInline: 0,
+              }}
+            >
+              {dataset.description}
+            </p>
           )}
 
-          <div className="divide-border/40 divide-y rounded border">
+          <div
+            style={{
+              border: "1px solid color-mix(in oklab, var(--border) 40%, transparent)",
+              borderRadius: "var(--radius-sm, 0.25rem)",
+            }}
+          >
             {dataset.items.map((item, idx) => (
-              <div key={item.id} className="p-2.5 text-xs">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <span className="text-muted-foreground mr-1.5 font-mono text-[11px]">
+              <div
+                key={item.id}
+                style={{
+                  padding: "0.625rem",
+                  fontSize: "0.75rem",
+                  borderBottom:
+                    idx < dataset.items.length - 1
+                      ? "1px solid color-mix(in oklab, var(--border) 40%, transparent)"
+                      : "none",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <span
+                      style={{
+                        color: "var(--mutedForeground)",
+                        marginRight: "0.375rem",
+                        fontFamily: "var(--font-mono, monospace)",
+                        fontSize: "0.6875rem",
+                      }}
+                    >
                       #{idx + 1}
                     </span>
-                    <span className="text-foreground/90 font-mono text-[11px]">
+                    <span
+                      style={{
+                        color: "var(--foreground)",
+                        fontFamily: "var(--font-mono, monospace)",
+                        fontSize: "0.6875rem",
+                      }}
+                    >
                       &quot;{item.prompt}&quot;
                     </span>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-1">
-                    <Wrench className="text-muted-foreground size-3" />
-                    <span className="text-primary font-mono text-[10px]">
+                  <div
+                    style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: "0.25rem" }}
+                  >
+                    <Wrench
+                      style={{
+                        color: "var(--mutedForeground)",
+                        width: "0.75rem",
+                        height: "0.75rem",
+                      }}
+                    />
+                    <span
+                      style={{
+                        color: "var(--primary)",
+                        fontFamily: "var(--font-mono, monospace)",
+                        fontSize: "0.625rem",
+                      }}
+                    >
                       {item.expectedTools.join(", ")}
                     </span>
                   </div>

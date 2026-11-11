@@ -33,29 +33,49 @@ export function DatabaseSettings({
   onOutboxChange,
 }: DatabaseSettingsProps): React.JSX.Element {
   return (
-    <Card className="border-border bg-card">
-      <CardHeader className="border-border/50 border-b pb-3">
-        <div className="flex items-center gap-2">
-          <Database className="text-primary size-4" />
-          <CardTitle className="text-sm font-semibold">{UI_COPY.SETTINGS.DATABASE.TITLE}</CardTitle>
+    <Card>
+      <CardHeader
+        style={{
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 50%, transparent)",
+          paddingBottom: "0.75rem",
+        }}
+      >
+        <div className="orch-flex-row orch-gap-sm" style={{ alignItems: "center" }}>
+          <Database className="orch-text-primary" style={{ width: "1rem", height: "1rem" }} />
+          <CardTitle style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+            {UI_COPY.SETTINGS.DATABASE.TITLE}
+          </CardTitle>
         </div>
-        <CardDescription className="text-muted-foreground text-xs">
+        <CardDescription className="orch-text-muted" style={{ fontSize: "0.75rem" }}>
           {UI_COPY.SETTINGS.DATABASE.DESCRIPTION}
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 p-4">
-        <div className="space-y-2">
-          <Label className="text-xs font-medium">{UI_COPY.SETTINGS.DATABASE.URI_LABEL}</Label>
+      <CardContent
+        style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}
+      >
+        <div className="orch-flex-col orch-gap-xs">
+          <Label style={{ fontSize: "0.75rem", fontWeight: 500 }}>
+            {UI_COPY.SETTINGS.DATABASE.URI_LABEL}
+          </Label>
           <Input
             defaultValue={databaseUri}
-            className="bg-background/50 font-mono text-xs"
+            className="orch-font-mono"
+            style={{
+              fontSize: "0.75rem",
+              backgroundColor: "color-mix(in oklab, var(--background) 50%, transparent)",
+            }}
             readOnly
           />
         </div>
-        <div className="flex items-center justify-between pt-2">
-          <div className="space-y-0.5">
-            <span className="text-xs font-semibold">{UI_COPY.SETTINGS.DATABASE.OUTBOX_TITLE}</span>
-            <p className="text-muted-foreground text-[11px]">
+        <div
+          className="orch-flex-row orch-justify-between"
+          style={{ alignItems: "center", paddingTop: "0.5rem" }}
+        >
+          <div className="orch-flex-col">
+            <span className="orch-font-semibold" style={{ fontSize: "0.75rem" }}>
+              {UI_COPY.SETTINGS.DATABASE.OUTBOX_TITLE}
+            </span>
+            <p className="orch-text-muted" style={{ margin: 0, fontSize: "0.6875rem" }}>
               {UI_COPY.SETTINGS.DATABASE.OUTBOX_DESC}
             </p>
           </div>

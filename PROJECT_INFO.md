@@ -181,7 +181,7 @@ sequenceDiagram
     participant Redis as Redis (:6379)
     participant Worker as Worker Pool (:4023)
     participant DL as DevLab Logs (:4003)
-    participant IA as IncidentAI (:8085)
+    participant IA as IncidentAI (:8001 / :8011)
 
     Op->>GW: POST /api/v1/sessions/start (Bearer dl_live_...)
     GW->>Redis: 1. Validate API Key & Tenant Quota (<1ms)
@@ -198,24 +198,21 @@ sequenceDiagram
     Worker->>DL: 4. Stream Structured Spans & Logs (:4003)
 
     alt Tool Crash or Unhandled Exception
-        Worker->>IA: 5. Emit Webhook Alert to IncidentAI (:8085)
+        Worker->>IA: 5. Emit Webhook Alert to IncidentAI (:8001)
         IA->>Worker: 6. Spin up Isolated Sandbox & Run Auto-Fix
-    else Swarm Completed Successfully
-        Worker->>Redis: 7. Publish State Machine Transition
-        Redis->>Op: 8. Stream Completion Artifacts via Realtime SSE (:4022)
     end
 ```
 
 ### 3.1 Inter-Repository Integration Matrix
 
-| Ecosystem Member    | Direction | Protocol & Transport                                   | Exact Payload Contract & Endpoint                                    | Purpose & Operational Behavior                                                                                                                |
-| :------------------ | :-------: | :----------------------------------------------------- | :------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`devlab-portal`** |  Inbound  | Redis Pub/Sub (`devlab:killswitch:events`) & HTTP JWKS | `GET http://localhost:4000/api/v1/keys/verify` (Prod: `:4010`)       | Gateway validates API keys and enforces sub-1ms instant revocation when an administrator disables an enterprise key in Portal.                |
-| **`devlab-logs`**   | Outbound  | HTTP/2 POST / Kafka                                    | `POST http://localhost:4003/logs` (Prod: `:4013`)                    | Worker and Gateway stream all structured JSON logs, LLM token counts, tool invocation latency, and error traces to DevLab Logs.               |
-| **`incidentai`**    | Outbound  | HTTP POST Webhook                                      | `POST http://localhost:8085/api/v1/incidents/webhook`                | Worker dispatches runtime exceptions, sandbox crashes, and memory leaks to IncidentAI to trigger autonomous SRE root-cause diagnosis.         |
-| **`devlab-guard`**  |  Inbound  | Local CLI / Git Hook / CI                              | `uv run devlab-guard scan --path .`                                  | Scans all TypeScript and Python code before commit to strictly enforce the 250-line rule, zero raw string enums, and centralized regex rules. |
-| **`devlab-shared`** |  Static   | Internal npm Workspace (`@yuva-devlab/*`)              | Direct package import                                                | Imports `@yuva-devlab/ui`, `@yuva-devlab/tokens`, `@yuva-devlab/resilience` (circuit breakers), and `@yuva-devlab/semantic-cache`.            |
-| **`finai`**         | Cross-App | REST HTTP API / gRPC                                   | `POST http://localhost:4001/api/v1/advisory/analyze` (Prod: `:4011`) | Can invoke FinAI's pure financial engine for deterministic arithmetic calculations during complex portfolio or wealth management reasoning.   |
+| Ecosystem Member    | Direction | Protocol & Transport                                   | Exact Payload Contract & Endpoint                                     | Purpose & Operational Behavior                                                                                                                |
+| :------------------ | :-------: | :----------------------------------------------------- | :-------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`devlab-portal`** |  Inbound  | Redis Pub/Sub (`devlab:killswitch:events`) & HTTP JWKS | `GET http://localhost:4000/api/v1/keys/verify` (Prod: `:4010`)        | Gateway validates API keys and enforces sub-1ms instant revocation when an administrator disables an enterprise key in Portal.                |
+| **`devlab-logs`**   | Outbound  | HTTP/2 POST / Kafka                                    | `POST http://localhost:4003/logs` (Prod: `:4013`)                     | Worker and Gateway stream all structured JSON logs, LLM token counts, tool invocation latency, and error traces to DevLab Logs.               |
+| **`incidentai`**    | Outbound  | HTTP POST Webhook                                      | `POST http://localhost:8001/api/v1/incidents/webhook` (Prod: `:8011`) | Worker dispatches runtime exceptions, sandbox crashes, and memory leaks to IncidentAI to trigger autonomous SRE root-cause diagnosis.         |
+| **`devlab-guard`**  |  Inbound  | Local CLI / Git Hook / CI                              | `uv run devlab-guard scan --path .`                                   | Scans all TypeScript and Python code before commit to strictly enforce the 250-line rule, zero raw string enums, and centralized regex rules. |
+| **`devlab-shared`** |  Static   | Internal npm Workspace (`@yuva-devlab/*`)              | Direct package import                                                 | Imports `@yuva-devlab/ui`, `@yuva-devlab/tokens`, `@yuva-devlab/resilience` (circuit breakers), and `@yuva-devlab/semantic-cache`.            |
+| **`finai`**         | Cross-App | REST HTTP API / gRPC                                   | `POST http://localhost:4001/api/v1/advisory/analyze` (Prod: `:4011`)  | Can invoke FinAI's pure financial engine for deterministic arithmetic calculations during complex portfolio or wealth management reasoning.   |
 
 ---
 
@@ -285,7 +282,7 @@ pnpm typecheck
 | `ORCHESTRATOR_GRPC_URL`  | String |                       `localhost:50051`                        |   Yes    | gRPC binary DAG orchestrator endpoint.                                                     |
 | `DEVLAB_PORTAL_API_URL`  | String | `http://localhost:4000` (dev) / `http://localhost:4010` (prod) |   Yes    | DevLab Portal API URL for key validation and audit events.                                 |
 | `DEVLAB_LOGS_URL`        | String | `http://localhost:4003` (dev) / `http://localhost:4013` (prod) |   Yes    | DevLab Logs ingestion endpoint for structured streaming.                                   |
-| `INCIDENTAI_WEBHOOK_URL` | String |                    `http://localhost:8085`                     |    No    | IncidentAI webhook endpoint for automated crash reporting.                                 |
+| `INCIDENTAI_WEBHOOK_URL` | String |                    `http://localhost:8001`                     |    No    | IncidentAI webhook endpoint for automated crash reporting (prod: `:8011`).                 |
 
 ### 5.4 Starting a Multi-Agent Swarm Session via API
 

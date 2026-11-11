@@ -32,12 +32,25 @@ export interface StudioMentionPopoverProps {
  */
 function getFileIcon(ext: string): React.JSX.Element {
   if ([".ts", ".tsx", ".js", ".jsx", ".py", ".rs", ".go", ".c", ".cpp"].includes(ext)) {
-    return <FileCode className="size-3.5 shrink-0 text-blue-400" />;
+    return (
+      <FileCode
+        style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0, color: "var(--primary)" }}
+      />
+    );
   }
   if ([".md", ".txt", ".json", ".yaml", ".yml", ".toml"].includes(ext)) {
-    return <FileText className="size-3.5 shrink-0 text-amber-400" />;
+    return (
+      <FileText
+        style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0, color: "var(--primary)" }}
+      />
+    );
   }
-  return <File className="text-muted-foreground size-3.5 shrink-0" />;
+  return (
+    <File
+      className="orch-text-muted"
+      style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+    />
+  );
 }
 
 /**
@@ -111,13 +124,23 @@ export function StudioMentionPopover({
   if (items.length === 0) return null;
 
   return (
-    <div className="border-border bg-card/95 text-card-foreground animate-in fade-in-50 slide-in-from-bottom-2 absolute bottom-full left-4 z-50 mb-2 max-h-64 w-80 overflow-y-auto rounded-md border p-1 shadow-2xl backdrop-blur-md">
-      <div className="border-border/60 text-muted-foreground flex items-center justify-between border-b px-2 py-1 font-mono text-[10px] uppercase">
+    <div className="orch-slash-menu">
+      <div
+        className="orch-flex-row orch-justify-between orch-text-muted orch-font-mono"
+        style={{
+          borderBottom: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+          padding: "0.25rem 0.5rem",
+          fontSize: "0.625rem",
+          textTransform: "uppercase",
+        }}
+      >
         <span>{UI_COPY.STUDIO.MENTIONS.HEADER_TITLE}</span>
         <span>{UI_COPY.STUDIO.MENTIONS.MATCHES_COUNT(items.length)}</span>
       </div>
 
-      <div className="space-y-0.5 p-0.5">
+      <div
+        style={{ padding: "0.125rem", display: "flex", flexDirection: "column", gap: "0.125rem" }}
+      >
         {items.map((item, idx) => {
           const isSelected = idx === selectedIndex;
           return (
@@ -126,23 +149,25 @@ export function StudioMentionPopover({
               type="button"
               onClick={() => onSelect(item)}
               onMouseEnter={() => setSelectedIndex(idx)}
-              className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors ${
-                isSelected
-                  ? "bg-primary/15 text-primary font-medium"
-                  : "hover:bg-muted/60 text-foreground"
-              }`}
+              className={`orch-slash-item ${isSelected ? "is-selected" : ""}`}
             >
               {item.type === "specialist" ? (
-                <Bot className="text-primary size-3.5 shrink-0" />
+                <Bot
+                  className="orch-text-primary"
+                  style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+                />
               ) : (
                 getFileIcon(item.value.slice(item.value.lastIndexOf(".")))
               )}
 
-              <div className="min-w-0 flex-1 truncate">
-                <span className="font-mono">{item.label}</span>
+              <div className="orch-truncate" style={{ minWidth: 0, flex: 1 }}>
+                <span className="orch-font-mono">{item.label}</span>
               </div>
 
-              <span className="text-muted-foreground shrink-0 font-mono text-[10px] uppercase">
+              <span
+                className="orch-text-muted orch-font-mono"
+                style={{ flexShrink: 0, fontSize: "0.625rem", textTransform: "uppercase" }}
+              >
                 {item.type}
               </span>
             </button>

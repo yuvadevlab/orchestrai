@@ -5,6 +5,16 @@
  */
 
 export const AUTH_COPY = {
+  SSO: {
+    REDIRECTING_TITLE: "Redirecting to DevLab SSO",
+    REDIRECTING_DESC:
+      "Single Sign-On is required to access OrchestrAI Console. You are being redirected to the DevLab Portal...",
+    CONTINUE_BUTTON: "Continue to DevLab Portal →",
+    RECOVER_TITLE: "Redirecting to Password Recovery",
+    RECOVER_DESC: "Password recovery is handled centrally via DevLab Portal...",
+    REGISTER_TITLE: "Redirecting to DevLab Registration",
+    REGISTER_DESC: "Operator account registration is managed centrally via DevLab Portal...",
+  },
   CARD: {
     HOME_A11Y: "OrchestrAI Home",
     BADGE_TEXT: "AI OPERATOR ACCESS",

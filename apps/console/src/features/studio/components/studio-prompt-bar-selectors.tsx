@@ -43,19 +43,41 @@ export function StudioPromptBarSelectors({
     <>
       {/* Specialist Selector */}
       <Select value={selectedSpecialistId} onValueChange={onSelectSpecialist}>
-        <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium">
-          <Bot className="text-primary size-3.5 shrink-0" />
+        <SelectTrigger
+          style={{
+            height: "1.75rem",
+            width: "auto",
+            flexShrink: 0,
+            gap: "0.375rem",
+            padding: "0 0.625rem",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          }}
+        >
+          <Bot
+            className="orch-text-primary"
+            style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+          />
           <SelectValue placeholder={UI_COPY.STUDIO.SELECT_SPECIALIST} />
         </SelectTrigger>
-        <SelectContent className="bg-popover border-border text-foreground text-xs">
+        <SelectContent>
           {specialists && specialists.length > 0 ? (
             specialists.map((sp) => (
-              <SelectItem key={sp.id} value={sp.id} className="cursor-pointer text-xs">
+              <SelectItem
+                key={sp.id}
+                value={sp.id}
+                style={{ cursor: "pointer", fontSize: "0.75rem" }}
+              >
                 {sp.name}
               </SelectItem>
             ))
           ) : (
-            <SelectItem value="loading" disabled className="text-muted-foreground text-xs">
+            <SelectItem
+              value="loading"
+              disabled
+              className="orch-text-muted"
+              style={{ fontSize: "0.75rem" }}
+            >
               {UI_COPY.STUDIO.LOADING_AGENTS}
             </SelectItem>
           )}
@@ -64,23 +86,41 @@ export function StudioPromptBarSelectors({
 
       {/* Live Database Model Selector */}
       <Select value={selectedModel} onValueChange={onSelectModel}>
-        <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium">
-          <Cpu className="text-muted-foreground size-3.5 shrink-0" />
+        <SelectTrigger
+          style={{
+            height: "1.75rem",
+            width: "auto",
+            flexShrink: 0,
+            gap: "0.375rem",
+            padding: "0 0.625rem",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          }}
+        >
+          <Cpu
+            className="orch-text-muted"
+            style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+          />
           <SelectValue placeholder={UI_COPY.STUDIO.SELECT_MODEL} />
         </SelectTrigger>
-        <SelectContent className="bg-popover border-border text-foreground text-xs">
+        <SelectContent>
           {models && models.length > 0 ? (
             models.map((m) => (
               <SelectItem
                 key={m.modelId || m.modelIdentifier}
                 value={m.modelIdentifier || m.name}
-                className="cursor-pointer text-xs"
+                style={{ cursor: "pointer", fontSize: "0.75rem" }}
               >
                 {m.name}
               </SelectItem>
             ))
           ) : (
-            <SelectItem value="loading" disabled className="text-muted-foreground text-xs">
+            <SelectItem
+              value="loading"
+              disabled
+              className="orch-text-muted"
+              style={{ fontSize: "0.75rem" }}
+            >
               {UI_COPY.STUDIO.LOADING_MODELS}
             </SelectItem>
           )}
@@ -89,23 +129,42 @@ export function StudioPromptBarSelectors({
 
       {/* Platform Mode Selector Dropdown */}
       <Select value={mode} onValueChange={onSelectMode}>
-        <SelectTrigger className="border-border bg-background h-7 w-auto shrink-0 gap-1.5 rounded-md px-2.5 text-xs font-medium capitalize">
-          <Sparkles className="text-warning size-3.5 shrink-0" />
+        <SelectTrigger
+          style={{
+            height: "1.75rem",
+            width: "auto",
+            flexShrink: 0,
+            gap: "0.375rem",
+            padding: "0 0.625rem",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+            textTransform: "capitalize",
+          }}
+        >
+          <Sparkles
+            className="orch-text-primary"
+            style={{ width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+          />
           <SelectValue placeholder={UI_COPY.STUDIO.SELECT_MODE} />
         </SelectTrigger>
-        <SelectContent className="bg-popover border-border text-foreground text-xs">
+        <SelectContent>
           {modes && modes.length > 0 ? (
             modes.map((m) => (
               <SelectItem
                 key={m.modeId || m.slug}
                 value={m.slug}
-                className="cursor-pointer text-xs capitalize"
+                style={{ cursor: "pointer", fontSize: "0.75rem", textTransform: "capitalize" }}
               >
                 {m.name}
               </SelectItem>
             ))
           ) : (
-            <SelectItem value="loading" disabled className="text-muted-foreground text-xs">
+            <SelectItem
+              value="loading"
+              disabled
+              className="orch-text-muted"
+              style={{ fontSize: "0.75rem" }}
+            >
               {UI_COPY.STUDIO.LOADING_MODES}
             </SelectItem>
           )}

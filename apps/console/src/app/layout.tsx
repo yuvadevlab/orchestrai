@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-background text-foreground min-h-screen font-sans antialiased">
+      <body>
         <ConfigProvider brand="orchestrai" defaultTheme="dark" storageKey="orchestrai-theme">
           <AppQueryProvider>
             <AuthProvider>

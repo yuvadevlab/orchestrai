@@ -52,27 +52,35 @@ export function ExecutionsPageContent(): React.JSX.Element {
           onClick={(): void => {
             refetch();
           }}
-          className="h-8 gap-1.5 font-sans text-xs"
+          style={{ height: "2rem", gap: "0.375rem", fontSize: "0.75rem" }}
         >
-          <RotateCcw className="size-3.5" />
+          <RotateCcw style={{ width: "0.875rem", height: "0.875rem" }} />
           <span>{UI_COPY.COMMON.ACTIONS.REFRESH}</span>
         </Button>
       }
     >
-      <div className="space-y-5">
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
         {/* Search and Filters */}
-        <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="w-full sm:w-72">
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.75rem",
+          }}
+        >
+          <div style={{ width: "18rem", maxWidth: "100%" }}>
             <Input
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void => setSearch(e.target.value)}
               placeholder={UI_COPY.EXECUTIONS.SEARCH_PLACEHOLDER}
-              startIcon={<Search className="size-3.5" />}
-              className="bg-card h-8 font-sans text-xs"
+              startIcon={<Search style={{ width: "0.875rem", height: "0.875rem" }} />}
+              style={{ height: "2rem", fontSize: "0.75rem" }}
             />
           </div>
 
-          <div className="flex items-center gap-1.5 self-start sm:self-auto">
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.375rem" }}>
             {[
               "ALL",
               ExecutionStatus.COMPLETED,
@@ -84,7 +92,7 @@ export function ExecutionsPageContent(): React.JSX.Element {
                 variant={statusFilter === s ? "default" : "outline"}
                 size="sm"
                 onClick={(): void => setStatusFilter(s)}
-                className="h-7 px-2.5 font-sans text-xs"
+                style={{ height: "1.75rem", paddingInline: "0.625rem", fontSize: "0.75rem" }}
               >
                 {s}
               </Button>

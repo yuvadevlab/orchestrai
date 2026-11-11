@@ -45,19 +45,27 @@ export function CanvasPreviewView({
 </html>`;
 
   return (
-    <div className="bg-card text-foreground flex h-full flex-col overflow-hidden">
+    <div className="orch-terminal-view">
       {/* Sandbox Navigation Bar */}
-      <div className="border-border/40 bg-muted/40 text-muted-foreground flex items-center justify-between border-b px-4 py-2 text-xs">
-        <span className="text-foreground font-medium">{title}</span>
-        <div className="flex items-center gap-2">
+      <div className="orch-canvas-bar orch-text-muted">
+        <span className="orch-font-medium" style={{ color: "var(--foreground)" }}>
+          {title}
+        </span>
+        <div className="orch-flex-row orch-gap-xs" style={{ alignItems: "center" }}>
           <button
             type="button"
             onClick={() => setReloadKey((k) => k + 1)}
             title={UI_COPY.STUDIO.CANVAS.RELOAD_PREVIEW}
             aria-label={UI_COPY.STUDIO.CANVAS.RELOAD_PREVIEW}
-            className="hover:bg-muted rounded p-1 transition-colors"
+            className="orch-text-muted"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: "0.25rem",
+            }}
           >
-            <RefreshCw className="size-3.5" />
+            <RefreshCw style={{ width: "0.875rem", height: "0.875rem" }} />
           </button>
           <button
             type="button"
@@ -69,9 +77,15 @@ export function CanvasPreviewView({
             }}
             title={UI_COPY.STUDIO.CANVAS.OPEN_NEW_WINDOW}
             aria-label={UI_COPY.STUDIO.CANVAS.OPEN_NEW_WINDOW}
-            className="hover:bg-muted rounded p-1 transition-colors"
+            className="orch-text-muted"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: "0.25rem",
+            }}
           >
-            <ExternalLink className="size-3.5" />
+            <ExternalLink style={{ width: "0.875rem", height: "0.875rem" }} />
           </button>
         </div>
       </div>
@@ -82,7 +96,7 @@ export function CanvasPreviewView({
         srcDoc={fullHtml}
         title={title}
         sandbox="allow-scripts"
-        className="size-full flex-1 border-0"
+        style={{ width: "100%", height: "100%", flex: 1, border: "none" }}
       />
     </div>
   );

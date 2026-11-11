@@ -52,21 +52,33 @@ export function StudioLiveClearanceCard({
     <div
       role="alertdialog"
       aria-label={UI_COPY.STUDIO.CLEARANCE.A11Y_REQUIRED}
-      className={`bg-card/95 rounded-md border p-4 shadow-xl backdrop-blur-md transition-all ${
-        isCritical ? "border-destructive/60 bg-destructive/5" : "border-warning/50 bg-warning/5"
+      className={`orch-clearance-card ${
+        isCritical ? "orch-clearance-card--critical" : "orch-clearance-card--warning"
       }`}
+      style={{ margin: 0, backdropFilter: "blur(12px)" }}
     >
       {/* Header with Title and Tool Badge */}
-      <div className="mb-2.5 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+      <div
+        className="orch-flex-row orch-justify-between"
+        style={{ alignItems: "center", marginBottom: "0.625rem", gap: "0.75rem" }}
+      >
+        <div className="orch-flex-row orch-gap-xs" style={{ alignItems: "center" }}>
           <div
-            className={`grid size-6 shrink-0 place-items-center rounded-sm ${
-              isCritical ? "bg-destructive/15 text-destructive" : "bg-warning/15 text-warning"
-            }`}
+            style={{
+              display: "grid",
+              width: "1.5rem",
+              height: "1.5rem",
+              placeItems: "center",
+              borderRadius: "var(--radius-sm, 0.25rem)",
+              backgroundColor: isCritical
+                ? "color-mix(in oklab, var(--destructive) 15%, transparent)"
+                : "color-mix(in oklab, var(--warning, #eab308) 15%, transparent)",
+              color: isCritical ? "var(--destructive)" : "var(--warning, #eab308)",
+            }}
           >
-            <ShieldAlert className="size-4" />
+            <ShieldAlert style={{ width: "1rem", height: "1rem" }} />
           </div>
-          <span className="text-foreground text-sm font-semibold">
+          <span className="orch-font-semibold" style={{ fontSize: "0.875rem" }}>
             {isCritical
               ? UI_COPY.STUDIO.CLEARANCE.TITLE_SENSITIVE
               : UI_COPY.STUDIO.CLEARANCE.TITLE_SECURITY}
@@ -74,39 +86,76 @@ export function StudioLiveClearanceCard({
         </div>
         <Badge
           variant="outline"
-          className={`font-mono text-[10px] ${
-            isCritical ? "border-destructive/40 text-destructive" : "border-warning/40 text-warning"
-          }`}
+          className="orch-font-mono"
+          style={{
+            fontSize: "0.625rem",
+            borderColor: isCritical
+              ? "color-mix(in oklab, var(--destructive) 40%, transparent)"
+              : "color-mix(in oklab, var(--warning, #eab308) 40%, transparent)",
+            color: isCritical ? "var(--destructive)" : "var(--warning, #eab308)",
+          }}
         >
           {pendingApproval.tool}
         </Badge>
       </div>
 
       {/* Description / Reason */}
-      <p className="text-muted-foreground mb-3 text-xs leading-relaxed">{pendingApproval.reason}</p>
+      <p
+        className="orch-text-muted"
+        style={{ margin: 0, marginBottom: "0.75rem", fontSize: "0.75rem", lineHeight: 1.5 }}
+      >
+        {pendingApproval.reason}
+      </p>
 
       {/* Target Resource Path */}
-      <div className="border-border/60 bg-background/80 mb-4 flex items-start gap-2 rounded border px-3 py-2 font-mono">
-        <Terminal className="text-muted-foreground mt-0.5 size-3.5 shrink-0" />
-        <span className="text-foreground text-[11px] font-medium break-all select-all">
+      <div
+        className="orch-flex-row orch-gap-xs"
+        style={{
+          alignItems: "flex-start",
+          marginBottom: "1rem",
+          borderRadius: "var(--radius-sm, 0.25rem)",
+          border: "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+          backgroundColor: "color-mix(in oklab, var(--background) 80%, transparent)",
+          padding: "0.5rem 0.75rem",
+          fontFamily: "var(--font-mono, monospace)",
+        }}
+      >
+        <Terminal
+          className="orch-text-muted"
+          style={{ marginTop: "0.125rem", width: "0.875rem", height: "0.875rem", flexShrink: 0 }}
+        />
+        <span
+          style={{
+            fontSize: "0.6875rem",
+            fontWeight: 500,
+            wordBreak: "break-all",
+            userSelect: "all",
+          }}
+        >
           {pendingApproval.target}
         </span>
       </div>
 
       {/* Action Buttons Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 pt-1">
+      <div
+        className="orch-flex-row orch-gap-xs"
+        style={{ flexWrap: "wrap", alignItems: "center", paddingTop: "0.25rem" }}
+      >
         <Button
           variant="outline"
           size="sm"
           id="clearance-once"
           disabled={submittingScope !== null}
           onClick={() => handleAction(PermissionScope.ONCE)}
-          className="h-8 gap-1.5 text-xs font-medium"
+          style={{ height: "2rem", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 500 }}
         >
           {submittingScope === PermissionScope.ONCE ? (
-            <Loader2 className="size-3 animate-spin" />
+            <Loader2
+              style={{ width: "0.75rem", height: "0.75rem" }}
+              className="orch-animate-spin"
+            />
           ) : (
-            <Clock className="size-3" />
+            <Clock style={{ width: "0.75rem", height: "0.75rem" }} />
           )}
           {UI_COPY.STUDIO.CLEARANCE.ALLOW_ONCE}
         </Button>
@@ -117,12 +166,18 @@ export function StudioLiveClearanceCard({
           id="clearance-session"
           disabled={submittingScope !== null}
           onClick={() => handleAction(PermissionScope.SESSION)}
-          className="border-primary/40 hover:bg-primary/10 h-8 gap-1.5 text-xs font-medium"
+          style={{ height: "2rem", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 500 }}
         >
           {submittingScope === PermissionScope.SESSION ? (
-            <Loader2 className="size-3 animate-spin" />
+            <Loader2
+              style={{ width: "0.75rem", height: "0.75rem" }}
+              className="orch-animate-spin"
+            />
           ) : (
-            <ShieldCheck className="text-primary size-3" />
+            <ShieldCheck
+              className="orch-text-primary"
+              style={{ width: "0.75rem", height: "0.75rem" }}
+            />
           )}
           {UI_COPY.STUDIO.CLEARANCE.THIS_CHAT}
         </Button>
@@ -133,12 +188,15 @@ export function StudioLiveClearanceCard({
           id="clearance-permanent"
           disabled={submittingScope !== null}
           onClick={() => handleAction(PermissionScope.PERMANENT)}
-          className="h-8 gap-1.5 text-xs font-medium"
+          style={{ height: "2rem", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 500 }}
         >
           {submittingScope === PermissionScope.PERMANENT ? (
-            <Loader2 className="size-3 animate-spin" />
+            <Loader2
+              style={{ width: "0.75rem", height: "0.75rem" }}
+              className="orch-animate-spin"
+            />
           ) : (
-            <CheckCheck className="size-3" />
+            <CheckCheck style={{ width: "0.75rem", height: "0.75rem" }} />
           )}
           {UI_COPY.STUDIO.CLEARANCE.ALWAYS_ALLOW}
         </Button>
@@ -149,12 +207,22 @@ export function StudioLiveClearanceCard({
           id="clearance-deny"
           disabled={submittingScope !== null}
           onClick={() => handleAction(PermissionScope.DENY)}
-          className="text-destructive hover:bg-destructive/10 ml-auto h-8 gap-1.5 text-xs font-medium"
+          className="orch-text-destructive"
+          style={{
+            marginLeft: "auto",
+            height: "2rem",
+            gap: "0.375rem",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          }}
         >
           {submittingScope === PermissionScope.DENY ? (
-            <Loader2 className="size-3 animate-spin" />
+            <Loader2
+              style={{ width: "0.75rem", height: "0.75rem" }}
+              className="orch-animate-spin"
+            />
           ) : (
-            <X className="size-3" />
+            <X style={{ width: "0.75rem", height: "0.75rem" }} />
           )}
           {UI_COPY.STUDIO.CLEARANCE.DENY}
         </Button>

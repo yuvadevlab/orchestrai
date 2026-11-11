@@ -26,39 +26,42 @@ export function SettingsProfileCard({
   user,
 }: SettingsProfileCardProps): React.JSX.Element {
   return (
-    <section className="border-border bg-card/60 space-y-4 rounded-md border p-5 shadow-xs">
-      <div>
-        <h2 className="text-foreground text-sm font-semibold tracking-tight">
-          {UI_COPY.SETTINGS.PROFILE.TITLE}
-        </h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">
-          {UI_COPY.SETTINGS.PROFILE.DESCRIPTION}
-        </p>
+    <section className="orch-settings-section">
+      <div className="orch-settings-section-header">
+        <h2 className="orch-settings-section-title">{UI_COPY.SETTINGS.PROFILE.TITLE}</h2>
+        <p className="orch-settings-section-desc">{UI_COPY.SETTINGS.PROFILE.DESCRIPTION}</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs">{UI_COPY.SETTINGS.PROFILE.NAME_LABEL}</Label>
+      <div className="orch-settings-profile-grid">
+        <div className="orch-flex-col orch-gap-xs">
+          <Label style={{ fontSize: "0.75rem" }}>{UI_COPY.SETTINGS.PROFILE.NAME_LABEL}</Label>
           <Input
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
-            className="bg-background h-8 text-xs"
+            style={{ height: "2rem", fontSize: "0.75rem" }}
           />
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">{UI_COPY.SETTINGS.PROFILE.EMAIL_LABEL}</Label>
+        <div className="orch-flex-col orch-gap-xs">
+          <Label style={{ fontSize: "0.75rem" }}>{UI_COPY.SETTINGS.PROFILE.EMAIL_LABEL}</Label>
           <Input
             value={user?.email || ""}
             disabled
-            className="bg-muted text-muted-foreground h-8 cursor-not-allowed text-xs"
+            className="orch-text-muted"
+            style={{ height: "2rem", fontSize: "0.75rem", cursor: "not-allowed" }}
           />
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">{UI_COPY.SETTINGS.PROFILE.ROLE_LABEL}</Label>
+        <div className="orch-flex-col orch-gap-xs">
+          <Label style={{ fontSize: "0.75rem" }}>{UI_COPY.SETTINGS.PROFILE.ROLE_LABEL}</Label>
           <Input
             value={user?.roles?.[0] || ""}
             disabled
-            className="bg-muted text-muted-foreground h-8 cursor-not-allowed text-xs capitalize"
+            className="orch-text-muted"
+            style={{
+              height: "2rem",
+              fontSize: "0.75rem",
+              cursor: "not-allowed",
+              textTransform: "capitalize",
+            }}
           />
         </div>
       </div>

@@ -10,9 +10,10 @@ import { LocalStore } from "@/db/local-store";
 import { JwksValidator } from "@yuva-devlab/auth-server";
 import { signToken, verifyToken, type TokenClaims } from "./crypto";
 
+const portalApiUrl = process.env.DEVLAB_PORTAL_API_URL || "http://localhost:4000";
 const jwksValidator = new JwksValidator({
-  jwksUri: process.env.JWKS_URI || "http://localhost:3015/.well-known/jwks.json",
-  issuer: process.env.OIDC_ISSUER || "http://localhost:3015",
+  jwksUri: process.env.JWKS_URI || `${portalApiUrl}/.well-known/jwks.json`,
+  issuer: process.env.OIDC_ISSUER,
 });
 
 /**
@@ -67,57 +68,76 @@ export async function resolveUserByToken(token: string): Promise<ResolvedUser | 
     const claims = await jwksValidator.verifyToken(token);
     if (claims && claims.sub) {
       const userId = String(claims.sub);
-      const dbUser = await prisma.user.findUnique({
-        where: { userId },
-      });
-
-      if (dbUser) {
-        return {
-          id: dbUser.userId,
-          name: dbUser.name || String(claims.name || "DevLab User"),
-          email: dbUser.email,
-          tenantId: dbUser.tenantId,
-          roles: [dbUser.role],
-        };
-      }
-
-      // Check by email if user ID differs
-      if (claims.email) {
-        const byEmail = await prisma.user.findUnique({
-          where: { email: String(claims.email) },
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { userId },
         });
-        if (byEmail) {
+
+        if (dbUser) {
           return {
-            id: byEmail.userId,
-            name: byEmail.name || String(claims.name || "DevLab User"),
-            email: byEmail.email,
-            tenantId: byEmail.tenantId,
-            roles: [byEmail.role],
+            id: dbUser.userId,
+            name: dbUser.name || String(claims.name || "DevLab User"),
+            email: dbUser.email,
+            tenantId: dbUser.tenantId,
+            roles: [dbUser.role],
           };
         }
-      }
 
-      // JIT provision user shadow profile in PostgreSQL
-      const firstTenant = await prisma.tenant.findFirst();
-      const tenantId =
-        (claims.tenant_id as string) || (claims.tenantId as string) || firstTenant?.tenantId;
-      if (tenantId) {
-        const newUser = await prisma.user.create({
-          data: {
-            userId,
-            tenantId,
-            email: String(claims.email || `${userId}@devlab.local`),
-            name: typeof claims.name === "string" ? claims.name : "DevLab User",
-            passwordHash: null,
-            role: typeof claims.role === "string" ? claims.role : "developer",
-          },
-        });
+        // Check by email if user ID differs
+        if (claims.email) {
+          const byEmail = await prisma.user.findUnique({
+            where: { email: String(claims.email) },
+          });
+          if (byEmail) {
+            return {
+              id: byEmail.userId,
+              name: byEmail.name || String(claims.name || "DevLab User"),
+              email: byEmail.email,
+              tenantId: byEmail.tenantId,
+              roles: [byEmail.role],
+            };
+          }
+        }
+
+        // JIT provision user shadow profile in PostgreSQL
+        let tenant = await prisma.tenant.findFirst();
+        if (!tenant) {
+          tenant = await prisma.tenant.create({
+            data: {
+              name: "Default Tenancy",
+              slug: "default",
+            },
+          });
+        }
+        const tenantId =
+          (claims.tenant_id as string) || (claims.tenantId as string) || tenant.tenantId;
+        if (tenantId) {
+          const newUser = await prisma.user.create({
+            data: {
+              userId,
+              tenantId,
+              email: String(claims.email || `${userId}@devlab.local`),
+              name: typeof claims.name === "string" ? claims.name : "DevLab User",
+              passwordHash: null,
+              role: typeof claims.role === "string" ? claims.role : "developer",
+            },
+          });
+          return {
+            id: newUser.userId,
+            name: newUser.name || "DevLab User",
+            email: newUser.email,
+            tenantId: newUser.tenantId,
+            roles: [newUser.role],
+          };
+        }
+      } catch {
+        // Fallback: DB unavailable or error, use cryptographically verified claims directly
         return {
-          id: newUser.userId,
-          name: newUser.name || "DevLab User",
-          email: newUser.email,
-          tenantId: newUser.tenantId,
-          roles: [newUser.role],
+          id: userId,
+          name: String(claims.name || "DevLab User"),
+          email: String(claims.email || `${userId}@devlab.local`),
+          tenantId: String(claims.tenant_id || claims.tenantId || "default"),
+          roles: [typeof claims.role === "string" ? claims.role : "operator"],
         };
       }
     }

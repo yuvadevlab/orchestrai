@@ -9,6 +9,8 @@ import {
   AUTH_COOKIE_NAME,
   TENANT_COOKIE_NAME,
   SESSION_MAX_AGE,
+  ConsoleStorageKey,
+  ConsoleCookieKey,
   type AuthSession,
 } from "./types";
 
@@ -85,12 +87,12 @@ export function persistSession(session: AuthSession): void {
 export function clearSession(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem("devlab_access_token");
-  localStorage.removeItem("devlab_auth_token");
-  localStorage.removeItem("devlab_auth_user");
+  localStorage.removeItem(ConsoleStorageKey.DEVLAB_ACCESS_TOKEN);
+  localStorage.removeItem(ConsoleStorageKey.DEVLAB_AUTH_TOKEN);
+  localStorage.removeItem(ConsoleStorageKey.DEVLAB_AUTH_USER);
   document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
   document.cookie = `${TENANT_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
-  document.cookie = `devlab_access_token=; path=/; max-age=0; SameSite=Lax`;
+  document.cookie = `${ConsoleCookieKey.DEVLAB_ACCESS_TOKEN}=; path=/; max-age=0; SameSite=Lax`;
 
   try {
     const channel = new BroadcastChannel(BROADCAST_CHANNEL);

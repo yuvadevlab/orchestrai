@@ -62,13 +62,13 @@ export function SettingsPageContent(): React.JSX.Element {
           variant="default"
           size="sm"
           onClick={handleSave}
-          className="h-8 cursor-pointer text-xs font-medium"
+          style={{ height: "2rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 500 }}
         >
           {UI_COPY.SETTINGS.SAVE_BUTTON}
         </Button>
       }
     >
-      <div className="mx-auto w-full max-w-3xl space-y-5">
+      <div className="orch-settings-grid">
         {/* Profile Card */}
         <SettingsProfileCard name={name} onNameChange={setName} user={user} />
 

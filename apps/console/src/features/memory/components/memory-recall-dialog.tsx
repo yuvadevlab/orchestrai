@@ -7,12 +7,11 @@
  */
 
 import React, { useState } from "react";
-import { Search, Loader2, Sparkles, Brain } from "lucide-react";
+import { Search, Loader2, Sparkles } from "lucide-react";
 import {
   Button,
   Input,
   toast,
-  Badge,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -24,6 +23,7 @@ import {
 import { UI_COPY } from "@/lib/ui-copy";
 import { useSearchMemories } from "../api";
 import type { ScoredMemoryResult } from "../types";
+import { MemoryRecallResults } from "./memory-recall-results";
 
 export interface MemoryRecallDialogProps {
   readonly isOpen: boolean;
@@ -63,42 +63,74 @@ export function MemoryRecallDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent size="lg">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="bg-primary/10 text-primary grid size-7 place-items-center rounded-md">
-              <Sparkles className="size-4" />
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div
+              style={{
+                backgroundColor: "color-mix(in oklab, var(--primary) 10%, transparent)",
+                color: "var(--primary)",
+                display: "grid",
+                height: "1.75rem",
+                width: "1.75rem",
+                placeItems: "center",
+                borderRadius: "var(--radius-md, 0.375rem)",
+              }}
+            >
+              <Sparkles style={{ width: "1rem", height: "1rem" }} />
             </div>
             <div>
-              <DialogTitle className="text-base font-semibold">
+              <DialogTitle style={{ fontSize: "1rem", fontWeight: 600, margin: 0 }}>
                 {UI_COPY.MEMORY.RECALL_TESTER.TITLE}
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground text-xs">
+              <DialogDescription
+                style={{ color: "var(--mutedForeground)", fontSize: "0.75rem", margin: 0 }}
+              >
                 {UI_COPY.MEMORY.RECALL_TESTER.DESCRIPTION}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <DialogBody className="space-y-4 px-6 py-4">
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="flex-1">
+        <DialogBody
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            paddingInline: "1.5rem",
+            paddingBlock: "1rem",
+          }}
+        >
+          <form onSubmit={handleSearch} style={{ display: "flex", gap: "0.5rem" }}>
+            <div style={{ flex: 1 }}>
               <Input
                 value={queryText}
                 onChange={(e) => setQueryText(e.target.value)}
                 placeholder={UI_COPY.MEMORY.RECALL_TESTER.PLACEHOLDER}
-                startIcon={<Search className="size-3.5" />}
-                className="bg-card h-8 text-xs"
+                startIcon={<Search style={{ width: "0.875rem", height: "0.875rem" }} />}
+                style={{ height: "2rem", fontSize: "0.75rem" }}
               />
             </div>
             <Button
               type="submit"
               size="sm"
               disabled={isRecalling || !queryText.trim()}
-              className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+              style={{
+                height: "2rem",
+                cursor: "pointer",
+                gap: "0.375rem",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+              }}
             >
               {isRecalling ? (
-                <Loader2 className="size-3.5 animate-spin" />
+                <Loader2
+                  style={{
+                    width: "0.875rem",
+                    height: "0.875rem",
+                    animation: "spin 1s linear infinite",
+                  }}
+                />
               ) : (
-                <Search className="size-3.5" />
+                <Search style={{ width: "0.875rem", height: "0.875rem" }} />
               )}
               <span>{UI_COPY.MEMORY.RECALL_TESTER.SUBMIT_BUTTON}</span>
             </Button>
@@ -106,59 +138,16 @@ export function MemoryRecallDialog({
 
           {/* Results list */}
           {results !== null && (
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground font-mono">
-                  {UI_COPY.MEMORY.RECALL_TESTER.MATCHES_COUNT(results.length, queryText)}
-                </span>
-              </div>
-
-              {results.length === 0 ? (
-                <div className="border-border/60 bg-muted/20 flex flex-col items-center justify-center rounded border py-6 text-center">
-                  <Brain className="text-muted-foreground mb-2 size-6" />
-                  <p className="text-muted-foreground text-xs">
-                    {UI_COPY.MEMORY.RECALL_TESTER.NO_MATCHES}
-                  </p>
-                </div>
-              ) : (
-                <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-                  {(results as ScoredMemoryResult[]).map((match, idx) => {
-                    const item = match.item;
-                    const score = Math.round(match.score * 100);
-
-                    return (
-                      <div
-                        key={item.memoryId || idx}
-                        className="border-border/80 bg-background/80 rounded border p-3 text-xs shadow-sm"
-                      >
-                        <div className="mb-1.5 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <Badge variant="outline" className="font-mono text-[10px]">
-                              {item.memoryType}
-                            </Badge>
-                          </div>
-                          <span className="text-primary font-mono text-[10px] font-semibold">
-                            {score}% match
-                          </span>
-                        </div>
-                        <p className="text-foreground/90 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
-                          {item.content}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <MemoryRecallResults results={results as ScoredMemoryResult[]} queryText={queryText} />
           )}
         </DialogBody>
 
-        <DialogFooter className="px-6 py-3">
+        <DialogFooter style={{ padding: "0.75rem 1.5rem" }}>
           <Button
             variant="outline"
             size="sm"
             onClick={handleClose}
-            className="h-8 cursor-pointer text-xs"
+            style={{ height: "2rem", cursor: "pointer", fontSize: "0.75rem" }}
           >
             {UI_COPY.COMMON.ACTIONS.CLOSE}
           </Button>

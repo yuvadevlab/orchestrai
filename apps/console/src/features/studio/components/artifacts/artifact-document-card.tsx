@@ -42,52 +42,68 @@ export function ArtifactDocumentCard({ artifact }: ArtifactDocumentCardProps): R
   };
 
   return (
-    <div className="border-border/80 bg-card/70 my-2 overflow-hidden rounded-md border shadow-sm">
+    <div className="orch-artifact-card">
       {/* Document Header */}
-      <div
-        className={`bg-muted/30 flex items-center justify-between px-3.5 py-2 font-mono text-xs ${
-          isExpanded ? "border-border/60 border-b" : ""
-        }`}
-      >
+      <div className={`orch-artifact-header ${isExpanded ? "is-expanded" : ""}`}>
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="flex min-w-0 items-center gap-2 text-left transition-opacity hover:opacity-80"
+          className="orch-artifact-trigger"
         >
-          <FileText className="text-primary size-4 shrink-0" />
-          <span className="text-foreground truncate font-semibold">{artifact.title}</span>
-          <span className="text-muted-foreground hidden text-[11px] sm:inline">
+          <FileText
+            className="orch-text-primary"
+            style={{ width: "1rem", height: "1rem", flexShrink: 0 }}
+          />
+          <span className="orch-truncate orch-font-semibold">{artifact.title}</span>
+          <span className="orch-text-muted" style={{ fontSize: "0.6875rem" }}>
             {UI_COPY.STUDIO.ARTIFACTS.WORDS_COUNT(wordCount)}
           </span>
-          <span className="text-muted-foreground ml-1 flex items-center gap-0.5 text-[10px]">
+          <span
+            className="orch-flex-row orch-gap-xs orch-text-muted"
+            style={{ fontSize: "0.625rem", alignItems: "center", marginLeft: "0.25rem" }}
+          >
             <span>{isExpanded ? UI_COPY.COMMON.ACTIONS.HIDE : UI_COPY.COMMON.ACTIONS.SHOW}</span>
-            {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+            {isExpanded ? (
+              <ChevronDown style={{ width: "0.75rem", height: "0.75rem" }} />
+            ) : (
+              <ChevronRight style={{ width: "0.75rem", height: "0.75rem" }} />
+            )}
           </span>
         </button>
 
-        <div className="flex shrink-0 items-center gap-1.5">
-          <Button variant="ghost" size="sm" onClick={handleCopy} className="h-7 gap-1 px-2 text-xs">
-            {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
-            <span className="hidden sm:inline">
-              {copied ? UI_COPY.COMMON.ACTIONS.COPIED : UI_COPY.COMMON.ACTIONS.COPY}
-            </span>
+        <div className="orch-artifact-actions">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopy}
+            style={{ height: "1.75rem", gap: "0.25rem", padding: "0 0.5rem", fontSize: "0.75rem" }}
+          >
+            {copied ? (
+              <Check
+                className="orch-text-primary"
+                style={{ width: "0.75rem", height: "0.75rem" }}
+              />
+            ) : (
+              <Copy style={{ width: "0.75rem", height: "0.75rem" }} />
+            )}
+            <span>{copied ? UI_COPY.COMMON.ACTIONS.COPIED : UI_COPY.COMMON.ACTIONS.COPY}</span>
           </Button>
 
           <Button
             variant="outline"
             size="sm"
             onClick={handleDownload}
-            className="h-7 gap-1 px-2 text-xs"
+            style={{ height: "1.75rem", gap: "0.25rem", padding: "0 0.5rem", fontSize: "0.75rem" }}
           >
-            <Download className="size-3" />
-            <span className="hidden sm:inline">{UI_COPY.STUDIO.ARTIFACTS.DOWNLOAD_BUTTON}</span>
+            <Download style={{ width: "0.75rem", height: "0.75rem" }} />
+            <span>{UI_COPY.STUDIO.ARTIFACTS.DOWNLOAD_BUTTON}</span>
           </Button>
         </div>
       </div>
 
       {/* Document Body */}
       {isExpanded && (
-        <div className="bg-background/40 text-foreground p-4 font-sans text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="orch-artifact-body" style={{ whiteSpace: "pre-wrap" }}>
           {artifact.content}
         </div>
       )}

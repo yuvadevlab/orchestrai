@@ -52,32 +52,54 @@ export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): R
   };
 
   return (
-    <div className="border-border/80 my-2 overflow-hidden rounded-md border shadow-sm">
+    <div className="orch-artifact-card">
       {/* Terminal Title Bar */}
-      <div
-        className={`flex items-center justify-between bg-zinc-900 px-3.5 py-2 font-mono text-xs text-zinc-300 ${
-          isExpanded ? "border-b border-zinc-800" : ""
-        }`}
-      >
+      <div className={`orch-artifact-terminal-header ${isExpanded ? "is-expanded" : ""}`}>
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="flex min-w-0 items-center gap-2 text-left transition-colors hover:text-zinc-100"
+          className="orch-artifact-trigger"
+          style={{ color: "inherit" }}
         >
-          <Terminal className="size-3.5 shrink-0 text-amber-400" />
-          <span className="truncate font-semibold text-zinc-100">{artifact.title}</span>
-          <span className="ml-1 flex items-center gap-0.5 text-[10px] text-zinc-400">
+          <Terminal
+            style={{
+              width: "0.875rem",
+              height: "0.875rem",
+              flexShrink: 0,
+              color: "var(--primary)",
+            }}
+          />
+          <span className="orch-truncate orch-font-semibold">{artifact.title}</span>
+          <span
+            className="orch-flex-row orch-gap-xs"
+            style={{
+              fontSize: "0.625rem",
+              alignItems: "center",
+              marginLeft: "0.25rem",
+              opacity: 0.7,
+            }}
+          >
             <span>{isExpanded ? UI_COPY.COMMON.ACTIONS.HIDE : UI_COPY.COMMON.ACTIONS.SHOW}</span>
-            {isExpanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+            {isExpanded ? (
+              <ChevronDown style={{ width: "0.75rem", height: "0.75rem" }} />
+            ) : (
+              <ChevronRight style={{ width: "0.75rem", height: "0.75rem" }} />
+            )}
           </span>
         </button>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="orch-artifact-actions">
           <Badge
             variant="outline"
-            className="border-primary/30 text-primary px-1.5 py-0 font-mono text-[10px]"
+            className="orch-font-mono"
+            style={{
+              borderColor: "color-mix(in oklab, var(--primary) 30%, transparent)",
+              color: "var(--primary)",
+              padding: "0 0.375rem",
+              fontSize: "0.625rem",
+            }}
           >
-            <CheckCircle2 className="mr-1 size-3" />
+            <CheckCircle2 style={{ marginRight: "0.25rem", width: "0.75rem", height: "0.75rem" }} />
             exit 0
           </Badge>
 
@@ -85,35 +107,53 @@ export function ArtifactTerminalCard({ artifact }: ArtifactTerminalCardProps): R
             variant="outline"
             size="sm"
             onClick={handleOpenInCanvas}
-            className="h-6 cursor-pointer gap-1 border-zinc-700 bg-zinc-800/80 px-2 text-[10px] text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
+            style={{
+              height: "1.5rem",
+              cursor: "pointer",
+              gap: "0.25rem",
+              padding: "0 0.5rem",
+              fontSize: "0.625rem",
+            }}
             title={UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS_TOOLTIP}
             aria-label={UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS_TOOLTIP}
           >
-            <PanelRightOpen className="size-3 text-amber-400" />
-            <span className="hidden sm:inline">{UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS}</span>
+            <PanelRightOpen
+              style={{ width: "0.75rem", height: "0.75rem", color: "var(--primary)" }}
+            />
+            <span>{UI_COPY.STUDIO.ARTIFACTS.OPEN_CANVAS}</span>
           </Button>
 
           <Button
             variant="ghost"
             size="sm"
             onClick={handleCopy}
-            className="size-6 p-0 text-zinc-400 hover:text-zinc-100"
+            style={{ width: "1.5rem", height: "1.5rem", padding: 0 }}
             title={UI_COPY.STUDIO.ARTIFACTS.COPY_TERMINAL_TOOLTIP}
             aria-label={UI_COPY.STUDIO.ARTIFACTS.COPY_TERMINAL_TOOLTIP}
           >
-            {copied ? <Check className="text-primary size-3" /> : <Copy className="size-3" />}
+            {copied ? (
+              <Check
+                className="orch-text-primary"
+                style={{ width: "0.75rem", height: "0.75rem" }}
+              />
+            ) : (
+              <Copy style={{ width: "0.75rem", height: "0.75rem" }} />
+            )}
           </Button>
         </div>
       </div>
 
       {/* Terminal Console Output */}
       {isExpanded && (
-        <div className="overflow-x-auto bg-zinc-950 p-4 font-mono text-xs leading-relaxed text-zinc-200">
-          <div className="mb-2 flex items-center gap-1.5 text-zinc-500">
-            <span className="text-amber-400">$</span>
+        <div className="orch-artifact-terminal-body">
+          <div
+            className="orch-flex-row orch-gap-xs"
+            style={{ alignItems: "center", marginBottom: "0.5rem", opacity: 0.6 }}
+          >
+            <span style={{ color: "var(--primary)" }}>$</span>
             <span>{artifact.filePath || artifact.title}</span>
           </div>
-          <pre className="whitespace-pre-wrap">{artifact.content}</pre>
+          <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{artifact.content}</pre>
         </div>
       )}
     </div>
