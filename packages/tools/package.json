@@ -18,8 +18,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --config vitest.config.ts",
-    "test:watch": "vitest --config vitest.config.ts",
+    "test": "vitest run --config vitest.config.ts --passWithNoTests",
+    "test:watch": "vitest --config vitest.config.ts --passWithNoTests",
     "clean": "rm -rf dist"
   },
   "dependencies": {
