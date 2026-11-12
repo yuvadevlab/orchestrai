@@ -5,6 +5,7 @@
 
 import type { GatewayRequest, GatewayResponse } from "@/routes/http-types";
 import { sendJson } from "@/routes/http-helpers";
+import { GATEWAY_VERSION, BUILD_METADATA } from "@/version";
 
 /**
  * Controller managing health probes.
@@ -17,7 +18,8 @@ export class HealthController {
     sendJson(res, 200, {
       status: "ok",
       service: "@orchestrai/gateway",
-      version: "1.0.0",
+      version: GATEWAY_VERSION,
+      build: BUILD_METADATA,
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
     });
