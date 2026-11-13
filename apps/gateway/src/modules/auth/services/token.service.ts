@@ -10,9 +10,12 @@ import { LocalStore } from "@/db/local-store";
 import { JwksValidator } from "@yuva-devlab/auth-server";
 import { signToken, verifyToken, type TokenClaims } from "./crypto";
 
+/** Canonical RFC 7517 JWKS discovery endpoint path */
+export const DEFAULT_JWKS_PATH = "/.well-known/jwks.json";
+
 const portalApiUrl = process.env.DEVLAB_PORTAL_API_URL || "http://localhost:4000";
 const jwksValidator = new JwksValidator({
-  jwksUri: process.env.JWKS_URI || `${portalApiUrl}/.well-known/jwks.json`,
+  jwksUri: process.env.JWKS_URI || `${portalApiUrl}${DEFAULT_JWKS_PATH}`,
   issuer: process.env.OIDC_ISSUER,
 });
 
