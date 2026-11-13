@@ -7,11 +7,10 @@
 import { loadGatewayConfig } from "@/config";
 import { prisma } from "@orchestrai/database";
 import { LocalStore } from "@/db/local-store";
-import { JwksValidator } from "@yuva-devlab/auth-server";
+import { JwksValidator, DEFAULT_JWKS_PATH } from "@yuva-devlab/auth-server";
 import { signToken, verifyToken, type TokenClaims } from "./crypto";
 
-/** Canonical RFC 7517 JWKS discovery endpoint path */
-export const DEFAULT_JWKS_PATH = "/.well-known/jwks.json";
+export { DEFAULT_JWKS_PATH };
 
 const portalApiUrl = process.env.DEVLAB_PORTAL_API_URL || "http://localhost:4000";
 const jwksValidator = new JwksValidator({
